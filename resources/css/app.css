@@ -324,3 +324,19 @@ layer(base);
 }
 
 
+
+/* Custom Modern Select Option Styling with spacing & subtle bottom border */
+select option {
+  padding: 10px 14px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.8125rem;
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+.dark select option {
+  border-bottom: 1px solid #1e293b;
+  background-color: #111827;
+  color: #f9fafb;
+}

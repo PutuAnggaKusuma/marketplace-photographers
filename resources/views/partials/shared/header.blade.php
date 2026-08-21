@@ -1,16 +1,16 @@
 <header x-data="{menuToggle: false}"
-  class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white lg:border-b dark:border-gray-800 dark:bg-gray-900">
+  class="sticky top-0 z-50 flex w-full border-gray-200 bg-white lg:border-b dark:border-gray-800 dark:bg-gray-900">
   <div class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
     <div
       class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-800">
       <!-- Hamburger Toggle BTN -->
       <button :class="sidebarToggle ? 'lg:bg-transparent dark:lg:bg-transparent bg-gray-100 dark:bg-gray-800' : ''"
-        class="z-99999 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border dark:border-gray-800 dark:text-gray-400"
+        class="z-50 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border dark:border-gray-800 dark:text-gray-400"
         @click.stop="sidebarToggle = !sidebarToggle">
         <svg class="hidden fill-current lg:block" width="16" height="12" viewBox="0 0 16 12" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 10.5858 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z"
+            d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 11.75 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z"
             fill="" />
         </svg>
 
@@ -30,7 +30,7 @@
       </button>
 
       <a href="/" class="lg:hidden">
-        <span class="text-xl font-bold text-brand-500">LensMatch</span>
+        <span class="text-xl font-bold text-amber-500">LensMatch</span>
       </a>
 
       <div class="hidden lg:block">
@@ -45,7 +45,7 @@
               </svg>
             </span>
             <input type="text" placeholder="Cari layanan, fotografer, booking..." id="search-input"
-              class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30" />
+              class="dark:bg-dark-900 shadow-theme-xs focus:border-amber-300 focus:ring-amber-500/10 dark:focus:border-amber-800 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30" />
           </div>
         </form>
       </div>
@@ -54,6 +54,81 @@
     <div :class="menuToggle ? 'flex' : 'hidden'"
       class="shadow-theme-md w-full items-center justify-between gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0 lg:shadow-none">
       <div class="2xsm:gap-3 flex items-center gap-2">
+        <!-- Dynamic Notification Bell Dropdown -->
+        @auth
+          <div class="relative" x-data="headerNotifApp()" x-init="init()">
+            <button @click="notifOpen = !notifOpen" 
+                    title="Notifikasi Saya"
+                    class="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-amber-100 hover:text-amber-800 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-amber-400 focus:outline-none">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              <!-- Unread Red Pulse Badge -->
+              <span x-show="unreadCount > 0" 
+                    x-cloak 
+                    class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-pulse">
+                <span x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
+              </span>
+            </button>
+
+            <!-- Notifications Dropdown List -->
+            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden text-left">
+              <div class="px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/70 dark:bg-gray-900/60">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-black text-gray-900 dark:text-white">Notifikasi Saya</h3>
+                  <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
+                </div>
+                <button type="button" @click="markAllRead()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline">Tandai dibaca</button>
+              </div>
+
+              <div class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
+                <template x-for="notif in notifications" :key="notif.id">
+                  <div @click="openNotif(notif)" 
+                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3"
+                       :class="!notif.is_read ? 'bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50/80 dark:hover:bg-amber-950/40' : 'hover:bg-gray-50 dark:hover:bg-gray-700/40'">
+                    
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                         :class="{
+                            'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300': notif.type === 'booking',
+                            'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300': notif.type === 'payout' || notif.type === 'payment',
+                            'bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300': notif.type === 'gallery',
+                            'bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300': notif.type === 'chat'
+                         }">
+                      <template x-if="notif.type === 'booking'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      </template>
+                      <template x-if="notif.type === 'payout' || notif.type === 'payment'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      </template>
+                      <template x-if="notif.type === 'gallery'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      </template>
+                      <template x-if="notif.type !== 'booking' && notif.type !== 'payout' && notif.type !== 'payment' && notif.type !== 'gallery'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                      </template>
+                    </div>
+
+                    <div class="min-w-0 flex-1 space-y-0.5">
+                      <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white truncate" x-text="notif.title"></p>
+                        <span x-show="!notif.is_read" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                      </div>
+                      <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2" x-text="notif.message"></p>
+                      <p class="text-[10px] text-gray-400 font-medium" x-text="notif.created_at"></p>
+                    </div>
+                  </div>
+                </template>
+
+                <template x-if="notifications.length === 0">
+                  <div class="px-5 py-8 text-center text-gray-400 space-y-1">
+                    <p class="text-xs font-bold">Belum ada notifikasi baru.</p>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        @endauth
+
         <!-- Dark Mode Toggler -->
         <button
           title="Toggle Light/Dark Theme"
@@ -78,16 +153,22 @@
         </button>
       </div>
 
-      <!-- User Profile Dropdown -->
-      <div class="relative" x-data="{ dropdownOpen: false }" @click.outside="dropdownOpen = false">
-        <a class="flex items-center text-gray-700 dark:text-gray-400" href="#"
-          @click.prevent="dropdownOpen = ! dropdownOpen">
-          <span class="mr-3 h-11 w-11 overflow-hidden rounded-full border border-gray-200">
-            <img src="../images/user/owner.jpg" alt="User" class="object-cover w-full h-full" />
-          </span>
-          <span class="text-theme-sm mr-1 block font-bold text-gray-800 dark:text-white"> Admin 1 </span>
-        </a>
-      </div>
+      <!-- User Profile Static Badge (Non-clickable, strict roles: Klien, Fotografer, or Admin) -->
+      @auth
+        <div class="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+            {{ strtoupper(substr(auth()->user()->nama ?? 'U', 0, 2)) }}
+          </div>
+          <div class="text-left hidden sm:block pr-1">
+            <span class="block text-xs font-extrabold text-gray-900 dark:text-white leading-tight">
+              {{ auth()->user()->nama }}
+            </span>
+            <span class="block text-[10px] font-bold text-amber-600 dark:text-amber-400 capitalize">
+              {{ auth()->user()->role === 'photographer' ? 'Fotografer' : (in_array(auth()->user()->role, ['super_admin', 'admin']) ? 'Admin' : 'Klien') }}
+            </span>
+          </div>
+        </div>
+      @endauth
     </div>
   </div>
 </header>

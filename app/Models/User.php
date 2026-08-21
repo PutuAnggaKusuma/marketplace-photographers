@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_protected',
+        'last_seen_at',
     ];
 
     /**
@@ -42,6 +43,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'last_seen_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_protected' => 'boolean',
@@ -86,5 +88,37 @@ class User extends Authenticatable
         }
 
         return parent::delete();
+    }
+
+    public function rolePhotographer()
+    {
+        return $this->hasOne(RolePhotographer::class, 'id_user', 'id');
+    }
+
+    /**
+     * Get the user's avatar URL from their rolePhotographer foto.
+     * Returns null if no foto is set (views should fall back to initials).
+     *
+     * STANDAR PROYEK (Rule #44): Mekanisme Avatar User
+     * - Jika user memiliki foto profil (via role_photographers.foto) -> tampilkan foto
+     * - Jika tidak ada foto -> tampilkan inisial nama (via $user->initials)
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $foto = $this->rolePhotographer?->foto;
+        if (!$foto) return null;
+        return str_starts_with($foto, 'http') ? $foto : asset('storage/' . $foto);
+    }
+
+    /**
+     * Get user initials (max 2 uppercase letters) from nama.
+     * Fallback when avatar_url is null.
+     */
+    public function getInitialsAttribute(): string
+    {
+        $words = explode(' ', trim($this->nama ?? 'U'));
+        return strtoupper(
+            substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : '')
+        );
     }
 }

@@ -1,14 +1,14 @@
 <aside :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
-  class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0">
+  class="sidebar fixed left-0 top-0 z-50 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0">
   <!-- SIDEBAR HEADER -->
   <div :class="sidebarToggle ? 'justify-center' : 'justify-between'"
     class="flex items-center gap-2 pt-6 sidebar-header pb-6 border-b border-gray-100 dark:border-gray-800">
     <a href="{{ url('/photographer/dashboard') }}" class="flex items-center gap-2">
-      <img src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-8 w-auto" alt="LensMatch Logo" :class="sidebarToggle ? 'hidden' : ''" />
+      <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-8 w-auto" alt="LensMatch Logo" :class="sidebarToggle ? 'hidden' : ''" />
     </a>
   </div>
 
-  <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pt-6">
+  <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar pt-6 pb-6">
     <nav>
       <div>
         <h3 class="mb-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
@@ -30,7 +30,7 @@
 
           <!-- Profil & Bio -->
           <li>
-            <a href="{{ url('/photographer/profile') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {{ request()->is('photographer/profile') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+            <a href="{{ url('/profile') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {{ request()->is('photographer/profile') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="fill-current" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM17.0246 18.8566V18.8455C17.0246 16.7744 15.3457 15.0955 13.2746 15.0955H10.7246C8.65354 15.0955 6.97461 16.7744 6.97461 18.8455V18.856C8.38223 19.8895 10.1198 20.5 12 20.5C13.8798 20.5 15.6171 19.8898 17.0246 18.8566ZM2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM11.9991 7.25C10.8847 7.25 9.98126 8.15342 9.98126 9.26784C9.98126 10.3823 10.8847 11.2857 11.9991 11.2857C13.1135 11.2857 14.0169 10.3823 14.0169 9.26784C14.0169 8.15342 13.1135 7.25 11.9991 7.25Z"/>
               </svg>
@@ -86,6 +86,28 @@
               </svg>
               <span :class="sidebarToggle ? 'lg:hidden' : ''">Pesan & Chat Client</span>
             </a>
+          </li>
+
+          <!-- Laporan Keuangan -->
+          <li>
+            <a href="{{ url('/photographer/reports') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 {{ request()->is('photographer/reports*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM9 17H7V10H9V17ZM13 17H11V7H13V17ZM17 17H15V13H17V17Z"/>
+              </svg>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Laporan Keuangan</span>
+            </a>
+          </li>
+
+          <!-- Tombol Logout -->
+          <li class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <button type="button" @click="$dispatch('open-confirm-modal', { title: 'Konfirmasi Keluar Akun', message: 'Apakah Anda yakin ingin keluar dari akun LensMatch?', actionUrl: '{{ route('logout') }}', method: 'POST', buttonText: 'Ya, Keluar Akun', iconType: 'logout', buttonClass: 'bg-red-600 hover:bg-red-700 text-white' })" class="w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition font-bold">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span :class="sidebarToggle ? 'lg:hidden' : ''">Keluar / Logout</span>
+            </button>
           </li>
         </ul>
       </div>

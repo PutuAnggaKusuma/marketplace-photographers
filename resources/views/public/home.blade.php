@@ -13,16 +13,13 @@
       <div class="max-w-3xl mx-auto text-center space-y-4 pt-2">
         <div class="flex justify-center">
           <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 uppercase tracking-widest shadow-2xs">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="fill-current" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-            </svg>
-            Marketplace Fotografer Lokal Terverifikasi
+            Marketplace Fotografer Lokal
           </span>
         </div>
 
         <h1 class="text-3xl sm:text-4xl lg:text-[48px] font-black text-gray-900 dark:text-white tracking-tight leading-[1.12]">
           Abadikan Momen Indah <br class="hidden sm:inline" />
-          <span class="text-amber-600 dark:text-amber-400">Dimanapun Anda Berada.</span>
+          <span class="text-amber-600 dark:text-amber-400">Dimanapun Anda Berada</span>
         </h1>
 
         <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-normal leading-relaxed max-w-xl mx-auto text-center">
@@ -30,38 +27,39 @@
         </p>
       </div>
 
-      <!-- Compact Centered Floating Search Box -->
-      <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-3.5 sm:p-4 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-3 items-center">
-        <div class="relative flex-1 w-full">
-          <div class="relative">
-            <input type="text" placeholder="Cari kota (mis: Bali, Jakarta, Bandung)..." class="w-full pl-9 pr-4 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400" />
-            <svg class="w-3.5 h-3.5 absolute left-3 top-3 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          </div>
+      <!-- Spacious Floating Search Box (Pure White Center, Gray Border Only, Flex Centered Icon) -->
+      <form action="{{ url('/fotografer') }}" method="GET" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 px-5 sm:px-6 lg:px-7 py-3.5 sm:py-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-3.5 sm:gap-4 items-stretch">
+        
+        <!-- 1. Location Input (PURE WHITE CENTER, THIN GRAY BORDER ONLY, FLEX CENTERED ICON) -->
+        <div class="flex-1 w-full flex items-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-4 py-3.5 sm:py-4 focus-within:ring-2 focus-within:ring-amber-400 transition">
+          <svg class="w-4 h-4 text-gray-400 shrink-0 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <input type="text" name="location" placeholder="Cari kota / wilayah (mis: Bali, Jakarta, Bandung)..." class="w-full bg-transparent border-0 outline-none p-0 text-xs sm:text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:ring-0 leading-normal" />
         </div>
 
-        <div class="w-full md:w-56 relative">
-          <select class="w-full pl-3.5 pr-9 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 appearance-none cursor-pointer">
+        <!-- 2. Category Dropdown Select (PURE WHITE CENTER, THIN GRAY BORDER ONLY) -->
+        <div class="w-full md:w-64 relative flex">
+          <select name="category" class="w-full pl-4 pr-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 appearance-none cursor-pointer">
             <option value="">Semua Kategori Sesi</option>
-            <option value="wedding">Wedding & Prewedding</option>
-            <option value="travel">Vacation & Travel</option>
-            <option value="event">Event & Konser</option>
-            <option value="portrait">Studio & Portrait</option>
+            <option value="1">Wedding & Prewedding</option>
+            <option value="2">Vacation & Travel</option>
+            <option value="3">Event & Konser</option>
+            <option value="4">Studio & Portrait</option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
           </div>
         </div>
 
-        <div class="w-full md:w-auto">
-          <a href="{{ url('/fotografer') }}" class="w-full md:w-auto px-6 py-2.5 bg-amber-400 hover:bg-amber-500 font-bold text-xs text-gray-900 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            Temukan Fotografer
-          </a>
-        </div>
-      </div>
+        <!-- 3. Button Temukan Fotografer (MATCHING HEIGHT & HOVER) -->
+        <button type="submit" class="w-full md:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:scale-105 transition-all duration-200 shrink-0 flex items-center justify-center gap-2 self-stretch">
+          <svg class="w-4 h-4 text-gray-900 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+          <span>Temukan Fotografer</span>
+        </button>
+
+      </form>
 
       <!-- 5-Photo Staggered Floating Wave Gallery (Pasted Image 1 Floating Animation) -->
       <div class="grid grid-cols-5 gap-3.5 sm:gap-6 items-end max-w-6xl mx-auto pt-4 sm:pt-6">
@@ -98,7 +96,7 @@
 
   <!-- 2. TRUST STATS STRIP (Clean Hairline Counter Bar with Spacious Padding) -->
   <section class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
-    <div class="py-12 sm:py-16 border-y border-gray-200/80 dark:border-gray-800 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center items-center">
+    <div class="py-12 sm:py-16 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center items-center">
       
       <div class="space-y-1">
         <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">150+</p>
@@ -131,118 +129,30 @@
     
     <!-- Consistent Left-Aligned Header with Natural Spacing -->
     <div class="space-y-2">
-      <span class="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Kategori Fotografi</span>
+      <span class="text-[11px] font-extrabold text-amber-500 dark:text-amber-500 uppercase tracking-widest">Kategori Fotografi</span>
       <h2 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white leading-[1.15] tracking-tight">Dokumentasi Momen Spesial Anda</h2>
       <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl">Temukan fotografer profesional sesuai dengan momen & milestone penting dalam hidup Anda.</p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-      
-      <!-- Card 1: Wedding & Prewedding (POPULER #1 Featured Card - WITH YELLOW BADGE) -->
-      <a href="{{ url('/fotografer?cat=wedding-prewedding') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Wedding" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <span class="px-3 py-1 bg-amber-400 text-gray-900 text-[10px] font-black rounded-md inline-block uppercase tracking-wider">POPULER #1</span>
-          <h3 class="text-xl font-extrabold text-white leading-snug">Wedding & Prewedding Sesi</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Abadikan momen romantis Anda bersama fotografer wedding berpengalaman outdoor & indoor.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 120+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 2: Holiday & Travel -->
-      <a href="{{ url('/fotografer?cat=vacation-travel') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Holiday" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Holiday & Travel Shoot</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Abadikan momen berharga saat liburan di lokasi wisata impian Anda.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 95+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 3: Family -->
-      <a href="{{ url('/fotografer?cat=family-gathering') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Family" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Family & Gathering</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Sesi foto hangat keluarga kecil hingga acara reuni keluarga besar.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 80+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 4: Birthday -->
-      <a href="{{ url('/fotografer?cat=birthday-celebration') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Birthday" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Birthday & Party</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Setiap momen pesta ulang tahun patut dirayakan dan diabadikan.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 65+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 5: Graduation -->
-      <a href="{{ url('/fotografer?cat=graduation-wisuda') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Graduation" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Graduation & Wisuda</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Rayakan kelulusan wisuda dan pencapaian akademik terbaik Anda.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 75+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 6: Baby & Maternity -->
-      <a href="{{ url('/fotografer?cat=maternity-newborn') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Baby" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Baby & Maternity</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Dokumentasi manis kehamilan hingga foto bayi baru lahir.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 50+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
-
-      <!-- Card 7: Event & Concert -->
-      <a href="{{ url('/fotografer?cat=event-concert') }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
-        <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Event" />
-        
-        <div class="relative z-20 space-y-2.5">
-          <h3 class="text-xl font-extrabold text-white leading-snug">Event & Concert</h3>
-          <p class="text-xs text-gray-200 leading-relaxed">Dokumentasi konser musik, pameran, dan pesta perusahaan.</p>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
-            Lihat 85+ Fotografer Available
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </span>
-        </div>
-      </a>
+      @foreach($categories->take(7) as $index => $cat)
+        <a href="{{ route('public.photographers.katalog', ['category' => $cat->id]) }}" class="group relative rounded-2xl overflow-hidden min-h-[300px] flex flex-col justify-end p-7 text-white shadow-md hover:shadow-xl transition border border-gray-100 dark:border-gray-800">
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-950/95 via-gray-900/60 to-gray-900/20 z-10"></div>
+          <img src="{{ $cat->icon_url }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $cat->nama_kategori }}" />
+          
+          <div class="relative z-20 space-y-2.5">
+            @if($index === 0)
+              <span class="px-3 py-1 bg-amber-400 text-gray-900 text-[10px] font-black rounded-md inline-block uppercase tracking-wider">POPULER #1</span>
+            @endif
+            <h3 class="text-xl font-extrabold text-white leading-snug">{{ $cat->nama_kategori }}</h3>
+            <p class="text-xs text-gray-200 leading-relaxed">{{ $cat->deskripsi }}</p>
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
+              Lihat Fotografer Available
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </span>
+          </div>
+        </a>
+      @endforeach
 
       <!-- Card 8: Browse All Categories (CTA Card) -->
       <a href="{{ url('/fotografer') }}" class="group bg-[#222222] text-white p-7 rounded-2xl border border-gray-800 hover:bg-amber-400 hover:text-gray-900 transition flex flex-col items-center justify-center text-center gap-5 min-h-[300px] shadow-md">
@@ -254,7 +164,6 @@
           </svg>
         </div>
       </a>
-
     </div>
   </section>
 
@@ -267,7 +176,7 @@
         <div class="lg:col-span-7 space-y-5">
           
           <div class="bg-white dark:bg-gray-900 p-7 sm:p-8 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-2xs flex gap-6 items-start">
-            <span class="text-2xl font-black text-amber-500 shrink-0">01</span>
+            <span class="text-2xl font-black text-amber-400 shrink-0">01</span>
             <div class="space-y-1.5">
               <h3 class="font-bold text-base text-gray-900 dark:text-white">Pilih Fotografer & Paket Layanan</h3>
               <p class="text-xs sm:text-sm text-gray-500 leading-relaxed">Filter berdasarkan kota lokasi foto, lihat portofolio galeri karya, dan pilih estimasi tarif paket jam fotonya.</p>
@@ -275,7 +184,7 @@
           </div>
 
           <div class="bg-white dark:bg-gray-900 p-7 sm:p-8 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-2xs flex gap-6 items-start">
-            <span class="text-2xl font-black text-amber-500 shrink-0">02</span>
+            <span class="text-2xl font-black text-amber-400 shrink-0">02</span>
             <div class="space-y-1.5">
               <h3 class="font-bold text-base text-gray-900 dark:text-white">Validasi Kontrak & DP Escrow</h3>
               <p class="text-xs sm:text-sm text-gray-500 leading-relaxed">Fotografer menyetujui jadwal. Sepakati ketentuan kontrak digital dan lakukan bayar DP aman yang ditahan sistem.</p>
@@ -283,7 +192,7 @@
           </div>
 
           <div class="bg-white dark:bg-gray-900 p-7 sm:p-8 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-2xs flex gap-6 items-start">
-            <span class="text-2xl font-black text-amber-500 shrink-0">03</span>
+            <span class="text-2xl font-black text-amber-400 shrink-0">03</span>
             <div class="space-y-1.5">
               <h3 class="font-bold text-base text-gray-900 dark:text-white">Pelaksanaan Sesi & Unduh Galeri Digital</h3>
               <p class="text-xs sm:text-sm text-gray-500 leading-relaxed">Lakukan pemotretan santai di lokasi. Unduh hasil foto ter-edit kualitas studio langsung dari portal akun Anda.</p>
@@ -294,7 +203,7 @@
 
         <!-- Right Column: Title, Description & CTA Button -->
         <div class="lg:col-span-5 space-y-5">
-          <span class="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Alur Transaksi Transparan</span>
+          <span class="text-[11px] font-extrabold text-amber-500 dark:text-amber-500 uppercase tracking-widest">Alur Transaksi Transparan</span>
           <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-[1.15] tracking-tight">
             Cara Kerja Praktis & Aman di LensMatch
           </h2>
@@ -318,126 +227,92 @@
     
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div class="space-y-2">
-        <span class="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Rekomendasi Komunitas</span>
+        <span class="text-[11px] font-extrabold text-amber-500 dark:text-amber-500 uppercase tracking-widest">Rekomendasi Komunitas</span>
         <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-[1.15] tracking-tight">Fotografer Pilihan Bulan Ini</h2>
       </div>
-      <a href="{{ url('/fotografer') }}" class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs hover:underline">
+      <a href="{{ url('/fotografer') }}" class="inline-flex items-center gap-1.5 text-amber-400 dark:text-amber-400 font-bold text-xs hover:underline">
         Lihat Katalog Lengkap (150+)
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </a>
     </div>
 
-    <!-- 4 Equal Photographer Cards Grid -->
+    <!-- 4 Equal Photographer Cards Grid (Pure Dynamic Database Loop) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-      
-      <!-- Photographer Card 1 (Alex Visual Studio - HD Unsplash Portrait) -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
-        <div>
-          <div class="h-56 bg-gray-100 relative overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Alex Visual Studio" />
-            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="text-amber-500"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              4.9 (42)
-            </span>
-          </div>
-          <div class="p-7 space-y-3">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Alex Visual Studio</h3>
-            <p class="text-xs text-gray-500 leading-relaxed">Ahli fotografi momen outdoor wedding, prewedding romantis, serta foto pasangan liburan di Jakarta & Bali.</p>
-            <div class="pt-2">
-              <span class="text-[10px] font-bold text-gray-400 uppercase block">Mulai Dari</span>
-              <p class="text-amber-600 dark:text-amber-400 font-extrabold text-base">Rp 3.500.000</p>
+      @foreach($featuredPhotographers as $p)
+        @php
+          $lowestPrice = $p->services->min('tarif_harga') ?? 1500000;
+          $coverPortfolio = $p->portfolios->first()?->medias?->first()?->media ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80';
+          $avatarUrl = $p->foto_url ?? ($p->foto ? (str_starts_with($p->foto, 'http') ? $p->foto : asset('storage/' . $p->foto)) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80');
+          $rating = $p->rating_average ?? 4.9;
+          $reviewCount = $p->testimonials->count();
+        @endphp
+
+        <!-- Standard Photographer Card (LensMatch UI Standard) -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group h-full">
+          
+          <div>
+            <!-- Top Cover Image Frame -->
+            <div class="relative h-56 w-full overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
+              <img src="{{ $coverPortfolio }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $p->nama }}" />
+              <!-- Rating Badge Top-Right -->
+              <div class="absolute top-4 right-4 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <span>{{ $rating }}</span>
+                <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
+              </div>
+            </div>
+
+            <!-- Card Body Content -->
+            <div class="px-6 sm:px-7 pt-4 pb-0">
+              <!-- Location (Subtle & Compact Above Name) -->
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-400 font-medium mb-2.5">
+                <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                </svg>
+                <span class="truncate">{{ $p->city->name ?? ($p->alamat ?? 'Indonesia') }}</span>
+              </div>
+
+              <!-- Avatar & Name Row -->
+              <div class="flex items-center gap-3">
+                <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" alt="{{ $p->nama }}" />
+                <h3 class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white truncate group-hover:text-amber-500 transition leading-snug">
+                  {{ $p->nama }}
+                </h3>
+              </div>
+
+              <!-- Bio Description -->
+              <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mt-2.5">
+                {{ $p->deskripsi_bio ?? 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
+              </p>
+
+              <!-- Category Tags Row (Max 5) -->
+              <div class="flex flex-wrap gap-1.5 pt-2.5 items-center">
+                @foreach($p->categories->take(5) as $cat)
+                  <span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px] rounded-lg border border-amber-200/60 dark:border-amber-800/60 uppercase tracking-wider">
+                    {{ $cat->nama_kategori }}
+                  </span>
+                @endforeach
+              </div>
             </div>
           </div>
-        </div>
-        <div class="p-7 pt-0">
-          <a href="{{ url('/fotografer/1') }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-2.5 bg-gray-900 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-bold transition">
-            Lihat Profil
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </a>
-        </div>
-      </div>
 
-      <!-- Photographer Card 2 (Budi Event Captures - HD Unsplash Portrait) -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
-        <div>
-          <div class="h-56 bg-gray-100 relative overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Budi Event Captures" />
-            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="text-amber-500"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              4.8 (38)
-            </span>
-          </div>
-          <div class="p-7 space-y-3">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Budi Event Captures</h3>
-            <p class="text-xs text-gray-500 leading-relaxed">Dokumentasi konser musik panggung, festival budaya, dan dokumentasi acara eksklusif perusahaan di Surabaya.</p>
-            <div class="pt-2">
-              <span class="text-[10px] font-bold text-gray-400 uppercase block">Mulai Dari</span>
-              <p class="text-amber-600 dark:text-amber-400 font-extrabold text-base">Rp 2.800.000</p>
+          <!-- Bottom Section: Price & Full-Width Button -->
+          <div class="px-6 sm:px-7 pt-3.5 pb-6 sm:pb-7 space-y-3 mt-auto">
+            <div class="space-y-0.5">
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Mulai Dari</span>
+              <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">Rp {{ number_format($lowestPrice, 0, ',', '.') }}</p>
+            </div>
+            <div class="pt-0.5">
+              <a href="{{ url('/fotografer/' . $p->id) }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-3 bg-[#222222] dark:bg-gray-700 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-extrabold transition duration-200 shadow-xs">
+                <span>Lihat Profil</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+              </a>
             </div>
           </div>
-        </div>
-        <div class="p-7 pt-0">
-          <a href="{{ url('/fotografer/1') }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-2.5 bg-gray-900 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-bold transition">
-            Lihat Profil
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </a>
-        </div>
-      </div>
 
-      <!-- Photographer Card 3 (Clara Commercial Lens - HD Unsplash Portrait) -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
-        <div>
-          <div class="h-56 bg-gray-100 relative overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Clara Commercial Lens" />
-            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="text-amber-500"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              5.0 (29)
-            </span>
-          </div>
-          <div class="p-7 space-y-3">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Clara Commercial Lens</h3>
-            <p class="text-xs text-gray-500 leading-relaxed">Dokumentasi katalog produk UMKM lokal, komersial brand fashion, dan foto komersial studio di Bandung.</p>
-            <div class="pt-2">
-              <span class="text-[10px] font-bold text-gray-400 uppercase block">Mulai Dari</span>
-              <p class="text-amber-600 dark:text-amber-400 font-extrabold text-base">Rp 1.500.000</p>
-            </div>
-          </div>
         </div>
-        <div class="p-7 pt-0">
-          <a href="{{ url('/fotografer/1') }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-2.5 bg-gray-900 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-bold transition">
-            Lihat Profil
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </a>
-        </div>
-      </div>
-
-      <!-- Photographer Card 4 (Dewa Portrait Studio - HD Unsplash Portrait) -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
-        <div>
-          <div class="h-56 bg-gray-100 relative overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Dewa Portrait Studio" />
-            <span class="absolute top-3.5 right-3.5 px-2.5 py-1 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-[11px] font-bold rounded-lg shadow-2xs flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="text-amber-500"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              4.9 (51)
-            </span>
-          </div>
-          <div class="p-7 space-y-3">
-            <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Dewa Portrait Studio</h3>
-            <p class="text-xs text-gray-500 leading-relaxed">Spesialis portrait wisuda, foto liburan keluarga, serta dokumentasi lanskap estetik di Yogyakarta & Bali.</p>
-            <div class="pt-2">
-              <span class="text-[10px] font-bold text-gray-400 uppercase block">Mulai Dari</span>
-              <p class="text-amber-600 dark:text-amber-400 font-extrabold text-base">Rp 2.200.000</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-7 pt-0">
-          <a href="{{ url('/fotografer/1') }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-2.5 bg-gray-900 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-bold transition">
-            Lihat Profil
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </a>
-        </div>
-      </div>
-
+      @endforeach
     </div>
   </section>
 
@@ -457,7 +332,7 @@
       
       <!-- Centered Header -->
       <div class="text-center space-y-3 max-w-2xl mx-auto">
-        <span class="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Testimonials</span>
+        <span class="text-[11px] font-extrabold text-amber-500 dark:text-amber-500 uppercase tracking-widest">Testimonials</span>
         <h2 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white leading-tight">Cerita Pengalaman Bersama LensMatch</h2>
       </div>
 
@@ -482,7 +357,7 @@
             <template x-if="activeIndex > 0">
               <div class="flex flex-col justify-between h-full space-y-6">
                 <div class="space-y-4">
-                  <div class="text-amber-500 font-serif text-4xl leading-none">“</div>
+                  <div class="text-amber-400 font-serif text-4xl leading-none">“</div>
                   <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic" x-text="items[activeIndex - 1].quote"></p>
                 </div>
                 <div class="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
@@ -499,7 +374,7 @@
           <!-- Center Active Elevated Card (Menonjol with Emas Border & Shadow) -->
           <div class="scale-105 shadow-2xl border-2 border-amber-400 dark:border-amber-400 z-20 opacity-100 bg-white dark:bg-gray-900 p-8 sm:p-9 rounded-2xl transition-all duration-500 flex flex-col justify-between space-y-6 min-h-[290px]">
             <div class="space-y-4">
-              <div class="text-amber-500 font-serif text-4xl leading-none">“</div>
+              <div class="text-amber-400 font-serif text-4xl leading-none">“</div>
               <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic" x-text="items[activeIndex].quote"></p>
             </div>
             <div class="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
@@ -516,7 +391,7 @@
             <template x-if="activeIndex < items.length - 1">
               <div class="flex flex-col justify-between h-full space-y-6">
                 <div class="space-y-4">
-                  <div class="text-amber-500 font-serif text-4xl leading-none">“</div>
+                  <div class="text-amber-400 font-serif text-4xl leading-none">“</div>
                   <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic" x-text="items[activeIndex + 1].quote"></p>
                 </div>
                 <div class="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
@@ -555,11 +430,11 @@
   </section>
 
   <!-- 7. CTA GABUNG MITRA FOTOGRAFER (Dark Charcoal Banner on Pure White Canvas) -->
-  <section class="w-full bg-white dark:bg-gray-900 py-16 sm:py-20 reveal-on-scroll">
+  <section class="w-full bg-white dark:bg-gray-900 py-20 sm:py-28 reveal-on-scroll">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-[#222222] text-white rounded-3xl p-10 sm:p-14 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
+      <div class="bg-[#222222] text-white rounded-3xl px-8 sm:px-16 py-16 sm:py-22 flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-12 shadow-2xl">
         <div class="space-y-3 text-center md:text-left">
-          <span class="text-[11px] font-black text-amber-400 uppercase tracking-widest">Kemitraan Fotografer</span>
+          <span class="text-[11px] font-black text-amber-500 uppercase tracking-widest">Kemitraan Fotografer</span>
           <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">Apakah Anda Fotografer Profesional?</h2>
           <p class="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-xl">
             Bergabunglah bersama 150+ fotografer di Indonesia. Kelola jadwal ketersediaan, buat paket layanan, dan terima pesanan booking dengan jaminan sistem escrow.

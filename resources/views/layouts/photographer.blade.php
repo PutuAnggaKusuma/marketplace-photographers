@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Fotografer Dashboard — Marketplace Fotografer')</title>
@@ -31,5 +32,7 @@
         </main>
       </div>
     </div>
-  </body>
+    @include('partials.shared.confirm-modal')
+  @include('partials.shared.toast-notification')
+</body>
 </html>

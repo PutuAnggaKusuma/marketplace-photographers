@@ -96,7 +96,7 @@
           <td class="py-3.5">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 overflow-hidden rounded-lg shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80" class="w-full h-full object-cover" alt="Prewedding" />
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80" class="w-full h-full object-cover" alt="Prewedding" />
               </div>
               <div>
                 <p class="font-bold text-gray-900 text-theme-sm dark:text-white/90">
@@ -130,7 +130,7 @@
           <td class="py-3.5">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 overflow-hidden rounded-lg shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&q=80" class="w-full h-full object-cover" alt="Concert" />
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150&q=80" class="w-full h-full object-cover" alt="Concert" />
               </div>
               <div>
                 <p class="font-bold text-gray-900 text-theme-sm dark:text-white/90">
@@ -164,7 +164,7 @@
           <td class="py-3.5">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 overflow-hidden rounded-lg shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&q=80" class="w-full h-full object-cover" alt="Commercial" />
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&q=80" class="w-full h-full object-cover" alt="Commercial" />
               </div>
               <div>
                 <p class="font-bold text-gray-900 text-theme-sm dark:text-white/90">
@@ -198,7 +198,7 @@
           <td class="py-3.5">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 overflow-hidden rounded-lg shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150&q=80" class="w-full h-full object-cover" alt="Graduation" />
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150&q=80" class="w-full h-full object-cover" alt="Graduation" />
               </div>
               <div>
                 <p class="font-bold text-gray-900 text-theme-sm dark:text-white/90">
@@ -232,7 +232,7 @@
           <td class="py-3.5">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 overflow-hidden rounded-lg shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&q=80" class="w-full h-full object-cover" alt="Vacation" />
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=150&q=80" class="w-full h-full object-cover" alt="Vacation" />
               </div>
               <div>
                 <p class="font-bold text-gray-900 text-theme-sm dark:text-white/90">

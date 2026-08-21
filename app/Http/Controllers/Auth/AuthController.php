@@ -14,10 +14,14 @@ class AuthController extends Controller
     /**
      * Tampilkan Halaman Form Login.
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
+        }
+
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->query('redirect')]);
         }
 
         return view('public.auth.signin');
@@ -53,10 +57,14 @@ class AuthController extends Controller
     /**
      * Tampilkan Halaman Form Registrasi Akun Baru.
      */
-    public function showRegisterForm()
+    public function showRegisterForm(Request $request)
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
+        }
+
+        if ($request->has('redirect')) {
+            session(['url.intended' => $request->query('redirect')]);
         }
 
         return view('public.auth.signup');
@@ -102,12 +110,19 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        if (Auth::check()) {
+            // Update status user langsung menjadi offline saat logout (misal 5 menit lalu)
+            Auth::user()->update([
+                'last_seen_at' => now()->subMinutes(5)
+            ]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar dari akun.');
+        return redirect('/')->with('success', 'Anda telah berhasil keluar dari akun.');
     }
 
     /**
@@ -115,6 +130,11 @@ class AuthController extends Controller
      */
     protected function redirectBasedOnRole(User $user)
     {
+        if (session()->has('url.intended')) {
+            $intended = session()->pull('url.intended');
+            return redirect()->to($intended);
+        }
+
         if (in_array($user->role, ['super_admin', 'admin'])) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role === 'photographer') {
