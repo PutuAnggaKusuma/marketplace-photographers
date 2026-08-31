@@ -3,7 +3,7 @@
   x-data="{
     toasts: [],
     addToast(data) {
-      const id = Date.now();
+      const id = Date.now() + Math.random();
       const duration = data.duration || 4500;
       const type = data.type || 'success';
 
@@ -61,7 +61,7 @@
     @endif
   "
   @show-toast.window="addToast($event.detail)"
-  class="fixed top-20 right-5 z-50 space-y-3.5 max-w-sm w-full pointer-events-none"
+  class="fixed top-20 right-5 z-50 space-y-3.5 max-w-md w-full pointer-events-none"
 >
   <template x-for="t in toasts" :key="t.id">
     <div 
@@ -73,7 +73,7 @@
       x-transition:leave-end="translate-y-[-20px] opacity-0 scale-95"
       class="relative pointer-events-auto px-5 py-4 rounded-2xl bg-white dark:bg-gray-800 shadow-xl border border-gray-100 dark:border-gray-700/80 flex items-center justify-between gap-4 overflow-hidden"
     >
-      <div class="flex items-center gap-3.5 min-w-0 pb-1">
+      <div class="flex items-center gap-3.5 min-w-0 flex-1 pb-1">
         <!-- Outlined Circular Vector SVG Icon -->
         <div class="shrink-0">
           <template x-if="t.type === 'success'">
@@ -102,8 +102,8 @@
           </template>
         </div>
 
-        <!-- Toast Message Text -->
-        <p class="text-xs font-semibold text-gray-800 dark:text-gray-100 leading-snug truncate" x-text="t.message"></p>
+        <!-- Toast Message Text (Full Text Display) -->
+        <p class="text-xs font-semibold text-gray-800 dark:text-gray-100 leading-snug break-words" x-text="t.message"></p>
       </div>
 
       <!-- Close Button Cross -->

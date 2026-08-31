@@ -73,6 +73,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/chat/unread-count', [\App\Http\Controllers\Public\ChatController::class, 'getUnreadCount'])->name('chat.unread-count');
     Route::get('/notifications/unread', [\App\Http\Controllers\Public\NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Public\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Public\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
@@ -111,9 +112,7 @@ Route::middleware(['auth', 'role:client'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,admin'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/users', function () {
         return view('admin.users.index');
@@ -121,14 +120,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
     // Admin Category Management Routes
     Route::get('/categories', [\App\Http\Controllers\Admin\CategoryController::class, 'index'])->name('categories');
+    Route::get('/categories/create', [\App\Http\Controllers\Admin\CategoryController::class, 'create'])->name('categories.create');
     Route::post('/categories', [\App\Http\Controllers\Admin\CategoryController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{id}/edit', [\App\Http\Controllers\Admin\CategoryController::class, 'edit'])->name('categories.edit');
     Route::post('/categories/{id}/update', [\App\Http\Controllers\Admin\CategoryController::class, 'update'])->name('categories.update');
     Route::post('/categories/{id}/delete', [\App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    // Admin User & Verification Management Routes
+    // Admin User & Client Management Routes
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
-    Route::post('/users/{id}/verify', [\App\Http\Controllers\Admin\UserController::class, 'toggleVerification'])->name('users.verify');
     Route::post('/users/{id}/delete', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+
+    // Admin Dedicated Photographer & Verification Routes
+    Route::get('/photographers', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'index'])->name('photographers');
+    Route::post('/photographers/{id}/verify', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'toggleVerification'])->name('photographers.verify');
+    Route::post('/photographers/{id}/delete', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'destroy'])->name('photographers.destroy');
+
+    // Admin Dedicated Staff & Super Admin Management Routes (Super Admin Only)
+    Route::get('/admins', [\App\Http\Controllers\Admin\AdminStaffController::class, 'index'])->name('admins');
+    Route::get('/admins/create', [\App\Http\Controllers\Admin\AdminStaffController::class, 'create'])->name('admins.create');
+    Route::post('/admins', [\App\Http\Controllers\Admin\AdminStaffController::class, 'store'])->name('admins.store');
+    Route::post('/admins/{id}/delete', [\App\Http\Controllers\Admin\AdminStaffController::class, 'destroy'])->name('admins.destroy');
 
     // Admin Customer Reviews & Rating Management Routes
     Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews');
@@ -143,7 +154,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
     // Admin Photo Contest Management Routes
     Route::get('/contests', [\App\Http\Controllers\Admin\ContestController::class, 'index'])->name('contests');
+    Route::get('/contests/create', [\App\Http\Controllers\Admin\ContestController::class, 'create'])->name('contests.create');
     Route::post('/contests', [\App\Http\Controllers\Admin\ContestController::class, 'store'])->name('contests.store');
+    Route::get('/contests/{id}/edit', [\App\Http\Controllers\Admin\ContestController::class, 'edit'])->name('contests.edit');
     Route::post('/contests/{id}/update', [\App\Http\Controllers\Admin\ContestController::class, 'update'])->name('contests.update');
     Route::post('/contests/{id}/delete', [\App\Http\Controllers\Admin\ContestController::class, 'destroy'])->name('contests.destroy');
     Route::get('/contests/{id}/submissions', [\App\Http\Controllers\Admin\ContestController::class, 'submissions'])->name('contests.submissions');
@@ -151,7 +164,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
     // Admin E-Learning Management Routes
     Route::get('/elearning', [\App\Http\Controllers\Admin\ElearningController::class, 'index'])->name('elearning');
+    Route::get('/elearning/create', [\App\Http\Controllers\Admin\ElearningController::class, 'create'])->name('elearning.create');
     Route::post('/elearning', [\App\Http\Controllers\Admin\ElearningController::class, 'store'])->name('elearning.store');
+    Route::get('/elearning/{id}/edit', [\App\Http\Controllers\Admin\ElearningController::class, 'edit'])->name('elearning.edit');
     Route::post('/elearning/{id}/update', [\App\Http\Controllers\Admin\ElearningController::class, 'update'])->name('elearning.update');
     Route::post('/elearning/{id}/delete', [\App\Http\Controllers\Admin\ElearningController::class, 'destroy'])->name('elearning.destroy');
 
@@ -167,25 +182,28 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 |--------------------------------------------------------------------------
 */
 Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:photographer'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('photographer.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Photographer\DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile', function () {
-        return view('photographer.profile.index');
-    })->name('profile');
+    Route::get('/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index'])->name('profile');
 
-    Route::get('/services', function () {
-        return view('photographer.services.index');
-    })->name('services');
+    Route::get('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'index'])->name('services');
+    Route::get('/services/create', [\App\Http\Controllers\Photographer\ServiceController::class, 'create'])->name('services.create');
+    Route::post('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'store'])->name('services.store');
+    Route::get('/services/{id}/edit', [\App\Http\Controllers\Photographer\ServiceController::class, 'edit'])->name('services.edit');
+    Route::post('/services/{id}/update', [\App\Http\Controllers\Photographer\ServiceController::class, 'update'])->name('services.update');
+    Route::post('/services/{id}/delete', [\App\Http\Controllers\Photographer\ServiceController::class, 'destroy'])->name('services.delete');
 
-    Route::get('/portfolio', function () {
-        return view('photographer.portfolio.index');
-    })->name('portfolio');
+    Route::get('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'index'])->name('portfolio');
+    Route::get('/portfolio/create', [\App\Http\Controllers\Photographer\PortfolioController::class, 'create'])->name('portfolio.create');
+    Route::post('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'store'])->name('portfolio.store');
+    Route::get('/portfolio/{id}/edit', [\App\Http\Controllers\Photographer\PortfolioController::class, 'edit'])->name('portfolio.edit');
+    Route::post('/portfolio/{id}/update', [\App\Http\Controllers\Photographer\PortfolioController::class, 'update'])->name('portfolio.update');
+    Route::post('/portfolio/{id}/delete', [\App\Http\Controllers\Photographer\PortfolioController::class, 'destroy'])->name('portfolio.delete');
 
-    Route::get('/availability', function () {
-        return view('photographer.availability.index');
-    })->name('availability');
+    Route::get('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'index'])->name('availability');
+    Route::get('/availability/create', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'create'])->name('availability.create');
+    Route::post('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'store'])->name('availability.store');
+    Route::post('/availability/{id}/delete', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'destroy'])->name('availability.delete');
 
     // Photographer Booking Order Management & Gallery Upload Routes
     Route::get('/bookings', [PhotographerBookingController::class, 'index'])->name('bookings');
@@ -194,6 +212,7 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
 
     // Real-Time Chat Photographer Studio Routes
     Route::get('/chat', [ChatController::class, 'photographerIndex'])->name('chat');
+    Route::get('/chat/client/{clientId}', [ChatController::class, 'photographerStartChat'])->name('chat.client');
     Route::get('/chat/messages/{chatBookingId}', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
@@ -208,9 +227,9 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
 */
 // User Profile & Security Routes (Supports /profile, /client/profile, /photographer/profile, /admin/profile)
 Route::middleware('auth')->group(function () {
+    Route::get('/chat/unread-count', [\App\Http\Controllers\Public\ChatController::class, 'getUnreadCount'])->name('chat.unread-count');
     Route::get('/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index'])->name('profile.index');
     Route::get('/client/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index']);
-    Route::get('/photographer/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index']);
     Route::get('/admin/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index']);
     Route::post('/profile/update', [\App\Http\Controllers\Public\ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\Public\ProfileController::class, 'updatePassword'])->name('profile.password');

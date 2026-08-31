@@ -3,29 +3,33 @@
   <div class="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
     <div
       class="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-800">
-      <!-- Hamburger Toggle BTN -->
-      <button :class="sidebarToggle ? 'lg:bg-transparent dark:lg:bg-transparent bg-gray-100 dark:bg-gray-800' : ''"
-        class="z-50 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border dark:border-gray-800 dark:text-gray-400"
+      <!-- Hamburger Toggle BTN with Smooth Interaction Animation -->
+      <button :class="sidebarToggle ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border-amber-300 dark:border-amber-700' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700'"
+        class="z-50 flex h-10 w-10 items-center justify-center rounded-xl border hover:border-amber-400 dark:hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 lg:h-11 lg:w-11 transition-all duration-300 active:scale-95 shadow-2xs cursor-pointer group"
+        title="Toggle Menu Sidebar"
         @click.stop="sidebarToggle = !sidebarToggle">
-        <svg class="hidden fill-current lg:block" width="16" height="12" viewBox="0 0 16 12" fill="none"
+        
+        <!-- Desktop Hamburger Icon with Micro-Animation -->
+        <svg class="hidden fill-current lg:block transition-transform duration-300 group-hover:scale-105" 
+             :class="sidebarToggle ? 'rotate-180 text-amber-600 dark:text-amber-400' : ''"
+             width="16" height="12" viewBox="0 0 16 12" fill="none"
           xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 11.75 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z"
-            fill="" />
+            d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 11.75 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z" />
         </svg>
 
-        <svg :class="sidebarToggle ? 'hidden' : 'block lg:hidden'" class="fill-current lg:hidden" width="24" height="24"
+        <!-- Mobile Hamburger Icon -->
+        <svg :class="sidebarToggle ? 'hidden' : 'block lg:hidden'" class="fill-current lg:hidden transition-transform duration-300" width="22" height="22"
           viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M3.25 6C3.25 5.58579 3.58579 5.25 4 5.25L20 5.25C20.4142 5.25 20.75 5.58579 20.75 6C20.75 6.41421 20.4142 6.75 20 6.75L4 6.75C3.58579 6.75 3.25 6.41422 3.25 6ZM3.25 18C3.25 17.5858 3.58579 17.25 4 17.25L20 17.25C20.4142 17.25 20.75 17.5858 20.75 18C20.75 18.4142 20.4142 18.75 20 18.75L4 18.75C3.58579 18.75 3.25 18.4142 3.25 18ZM4 11.25C3.58579 11.25 3.25 11.5858 3.25 12C3.25 12.4142 3.58579 12.75 4 12.75L12 12.75C12.4142 12.75 12.75 12.4142 12.75 12C12.75 11.5858 12.4142 11.25 12 11.25L4 11.25Z"
-            fill="" />
+            d="M3.25 6C3.25 5.58579 3.58579 5.25 4 5.25L20 5.25C20.4142 5.25 20.75 5.58579 20.75 6C20.75 6.41421 20.4142 6.75 20 6.75L4 6.75C3.58579 6.75 3.25 6.41422 3.25 6ZM3.25 18C3.25 17.5858 3.58579 17.25 4 17.25L20 17.25C20.4142 17.25 20.75 17.5858 20.75 18C20.75 18.4142 20.4142 18.75 20 18.75L4 18.75C3.58579 18.75 3.25 18.4142 3.25 18ZM4 11.25C3.58579 11.25 3.25 11.5858 3.25 12C3.25 12.4142 3.58579 12.75 4 12.75L12 12.75C12.4142 12.75 12.75 12.4142 12.75 12C12.75 11.5858 12.4142 11.25 12 11.25L4 11.25Z" />
         </svg>
 
-        <svg :class="sidebarToggle ? 'block lg:hidden' : 'hidden'" class="fill-current" width="24" height="24"
+        <!-- Mobile Close 'X' Icon -->
+        <svg :class="sidebarToggle ? 'block lg:hidden' : 'hidden'" class="fill-current text-rose-500 transition-transform duration-300 rotate-90" width="22" height="22"
           viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd"
-            d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z"
-            fill="" />
+            d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z" />
         </svg>
       </button>
 
@@ -153,18 +157,18 @@
         </button>
       </div>
 
-      <!-- User Profile Static Badge (Non-clickable, strict roles: Klien, Fotografer, or Admin) -->
+      <!-- User Profile Static Badge (Matching Bell & Theme Buttons: White Bg & Gray Border) -->
       @auth
-        <div class="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shadow-sm overflow-hidden shrink-0">
+        <div class="flex items-center gap-3 px-3 py-1.5 rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-2xs">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shadow-xs overflow-hidden shrink-0">
             {{ strtoupper(substr(auth()->user()->nama ?? 'U', 0, 2)) }}
           </div>
-          <div class="text-left hidden sm:block pr-1">
+          <div class="text-left hidden sm:block pr-0.5">
             <span class="block text-xs font-extrabold text-gray-900 dark:text-white leading-tight">
               {{ auth()->user()->nama }}
             </span>
             <span class="block text-[10px] font-bold text-amber-600 dark:text-amber-400 capitalize">
-              {{ auth()->user()->role === 'photographer' ? 'Fotografer' : (in_array(auth()->user()->role, ['super_admin', 'admin']) ? 'Admin' : 'Klien') }}
+              {{ auth()->user()->role === 'super_admin' ? 'Super Admin' : (auth()->user()->role === 'admin' ? 'Staff Admin' : (auth()->user()->role === 'photographer' ? 'Fotografer' : 'Klien')) }}
             </span>
           </div>
         </div>
@@ -172,3 +176,62 @@
     </div>
   </div>
 </header>
+@auth
+<script>
+function headerNotifApp() {
+    return {
+        notifOpen: false,
+        unreadCount: 0,
+        notifications: [],
+        init() {
+            this.fetchNotifs();
+            setInterval(() => this.fetchNotifs(), 30000);
+        },
+        fetchNotifs() {
+            fetch('{{ route("notifications.unread") }}', {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.unreadCount = data.unread_count || 0;
+                    this.notifications = data.notifications || [];
+                }
+            })
+            .catch(err => console.error(err));
+        },
+        markAllRead() {
+            fetch('{{ route("notifications.read-all") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.unreadCount = 0;
+                    this.notifications.forEach(n => n.is_read = true);
+                }
+            });
+        },
+        openNotif(notif) {
+            fetch(`/notifications/${notif.id}/read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(() => {
+                if (notif.url) {
+                    window.location.href = notif.url;
+                }
+            });
+        }
+    };
+}
+</script>
+@endauth

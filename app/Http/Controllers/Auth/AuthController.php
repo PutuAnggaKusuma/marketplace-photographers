@@ -132,7 +132,26 @@ class AuthController extends Controller
     {
         if (session()->has('url.intended')) {
             $intended = session()->pull('url.intended');
-            return redirect()->to($intended);
+
+            // Validasi apakah intended URL sesuai dengan role pengguna saat ini
+            $isAllowed = true;
+            if (in_array($user->role, ['super_admin', 'admin'])) {
+                if (str_contains($intended, '/photographer')) {
+                    $isAllowed = false;
+                }
+            } elseif ($user->role === 'photographer') {
+                if (str_contains($intended, '/admin')) {
+                    $isAllowed = false;
+                }
+            } elseif ($user->role === 'client') {
+                if (str_contains($intended, '/admin') || str_contains($intended, '/photographer')) {
+                    $isAllowed = false;
+                }
+            }
+
+            if ($isAllowed) {
+                return redirect()->to($intended);
+            }
         }
 
         if (in_array($user->role, ['super_admin', 'admin'])) {

@@ -40,15 +40,18 @@ class ReviewController extends Controller
             });
         }
 
-        $reviews = $query->paginate(10)->withQueryString();
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
+        $reviews = $query->paginate($perPage)->withQueryString();
 
         $totalReviews = Testimonial::count();
         $avgRating = number_format(Testimonial::avg('rating') ?: 5.0, 1);
         $fiveStarReviews = Testimonial::where('rating', 5)->count();
+        $hiddenReviews = Testimonial::where('is_hidden', true)->count();
 
         return view('admin.reviews.index', compact(
             'reviews', 'search', 'ratingFilter',
-            'totalReviews', 'avgRating', 'fiveStarReviews'
+            'totalReviews', 'avgRating', 'fiveStarReviews', 'hiddenReviews'
         ));
     }
 

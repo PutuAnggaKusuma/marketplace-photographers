@@ -14,7 +14,7 @@ class ReportController extends Controller
     /**
      * Tampilkan Halaman Laporan Keuangan & Statistik Studio.
      */
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $user = Auth::user();
         $photographer = RolePhotographer::where('id_user', $user->id)->first();
@@ -23,11 +23,11 @@ class ReportController extends Controller
         }
 
         $statusFilter = $request->query('status', 'all');
+        $sort = $request->query('sort', 'latest');
         $selectedYear = $request->query('year', date('Y'));
 
         $query = Contract::where('id_photographer', $photographer->id)
-            ->with(['client.user', 'bookingDetail.service', 'payments'])
-            ->orderBy('created_at', 'desc');
+            ->with(['client.user', 'bookingDetail.service', 'payments']);
 
         if ($statusFilter === 'paid') {
             $query->where('status_payout', 'paid');
@@ -35,7 +35,19 @@ class ReportController extends Controller
             $query->whereIn('status_payout', ['holding', 'ready']);
         }
 
-        $contracts = $query->paginate(15)->withQueryString();
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'highest') {
+            $query->orderBy('jumlah', 'desc');
+        } elseif ($sort === 'lowest') {
+            $query->orderBy('jumlah', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
+        $contracts = $query->paginate($perPage)->withQueryString();
 
         // 4 Summary Metrics
         $allContracts = Contract::where('id_photographer', $photographer->id)->get();
@@ -65,6 +77,7 @@ class ReportController extends Controller
             'photographer',
             'contracts',
             'statusFilter',
+            'sort',
             'selectedYear',
             'totalNetIncome',
             'totalEscrowPending',
@@ -78,9 +91,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Tampilkan Halaman Format Cetak Laporan PDF / Print.
-     */
     public function export(Request $request)
     {
         $user = Auth::user();

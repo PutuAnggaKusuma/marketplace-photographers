@@ -19,7 +19,7 @@
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
                 </span>
             @else
-                <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $paginator->url(1) }}') : window.location.href='{{ $paginator->url(1) }}'" href="{{ $paginator->url(1) }}" class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
+                <a @click.prevent="loadAjaxPage('{{ $paginator->url(1) }}')" href="{{ $paginator->url(1) }}" data-ajax-page class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
                 </a>
             @endif
@@ -30,7 +30,7 @@
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </span>
             @else
-                <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $paginator->previousPageUrl() }}') : window.location.href='{{ $paginator->previousPageUrl() }}'" href="{{ $paginator->previousPageUrl() }}" class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
+                <a @click.prevent="loadAjaxPage('{{ $paginator->previousPageUrl() }}')" href="{{ $paginator->previousPageUrl() }}" data-ajax-page class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
             @endif
@@ -48,7 +48,7 @@
                                 {{ $page }}
                             </span>
                         @else
-                            <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $url }}') : window.location.href='{{ $url }}'" href="{{ $url }}" class="px-4 py-2.5 sm:px-4.5 sm:py-2.5 rounded-2xl border border-transparent text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-xs sm:text-sm font-bold transition">
+                            <a @click.prevent="loadAjaxPage('{{ $url }}')" href="{{ $url }}" data-ajax-page class="px-4 py-2.5 sm:px-4.5 sm:py-2.5 rounded-2xl border border-transparent text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-xs sm:text-sm font-bold transition">
                                 {{ $page }}
                             </a>
                         @endif
@@ -58,7 +58,7 @@
 
             <!-- Next Page (>) -->
             @if ($paginator->hasMorePages())
-                <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $paginator->nextPageUrl() }}') : window.location.href='{{ $paginator->nextPageUrl() }}'" href="{{ $paginator->nextPageUrl() }}" class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
+                <a @click.prevent="loadAjaxPage('{{ $paginator->nextPageUrl() }}')" href="{{ $paginator->nextPageUrl() }}" data-ajax-page class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
                 </a>
             @else
@@ -69,7 +69,7 @@
 
             <!-- Last Page (>>) -->
             @if ($paginator->hasMorePages())
-                <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $paginator->url($paginator->lastPage()) }}') : window.location.href='{{ $paginator->url($paginator->lastPage()) }}'" href="{{ $paginator->url($paginator->lastPage()) }}" class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
+                <a @click.prevent="loadAjaxPage('{{ $paginator->url($paginator->lastPage()) }}')" href="{{ $paginator->url($paginator->lastPage()) }}" data-ajax-page class="p-2.5 sm:p-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 shadow-xs transition">
                     <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7m-8 0l7-7-7-7"></path></svg>
                 </a>
             @else
@@ -94,7 +94,7 @@
                         @php
                             $targetUrl = request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]);
                         @endphp
-                        <a @click.prevent="typeof loadAjaxPage === 'function' ? loadAjaxPage('{{ $targetUrl }}') : window.location.href='{{ $targetUrl }}'; open = false" 
+                        <a @click.prevent="loadAjaxPage('{{ $targetUrl }}'); open = false" data-ajax-page 
                            href="{{ $targetUrl }}" 
                            class="block px-3.5 py-2 text-center text-xs sm:text-sm font-black {{ $paginator->perPage() == $size ? 'bg-amber-400 text-gray-900' : 'text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600' }} transition">
                             {{ $size }}

@@ -34,7 +34,20 @@
     <div class="flex h-screen overflow-hidden">
       @include('partials.admin.sidebar')
 
-      <div class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
+    <!-- Mobile Backdrop Overlay with Smooth Slide & Fade Transition -->
+    <div x-show="sidebarToggle" 
+         @click="sidebarToggle = false" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden" 
+         style="display: none;">
+    </div>
+
+      <div class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50">
         @include('partials.shared.header')
 
         <main>
@@ -46,5 +59,7 @@
     </div>
     @include('partials.shared.confirm-modal')
   @include('partials.shared.toast-notification')
+  @include('partials.shared.dashboard-live-filter-js')
+  @include('partials.shared.ajax-pagination-engine')
 </body>
 </html>

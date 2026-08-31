@@ -11,9 +11,10 @@ class TransactionController extends Controller
     /**
      * Tampilkan Halaman Monitoring Transaksi & Escrow Admin.
      */
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $statusFilter = $request->query('status', 'all');
+        $sort = $request->query('sort', 'latest');
         $search = $request->query('search', '');
 
         $query = Contract::with([
@@ -21,7 +22,7 @@ class TransactionController extends Controller
             'photographer.user',
             'bookingDetail.service',
             'payments'
-        ])->orderBy('created_at', 'desc');
+        ]);
 
         if ($statusFilter !== 'all') {
             $query->where('status_payout', $statusFilter);
@@ -39,7 +40,19 @@ class TransactionController extends Controller
             });
         }
 
-        $contracts = $query->paginate(15)->withQueryString();
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'highest') {
+            $query->orderBy('jumlah', 'desc');
+        } elseif ($sort === 'lowest') {
+            $query->orderBy('jumlah', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
+        $contracts = $query->paginate($perPage)->withQueryString();
 
         // Calculate Overview Statistics
         $allContracts = Contract::all();
@@ -53,6 +66,7 @@ class TransactionController extends Controller
         return view('admin.transactions.index', compact(
             'contracts',
             'statusFilter',
+            'sort',
             'search',
             'totalGrossVolume',
             'totalEscrowHolding',
@@ -62,27 +76,6 @@ class TransactionController extends Controller
         ));
     }
 
-    /**
-     * Tampilkan Detail JSON Transaksi (Dipakai Modal).
-     */
-    public function show($id)
-    {
-        $contract = Contract::with([
-            'client.user',
-            'photographer.user',
-            'bookingDetail.service',
-            'payments'
-        ])->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'contract' => $contract
-        ]);
-    }
-
-    /**
-     * Process Release Payout ke Rekening Studio Fotografer.
-     */
     public function releasePayout(Request $request, $id)
     {
         $contract = Contract::with('photographer')->findOrFail($id);

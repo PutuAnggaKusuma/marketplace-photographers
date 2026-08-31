@@ -120,9 +120,9 @@ class PhotographerController extends Controller
             });
         }
 
-        $perPage = (int) $request->query('per_page', 9);
-        if (!in_array($perPage, [9, 12, 24, 48])) {
-            $perPage = 9;
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) {
+            $perPage = 10;
         }
 
         $photographers = $query->paginate($perPage)->withQueryString();

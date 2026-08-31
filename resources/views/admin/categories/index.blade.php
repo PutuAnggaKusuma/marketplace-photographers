@@ -1,197 +1,216 @@
 @extends('layouts.admin')
 
-@section('title', 'Manajemen Kategori Layanan Admin - LensMatch')
+@section('title', 'Kelola Kategori Layanan — Admin')
 
 @section('content')
-<div class="space-y-6" x-data="categoryModalApp()">
+<div class="space-y-6 w-full" x-data="{
+    searchQuery: '{{ $search }}',
+    currentSort: '{{ $sort }}',
+    isLoading: false,
+    searchTimeout: null,
+    applyFilter(key, val) {
+        if (key === 'sort') this.currentSort = val;
+        let url = new URL(window.location.href);
+        url.searchParams.set(key, val);
+        url.searchParams.set('page', '1');
+        this.fetchTable(url.toString());
+    },
+    handleSearch(e) {
+        this.searchQuery = e.target.value;
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            let url = new URL(window.location.href);
+            url.searchParams.set('search', this.searchQuery);
+            url.searchParams.set('page', '1');
+            this.fetchTable(url.toString());
+        }, 300);
+    },
+    fetchTable(url) {
+        this.isLoading = true;
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, 'text/html');
+                let newTable = doc.querySelector('#dashboard-table-container');
+                let curTable = document.querySelector('#dashboard-table-container');
+                if (newTable && curTable) {
+                    curTable.innerHTML = newTable.innerHTML;
+                }
+                history.pushState(null, '', url);
+                this.isLoading = false;
+            })
+            .catch(err => {
+                console.error(err);
+                this.isLoading = false;
+            });
+    }
+}">
 
-    <!-- Page Title Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Master Data System</span>
-            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">Kategori Layanan Fotografi</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola master spesialisasi kategori fotografi yang tampil pada katalog pencarian publik</p>
+            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Katalog & Taksonomi Platform</span>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kategori Layanan Fotografi</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola daftar kategori sesi pemotretan yang dapat dipilih mitra fotografer dan klien</p>
         </div>
-
-        <button type="button" 
-                @click="openModal('create')" 
-                class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-xs transition flex items-center justify-center gap-2 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
-            <span>Tambah Kategori Baru</span>
-        </button>
+        <a href="{{ route('admin.categories.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>+ Tambah Kategori Baru</span>
+        </a>
     </div>
 
-    <!-- Stat Card Summary -->
-    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm flex items-center justify-between">
-        <div>
-            <span class="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Kategori Terdaftar</span>
-            <h2 class="text-2xl font-black text-gray-900 dark:text-white mt-1">{{ $totalCategories }} Kategori</h2>
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            <span>{{ session('success') }}</span>
         </div>
-        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+    @endif
+
+        <!-- Metric Stat Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- Card 1 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Kategori</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $categories->total() }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Kategori sesi aktif terdaftar</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Terpopuler</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Wedding & Prewedding</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Permintaan booking terbanyak</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Fotografer Terhubung</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\RolePhotographer::count() }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Mitra fotografer aktif</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Paket Layanan Terkait</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\PhotographerService::count() }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Paket jasa aktif di etalase</p>
         </div>
     </div>
 
-    <!-- Data Table Card -->
+    <!-- Standard Data Table Card -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
         
-        <!-- Search Toolbar -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4">
-            <form method="GET" action="{{ route('admin.categories') }}" class="relative w-full sm:w-80">
+        <!-- Search Toolbar & Sort -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                @php
+                    $sortLabels = [
+                        'latest' => 'Kategori Terbaru',
+                        'oldest' => 'Kategori Terlama',
+                        'name_asc' => 'Nama Kategori (A-Z)',
+                        'name_desc' => 'Nama Kategori (Z-A)'
+                    ];
+                    $curSortName = $sortLabels[$sort ?? 'latest'] ?? 'Kategori Terbaru';
+                @endphp
+                <div class="relative w-full sm:w-auto min-w-[200px]" x-data="{ open: false, selectedId: '{{ $sort ?? 'latest' }}', selectedName: '{{ $curSortName }}' }">
+                    <input type="hidden" name="sort" :value="selectedId">
+                    <button @click="open = !open" type="button" 
+                            class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
+                        <span x-text="selectedName" class="truncate"></span>
+                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" x-transition 
+                          class="absolute z-50 left-0 mt-2 min-w-[210px] w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+                        @foreach($sortLabels as $srtKey => $srtVal)
+                            <button type="button" @click="selectedId = '{{ $srtKey }}'; selectedName = '{{ $srtVal }}'; open = false; applyFilter('sort', '{{ $srtKey }}')" 
+                                    class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
+                                    :class="selectedId === '{{ $srtKey }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                <span>{{ $srtVal }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search di Kanan -->
+            <div class="relative w-full md:w-80">
                 <input type="text" 
                        name="search" 
-                       value="{{ $search }}" 
+                       value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari nama atau deskripsi kategori..." 
                        class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                 <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </form>
-        </div>
-
-        <!-- Table -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        <th class="py-3.5 px-4 sm:px-6 w-4/12">Kategori & Gambar</th>
-                        <th class="py-3.5 px-4 sm:px-6 w-2/12">Slug System</th>
-                        <th class="py-3.5 px-4 sm:px-6 w-4/12">Deskripsi Ringkas</th>
-                        <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi Moderasi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
-                    @forelse($categories as $cat)
-                        <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
-                            <td class="py-4 px-4 sm:px-6 flex items-center gap-3">
-                                <img src="{{ $cat->icon_url ?: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80' }}" alt="{{ $cat->nama_kategori }}" class="w-12 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 shrink-0 shadow-xs" />
-                                <div>
-                                    <h4 class="font-extrabold text-gray-900 dark:text-white">{{ $cat->nama_kategori }}</h4>
-                                </div>
-                            </td>
-
-                            <td class="py-4 px-4 sm:px-6 font-mono text-[11px] text-amber-600 dark:text-amber-400 font-bold whitespace-nowrap">
-                                {{ $cat->slug }}
-                            </td>
-
-                            <td class="py-4 px-4 sm:px-6 text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                                {{ $cat->deskripsi ?: 'Tidak ada deskripsi.' }}
-                            </td>
-
-                            <td class="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <button type="button" 
-                                            @click="openModal('edit', {{ json_encode($cat) }})" 
-                                            class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-amber-100 text-gray-700 hover:text-amber-700 dark:bg-gray-700 dark:hover:bg-amber-950/60 dark:text-gray-300 dark:hover:text-amber-300 font-bold text-xs transition">
-                                        Edit
-                                    </button>
-                                    <button type="button" 
-                                            @click="$dispatch('open-confirm-modal', {
-                                                title: 'Hapus Master Kategori?',
-                                                message: 'Apakah Anda yakin ingin menghapus kategori {{ addslashes($cat->nama_kategori) }}?',
-                                                confirmText: 'Ya, Hapus Kategori',
-                                                type: 'danger',
-                                                actionUrl: '{{ route('admin.categories.destroy', $cat->id) }}',
-                                                method: 'POST'
-                                            })"
-                                            class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 font-bold text-xs transition">
-                                        Hapus
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="py-12 text-center text-gray-400 font-bold text-xs">
-                                Belum ada master kategori ditemukan.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        @if($categories->hasPages())
-            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $categories->links() }}
             </div>
-        @endif
-    </div>
+        </div>
 
-    <!-- Modal Form Create / Edit Category -->
-    <div x-show="modalOpen" 
-         x-cloak 
-         class="fixed inset-0 z-50 overflow-y-auto" 
-         role="dialog" aria-modal="true">
-        
-        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" @click="closeModal()"></div>
+        <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
-        <div class="flex min-h-full items-center justify-center p-4">
-            <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-                
-                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
-                    <h3 class="text-base font-extrabold text-gray-900 dark:text-white" x-text="modalMode === 'create' ? 'Tambah Kategori Baru' : 'Edit Kategori'"></h3>
-                    <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Nama Kategori</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-6/12">Deskripsi Kategori</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Status</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
+                        @forelse($categories as $cat)
+                            <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
+                                <td class="py-4 px-4 sm:px-6 align-top font-black text-gray-900 dark:text-white text-sm">
+                                    {{ $cat->nama_kategori }}
+                                </td>
+                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    {{ $cat->deskripsi ?: '-' }}
+                                </td>
+                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Aktif</span>
+                                </td>
+                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <a href="{{ route('admin.categories.edit', $cat->id) }}" 
+                                           class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block">
+                                            Edit
+                                        </a>
+                                        <button type="button" 
+                                                @click="$dispatch('open-confirm-modal', {
+                                                    title: 'Hapus Kategori?',
+                                                    message: 'Apakah Anda yakin ingin menghapus kategori {{ addslashes($cat->nama_kategori) }}?',
+                                                    buttonText: 'Ya, Hapus Kategori',
+                                                    iconType: 'delete',
+                                                    buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
+                                                    actionUrl: '{{ route('admin.categories.destroy', $cat->id) }}',
+                                                    method: 'POST'
+                                                })"
+                                                class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-12 text-center text-gray-400 font-bold text-xs">
+                                    Belum ada kategori ditemukan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if($categories->total() > 0)
+                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50">
+                    {{ $categories->links('partials.dashboard.pagination') }}
                 </div>
-
-                <form :action="formAction" method="POST" class="space-y-4">
-                    @csrf
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Kategori *</label>
-                        <input type="text" name="nama_kategori" x-model="formData.nama_kategori" required placeholder="mis. Prewedding & Engagement" class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">URL Gambar Icon / Cover</label>
-                        <input type="url" name="icon_url" x-model="formData.icon_url" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Deskripsi Kategori</label>
-                        <textarea name="deskripsi" x-model="formData.deskripsi" rows="3" placeholder="Penjelasan mengenai spesialisasi kategori ini..." class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-none"></textarea>
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
-                        <button type="button" @click="closeModal()" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold">Batal</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-sm">Simpan Kategori</button>
-                    </div>
-                </form>
-
-            </div>
+            @endif
         </div>
+
     </div>
 
 </div>
-
-<script>
-function categoryModalApp() {
-    return {
-        modalOpen: false,
-        modalMode: 'create',
-        formAction: '{{ route('admin.categories.store') }}',
-        formData: {
-            nama_kategori: '',
-            icon_url: '',
-            deskripsi: ''
-        },
-        openModal(mode, data = null) {
-            this.modalMode = mode;
-            if (mode === 'create') {
-                this.formAction = '{{ route('admin.categories.store') }}';
-                this.formData = { nama_kategori: '', icon_url: '', deskripsi: '' };
-            } else if (data) {
-                this.formAction = `/admin/categories/${data.id}/update`;
-                this.formData = {
-                    nama_kategori: data.nama_kategori || '',
-                    icon_url: data.icon_url || '',
-                    deskripsi: data.deskripsi || ''
-                };
-            }
-            this.modalOpen = true;
-        },
-        closeModal() {
-            this.modalOpen = false;
-        }
-    };
-}
-</script>
 @endsection

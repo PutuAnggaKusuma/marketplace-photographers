@@ -35,7 +35,7 @@ class ClientBookingController extends Controller
         ])
         ->where('id_client', $clientProfile->id)
         ->latest()
-        ->paginate(10);
+        ->paginate((int) ($request->query('per_page') && in_array((int)$request->query('per_page'), [10, 20, 50, 100]) ? $request->query('per_page') : 10))->withQueryString();
 
         return view('client.bookings.index', compact('contracts', 'clientProfile'));
     }
@@ -61,7 +61,7 @@ class ClientBookingController extends Controller
         ])
         ->where('id_client', $clientProfile->id)
         ->latest()
-        ->paginate(10);
+        ->paginate((int) ($request->query('per_page') && in_array((int)$request->query('per_page'), [10, 20, 50, 100]) ? $request->query('per_page') : 10))->withQueryString();
 
         return view('client.invoices.index', compact('contracts', 'clientProfile'));
     }
@@ -90,7 +90,7 @@ class ClientBookingController extends Controller
             $q->whereNotNull('hasil_foto_url');
         })
         ->latest()
-        ->paginate(10);
+        ->paginate((int) ($request->query('per_page') && in_array((int)$request->query('per_page'), [10, 20, 50, 100]) ? $request->query('per_page') : 10))->withQueryString();
 
         return view('client.galleries.index', compact('contracts', 'clientProfile'));
     }

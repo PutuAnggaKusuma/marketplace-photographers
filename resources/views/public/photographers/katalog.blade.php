@@ -191,8 +191,10 @@
       </div>
     </div>
 
-    <!-- Photographers Grid (3 Columns Desktop, 2 Columns Tablet, 1 Column Mobile) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    <!-- Dynamic AJAX Container for Photographers & Pagination -->
+    <div id="photographers-katalog-ajax-container" class="space-y-10 transition-opacity duration-200">
+      <!-- Photographers Grid (3 Columns Desktop, 2 Columns Tablet, 1 Column Mobile) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       @forelse($photographers as $photographer)
         @php
           $lowestPrice = $photographer->services->min('tarif_harga') ?? 1500000;
@@ -297,11 +299,12 @@
     </div>
 
     <!-- Pagination Container -->
-    @if($photographers->hasPages())
-      <div class="pt-6 flex justify-center">
-        {{ $photographers->links('partials.public.pagination') }}
-      </div>
-    @endif
+      @if($photographers->total() > 0)
+        <div class="pt-10">
+          {{ $photographers->links('partials.public.pagination') }}
+        </div>
+      @endif
+    </div>
 
   </div>
 </section>

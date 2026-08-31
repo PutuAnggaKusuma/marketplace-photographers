@@ -35,12 +35,13 @@ class ElearningController extends Controller
     /**
      * Tampilkan Halaman Full Data Katalog E-Learning (Search, Filter & Pagination).
      */
-    public function katalog(Request $request)
+        public function katalog(Request $request)
     {
         $selectedCategory = $request->query('category');
+        $sort = $request->query('sort', 'latest');
         $search = $request->query('q');
 
-        $query = Elearning::orderBy('created_at', 'desc');
+        $query = Elearning::query();
 
         if ($selectedCategory && $selectedCategory !== 'all') {
             $query->where('kategori', $selectedCategory);
@@ -49,8 +50,17 @@ class ElearningController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('ringkasan', 'like', "%{$search}%");
+                  ->orWhere('ringkasan', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%");
             });
+        }
+
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'most_views') {
+            $query->orderBy('view_count', 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         $perPage = (int) $request->query('per_page', 10);
@@ -65,13 +75,11 @@ class ElearningController extends Controller
             'elearnings', 
             'categories', 
             'selectedCategory', 
+            'sort',
             'search'
         ));
     }
 
-    /**
-     * Tampilkan Detail Baca Materi E-Learning (Strict Protected for Logged-In Users).
-     */
     public function show($slug)
     {
         if (!Auth::check()) {

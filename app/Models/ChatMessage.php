@@ -12,6 +12,8 @@ class ChatMessage extends Model
 
     protected $table = 'chat_messages';
 
+    protected $touches = ['chatBooking'];
+
     protected $fillable = [
         'id_chat_booking',
         'id_sender',

@@ -66,7 +66,7 @@
               </div>
               <div>
                 <h4 class="font-extrabold text-xs text-gray-900 dark:text-white line-clamp-1">{{ $win->judul_karya }}</h4>
-                <p class="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">{{ $win->user->nama ?? 'Peserta' }}</p>
+                <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $win->user->nama ?? 'Peserta' }}</p>
               </div>
             </div>
           @endforeach
@@ -91,12 +91,12 @@
             <form action="{{ route('public.contests.submit', $contest->id) }}" method="POST" class="space-y-4">
               @csrf
               <div>
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Karya Foto *</label>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Karya Foto <span class="text-rose-500">*</span></label>
                 <input type="text" name="judul_karya" required placeholder="mis. Ketenangan Kabut Pagi Danau Beratan" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">URL Link Foto Karya *</label>
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">URL Link Foto Karya <span class="text-rose-500">*</span></label>
                 <input type="url" name="image_url" required placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
               </div>
 

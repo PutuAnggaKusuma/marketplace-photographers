@@ -39,17 +39,55 @@
           <input type="text" name="location" placeholder="Cari kota / wilayah (mis: Bali, Jakarta, Bandung)..." class="w-full bg-transparent border-0 outline-none p-0 text-xs sm:text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:ring-0 leading-normal" />
         </div>
 
-        <!-- 2. Category Dropdown Select (PURE WHITE CENTER, THIN GRAY BORDER ONLY) -->
-        <div class="w-full md:w-64 relative flex">
-          <select name="category" class="w-full pl-4 pr-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 appearance-none cursor-pointer">
-            <option value="">Semua Kategori Sesi</option>
-            <option value="1">Wedding & Prewedding</option>
-            <option value="2">Vacation & Travel</option>
-            <option value="3">Event & Konser</option>
-            <option value="4">Studio & Portrait</option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+        <!-- 2. Category Dropdown Select (Standardized Alpine.js Custom Floating Dropdown) -->
+        <div class="w-full md:w-64 relative" x-data="{ 
+          open: false, 
+          selectedId: '{{ request('category', '') }}',
+          selectedName: '{{ request('category') && $categories->firstWhere('id', request('category')) ? $categories->firstWhere('id', request('category'))->nama_kategori : 'Semua Kategori Sesi' }}' 
+        }">
+          <input type="hidden" name="category" :value="selectedId" />
+          
+          <button @click="open = !open" 
+                  type="button" 
+                  class="w-full pl-4 pr-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 text-left flex items-center justify-between cursor-pointer transition shadow-xs">
+            <span x-text="selectedName" class="truncate"></span>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+              <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </button>
+
+          <!-- Floating Dropdown Menu -->
+          <div x-show="open" 
+               @click.away="open = false" 
+               x-transition:enter="transition ease-out duration-150"
+               x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+               x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+               x-transition:leave="transition ease-in duration-100"
+               x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+               x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+               class="absolute z-50 left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto"
+               style="display: none;">
+            
+            <button type="button" 
+                    @click="selectedId = ''; selectedName = 'Semua Kategori Sesi'; open = false" 
+                    class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
+                    :class="selectedId === '' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600' : ''">
+              <span>Semua Kategori Sesi</span>
+              
+            </button>
+
+            @foreach($categories as $category)
+              <button type="button" 
+                      @click="selectedId = '{{ $category->id }}'; selectedName = '{{ $category->nama_kategori }}'; open = false" 
+                      class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition flex items-center justify-between text-left cursor-pointer"
+                      :class="selectedId === '{{ $category->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600' : ''">
+                <span>{{ $category->nama_kategori }}</span>
+                
+              </button>
+            @endforeach
+
           </div>
         </div>
 

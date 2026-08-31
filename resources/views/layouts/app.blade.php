@@ -63,5 +63,6 @@
     </script>
     @include('partials.shared.confirm-modal')
   @include('partials.shared.toast-notification')
+  @include('partials.shared.ajax-pagination-engine')
 </body>
 </html>

@@ -72,7 +72,7 @@
                 <!-- Written Testimonial Textarea -->
                 <div class="space-y-1.5 text-left">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                        Ulasan Testimoni Anda <span class="text-amber-500">*</span>
+                        Ulasan Testimoni Anda <span class="text-amber-500"> <span class="text-rose-500">*</span></span>
                     </label>
                     <textarea name="deskripsi_review" 
                               x-model="reviewText" 

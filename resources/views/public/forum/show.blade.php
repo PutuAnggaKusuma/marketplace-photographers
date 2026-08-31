@@ -87,10 +87,10 @@
 
         <!-- Ethics Warning Banner -->
         <div class="bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl text-center space-y-1">
-          <p class="text-xs font-black text-amber-800 dark:text-amber-300">
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
             Dimohon untuk tetap mengikuti Aturan Berkomunikasi dalam Forum
           </p>
-          <p class="text-[11px] text-amber-700 dark:text-amber-400">
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
             Gunakan bahasa yang santun, saling menghargai pendapat anggota komunitas, dan hindari konten spam.
           </p>
         </div>

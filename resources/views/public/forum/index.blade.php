@@ -183,11 +183,11 @@
           <form action="{{ route('public.forum.store') }}" method="POST" class="space-y-4">
             @csrf
             <div>
-              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Topik *</label>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Topik <span class="text-rose-500">*</span></label>
               <input type="text" name="judul" required placeholder="mis. Rekomendasi Lensa Portrait Terbaik..." class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Penjelasan & Isi Diskusi *</label>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Penjelasan & Isi Diskusi <span class="text-rose-500">*</span></label>
               <textarea name="deskripsi" rows="5" required placeholder="Tuliskan pertanyaan atau informasi diskusi Anda secara detail..." class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-none focus:ring-2 focus:ring-amber-500"></textarea>
             </div>
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">

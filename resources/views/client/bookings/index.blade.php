@@ -47,7 +47,7 @@
                 </span>
               @elseif($c->bookingDetail->status_booking === 'confirmed')
                 <span class="px-3.5 py-1.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300">
-                  ✓ Jadwal Sesi Dikonfirmasi
+                  Jadwal Sesi Dikonfirmasi
                 </span>
               @elseif($c->bookingDetail->status_booking === 'completed')
                 <span class="px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
@@ -79,7 +79,7 @@
 
             <div class="space-y-1">
               <span class="font-bold text-gray-400 uppercase text-[10px]">Nomor Tagihan & Status Bayar:</span>
-              <p class="font-mono font-bold text-amber-600 dark:text-amber-400">{{ $c->payments->first()->external_id ?? 'INV-XXXX' }}</p>
+              <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $c->payments->first()->external_id ?? 'INV-XXXX' }}</p>
               <span class="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 Status Tagihan: {{ strtoupper($c->payments->first()->payment_status ?? 'pending') }}
               </span>
@@ -99,7 +99,7 @@
                 </a>
               </div>
               @if($c->bookingDetail->catatan_fotografer)
-                <p class="text-emerald-700 dark:text-emerald-400 italic text-[11px]">
+                <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                   Pesan Studio: "{{ $c->bookingDetail->catatan_fotografer }}"
                 </p>
               @endif
@@ -112,7 +112,7 @@
               @if($c->bookingDetail && $c->bookingDetail->status_booking === 'completed')
                 @if($c->testimonial)
                   <span class="px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-extrabold text-xs border border-amber-200/80 inline-flex items-center gap-1">
-                    <span>⭐ Ulasan Diberikan ({{ $c->testimonial->rating }}.0)</span>
+                    <span><svg class="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><span>Ulasan Diberikan</span> ({{ $c->testimonial->rating }}.0)</span>
                   </span>
                 @else
                   <button type="button" 
@@ -122,7 +122,7 @@
                               serviceName: '{{ addslashes($c->bookingDetail->service->nama_layanan ?? '') }}'
                           })"
                           class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
-                    <span>⭐ Beri Ulasan Studio</span>
+                    <span><svg class="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg><span>Beri Ulasan Studio</span></span>
                   </button>
                 @endif
               @endif
@@ -149,7 +149,7 @@
         </div>
       @endforelse
 
-      {{ $contracts->links() }}
+      {{ $contracts->links('partials.dashboard.pagination') }}
     </div>
 
   </div>

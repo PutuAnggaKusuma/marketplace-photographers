@@ -22,38 +22,76 @@
       </p>
     </div>
 
-    <!-- 2. INTEGRATED SEARCH & CATEGORY FILTER BAR (Search Icon on the RIGHT side) -->
-    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-gray-50/80 dark:bg-gray-800/80 p-4 sm:p-5 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
-      
-      <!-- Category Filter Pills Left -->
-      <div class="flex items-center gap-2.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-        <button type="button" 
-                @click="applyCategory('all')" 
-                class="px-4 py-2 rounded-full text-xs transition duration-200 shrink-0 font-black {{ empty($selectedCategory) || $selectedCategory === 'all' ? 'bg-amber-400 text-gray-900 shadow-xs' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 font-bold' }}">
-          Semua Kategori
-        </button>
-        @foreach($categories as $cat)
-          <button type="button" 
-                  @click="applyCategory('{{ $cat }}')" 
-                  class="px-4 py-2 rounded-full text-xs whitespace-nowrap transition duration-200 shrink-0 {{ $selectedCategory === $cat ? 'bg-amber-400 text-gray-900 font-black shadow-xs' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 font-bold' }}">
-            {{ $cat }}
-          </button>
-        @endforeach
-      </div>
-
-      <!-- Search Form Input Right with Icon on the RIGHT -->
-      <form @submit.prevent="submitSearch()" class="w-full md:w-72 shrink-0">
-        <div class="relative">
-          <input type="text" 
-                 x-model="searchQuery" 
-                 placeholder="Cari modul materi..." 
-                 class="w-full pl-4 pr-11 py-2.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-xs focus:ring-2 focus:ring-amber-400 outline-none transition font-medium" />
-          <button type="submit" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-amber-500 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
-          </button>
+    <!-- 2. FILTER & SEARCH CONTROL BAR (Matching Forum Style Image 1) -->
+    <div class="bg-white dark:bg-gray-800 p-7 sm:p-8 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6 items-end">
+        
+        <!-- Filter 1: Kategori -->
+        <div class="md:col-span-3">
+          <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
+            KATEGORI
+          </label>
+          <div class="relative" x-data="{ open: false, selectedText: '{{ empty($selectedCategory) || $selectedCategory === 'all' ? 'Semua Kategori' : $selectedCategory }}' }">
+            <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative">
+              <span x-text="selectedText" class="truncate"></span>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </button>
+            <div x-show="open" @click.away="open = false" x-transition class="absolute z-30 left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden max-h-60 overflow-y-auto" style="display: none;">
+              <a @click.prevent="applyCategory('all'); open = false; selectedText = 'Semua Kategori'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition">Semua Kategori</a>
+              @foreach($categories as $cat)
+                <a @click.prevent="applyCategory('{{ $cat }}'); open = false; selectedText = '{{ $cat }}'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition">{{ $cat }}</a>
+              @endforeach
+            </div>
+          </div>
         </div>
-      </form>
 
+        <!-- Filter 2: Urutkan -->
+        <div class="md:col-span-3">
+          <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
+            URUTKAN
+          </label>
+          @php
+            $sortLabels = [
+                'latest' => 'Terbaru',
+                'oldest' => 'Terlama',
+                'most_views' => 'Paling Populer'
+            ];
+            $curSortText = $sortLabels[$sort ?? 'latest'] ?? 'Terbaru';
+          @endphp
+          <div class="relative" x-data="{ open: false, selectedText: '{{ $curSortText }}' }">
+            <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative">
+              <span x-text="selectedText"></span>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </button>
+            <div x-show="open" @click.away="open = false" x-transition class="absolute z-30 left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden" style="display: none;">
+              <a @click.prevent="applySort('latest'); open = false; selectedText = 'Terbaru'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition">Terbaru</a>
+              <a @click.prevent="applySort('oldest'); open = false; selectedText = 'Terlama'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition">Terlama</a>
+              <a @click.prevent="applySort('most_views'); open = false; selectedText = 'Paling Populer'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition">Paling Populer</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter 3: Cari Topik Modul (Icon Magnifier inside Right) -->
+        <div class="md:col-span-6">
+          <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
+            CARI TOPIK MODUL
+          </label>
+          <form @submit.prevent="submitSearch()" class="relative">
+            <input type="text" 
+                   x-model="searchQuery" 
+                   placeholder="Cari pertanyaan atau kata kunci..." 
+                   class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+            <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-amber-500 transition">
+              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+          </form>
+        </div>
+
+      </div>
     </div>
 
     <!-- 3. AJAX CONTAINER FOR FULL CATALOG GRID & PAGINATION -->

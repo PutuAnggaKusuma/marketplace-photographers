@@ -1,19 +1,240 @@
 @extends('layouts.photographer')
 
-@section('title', 'Portofolio & Media — Fotografer')
+@section('title', 'Kelola Portofolio & Galeri Karya — Dashboard Fotografer')
 
 @section('content')
-<div class="flex justify-between items-center">
-  <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Portofolio & Galeri Media</h1>
-  <button class="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-semibold">+ Upload Portofolio Baru</button>
-</div>
+<div class="space-y-6 w-full" x-data="{
+    searchQuery: '{{ $search }}',
+    currentSort: '{{ $sort }}',
+    isLoading: false,
+    searchTimeout: null,
+    applyFilter(key, val) {
+        if (key === 'sort') this.currentSort = val;
+        let url = new URL(window.location.href);
+        url.searchParams.set(key, val);
+        url.searchParams.set('page', '1');
+        this.fetchTable(url.toString());
+    },
+    handleSearch(e) {
+        this.searchQuery = e.target.value;
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            let url = new URL(window.location.href);
+            url.searchParams.set('search', this.searchQuery);
+            url.searchParams.set('page', '1');
+            this.fetchTable(url.toString());
+        }, 300);
+    },
+    fetchTable(url) {
+        this.isLoading = true;
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(html => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, 'text/html');
+                let newTable = doc.querySelector('#dashboard-table-container');
+                let curTable = document.querySelector('#dashboard-table-container');
+                if (newTable && curTable) {
+                    curTable.innerHTML = newTable.innerHTML;
+                }
+                history.pushState(null, '', url);
+                this.isLoading = false;
+            })
+            .catch(err => {
+                console.error(err);
+                this.isLoading = false;
+            });
+    }
+}">
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-  <div class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
-    <div class="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-      <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/user/owner.jpg') }}" class="w-full h-full object-cover" />
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Galeri Karya & Etalase Visual</span>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Portofolio & Galeri Foto</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Daftar foto hasil karya pemotretan terbaik Anda yang ditampilkan pada katalog publik</p>
+        </div>
+        <a href="{{ route('photographer.portfolio.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Tambah Portofolio Baru</span>
+        </a>
     </div>
-    <h4 class="font-bold text-sm">Album Prewedding Bali</h4>
-  </div>
+
+    <!-- Flash Messages -->
+    @if(session('success'))
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    <!-- Metric Stat Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- Card 1 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Foto Portofolio</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->total() }} Karya</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Karya terpublikasi di etalase</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Spesialisasi</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $topCategoryName ?? 'Wedding' }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Fokus utama tema pemotretan</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Variasi Tema</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->unique('kategori')->count() }} Kategori</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Keanekaragaman jenis sesi foto</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Terakhir Diperbarui</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->first()?->created_at ? $portfolios->first()->created_at->format('d M Y') : '-' }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Waktu unggah karya terbaru</p>
+        </div>
+    </div>
+
+    <!-- Standard Data Table Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+        
+        <!-- Search Toolbar & Sort -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                @php
+                    $sortLabels = [
+                        'latest' => 'Terbaru Ditambahkan',
+                        'oldest' => 'Terlama Ditambahkan',
+                        'title_asc' => 'Judul Karya (A-Z)',
+                        'title_desc' => 'Judul Karya (Z-A)'
+                    ];
+                    $curSortName = $sortLabels[$sort ?? 'latest'] ?? 'Terbaru Ditambahkan';
+                @endphp
+                <div class="relative w-full sm:w-auto min-w-[200px]" x-data="{ open: false, selectedId: '{{ $sort ?? 'latest' }}', selectedName: '{{ $curSortName }}' }">
+                    <input type="hidden" name="sort" :value="selectedId">
+                    <button @click="open = !open" type="button" 
+                            class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
+                        <span x-text="selectedName" class="truncate"></span>
+                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" x-transition 
+                          class="absolute z-50 left-0 mt-2 min-w-[210px] w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+                        @foreach($sortLabels as $srtKey => $srtVal)
+                            <button type="button" @click="selectedId = '{{ $srtKey }}'; selectedName = '{{ $srtVal }}'; open = false; applyFilter('sort', '{{ $srtKey }}')" 
+                                    class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
+                                    :class="selectedId === '{{ $srtKey }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                <span>{{ $srtVal }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search di Kanan -->
+            <div class="relative w-full md:w-80">
+                <input type="text" 
+                       name="search" 
+                       value="{{ $search }}" @input="handleSearch($event)" 
+                       placeholder="Cari judul atau deskripsi karya..." 
+                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+
+        <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Foto & Judul Karya</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-2/12">Kategori</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-4/12">Deskripsi Karya</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Status</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
+                        @forelse($portfolios as $port)
+                            <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
+                                
+                                <!-- Foto & Judul -->
+                                <td class="py-4 px-4 sm:px-6 align-top">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-16 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs">
+                                            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ asset('storage/' . $port->foto) }}" class="w-full h-full object-cover">
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $port->judul }}</h4>
+                                            <span class="text-[11px] text-gray-400 block mt-0.5">{{ $port->created_at ? $port->created_at->format('d M Y') : '-' }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Kategori -->
+                                <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60">
+                                        {{ $port->category ? $port->category->nama_kategori : 'Karya Foto' }}
+                                    </span>
+                                </td>
+
+                                <!-- Deskripsi -->
+                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    {{ $port->deskripsi ?: '-' }}
+                                </td>
+
+                                <!-- Status -->
+                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Aktif</span>
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <a href="{{ route('photographer.portfolio.edit', $port->id) }}" 
+                                           class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block">
+                                            Edit
+                                        </a>
+                                        <button type="button" 
+                                                @click="$dispatch('open-confirm-modal', {
+                                                    title: 'Hapus Portofolio Karya?',
+                                                    message: 'Apakah Anda yakin ingin menghapus karya {{ addslashes($port->judul) }}?',
+                                                    buttonText: 'Ya, Hapus Karya',
+                                                    iconType: 'delete',
+                                                    buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
+                                                    actionUrl: '{{ route('photographer.portfolio.delete', $port->id) }}',
+                                                    method: 'POST'
+                                                })"
+                                                class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-12 text-center text-gray-400 font-bold text-xs">
+                                    Belum ada portofolio karya ditemukan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if($portfolios->total() > 0)
+                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50">
+                    {{ $portfolios->links('partials.dashboard.pagination') }}
+                </div>
+            @endif
+        </div>
+
+    </div>
+
 </div>
 @endsection

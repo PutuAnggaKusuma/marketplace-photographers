@@ -20,6 +20,7 @@ class RolePhotographer extends Model
         'nomor_telepon',
         'link_sosmed',
         'foto',
+        'foto_sampul',
         'alamat',
         'province_code',
         'city_code',

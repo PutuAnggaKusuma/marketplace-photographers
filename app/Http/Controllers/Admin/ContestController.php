@@ -12,14 +12,32 @@ use Illuminate\Support\Facades\DB;
 class ContestController extends Controller
 {
     /**
+     * Tampilkan Halaman Form Tambah Lomba Foto Baru.
+     */
+    public function create()
+    {
+        return view('admin.contests.create');
+    }
+
+    /**
+     * Tampilkan Halaman Form Edit Lomba Foto.
+     */
+    public function edit($id)
+    {
+        $contest = \App\Models\PhotoContest::findOrFail($id);
+        return view('admin.contests.edit', compact('contest'));
+    }
+
+    /**
      * Tampilkan Tabel Pengelolaan Lomba Foto Admin.
      */
-    public function index(Request $request)
+        public function index(Request $request)
     {
         $search = $request->query('search', '');
         $status = $request->query('status', 'all');
+        $sort = $request->query('sort', 'latest');
 
-        $query = PhotoContest::withCount('submissions')->orderBy('created_at', 'desc');
+        $query = PhotoContest::withCount('submissions');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -33,16 +51,29 @@ class ContestController extends Controller
             $query->where('status', $status);
         }
 
-        $contests = $query->paginate(10)->withQueryString();
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($sort === 'highest_prize') {
+            $query->orderBy('hadiah', 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
+        $contests = $query->paginate($perPage)->withQueryString();
         $totalContests = PhotoContest::count();
         $totalSubmissions = ContestSubmission::count();
+        $openContests = PhotoContest::where('status', 'buka')->count();
+        $completedContests = PhotoContest::where('status', '!=', 'buka')->count();
 
-        return view('admin.contests.index', compact('contests', 'search', 'status', 'totalContests', 'totalSubmissions'));
+                $totalHadiah = PhotoContest::get()->sum(function ($c) {
+            return (int) preg_replace('/[^0-9]/', '', $c->hadiah ?: '0');
+        });
+
+        return view('admin.contests.index', compact('contests', 'search', 'status', 'sort', 'totalContests', 'totalSubmissions', 'openContests', 'completedContests', 'totalHadiah'));
     }
 
-    /**
-     * Simpan Event Lomba Foto Baru.
-     */
     public function store(Request $request)
     {
         $request->validate([

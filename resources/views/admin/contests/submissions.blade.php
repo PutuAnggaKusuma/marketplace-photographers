@@ -11,7 +11,7 @@
             <a href="{{ route('admin.contests') }}" class="text-xs font-bold text-amber-600 hover:underline flex items-center gap-1 mb-1">
                 <span>← Kembali ke Daftar Event Lomba</span>
             </a>
-            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">Karya Submisi: {{ $contest->judul_lomba }}</h1>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Karya Submisi: {{ $contest->judul_lomba }}</h1>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Review foto karya peserta dan tetapkan Pemenang Juara 1, 2, dan 3</p>
         </div>
 

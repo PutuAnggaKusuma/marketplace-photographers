@@ -3,30 +3,262 @@
 @section('title', 'Admin Dashboard — Marketplace Fotografer')
 
 @section('content')
-<h1 class="text-2xl font-bold text-gray-800 dark:text-white">Admin Dashboard</h1>
+<div class="space-y-6">
 
-<!-- Quick Metrics Grid with Standard rounded-2xl -->
-<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-  <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs space-y-2">
-    <span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Total User Registrasi</span>
-    <p class="text-2xl font-black text-gray-900 dark:text-white">1,248</p>
+  <!-- 1. Header Row -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pusat Kendali Sistem</span>
+      <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Admin Dashboard</h1>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ringkasan metrik finansial, performa transaksi escrow, dan pemantauan aktivitas ekosistem LensMatch</p>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 shadow-2xs text-xs font-bold text-gray-700 dark:text-gray-300">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+        </svg>
+        <span>Tahun Operasional: {{ date('Y') }}</span>
+      </div>
+    </div>
   </div>
-  <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs space-y-2">
-    <span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Fotografer Terverifikasi</span>
-    <p class="text-2xl font-black text-amber-500">342</p>
-  </div>
-  <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs space-y-2">
-    <span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Total Kontrak Booking</span>
-    <p class="text-2xl font-black text-emerald-500">895</p>
-  </div>
-  <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs space-y-2">
-    <span class="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Total Omzet Transaksi</span>
-    <p class="text-2xl font-black text-purple-600">Rp 485.000.000</p>
-  </div>
-</div>
 
-<div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs">
-  <h3 class="font-bold text-gray-800 dark:text-white mb-4">Verifikasi Fotografer Pending & Booking Terbaru</h3>
-  @include('partials.table.table-01')
+  <!-- 2. Actionable Operational Queue (Alert Cards) -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Action 1: Pending Studio Verification -->
+    <a href="{{ route('admin.users') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingVerifications }} Verifikasi Fotografer</p>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Menunggu persetujuan KTP/Porto</span>
+        </div>
+      </div>
+      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
+
+    <!-- Action 2: Ready Payouts -->
+    <a href="{{ route('admin.transactions') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingPayouts }} Payout Siap Cair</p>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Sesi selesai & verifikasi Klien</span>
+        </div>
+      </div>
+      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
+
+    <!-- Action 3: Contest Submissions to Review -->
+    <a href="{{ route('admin.contests') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007-7.5V4.875a1.875 1.875 0 00-1.875-1.875h-1.5a1.875 1.875 0 00-1.875 1.875V6.75m6.75 0a3 3 0 00-3-3h-1.5a3 3 0 00-3 3m6.75 0v3.375c0 .621-.504 1.125-1.125 1.125h-.871M7.5 6.75v3.375c0 .621.504 1.125 1.125 1.125h.872"/></svg>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingContestReviews }} Submisi Lomba</p>
+          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Penjurian karya peserta foto</span>
+        </div>
+      </div>
+      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
+  </div>
+
+  <!-- 3. Top 4 Core Financial & System Metric Cards (Strictly Following Rules #7, #8, #9, #18) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Card 1: Total User Registrasi -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
+      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total User Registrasi</span>
+      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ number_format($totalUsers, 0, ',', '.') }}</p>
+      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium"><span class="font-bold text-gray-700 dark:text-gray-300">{{ $totalClients }}</span> klien dan <span class="font-bold text-gray-700 dark:text-gray-300">{{ $totalPhotographers }}</span> fotografer</p>
+    </div>
+
+    <!-- Card 2: Fotografer Terverifikasi -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
+      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Fotografer Terverifikasi</span>
+      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ $verifiedPhotographers }}</p>
+      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Fotografer aktif & terlisting katalog</p>
+    </div>
+
+    <!-- Card 3: Total Kontrak Booking -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
+      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Kontrak Booking</span>
+      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ number_format($totalContracts, 0, ',', '.') }}</p>
+      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Reservasi sesi foto tervalidasi</p>
+    </div>
+
+    <!-- Card 4: Total Omzet Transaksi -->
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
+      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Omzet Transaksi</span>
+      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">Rp {{ number_format($grossRevenue, 0, ',', '.') }}</p>
+      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Komisi Platform (<span class="font-bold text-gray-700 dark:text-gray-300">10%</span>): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($platformFee, 0, ',', '.') }}</span></p>
+    </div>
+  </div>
+
+  <!-- 4. Middle Section: Financial Trends Chart + Category Demand Breakdown -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- Left: 8 Cols - Monthly GMV & Revenue Chart -->
+    <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Omzet & Transaksi Bulanan</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perkembangan Gross Merchandise Value (GMV) per bulan (dalam Juta Rupiah)</p>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-bold">
+          <div class="flex items-center gap-1.5 text-gray-900 dark:text-white">
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span>Total Omzet (GMV)</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+            <span class="w-3 h-3 rounded-full bg-gray-800 dark:bg-gray-300"></span>
+            <span>Komisi Platform (10%)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vector SVG Area/Bar Visual Chart -->
+      <div class="h-64 sm:h-72 w-full flex flex-col justify-between pt-2">
+        <div class="h-full w-full relative flex items-end justify-between gap-2 sm:gap-4 px-1 pb-6">
+          
+          <!-- Background Horizontal Scale Lines -->
+          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6 opacity-30 dark:opacity-20">
+            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+          </div>
+
+          <!-- 12 Monthly Bar Columns -->
+          @foreach($months as $idx => $m)
+            @php
+              $val = $monthlyRevenue[$idx] ?? 30;
+              $fee = $monthlyCommission[$idx] ?? 3;
+              $heightPercent = min(100, max(15, ($val / 75) * 100));
+            @endphp
+            <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
+              <!-- Tooltip on Hover -->
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none absolute -top-12 bg-gray-900 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap z-30">
+                <span>Omzet: Rp {{ $val }} Jt</span>
+                <span class="block text-amber-300 font-semibold text-[9px]">Fee: Rp {{ $fee }} Jt</span>
+              </div>
+              
+              <!-- Column Bars -->
+              <div class="w-full max-w-[28px] bg-gray-100 dark:bg-gray-700/60 rounded-t-lg relative flex flex-col justify-end overflow-hidden" style="height: {{ $heightPercent }}%;">
+                <div class="w-full bg-amber-400 group-hover:bg-amber-500 transition-colors rounded-t-lg" style="height: 100%;"></div>
+                <div class="w-full bg-gray-900 dark:bg-white/80 absolute bottom-0 h-2"></div>
+              </div>
+              
+              <!-- Month Label -->
+              <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-2 absolute -bottom-5">{{ $m }}</span>
+            </div>
+          @endforeach
+        </div>
+      </div>
+      
+      <!-- Summary Bar Bottom Stats (Clean Whitespace without Top Border) -->
+      <div class="grid grid-cols-3 gap-2 pt-4 text-center">
+        <div>
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Rata-Rata Bulanan</span>
+          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 48.8 Juta</p>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Bulan Tertinggi (Des)</span>
+          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 72.0 Juta</p>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-gray-400 uppercase">Akumulasi Komisi</span>
+          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 48.5 Juta</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: 4 Cols - Category Demand Breakdown -->
+    <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
+      <div>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Kategori Sesi Terlaris</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pangsa pasar & minat pesanan klien</p>
+      </div>
+
+      <!-- Categories Progress Bars -->
+      <div class="space-y-3.5 pt-0.5">
+        @foreach($categoryStats as $cat)
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-800 dark:text-gray-200">{{ $cat['name'] }}</span>
+              <span class="font-black text-gray-900 dark:text-white">{{ $cat['share'] }}% ({{ $cat['count'] }})</span>
+            </div>
+            <div class="w-full bg-gray-100 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden">
+              <div class="{{ $cat['color'] }} h-full rounded-full transition-all duration-500" style="width: {{ $cat['share'] }}%"></div>
+            </div>
+          </div>
+        @endforeach
+      </div>
+
+      <div class="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-900/50 space-y-1.5">
+        <h4 class="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Pangsa Pasar Tertinggi</h4>
+        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+          Kategori <strong class="text-gray-900 dark:text-white font-bold">Wedding & Prewedding</strong> mendominasi <strong class="text-gray-900 dark:text-white font-bold">42%</strong> nilai transaksi platform di wilayah Bali & Jabodetabek.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 5. Bottom Section: Recent Transactions (8 cols) + Top Performing Photographers (4 cols) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- Left: 8 Cols - Recent Transactions Table -->
+    <div class="lg:col-span-8">
+      @include('partials.table.table-01')
+    </div>
+
+    <!-- Right: 4 Cols - Top Performing Studios -->
+    <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-4">
+      <div>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Fotografer Unggulan</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rating & performa tertinggi</p>
+      </div>
+
+      <!-- Top Studios List -->
+      <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+        @foreach($topPhotographers as $photo)
+          <div class="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700">
+                <img src="{{ $photo->foto ?: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' }}" 
+                     alt="{{ $photo->nama }}" 
+                     class="w-full h-full object-cover" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $photo->nama }}</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ $photo->city ? $photo->city->name : 'Indonesia' }}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-black">
+                <svg class="w-3 h-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span>4.9</span>
+              </div>
+              <span class="block text-[10px] text-gray-400 font-semibold mt-0.5">30+ Sesi</span>
+            </div>
+          </div>
+        @endforeach
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition">
+          <span>Kelola Fotografer</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 @endsection

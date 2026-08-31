@@ -19,10 +19,12 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $photographer = $user->role === 'photographer' 
-            ? RolePhotographer::where('id_user', $user->id)->first() 
-            : null;
+        if ($user->role === 'photographer') {
+            $photographer = RolePhotographer::where('id_user', $user->id)->first();
+            return view('photographer.profile.index', compact('user', 'photographer'));
+        }
 
+        $photographer = null;
         $client = $user->role === 'client'
             ? RoleClient::where('id_user', $user->id)->first()
             : null;

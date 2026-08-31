@@ -52,7 +52,7 @@
         <!-- Studio Profile Info Box -->
         <div class="grid grid-cols-2 gap-4 text-xs bg-gray-50 p-4 rounded-xl border border-gray-200">
             <div>
-                <span class="text-gray-400 font-bold uppercase text-[10px] block">Nama Studio Fotografer:</span>
+                <span class="text-gray-400 font-bold uppercase text-[10px] block">Nama Fotografer:</span>
                 <p class="font-extrabold text-sm text-gray-900">{{ $photographer->nama }}</p>
                 <p class="text-gray-600">{{ $photographer->alamat }}</p>
             </div>
@@ -70,7 +70,7 @@
                 <p class="text-sm font-black text-gray-900 mt-1">Rp {{ number_format($totalGrossVolume, 0, ',', '.') }}</p>
             </div>
             <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                <span class="text-[10px] font-bold text-emerald-600 uppercase">Net Income Studio (90%)</span>
+                <span class="text-[10px] font-bold text-emerald-600 uppercase">Net Income Fotografer (90%)</span>
                 <p class="text-sm font-black text-emerald-700 mt-1">Rp {{ number_format($totalNetIncome, 0, ',', '.') }}</p>
             </div>
             <div class="p-4 rounded-xl bg-amber-50 border border-amber-200">
@@ -136,14 +136,14 @@
                 <p class="font-bold text-gray-500">Diverifikasi Oleh Platform:</p>
                 <div class="space-y-1">
                     <p class="font-black text-gray-900 uppercase">LensMatch Finance System</p>
-                    <p class="text-[10px] text-emerald-600 font-bold">✓ Verified Digital Signature</p>
+                    <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Verified Digital Signature</p>
                 </div>
             </div>
             <div class="space-y-12">
-                <p class="font-bold text-gray-500">Pemilik Studio Fotografer:</p>
+                <p class="font-bold text-gray-500">Nama Fotografer:</p>
                 <div class="space-y-1">
                     <p class="font-black text-gray-900 uppercase">{{ $photographer->nama }}</p>
-                    <p class="text-[10px] text-gray-400">Tanda Tangan & Stempel Studio</p>
+                    <p class="text-[10px] text-gray-400">Tanda Tangan Fotografer</p>
                 </div>
             </div>
         </div>

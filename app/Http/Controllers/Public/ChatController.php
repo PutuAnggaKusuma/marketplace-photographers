@@ -15,48 +15,34 @@ use Illuminate\Support\Facades\Auth;
 class ChatController extends Controller
 {
     /**
-     * Helper Formatter Status Online / Last Seen Shopee Style.
+     * Helper Format Real-Time Last Seen Status WhatsApp.
      */
-    public static function formatLastSeen($lastSeenAt): array
+    public static function formatLastSeen($lastSeenAt)
     {
         if (!$lastSeenAt) {
             return [
                 'is_online' => false,
                 'label' => 'Aktif 7+ hari lalu',
-                'color' => 'text-gray-400 dark:text-gray-500',
+                'color' => 'text-gray-500 dark:text-gray-400',
                 'dot_color' => 'bg-gray-400',
             ];
         }
 
-        if (is_string($lastSeenAt)) {
-            $lastSeenAt = Carbon::parse($lastSeenAt);
-        } elseif (!$lastSeenAt instanceof Carbon) {
-            return [
-                'is_online' => false,
-                'label' => 'Aktif 7+ hari lalu',
-                'color' => 'text-gray-400 dark:text-gray-500',
-                'dot_color' => 'bg-gray-400',
-            ];
-        }
+        $lastSeen = Carbon::parse($lastSeenAt);
+        $diffSeconds = $lastSeen->diffInSeconds(now());
 
-        $now = now();
-        $diffMinutes = $lastSeenAt->diffInMinutes($now);
-
-        if ($diffMinutes < 3) {
+        if ($diffSeconds <= 120) {
             return [
                 'is_online' => true,
                 'label' => 'Online',
-                'color' => 'text-emerald-600 dark:text-emerald-400',
-                'dot_color' => 'bg-emerald-500',
+                'color' => 'text-emerald-700 dark:text-emerald-300 font-extrabold',
+                'dot_color' => 'bg-emerald-600 animate-pulse',
             ];
         }
 
-        $diffHours = $lastSeenAt->diffInHours($now);
-        $diffDays = $lastSeenAt->diffInDays($now);
-
-        $intMinutes = (int) $diffMinutes;
-        $intHours = (int) $diffHours;
-        $intDays = (int) $diffDays;
+        $intMinutes = (int) $lastSeen->diffInMinutes(now());
+        $intHours = (int) $lastSeen->diffInHours(now());
+        $intDays = (int) $lastSeen->diffInDays(now());
 
         if ($intDays >= 7) {
             $label = 'Aktif 7+ hari lalu';
@@ -77,6 +63,63 @@ class ChatController extends Controller
     }
 
     /**
+     * Format & Urutkan Thread Chat Berdasarkan Pesan / Aktivitas Terbaru Teratas (Newest on Top).
+     */
+    public static function formatThreadsForUser($rawThreads, $user, $role)
+    {
+        return $rawThreads->sortByDesc(function ($t) {
+            if ($t->lastMessage && $t->lastMessage->created_at) {
+                return $t->lastMessage->created_at->timestamp;
+            }
+            return $t->updated_at ? $t->updated_at->timestamp : 0;
+        })->values()->map(function ($t) use ($user, $role) {
+            if ($role === 'photographer') {
+                $otherUser = $t->client->user ?? null;
+                $name = $t->client->nama ?? 'Klien';
+                $initial = strtoupper(substr($name, 0, 2));
+                $foto = $t->client->foto ? asset('storage/' . $t->client->foto) : null;
+                $photographerId = null;
+            } else {
+                $otherUser = $t->photographer->user ?? null;
+                $name = $t->photographer->nama ?? 'Studio Fotografer';
+                $initial = strtoupper(substr($name, 0, 2));
+                $foto = $t->photographer->foto ? asset('storage/' . $t->photographer->foto) : null;
+                $photographerId = $t->photographer->id ?? null;
+            }
+
+            $status_user = self::formatLastSeen($otherUser ? $otherUser->last_seen_at : null);
+
+            $lastMessageTime = '';
+            $lastMessageIso = '';
+            $lastTimestamp = 0;
+
+            if ($t->lastMessage && $t->lastMessage->created_at) {
+                $lastMessageTime = $t->lastMessage->created_at->setTimezone('Asia/Jakarta')->format('H:i');
+                $lastMessageIso = $t->lastMessage->created_at->toIso8601String();
+                $lastTimestamp = $t->lastMessage->created_at->timestamp;
+            } elseif ($t->updated_at) {
+                $lastMessageTime = $t->updated_at->setTimezone('Asia/Jakarta')->format('H:i');
+                $lastMessageIso = $t->updated_at->toIso8601String();
+                $lastTimestamp = $t->updated_at->timestamp;
+            }
+
+            return [
+                'id' => $t->id,
+                'name' => $name,
+                'initial' => $initial,
+                'foto' => $foto,
+                'photographer_id' => $photographerId,
+                'last_message' => $t->lastMessage ? $t->lastMessage->message : 'Belum ada pesan',
+                'last_message_time' => $lastMessageTime,
+                'last_message_iso' => $lastMessageIso,
+                'last_timestamp' => $lastTimestamp,
+                'unread_count' => $t->messages()->where('id_sender', '!=', $user->id)->where('is_read', false)->count(),
+                'status_user' => $status_user,
+            ];
+        });
+    }
+
+    /**
      * Tampilkan Halaman Chat Client.
      */
     public function index(Request $request)
@@ -90,48 +133,45 @@ class ChatController extends Controller
             'alamat' => 'Jakarta, Indonesia',
         ]);
 
-        $threads = ChatBooking::where('id_client', $client->id)
+        $rawThreads = ChatBooking::where('id_client', $client->id)
             ->with(['photographer.user', 'lastMessage'])
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->map(function ($t) {
-                $photoUser = $t->photographer->user ?? null;
-                $t->status_user = self::formatLastSeen($photoUser ? $photoUser->last_seen_at : null);
-                if ($t->lastMessage && $t->lastMessage->created_at) {
-                    $t->last_message_time = $t->lastMessage->created_at->setTimezone('Asia/Jakarta')->format('H:i');
-                    $t->last_message_iso = $t->lastMessage->created_at->toIso8601String();
-                } else {
-                    $t->last_message_time = '';
-                    $t->last_message_iso = '';
-                }
-                return $t;
-            });
+            ->get();
+
+        $formattedThreads = self::formatThreadsForUser($rawThreads, $user, 'client');
+        $threads = $formattedThreads;
 
         $activeThreadId = $request->query('thread');
-        if (!$activeThreadId && $threads->count() > 0) {
-            $activeThreadId = $threads->first()->id;
+        if (!$activeThreadId && $formattedThreads->count() > 0) {
+            $activeThreadId = $formattedThreads->first()['id'];
         }
 
         $activeThread = null;
         $messages = collect();
 
         if ($activeThreadId) {
-            $activeThread = ChatBooking::where('id_client', $client->id)
+            $activeThreadModel = ChatBooking::where('id_client', $client->id)
                 ->where('id', $activeThreadId)
                 ->with(['photographer.user'])
                 ->first();
 
-            if ($activeThread) {
-                $photoUser = $activeThread->photographer->user ?? null;
-                $activeThread->status_user = self::formatLastSeen($photoUser ? $photoUser->last_seen_at : null);
-
+            if ($activeThreadModel) {
                 // Mark unread messages from photographer as read
-                ChatMessage::where('id_chat_booking', $activeThread->id)
+                ChatMessage::where('id_chat_booking', $activeThreadModel->id)
                     ->where('id_sender', '!=', $user->id)
                     ->where('is_read', false)
                     ->update(['is_read' => true]);
 
-                $messages = ChatMessage::where('id_chat_booking', $activeThread->id)
+                $photoUser = $activeThreadModel->photographer->user ?? null;
+                $activeThread = (object) [
+                    'id' => $activeThreadModel->id,
+                    'name' => $activeThreadModel->photographer->nama ?? 'Studio Fotografer',
+                    'initial' => strtoupper(substr($activeThreadModel->photographer->nama ?? 'S', 0, 2)),
+                    'foto' => $activeThreadModel->photographer->foto ? asset('storage/' . $activeThreadModel->photographer->foto) : null,
+                    'photographer_id' => $activeThreadModel->photographer->id ?? null,
+                    'status_user' => self::formatLastSeen($photoUser ? $photoUser->last_seen_at : null),
+                ];
+
+                $messages = ChatMessage::where('id_chat_booking', $activeThreadModel->id)
                     ->with('sender')
                     ->orderBy('created_at', 'asc')
                     ->get();
@@ -151,7 +191,7 @@ class ChatController extends Controller
             ];
         });
 
-        return view('public.chat.index', compact('threads', 'activeThread', 'formattedMessages'));
+        return view('public.chat.index', compact('threads', 'formattedThreads', 'activeThread', 'formattedMessages'));
     }
 
     /**
@@ -167,48 +207,45 @@ class ChatController extends Controller
             $photographer = RolePhotographer::first();
         }
 
-        $threads = ChatBooking::where('id_photographer', $photographer->id)
+        $rawThreads = ChatBooking::where('id_photographer', $photographer->id)
             ->with(['client.user', 'lastMessage'])
-            ->orderBy('updated_at', 'desc')
-            ->get()
-            ->map(function ($t) {
-                $clientUser = $t->client->user ?? null;
-                $t->status_user = self::formatLastSeen($clientUser ? $clientUser->last_seen_at : null);
-                if ($t->lastMessage && $t->lastMessage->created_at) {
-                    $t->last_message_time = $t->lastMessage->created_at->setTimezone('Asia/Jakarta')->format('H:i');
-                    $t->last_message_iso = $t->lastMessage->created_at->toIso8601String();
-                } else {
-                    $t->last_message_time = '';
-                    $t->last_message_iso = '';
-                }
-                return $t;
-            });
+            ->get();
+
+        $formattedThreads = self::formatThreadsForUser($rawThreads, $user, 'photographer');
+        $threads = $formattedThreads;
 
         $activeThreadId = $request->query('thread');
-        if (!$activeThreadId && $threads->count() > 0) {
-            $activeThreadId = $threads->first()->id;
+        if (!$activeThreadId && $formattedThreads->count() > 0) {
+            $activeThreadId = $formattedThreads->first()['id'];
         }
 
         $activeThread = null;
         $messages = collect();
 
         if ($activeThreadId) {
-            $activeThread = ChatBooking::where('id_photographer', $photographer->id)
+            $activeThreadModel = ChatBooking::where('id_photographer', $photographer->id)
                 ->where('id', $activeThreadId)
                 ->with(['client.user'])
                 ->first();
 
-            if ($activeThread) {
-                $clientUser = $activeThread->client->user ?? null;
-                $activeThread->status_user = self::formatLastSeen($clientUser ? $clientUser->last_seen_at : null);
-
+            if ($activeThreadModel) {
                 // Mark unread messages from client as read
-                ChatMessage::where('id_chat_booking', $activeThread->id)
+                ChatMessage::where('id_chat_booking', $activeThreadModel->id)
                     ->where('id_sender', '!=', $user->id)
                     ->where('is_read', false)
                     ->update(['is_read' => true]);
 
-                $messages = ChatMessage::where('id_chat_booking', $activeThread->id)
+                $clientUser = $activeThreadModel->client->user ?? null;
+                $activeThread = (object) [
+                    'id' => $activeThreadModel->id,
+                    'name' => $activeThreadModel->client->nama ?? 'Klien',
+                    'initial' => strtoupper(substr($activeThreadModel->client->nama ?? 'K', 0, 2)),
+                    'foto' => $activeThreadModel->client->foto ? asset('storage/' . $activeThreadModel->client->foto) : null,
+                    'photographer_id' => null,
+                    'status_user' => self::formatLastSeen($clientUser ? $clientUser->last_seen_at : null),
+                ];
+
+                $messages = ChatMessage::where('id_chat_booking', $activeThreadModel->id)
                     ->with('sender')
                     ->orderBy('created_at', 'asc')
                     ->get();
@@ -228,16 +265,37 @@ class ChatController extends Controller
             ];
         });
 
-        return view('photographer.chat.index', compact('threads', 'activeThread', 'formattedMessages'));
+        return view('photographer.chat.index', compact('threads', 'formattedThreads', 'activeThread', 'formattedMessages'));
     }
 
     /**
-     * Memulai atau Membuka Thread Chat dengan Fotografer Spesifik.
+     * Memulai atau Membuka Thread Chat dari Fotografer ke Klien Spesifik.
+     */
+    public function photographerStartChat($clientId)
+    {
+        $user = Auth::user();
+        $photographer = RolePhotographer::where('id_user', $user->id)->first();
+        if (!$photographer) {
+            $photographer = RolePhotographer::first();
+        }
+
+        $client = RoleClient::findOrFail($clientId);
+
+        $thread = ChatBooking::firstOrCreate([
+            'id_client' => $client->id,
+            'id_photographer' => $photographer->id,
+        ]);
+
+        return redirect()->route('photographer.chat', ['thread' => $thread->id]);
+    }
+
+    /**
+     * Mulai Chat dari Halaman Profil Fotografer / Tombol Kontak.
      */
     public function startChat($photographerId)
     {
         $user = Auth::user();
-        $user->update(['last_seen_at' => now()]);
+        $photographer = RolePhotographer::findOrFail($photographerId);
 
         $client = RoleClient::firstOrCreate(['id_user' => $user->id], [
             'nama' => $user->nama,
@@ -245,17 +303,15 @@ class ChatController extends Controller
             'alamat' => 'Jakarta, Indonesia',
         ]);
 
-        $photographer = RolePhotographer::findOrFail($photographerId);
-
         $thread = ChatBooking::firstOrCreate([
-            'id_photographer' => $photographer->id,
             'id_client' => $client->id,
+            'id_photographer' => $photographer->id,
         ]);
 
         if ($thread->messages()->count() === 0) {
             ChatMessage::create([
                 'id_chat_booking' => $thread->id,
-                'id_sender' => $photographer->id_user,
+                'id_sender' => $photographer->id_user ?? $user->id,
                 'message' => 'Halo Kak ' . $user->nama . '! Ada yang bisa kami bantu mengenai rencana sesi foto Anda bersama ' . $photographer->nama . '?',
                 'is_read' => false,
             ]);
@@ -270,7 +326,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Ambil Pesan Terbaru via JSON (Dipakai oleh Alpine.js Polling).
+     * Ambil Pesan Terbaru via JSON (Dipakai oleh Alpine.js Polling & SPA Switch).
      */
     public function getMessages($chatBookingId)
     {
@@ -286,10 +342,22 @@ class ChatController extends Controller
             ->update(['is_read' => true]);
 
         $otherUser = null;
+        $otherName = '';
+        $otherAvatar = '';
+        $otherInitial = '';
+        $photographerId = null;
+
         if ($user->role === 'photographer') {
             $otherUser = $thread->client->user ?? null;
+            $otherName = $thread->client->nama ?? 'Klien';
+            $otherAvatar = $thread->client->foto ? asset('storage/' . $thread->client->foto) : null;
+            $otherInitial = strtoupper(substr($otherName, 0, 2));
         } else {
             $otherUser = $thread->photographer->user ?? null;
+            $otherName = $thread->photographer->nama ?? 'Studio Fotografer';
+            $otherAvatar = $thread->photographer->foto ? asset('storage/' . $thread->photographer->foto) : null;
+            $otherInitial = strtoupper(substr($otherName, 0, 2));
+            $photographerId = $thread->photographer->id ?? null;
         }
 
         $otherStatus = self::formatLastSeen($otherUser ? $otherUser->last_seen_at : null);
@@ -311,10 +379,27 @@ class ChatController extends Controller
                 ];
             });
 
+        // Muat daftar threads terupdate untuk sinkronisasi real-time sidebar
+        if ($user->role === 'photographer') {
+            $photographer = RolePhotographer::where('id_user', $user->id)->first();
+            $rawThreads = $photographer ? ChatBooking::where('id_photographer', $photographer->id)->with(['client.user', 'lastMessage'])->get() : collect();
+            $formattedThreads = self::formatThreadsForUser($rawThreads, $user, 'photographer');
+        } else {
+            $client = RoleClient::where('id_user', $user->id)->first();
+            $rawThreads = $client ? ChatBooking::where('id_client', $client->id)->with(['photographer.user', 'lastMessage'])->get() : collect();
+            $formattedThreads = self::formatThreadsForUser($rawThreads, $user, 'client');
+        }
+
         return response()->json([
             'success' => true,
+            'thread_id' => $thread->id,
+            'other_name' => $otherName,
+            'other_avatar' => $otherAvatar,
+            'other_initial' => $otherInitial,
+            'photographer_id' => $photographerId,
             'other_status' => $otherStatus,
             'messages' => $messages,
+            'threads' => $formattedThreads,
         ]);
     }
 
@@ -359,5 +444,42 @@ class ChatController extends Controller
         }
 
         return redirect()->back();
+    }
+
+    /**
+     * Endpoint API Real-Time Unread Chat Count.
+     */
+    public function getUnreadCount()
+    {
+        if (!Auth::check()) {
+            return response()->json(['unread_count' => 0]);
+        }
+
+        $user = Auth::user();
+        $unreadCount = 0;
+
+        if ($user->role === 'client') {
+            $client = RoleClient::where('id_user', $user->id)->first();
+            if ($client) {
+                $threadIds = ChatBooking::where('id_client', $client->id)->pluck('id');
+                $unreadCount = ChatMessage::whereIn('id_chat_booking', $threadIds)
+                    ->where('id_sender', '!=', $user->id)
+                    ->where('is_read', false)
+                    ->count();
+            }
+        } elseif ($user->role === 'photographer') {
+            $photographer = RolePhotographer::where('id_user', $user->id)->first();
+            if ($photographer) {
+                $threadIds = ChatBooking::where('id_photographer', $photographer->id)->pluck('id');
+                $unreadCount = ChatMessage::whereIn('id_chat_booking', $threadIds)
+                    ->where('id_sender', '!=', $user->id)
+                    ->where('is_read', false)
+                    ->count();
+            }
+        }
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+        ]);
     }
 }
