@@ -56,7 +56,7 @@
         </div>
         <a href="{{ route('admin.elearning.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-            <span>+ Tambah Materi Baru</span>
+            <span>Tambah Materi Baru</span>
         </a>
     </div>
 
@@ -79,9 +79,9 @@
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Materi Bervideo</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $materials->whereNotNull('video_url')->count() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Dilengkapi video embed YouTube</p>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kursus Berbayar</span>
+            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::where('is_premium', true)->orWhere('harga', '>', 0)->count() }}</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Materi akses berbayar & premium</p>
         </div>
 
         <!-- Card 3 -->
@@ -152,9 +152,9 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                            <th class="py-3.5 px-4 sm:px-6 w-4/12">Materi & Thumbnail</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-4/12">Materi</th>
                             <th class="py-3.5 px-4 sm:px-6 w-2/12">Kategori</th>
-                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Video Pembelajaran</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Harga & Akses</th>
                             <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Status</th>
                             <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
                         </tr>
@@ -181,14 +181,25 @@
                                         {{ $m->kategori ?? ($m->category ? $m->category->nama_kategori : 'Umum') }}
                                     </span>
                                 </td>
-                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400">
-                                    @if($m->video_url)
-                                        <a href="{{ $m->video_url }}" target="_blank" class="text-amber-600 hover:underline font-bold flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            <span>Buka Video</span>
-                                        </a>
+                                <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
+                                    @if($m->is_premium || ($m->harga && $m->harga > 0))
+                                        <div>
+                                            <span class="text-xs font-bold text-gray-900 dark:text-white block">
+                                                Rp {{ number_format($m->harga ?? 149000, 0, ',', '.') }}
+                                            </span>
+                                            <span class="text-[11px] text-amber-600 dark:text-amber-500 font-medium block">
+                                                Berbayar
+                                            </span>
+                                        </div>
                                     @else
-                                        <span class="text-gray-400 italic">Artikel Teks</span>
+                                        <div>
+                                            <span class="text-xs font-bold text-gray-900 dark:text-white block">
+                                                Gratis
+                                            </span>
+                                            <span class="text-[11px] text-gray-400 dark:text-gray-500 font-medium block">
+                                                Akses Terbuka
+                                            </span>
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
@@ -196,6 +207,10 @@
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5">
+                                        <a href="{{ route('admin.elearning.curriculum', $m->id) }}" 
+                                           class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60 font-bold text-xs transition text-center inline-block">
+                                            Kurikulum
+                                        </a>
                                         <a href="{{ route('admin.elearning.edit', $m->id) }}" 
                                            class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block">
                                             Edit

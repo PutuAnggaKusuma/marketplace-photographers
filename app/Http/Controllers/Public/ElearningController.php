@@ -80,21 +80,312 @@ class ElearningController extends Controller
         ));
     }
 
-    public function show($slug)
+    public function show($slug, Request $request)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login', ['redirect' => route('public.elearning.show', $slug)])
-                ->with('error', 'Silakan login terlebih dahulu untuk mengakses materi e-learning.');
-        }
-
-        $course = Elearning::where('slug', $slug)->firstOrFail();
+        $course = Elearning::with(['modules.lessons', 'lessons'])->where('slug', $slug)->firstOrFail();
         $course->increment('view_count');
 
-        $relatedCourses = Elearning::where('id', '!=', $course->id)
-            ->where('kategori', $course->kategori)
-            ->take(3)
-            ->get();
+        $userId = Auth::id();
+        $allLessons = $course->lessons()->orderBy('urutan', 'asc')->get();
 
-        return view('public.elearning.show', compact('course', 'relatedCourses'));
+        // Cari tahapan aktif berdasarkan request atau tahapan pertama
+        $lessonId = $request->query('lesson');
+        $currentLesson = null;
+
+        if ($lessonId) {
+            $currentLesson = $allLessons->firstWhere('id', (int) $lessonId);
+        }
+
+        if (!$currentLesson) {
+            $currentLesson = $allLessons->first();
+        }
+
+        // List ID tahapan yang sudah diselesaikan oleh user
+        $completedLessonIds = [];
+        if ($userId) {
+            $completedLessonIds = \App\Models\ElearningLessonProgress::where('id_user', $userId)
+                ->where('id_elearning', $course->id)
+                ->where('is_completed', true)
+                ->pluck('id_lesson')
+                ->toArray();
+        }
+
+        // Hitung persentase progress
+        $totalLessons = $allLessons->count();
+        $userProgressPercentage = $totalLessons > 0 
+            ? min(100, (int) round((count($completedLessonIds) / $totalLessons) * 100))
+            : 0;
+
+        // Cari prev & next lesson
+        $prevLesson = null;
+        $nextLesson = null;
+        if ($currentLesson && $allLessons->isNotEmpty()) {
+            $currentIndex = $allLessons->search(fn($l) => $l->id === $currentLesson->id);
+            if ($currentIndex !== false) {
+                if ($currentIndex > 0) {
+                    $prevLesson = $allLessons->get($currentIndex - 1);
+                }
+                if ($currentIndex < $allLessons->count() - 1) {
+                    $nextLesson = $allLessons->get($currentIndex + 1);
+                }
+            }
+        }
+
+        $userProgress = $userId ? $course->getUserProgress() : null;
+
+        // Cek status kepemilikan / pembelian kursus
+        $isPurchased = session()->get("elearning_purchased_{$course->id}", false);
+        if ($course->harga == 0 || !$course->is_premium) {
+            $isPurchased = true;
+        }
+
+        // Tentukan apakah tahapan saat ini terkunci (harus bayar)
+        $isCurrentLessonLocked = false;
+        if ($currentLesson && !$currentLesson->is_free && !$isPurchased) {
+            $isCurrentLessonLocked = true;
+        }
+
+        // Cari tahapan gratis pertama jika ada
+        $firstFreeLesson = $allLessons->firstWhere('is_free', true);
+
+        return response()
+            ->view('public.elearning.show', compact(
+                'course',
+                'allLessons',
+                'currentLesson',
+                'completedLessonIds',
+                'userProgressPercentage',
+                'prevLesson',
+                'nextLesson',
+                'userProgress',
+                'isPurchased',
+                'isCurrentLessonLocked',
+                'firstFreeLesson'
+            ))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+    /**
+     * Toggle status penyelesaian tahapan materi spesifik (Coursera Step Completion).
+     */
+    public function toggleLessonProgress(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Silakan login terlebih dahulu untuk mencatat progress belajar Anda.',
+            ], 401);
+        }
+
+        $lesson = \App\Models\ElearningLesson::with('elearning')->findOrFail($id);
+        $course = $lesson->elearning;
+        $userId = Auth::id();
+
+        $lessonProgress = \App\Models\ElearningLessonProgress::firstOrNew([
+            'id_user' => $userId,
+            'id_elearning' => $course->id,
+            'id_lesson' => $lesson->id,
+        ]);
+
+        $lessonProgress->is_completed = true;
+        if (!$lessonProgress->completed_at) {
+            $lessonProgress->completed_at = now();
+        }
+        $lessonProgress->save();
+        $isCompleted = true;
+        $message = 'Materi berhasil diselesaikan!';
+
+        // Sinkronisasi ke tabel induk e_learning_progress
+        $totalLessons = $course->lessons()->count();
+        $completedLessonsCount = \App\Models\ElearningLessonProgress::where('id_user', $userId)
+            ->where('id_elearning', $course->id)
+            ->where('is_completed', true)
+            ->count();
+
+        $percentage = $totalLessons > 0 ? min(100, (int) round(($completedLessonsCount / $totalLessons) * 100)) : 100;
+
+        $overallProgress = \App\Models\ELearningProgress::firstOrNew([
+            'id_user' => $userId,
+            'id_e_learning' => $course->id,
+        ]);
+
+        $overallProgress->progress_percentage = $percentage;
+        if ($percentage >= 100) {
+            $overallProgress->status = 'selesai';
+            $overallProgress->completed_at = now();
+
+            // Kirim notifikasi jika baru saja menuntaskan 100% kursus
+            \App\Models\Notification::create([
+                'id_user' => $userId,
+                'type' => 'elearning',
+                'title' => 'Selamat! Kursus Selesai',
+                'message' => 'Anda telah menyelesaikan seluruh modul pada kursus: ' . $course->judul,
+                'data' => [
+                    'slug' => $course->slug,
+                    'url' => route('public.elearning.show', $course->slug),
+                ],
+                'is_read' => false,
+            ]);
+        } else {
+            $overallProgress->status = $percentage > 0 ? 'sedang_belajar' : 'belum_mulai';
+            $overallProgress->completed_at = null;
+        }
+        $overallProgress->save();
+
+        return response()->json([
+            'success' => true,
+            'is_completed' => $isCompleted,
+            'percentage' => $percentage,
+            'completed_lessons_count' => $completedLessonsCount,
+            'total_lessons' => $totalLessons,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * Tandai materi telah selesai dipelajari (Mark as Completed) atau toggle kembali.
+     */
+    public function toggleProgress(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Silakan login terlebih dahulu untuk menyimpan progres belajar Anda.',
+                ], 401);
+            }
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $course = Elearning::findOrFail($id);
+
+        $progress = \App\Models\ELearningProgress::firstOrNew([
+            'id_user' => Auth::id(),
+            'id_e_learning' => $course->id,
+        ]);
+
+        if ($progress->exists && $progress->status === 'selesai') {
+            // Toggle kembali ke belum selesai
+            $progress->status = 'sedang_belajar';
+            $progress->progress_percentage = 50;
+            $progress->completed_at = null;
+            $progress->save();
+
+            $isCompleted = false;
+            $message = 'Status materi diubah menjadi sedang dipelajari.';
+        } else {
+            // Tandai selesai
+            $progress->status = 'selesai';
+            $progress->progress_percentage = 100;
+            $progress->completed_at = now();
+            $progress->save();
+
+            $isCompleted = true;
+            $message = 'Selamat! Materi berhasil ditandai telah selesai dipelajari.';
+
+            // In-app Notification ke User (Rule #26)
+            \App\Models\Notification::create([
+                'id_user' => Auth::id(),
+                'type' => 'elearning',
+                'title' => 'Modul E-Learning Selesai!',
+                'message' => 'Selamat, Anda telah menyelesaikan modul: ' . $course->judul,
+                'data' => [
+                    'slug' => $course->slug,
+                    'url' => route('public.elearning.show', $course->slug),
+                ],
+                'is_read' => false,
+            ]);
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'is_completed' => $isCompleted,
+                'status' => $progress->status,
+                'completed_at' => $progress->completed_at ? $progress->completed_at->format('d M Y, H:i') : null,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Halaman Pembayaran / Checkout Akses Kursus E-Learning.
+     */
+    public function checkout($slug)
+    {
+        $course = Elearning::where('slug', $slug)
+            ->with(['modules.lessons'])
+            ->firstOrFail();
+
+        return view('public.elearning.checkout', compact('course'));
+    }
+
+    /**
+     * Proses Konfirmasi Pembayaran Kursus E-Learning.
+     */
+    public function processCheckout(Request $request, $slug)
+    {
+        $course = Elearning::where('slug', $slug)->firstOrFail();
+
+        // Simpan tanda pembelian kursus pada sesi
+        session()->put("elearning_purchased_{$course->id}", true);
+
+        if (Auth::check()) {
+            \App\Models\ELearningProgress::firstOrCreate(
+                ['id_user' => Auth::id(), 'id_e_learning' => $course->id],
+                ['status' => 'sedang_belajar', 'progress_percentage' => 0]
+            );
+        }
+
+        return redirect()->route('public.elearning.show', $course->slug)->with('success', 'Pembayaran berhasil dikonfirmasi! Seluruh materi kursus kini terbuka.');
+    }
+
+    /**
+     * Unduh & Tampilkan Sertifikat Kelulusan E-Learning Digital (Certificate of Completion).
+     */
+    public function certificate($slug)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $course = Elearning::with(['modules.lessons', 'lessons'])->where('slug', $slug)->firstOrFail();
+        $user = Auth::user();
+
+        // Cek apakah progress user sudah 100%
+        $totalLessons = $course->lessons()->count();
+        $completedLessonsCount = \App\Models\ElearningLessonProgress::where('id_user', $user->id)
+            ->where('id_elearning', $course->id)
+            ->where('is_completed', true)
+            ->count();
+
+        $percentage = $totalLessons > 0 ? min(100, (int) round(($completedLessonsCount / $totalLessons) * 100)) : 100;
+
+        if ($percentage < 100 && $totalLessons > 0) {
+            return redirect()->route('public.elearning.show', $course->slug)
+                ->with('error', 'Selesaikan seluruh materi kurikulum pembelajaran terlebih dahulu untuk menerbitkan sertifikat kelulusan.');
+        }
+
+        $overallProgress = \App\Models\ELearningProgress::where('id_user', $user->id)
+            ->where('id_e_learning', $course->id)
+            ->first();
+
+        $completedAt = $overallProgress?->completed_at ? \Carbon\Carbon::parse($overallProgress->completed_at) : now();
+
+        // Generate nomor seri kredensial sertifikat unik
+        $credentialId = 'LM-CERT-' . strtoupper(substr(md5($user->id . '-' . $course->id . '-lensmatch-academy-cert'), 0, 8)) . '-' . $completedAt->format('Y');
+
+        return view('public.elearning.certificate', compact(
+            'course',
+            'user',
+            'completedAt',
+            'credentialId',
+            'percentage',
+            'totalLessons'
+        ));
     }
 }

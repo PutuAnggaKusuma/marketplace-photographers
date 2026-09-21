@@ -53,7 +53,7 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Bulan Operasional</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ date('F Y') }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Periode aktif kalender studio</p>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Periode aktif kalender fotografer</p>
         </div>
     </div>
 

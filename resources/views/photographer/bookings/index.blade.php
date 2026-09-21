@@ -262,10 +262,10 @@
          style="display: none;">
         <div class="bg-white dark:bg-gray-800 max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6">
             
-            <div class="space-y-1 border-b border-gray-100 dark:border-gray-700 pb-4">
+            <div class="space-y-1">
                 <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Penyerahan Hasil Karya</span>
                 <h3 class="text-xl font-black text-gray-900 dark:text-white">Unggah Link Galeri Hasil Foto</h3>
-                <p class="text-xs text-gray-500">Kirimkan tautan Google Drive / Cloud Album hasil retouching foto kepada <strong x-text="selectedClientName" class="text-gray-900 dark:text-white"></strong>.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Kirimkan tautan Google Drive / Cloud Album hasil retouching foto kepada <strong x-text="selectedClientName" class="text-gray-900 dark:text-white"></strong>.</p>
             </div>
 
             <form :action="'/photographer/bookings/' + selectedContractId + '/gallery'" method="POST" class="space-y-4">
@@ -280,12 +280,12 @@
                     <textarea name="catatan_fotografer" rows="3" placeholder="Tuliskan ucapan terima kasih atau petunjuk pengunduhan foto..." class="w-full px-4 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <button type="button" @click="uploadModal = false" class="px-5 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-300">
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" @click="uploadModal = false" class="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-xl bg-gray-100 dark:bg-gray-700 transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md transition">
-                        Kirim Galeri ke Klien
+                    <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+                        Kirim Galeri
                     </button>
                 </div>
             </form>

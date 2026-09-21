@@ -38,8 +38,9 @@
 
   <!-- Section 1: Form Biodata & Media Fotografer (100% Vertical Flow - Rule #23) -->
   <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
+    <h2 class="text-lg font-black text-gray-900 dark:text-white">Informasi Profil</h2>
 
-    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
       @csrf
 
       <!-- Field 1: Nama Lengkap Fotografer -->
@@ -136,7 +137,7 @@
 
       <div class="flex justify-end pt-3">
         <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
-          Simpan Perubahan Profil
+          Perbaharui Data
         </button>
       </div>
     </form>
@@ -144,12 +145,9 @@
 
   <!-- Section 2: Keamanan & Ganti Password (100% Vertical Flow - Rule #23) -->
   <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
-    <div>
-      <h2 class="text-lg font-black text-gray-900 dark:text-white">Keamanan & Kata Sandi</h2>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perbarui kata sandi akun Anda secara berkala demi keamanan</p>
-    </div>
+    <h2 class="text-lg font-black text-gray-900 dark:text-white">Keamanan & Kata Sandi</h2>
 
-    <form action="{{ route('profile.password') }}" method="POST" class="space-y-4">
+    <form action="{{ route('profile.password') }}" method="POST" class="space-y-6">
       @csrf
 
       <!-- Field 1: Kata Sandi Saat Ini -->
@@ -172,7 +170,7 @@
 
       <div class="flex justify-end pt-3">
         <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
-          Perbarui Kata Sandi
+          Perbaharui Data
         </button>
       </div>
     </form>

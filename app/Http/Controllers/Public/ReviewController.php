@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
+use App\Models\Notification;
 use App\Models\RoleClient;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class ReviewController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $client = RoleClient::where('id_user', $user->id)->first();
@@ -36,7 +37,7 @@ class ReviewController extends Controller
             'deskripsi_review.min' => 'Ulasan minimal 5 karakter.',
         ]);
 
-        $contract = Contract::with(['bookingDetail'])->findOrFail($request->id_contract);
+        $contract = Contract::with(['bookingDetail', 'photographer'])->findOrFail($request->id_contract);
 
         // Verifikasi kepemilikan kontrak
         if ((int) $contract->id_client !== (int) $client->id) {
@@ -64,6 +65,21 @@ class ReviewController extends Controller
             'rating' => (int) $request->rating,
             'deskripsi_review' => trim($request->deskripsi_review),
         ]);
+
+        // Kirim Notifikasi in-app ke Fotografer
+        if ($contract->photographer && $contract->photographer->id_user) {
+            Notification::create([
+                'id_user' => $contract->photographer->id_user,
+                'type' => 'new_review',
+                'title' => 'Ulasan Baru Diterima',
+                'message' => "Klien {$client->nama} memberikan ulasan ({$request->rating}/5 bintang) untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
+                'data' => [
+                    'contract_id' => $contract->id,
+                    'url' => route('photographer.reports'),
+                ],
+                'is_read' => false,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Terima kasih! Ulasan dan rating Anda berhasil disimpan.');
     }

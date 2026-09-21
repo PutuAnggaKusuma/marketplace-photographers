@@ -41,6 +41,11 @@ Route::get('/elearning', [\App\Http\Controllers\Public\ElearningController::clas
 Route::get('/elearning/katalog', [\App\Http\Controllers\Public\ElearningController::class, 'katalog'])->name('public.elearning.katalog');
 Route::get('/e-learning', [\App\Http\Controllers\Public\ElearningController::class, 'index']);
 Route::get('/elearning/{slug}', [\App\Http\Controllers\Public\ElearningController::class, 'show'])->name('public.elearning.show');
+Route::get('/elearning/{slug}/certificate', [\App\Http\Controllers\Public\ElearningController::class, 'certificate'])->name('public.elearning.certificate')->middleware('auth');
+Route::get('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'checkout'])->name('public.elearning.checkout');
+Route::post('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'processCheckout'])->name('public.elearning.checkout.process');
+Route::post('/elearning/{id}/toggle-progress', [\App\Http\Controllers\Public\ElearningController::class, 'toggleProgress'])->name('public.elearning.toggle-progress')->middleware('auth');
+Route::post('/elearning/lesson/{id}/toggle', [\App\Http\Controllers\Public\ElearningController::class, 'toggleLessonProgress'])->name('public.elearning.lesson.toggle')->middleware('auth');
 
 Route::get('/forum', [\App\Http\Controllers\Public\ForumController::class, 'index'])->name('public.forum.index');
 Route::get('/forum/{id}', [\App\Http\Controllers\Public\ForumController::class, 'show'])->name('public.forum.show');
@@ -52,11 +57,12 @@ Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumCo
 // Public Photo Contest Routes
 Route::get('/lomba', [\App\Http\Controllers\Public\ContestController::class, 'index'])->name('public.contests.index');
 Route::get('/lomba/{id}', [\App\Http\Controllers\Public\ContestController::class, 'show'])->name('public.contests.show');
+Route::post('/lomba/{id}/register', [\App\Http\Controllers\Public\ContestController::class, 'registerParticipant'])->name('public.contests.register')->middleware('auth');
+Route::post('/lomba/{id}/payment', [\App\Http\Controllers\Public\ContestController::class, 'uploadPaymentProof'])->name('public.contests.payment')->middleware('auth');
 Route::post('/lomba/{id}/submit', [\App\Http\Controllers\Public\ContestController::class, 'submit'])->name('public.contests.submit')->middleware('auth');
-
-Route::get('/e-learning/{id}', function ($id) {
-    return view('public.elearning.show');
-});
+Route::get('/lomba-pengajuan/buat', [\App\Http\Controllers\Public\ContestProposalController::class, 'create'])->name('public.contests.propose.create')->middleware('auth');
+Route::post('/lomba-pengajuan/simpan', [\App\Http\Controllers\Public\ContestProposalController::class, 'store'])->name('public.contests.propose.store')->middleware('auth');
+Route::get('/lomba-pengajuan/riwayat', [\App\Http\Controllers\Public\ContestProposalController::class, 'myProposals'])->name('public.contests.propose.history')->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -159,6 +165,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::get('/contests/{id}/edit', [\App\Http\Controllers\Admin\ContestController::class, 'edit'])->name('contests.edit');
     Route::post('/contests/{id}/update', [\App\Http\Controllers\Admin\ContestController::class, 'update'])->name('contests.update');
     Route::post('/contests/{id}/delete', [\App\Http\Controllers\Admin\ContestController::class, 'destroy'])->name('contests.destroy');
+    Route::post('/contests/{id}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approve'])->name('contests.approve');
+    Route::post('/contests/{id}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'reject'])->name('contests.reject');
+    Route::get('/contests/{id}/manage', [\App\Http\Controllers\Admin\ContestController::class, 'manage'])->name('contests.manage');
+    Route::get('/contests/{id}/participants', [\App\Http\Controllers\Admin\ContestController::class, 'participants'])->name('contests.participants');
+    Route::post('/contests/participant/{id}/update-status', [\App\Http\Controllers\Admin\ContestController::class, 'updateParticipantStatus'])->name('contests.participant.update_status');
+    Route::post('/contests/participant/{id}/approve', [\App\Http\Controllers\Admin\ContestController::class, 'approveParticipant'])->name('contests.participant.approve');
+    Route::post('/contests/participant/{id}/reject', [\App\Http\Controllers\Admin\ContestController::class, 'rejectParticipant'])->name('contests.participant.reject');
+    Route::post('/contests/participant/{id}/verify-payment', [\App\Http\Controllers\Admin\ContestController::class, 'verifyPayment'])->name('contests.participant.verify_payment');
     Route::get('/contests/{id}/submissions', [\App\Http\Controllers\Admin\ContestController::class, 'submissions'])->name('contests.submissions');
     Route::post('/contests/submission/{id}/winner', [\App\Http\Controllers\Admin\ContestController::class, 'setWinner'])->name('contests.submission.winner');
 
@@ -169,6 +183,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::get('/elearning/{id}/edit', [\App\Http\Controllers\Admin\ElearningController::class, 'edit'])->name('elearning.edit');
     Route::post('/elearning/{id}/update', [\App\Http\Controllers\Admin\ElearningController::class, 'update'])->name('elearning.update');
     Route::post('/elearning/{id}/delete', [\App\Http\Controllers\Admin\ElearningController::class, 'destroy'])->name('elearning.destroy');
+
+    // Admin E-Learning Curriculum (Topik & Tahapan Belajar)
+    Route::get('/elearning/{id}/curriculum', [\App\Http\Controllers\Admin\ElearningController::class, 'curriculum'])->name('elearning.curriculum');
+    Route::post('/elearning/{id}/modules', [\App\Http\Controllers\Admin\ElearningController::class, 'storeModule'])->name('elearning.modules.store');
+    Route::post('/elearning/modules/{id}/update', [\App\Http\Controllers\Admin\ElearningController::class, 'updateModule'])->name('elearning.modules.update');
+    Route::post('/elearning/modules/{id}/delete', [\App\Http\Controllers\Admin\ElearningController::class, 'destroyModule'])->name('elearning.modules.destroy');
+    Route::post('/elearning/{id}/lessons', [\App\Http\Controllers\Admin\ElearningController::class, 'storeLesson'])->name('elearning.lessons.store');
+    Route::post('/elearning/lessons/{id}/update', [\App\Http\Controllers\Admin\ElearningController::class, 'updateLesson'])->name('elearning.lessons.update');
+    Route::post('/elearning/lessons/{id}/delete', [\App\Http\Controllers\Admin\ElearningController::class, 'destroyLesson'])->name('elearning.lessons.destroy');
+    Route::post('/elearning/lessons/{id}/toggle-free', [\App\Http\Controllers\Admin\ElearningController::class, 'toggleLessonFree'])->name('elearning.lessons.toggle-free');
 
     // Admin Forum Moderation Routes
     Route::get('/forum', [\App\Http\Controllers\Admin\ForumController::class, 'index'])->name('forum');

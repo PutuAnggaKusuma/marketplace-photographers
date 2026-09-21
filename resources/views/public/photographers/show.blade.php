@@ -53,7 +53,7 @@
           Sesi Foto Sekarang
         </a>
         <a href="{{ route('chat.start', $photographer->id) }}" class="block w-full px-8 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition border border-gray-700 text-center">
-          Tanya & Chat Studio
+          Tanya & Chat Fotografer
         </a>
       </div>
 

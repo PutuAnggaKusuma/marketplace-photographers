@@ -10,16 +10,31 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 lg:space-y-10">
 
     <!-- Header Section (Matching Forum Standard Typography & Spacing) -->
-    <div class="space-y-3">
-      <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-        INFORMASI LOMBA
-      </span>
-      <h1 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight">
-        Informasi Lomba & Event Fotografi
-      </h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed mt-2">
-        Temukan berbagai event lomba foto terbaru, tingkatkan skill & portofolio Anda, serta menangkan total hadiah menarik.
-      </p>
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div class="space-y-2">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+          INFORMASI LOMBA
+        </span>
+        <h1 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+          Informasi Lomba & Event Fotografi
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed">
+          Temukan berbagai event lomba foto terbaru, tingkatkan skill & portofolio Anda, serta menangkan total hadiah menarik.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        @auth
+          <a href="{{ route('public.contests.propose.history') }}" class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-2 shadow-2xs">
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>Riwayat Pengajuan</span>
+          </a>
+        @endauth
+        <a href="{{ route('public.contests.propose.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+          <span>Ajukan Lomba Foto</span>
+        </a>
+      </div>
     </div>
 
     <!-- Filter Control Bar (Exact UI Matching Komunitas Forum Page - Pure White Inputs & Proportional Spacing) -->
@@ -170,7 +185,7 @@
         @empty
           <div class="col-span-full bg-white dark:bg-gray-800 p-12 sm:p-16 rounded-3xl border border-gray-200 dark:border-gray-700 text-center space-y-3 shadow-xs">
             <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl mb-2">
-              🏆
+              <svg class="w-7 h-7 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.003 0H9.497m5.003 0a7.5 7.5 0 004.5-6.875V4.5a1.5 1.5 0 00-1.5-1.5h-10.5a1.5 1.5 0 00-1.5 1.5v4.25c0 2.92 1.666 5.462 4.5 6.875zM18.75 6.75h2.25a2.25 2.25 0 012.25 2.25v.75a4.5 4.5 0 01-4.5 4.5h-.45M5.25 6.75H3a2.25 2.25 0 00-2.25 2.25v.75a4.5 4.5 0 004.5 4.5h.45"></path></svg>
             </div>
             <h3 class="text-lg font-black text-gray-900 dark:text-white">Event Lomba Foto Tidak Ditemukan</h3>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">

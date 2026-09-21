@@ -15,10 +15,13 @@ class ContestSubmission extends Model
     protected $fillable = [
         'id_contest',
         'id_user',
+        'id_registration',
         'judul_karya',
         'deskripsi_karya',
         'image_url',
+        'media_link',
         'status_submission',
+        'catatan_juri',
     ];
 
     public function contest()
@@ -29,5 +32,10 @@ class ContestSubmission extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function registration()
+    {
+        return $this->belongsTo(ContestRegistration::class, 'id_registration');
     }
 }

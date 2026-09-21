@@ -90,16 +90,10 @@
           <div class="relative z-20 w-52 sm:w-60 h-52 sm:h-60 rounded-3xl overflow-hidden shadow-2xl hover:scale-105 hover:z-40 transition-all duration-300 group cursor-pointer my-auto">
             <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80" alt="Studio Portrait Session" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-            <div class="absolute top-3 right-3">
-              <span class="px-2.5 py-0.5 rounded-md bg-amber-400 text-gray-900 text-[10px] font-black uppercase tracking-wider shadow-xs">
-                Populer
-              </span>
-            </div>
-            <div class="absolute bottom-3 left-3 right-3 space-y-0.5 text-left">
+            <div class="absolute bottom-3 left-3 right-3 text-left">
               <span class="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide inline-block">
                 Studio & Portrait
               </span>
-              <p class="text-[11px] text-gray-200 font-bold">Dokumentasi Kualitas Studio</p>
             </div>
           </div>
 
@@ -136,7 +130,7 @@
   <!-- BODY CONTENT WRAPPER -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28 py-16 sm:py-20">
 
-    <!-- 2. CATEGORY SECTION (Pasted Image 3 Reference: 2-Column Horizontal Cards SweetEscape Style) -->
+    <!-- 2. CATEGORY SECTION (2-Column Horizontal Cards SweetEscape Style) -->
     <section class="w-full space-y-10 reveal-on-scroll">
       
       <!-- Section Header Row (Header Left, Subtext Right - E-Learning Style) -->
@@ -158,14 +152,14 @@
       <!-- 2-Column Horizontal Category Grid (Uniform Size & Left-Aligned Button Matching Pasted Image 2 & 3) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         @foreach($categories as $category)
-          <!-- Category Horizontal Card with Uniform Sandstone Beige & Seamless Blur/Fade Mask (SweetEscape Style) -->
+          <!-- Category Horizontal Card with Uniform Sandstone Beige & Seamless Edge Blend -->
           <div class="bg-[#eae2d5] dark:bg-[#28231d] rounded-3xl border border-black/[0.04] dark:border-white/[0.06] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row group h-full min-h-[220px] sm:h-[220px] relative">
             
             <!-- Left Info Content (Left-Aligned, Spaced Evenly) -->
-            <div class="p-6 sm:p-7 flex flex-col justify-between flex-1 space-y-3 z-10">
+            <div class="p-6 sm:p-7 flex flex-col justify-between flex-1 min-w-0 space-y-3 z-10">
               
               <div class="space-y-2 text-left">
-                <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white group-hover:text-amber-500 transition leading-snug line-clamp-1">
+                <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white group-hover:text-amber-500 transition leading-snug">
                   {{ $category->nama_kategori }}
                 </h3>
                 <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2">
@@ -183,13 +177,17 @@
 
             </div>
 
-            <!-- Right Image Frame with Smooth Alpha Mask Fade to Card Background (No Hard Cutoff Line) -->
-            <div class="w-full sm:w-1/2 md:w-5/12 h-48 sm:h-full shrink-0 relative overflow-hidden">
+            <!-- Right Image Frame with Targeted Edge Blend (Spacious Clear Photo) -->
+            <div class="w-full sm:w-1/2 md:w-5/12 h-48 sm:h-full shrink-0 relative overflow-hidden -ml-0 sm:-ml-8">
               <img 
                 src="{{ $category->icon_url ?: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80' }}" 
                 alt="{{ $category->nama_kategori }}" 
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-700 [mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] sm:[mask-image:linear-gradient(to_right,transparent_0%,black_35%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_35%)] sm:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_35%)]" 
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-700" 
               />
+              <!-- Light Mode Wash: Focused only on the left transition edge -->
+              <div class="absolute inset-y-0 left-0 w-24 sm:w-32 pointer-events-none dark:hidden" style="background: linear-gradient(to right, #eae2d5 0%, rgba(234, 226, 213, 0.85) 35%, rgba(234, 226, 213, 0) 100%);"></div>
+              <!-- Dark Mode Wash: Focused only on the left transition edge -->
+              <div class="absolute inset-y-0 left-0 w-24 sm:w-32 pointer-events-none hidden dark:block" style="background: linear-gradient(to right, #28231d 0%, rgba(40, 35, 29, 0.85) 35%, rgba(40, 35, 29, 0) 100%);"></div>
             </div>
 
           </div>

@@ -36,11 +36,11 @@
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center font-black text-sm">
-                            ⭐
+                            <svg class="w-5 h-5 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white" id="modal-title">Beri Ulasan & Rating Studio</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="photoName || 'Studio Fotografer'"></p>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white" id="modal-title">Beri Ulasan Fotografer</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="photoName || 'Fotografer'"></p>
                         </div>
                     </div>
                     <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -83,13 +83,13 @@
                 </div>
 
                 <!-- Modal Actions -->
-                <div class="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <button type="button" @click="closeModal()" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="closeModal()" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>
                     <button type="submit" 
                             :disabled="!reviewText.trim() || reviewText.length < 5"
-                            class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-extrabold text-xs shadow-md transition">
+                            class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
                         Kirim Ulasan
                     </button>
                 </div>
@@ -129,11 +129,11 @@ function reviewModalApp() {
         },
         getRatingLabel(val) {
             const labels = {
-                5: '⭐⭐⭐⭐⭐ Sangat Memuaskan & Sempurna!',
-                4: '⭐⭐⭐⭐ Bagus & Memuaskan',
-                3: '⭐⭐⭐ Cukup Baik',
-                2: '⭐⭐ Kurang Memuaskan',
-                1: '⭐ Kecewa / Perlu Perbaikan'
+                5: 'Sangat Memuaskan & Sempurna (5/5)',
+                4: 'Bagus & Memuaskan (4/5)',
+                3: 'Cukup Baik (3/5)',
+                2: 'Kurang Memuaskan (2/5)',
+                1: 'Kecewa / Perlu Perbaikan (1/5)'
             };
             return labels[val] || '';
         }

@@ -15,7 +15,7 @@
         Ada yang Bisa Kami Bantu?
       </h1>
       <p class="text-xs sm:text-sm text-gray-300 max-w-xl mx-auto leading-relaxed">
-        Temukan jawaban lengkap seputar cara booking sesi foto, garansi pembayaran escrow, verifikasi studio fotografer, dan kompetisi lomba foto.
+        Temukan jawaban lengkap seputar cara booking sesi foto, garansi pembayaran escrow, verifikasi fotografer, dan kompetisi lomba foto.
       </p>
     </div>
 

@@ -63,6 +63,15 @@ class ChatController extends Controller
     }
 
     /**
+     * Helper URL Avatar (Mendukung URL eksternal Unsplash/Cloud dan storage lokal).
+     */
+    public static function resolveAvatarUrl($foto)
+    {
+        if (!$foto) return null;
+        return str_starts_with($foto, 'http') ? $foto : asset('storage/' . $foto);
+    }
+
+    /**
      * Format & Urutkan Thread Chat Berdasarkan Pesan / Aktivitas Terbaru Teratas (Newest on Top).
      */
     public static function formatThreadsForUser($rawThreads, $user, $role)
@@ -77,13 +86,13 @@ class ChatController extends Controller
                 $otherUser = $t->client->user ?? null;
                 $name = $t->client->nama ?? 'Klien';
                 $initial = strtoupper(substr($name, 0, 2));
-                $foto = $t->client->foto ? asset('storage/' . $t->client->foto) : null;
+                $foto = self::resolveAvatarUrl($t->client->foto ?? null);
                 $photographerId = null;
             } else {
                 $otherUser = $t->photographer->user ?? null;
-                $name = $t->photographer->nama ?? 'Studio Fotografer';
+                $name = $t->photographer->nama ?? 'Fotografer';
                 $initial = strtoupper(substr($name, 0, 2));
-                $foto = $t->photographer->foto ? asset('storage/' . $t->photographer->foto) : null;
+                $foto = self::resolveAvatarUrl($t->photographer->foto ?? null);
                 $photographerId = $t->photographer->id ?? null;
             }
 
@@ -133,6 +142,31 @@ class ChatController extends Controller
             'alamat' => 'Jakarta, Indonesia',
         ]);
 
+        $activeThreadId = $request->query('thread');
+        $photographerIdParam = $request->query('photographer') ?? $request->query('photographer_id');
+
+        if ($photographerIdParam) {
+            $threadByPhoto = ChatBooking::firstOrCreate([
+                'id_client' => $client->id,
+                'id_photographer' => $photographerIdParam,
+            ]);
+            $activeThreadId = $threadByPhoto->id;
+        } elseif ($activeThreadId) {
+            // Check if activeThreadId belongs to a ChatBooking
+            $exists = ChatBooking::where('id_client', $client->id)->where('id', $activeThreadId)->exists();
+            if (!$exists) {
+                // Fallback: check if it was passed as a contract ID
+                $contract = \App\Models\Contract::where('id', $activeThreadId)->first();
+                if ($contract && $contract->id_photographer) {
+                    $threadByContract = ChatBooking::firstOrCreate([
+                        'id_client' => $client->id,
+                        'id_photographer' => $contract->id_photographer,
+                    ]);
+                    $activeThreadId = $threadByContract->id;
+                }
+            }
+        }
+
         $rawThreads = ChatBooking::where('id_client', $client->id)
             ->with(['photographer.user', 'lastMessage'])
             ->get();
@@ -140,7 +174,6 @@ class ChatController extends Controller
         $formattedThreads = self::formatThreadsForUser($rawThreads, $user, 'client');
         $threads = $formattedThreads;
 
-        $activeThreadId = $request->query('thread');
         if (!$activeThreadId && $formattedThreads->count() > 0) {
             $activeThreadId = $formattedThreads->first()['id'];
         }
@@ -164,9 +197,9 @@ class ChatController extends Controller
                 $photoUser = $activeThreadModel->photographer->user ?? null;
                 $activeThread = (object) [
                     'id' => $activeThreadModel->id,
-                    'name' => $activeThreadModel->photographer->nama ?? 'Studio Fotografer',
-                    'initial' => strtoupper(substr($activeThreadModel->photographer->nama ?? 'S', 0, 2)),
-                    'foto' => $activeThreadModel->photographer->foto ? asset('storage/' . $activeThreadModel->photographer->foto) : null,
+                    'name' => $activeThreadModel->photographer->nama ?? 'Fotografer',
+                    'initial' => strtoupper(substr($activeThreadModel->photographer->nama ?? 'F', 0, 2)),
+                    'foto' => self::resolveAvatarUrl($activeThreadModel->photographer->foto ?? null),
                     'photographer_id' => $activeThreadModel->photographer->id ?? null,
                     'status_user' => self::formatLastSeen($photoUser ? $photoUser->last_seen_at : null),
                 ];
@@ -240,7 +273,7 @@ class ChatController extends Controller
                     'id' => $activeThreadModel->id,
                     'name' => $activeThreadModel->client->nama ?? 'Klien',
                     'initial' => strtoupper(substr($activeThreadModel->client->nama ?? 'K', 0, 2)),
-                    'foto' => $activeThreadModel->client->foto ? asset('storage/' . $activeThreadModel->client->foto) : null,
+                    'foto' => self::resolveAvatarUrl($activeThreadModel->client->foto ?? null),
                     'photographer_id' => null,
                     'status_user' => self::formatLastSeen($clientUser ? $clientUser->last_seen_at : null),
                 ];
@@ -350,12 +383,12 @@ class ChatController extends Controller
         if ($user->role === 'photographer') {
             $otherUser = $thread->client->user ?? null;
             $otherName = $thread->client->nama ?? 'Klien';
-            $otherAvatar = $thread->client->foto ? asset('storage/' . $thread->client->foto) : null;
+            $otherAvatar = self::resolveAvatarUrl($thread->client->foto ?? null);
             $otherInitial = strtoupper(substr($otherName, 0, 2));
         } else {
             $otherUser = $thread->photographer->user ?? null;
-            $otherName = $thread->photographer->nama ?? 'Studio Fotografer';
-            $otherAvatar = $thread->photographer->foto ? asset('storage/' . $thread->photographer->foto) : null;
+            $otherName = $thread->photographer->nama ?? 'Fotografer';
+            $otherAvatar = self::resolveAvatarUrl($thread->photographer->foto ?? null);
             $otherInitial = strtoupper(substr($otherName, 0, 2));
             $photographerId = $thread->photographer->id ?? null;
         }

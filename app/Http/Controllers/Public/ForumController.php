@@ -82,7 +82,7 @@ class ForumController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk berdiskusi.');
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu untuk berdiskusi.');
         }
 
         $request->validate([
@@ -109,7 +109,7 @@ class ForumController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            return redirect()->route('login')->with('error', 'Silakan login untuk membalas diskusi.');
+            return redirect()->guest(route('login'))->with('error', 'Silakan login untuk membalas diskusi.');
         }
 
         $post = ForumPost::findOrFail($id);

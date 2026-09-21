@@ -45,8 +45,6 @@
         </div>
     </div>
 
-    </div>
-
     <!-- Data Table Card -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
         

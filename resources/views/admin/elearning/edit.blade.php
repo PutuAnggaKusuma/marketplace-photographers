@@ -19,7 +19,10 @@
             </p>
         </div>
         <div>
-            <a href="{{ route('admin.elearning') }}" class="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-extrabold text-xs transition inline-flex items-center justify-center shrink-0">Kembali ke Daftar Materi</a>
+            <a href="{{ route('admin.elearning') }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
+                <span>Kembali</span>
+            </a>
         </div>
     </div>
 
@@ -94,7 +97,70 @@
                 @enderror
             </div>
 
-            <!-- 3. URL Video Youtube (Opsional) -->
+            <!-- 3. Tipe Akses & Harga Kursus (Pure Vertical Dropdown) -->
+            @php
+                $initialIsPremium = old('is_premium', $material->is_premium ? '1' : ($material->harga > 0 ? '1' : '0'));
+                $initialAccessName = $initialIsPremium == '1' ? 'Berbayar (Akses Kursus Berbayar)' : 'Akses Gratis (Semua Pengguna)';
+            @endphp
+            <div x-data="{ 
+                    openAccess: false, 
+                    isPremium: '{{ $initialIsPremium }}', 
+                    accessName: '{{ $initialAccessName }}' 
+                 }" 
+                 class="space-y-5">
+                
+                <!-- Dropdown Tipe Akses -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        Tipe Akses Kursus <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative w-full">
+                        <input type="hidden" name="is_premium" :value="isPremium">
+                        <button @click="openAccess = !openAccess" type="button" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
+                            <span x-text="accessName" class="truncate"></span>
+                            <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="openAccess ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="openAccess" @click.away="openAccess = false" x-transition 
+                             class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden" style="display: none;">
+                            <button type="button" 
+                                    @click="isPremium = '0'; accessName = 'Akses Gratis (Semua Pengguna)'; openAccess = false" 
+                                    class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40"
+                                    :class="isPremium === '0' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                <span>Akses Gratis (Semua Pengguna)</span>
+                                <span x-show="isPremium === '0'" class="text-amber-600 font-bold">✓</span>
+                            </button>
+                            <button type="button" 
+                                    @click="isPremium = '1'; accessName = 'Berbayar (Akses Kursus Berbayar)'; openAccess = false" 
+                                    class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
+                                    :class="isPremium === '1' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                <span>Berbayar (Akses Kursus Berbayar)</span>
+                                <span x-show="isPremium === '1'" class="text-amber-600 font-bold">✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Harga Kursus Vertikal di Bawahnya (Hanya Muncul Jika Berbayar) -->
+                <div x-show="isPremium === '1'" x-transition class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                        Harga Kursus (Rp) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="number" 
+                           name="harga" 
+                           value="{{ old('harga', $material->harga ?? 149000) }}"
+                           min="0"
+                           step="1000"
+                           placeholder="Contoh: 149000" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('harga') border-rose-500 @enderror">
+                    <p class="text-[11px] text-gray-400 dark:text-gray-500">Masukkan nominal angka murni tanpa titik atau koma.</p>
+                    @error('harga')
+                        <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <!-- 4. URL Video Youtube (Opsional) -->
             <div>
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                     Link Video Pembelajaran YouTube / Vimeo (Opsional)
@@ -158,7 +224,7 @@
             <!-- Action Button Footer -->
             <div class="flex items-center justify-end pt-4">
                 <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition">
-                    Simpan Perubahan
+                    Perbaharui Data
                 </button>
             </div>
         </form>

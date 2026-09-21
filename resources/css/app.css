@@ -239,7 +239,7 @@ layer(base);
 
 @layer base {
   body {
-    @apply font-outfit relative z-1 bg-gray-50 text-base font-normal;
+    @apply font-outfit relative z-1 bg-white dark:bg-gray-900 text-base font-normal;
   }
 }
 

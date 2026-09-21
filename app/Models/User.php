@@ -95,6 +95,11 @@ class User extends Authenticatable
         return $this->hasOne(RolePhotographer::class, 'id_user', 'id');
     }
 
+    public function roleClient()
+    {
+        return $this->hasOne(RoleClient::class, 'id_user', 'id');
+    }
+
     /**
      * Get the user's avatar URL from their rolePhotographer foto.
      * Returns null if no foto is set (views should fall back to initials).
@@ -120,5 +125,13 @@ class User extends Authenticatable
         return strtoupper(
             substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : '')
         );
+    }
+
+    /**
+     * Relasi ke seluruh progress belajar e-learning
+     */
+    public function elearningProgresses()
+    {
+        return $this->hasMany(ELearningProgress::class, 'id_user');
     }
 }

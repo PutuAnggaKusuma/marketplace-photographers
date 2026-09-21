@@ -1,6 +1,6 @@
 @extends('layouts.photographer')
 
-@section('title', 'Pesan Client — Studio Fotografer')
+@section('title', 'Pesan Klien — Fotografer')
 
 @section('content')
 <div class="flex-1 flex w-full h-full min-h-0 bg-white dark:bg-gray-800 overflow-hidden relative select-none"
@@ -56,11 +56,11 @@
                         <div class="w-11 h-11 rounded-full bg-amber-500 flex items-center justify-center text-white font-black text-sm shadow-xs overflow-hidden"
                              :class="activeThreadId === t.id ? 'ring-2 ring-amber-500 ring-offset-2 dark:ring-offset-gray-800' : ''">
                             <template x-if="t.foto">
-                                <img :src="t.foto" class="w-full h-full object-cover">
+                                <img :src="t.foto" class="w-full h-full object-cover" x-on:error="$el.style.display='none'; if ($el.nextElementSibling) $el.nextElementSibling.style.display='flex'">
                             </template>
-                            <template x-if="!t.foto">
+                            <div class="w-full h-full flex items-center justify-center" :style="t.foto ? 'display: none;' : ''">
                                 <span x-text="t.initial"></span>
-                            </template>
+                            </div>
                         </div>
                         <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800"
                               :class="t.status_user ? t.status_user.dot_color : 'bg-gray-400'"></span>
@@ -107,11 +107,11 @@
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-black text-xs shadow-xs overflow-hidden">
                         <template x-if="activeThread && activeThread.foto">
-                            <img :src="activeThread.foto" class="w-full h-full object-cover">
+                            <img :src="activeThread.foto" class="w-full h-full object-cover" x-on:error="$el.style.display='none'; if ($el.nextElementSibling) $el.nextElementSibling.style.display='flex'">
                         </template>
-                        <template x-if="activeThread && !activeThread.foto">
+                        <div class="w-full h-full flex items-center justify-center" :style="(activeThread && activeThread.foto) ? 'display: none;' : ''">
                             <span x-text="activeThread ? activeThread.initial : ''"></span>
-                        </template>
+                        </div>
                     </div>
                     <div>
                         <h3 class="text-sm font-black text-gray-900 dark:text-white" x-text="activeThread ? activeThread.name : ''"></h3>

@@ -54,8 +54,9 @@
             <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Manajemen Akun Admin & Staff</h1>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Daftar staf administrator internal dan super admin yang mengelola operasional platform</p>
         </div>
-        <a href="{{ route('admin.admins.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center justify-center shrink-0">
-            + Tambah Admin Baru
+        <a href="{{ route('admin.admins.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Tambah Admin Baru</span>
         </a>
     </div>
 

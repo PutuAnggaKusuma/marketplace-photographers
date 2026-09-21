@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Photographer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
+use App\Models\Notification;
 use App\Models\RolePhotographer;
 use Illuminate\Http\Request;
 
@@ -82,17 +83,45 @@ class PhotographerBookingController extends Controller
             $photographer = RolePhotographer::first();
         }
 
-        $contract = Contract::where('id_photographer', $photographer->id)->findOrFail($id);
+        $contract = Contract::with(['client.user'])->where('id_photographer', $photographer->id)->findOrFail($id);
         $status = $request->input('status');
 
         if ($status === 'confirmed') {
             $contract->bookingDetail()->update(['status_booking' => 'confirmed']);
             $contract->update(['status_contract' => 'active']);
             $message = 'Pesanan booking berhasil dikonfirmasi! Klien telah diberitahukan.';
+
+            if ($contract->client && $contract->client->id_user) {
+                Notification::create([
+                    'id_user' => $contract->client->id_user,
+                    'type' => 'booking_confirmed',
+                    'title' => 'Jadwal Booking Dikonfirmasi',
+                    'message' => "Fotografer {$photographer->nama} telah mengonfirmasi jadwal pemotretan sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
+                    'data' => [
+                        'contract_id' => $contract->id,
+                        'url' => route('client.bookings'),
+                    ],
+                    'is_read' => false,
+                ]);
+            }
         } elseif ($status === 'cancelled') {
             $contract->bookingDetail()->update(['status_booking' => 'cancelled']);
             $contract->update(['status_contract' => 'cancelled']);
             $message = 'Pesanan booking telah ditolak / dibatalkan.';
+
+            if ($contract->client && $contract->client->id_user) {
+                Notification::create([
+                    'id_user' => $contract->client->id_user,
+                    'type' => 'booking_cancelled',
+                    'title' => 'Jadwal Booking Dibatalkan',
+                    'message' => "Pesanan booking #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah ditolak / dibatalkan oleh fotografer.",
+                    'data' => [
+                        'contract_id' => $contract->id,
+                        'url' => route('client.bookings'),
+                    ],
+                    'is_read' => false,
+                ]);
+            }
         } elseif ($status === 'completed') {
             $contract->bookingDetail()->update(['status_booking' => 'completed']);
             $contract->update(['status_contract' => 'completed']);
@@ -117,7 +146,7 @@ class PhotographerBookingController extends Controller
             $photographer = RolePhotographer::first();
         }
 
-        $contract = Contract::where('id_photographer', $photographer->id)->findOrFail($id);
+        $contract = Contract::with(['client.user'])->where('id_photographer', $photographer->id)->findOrFail($id);
 
         $contract->bookingDetail()->update([
             'hasil_foto_url' => $request->input('hasil_foto_url'),
@@ -126,6 +155,21 @@ class PhotographerBookingController extends Controller
         ]);
 
         $contract->update(['status_contract' => 'completed']);
+
+        // Kirim Notifikasi in-app ke Klien
+        if ($contract->client && $contract->client->id_user) {
+            Notification::create([
+                'id_user' => $contract->client->id_user,
+                'type' => 'gallery_delivered',
+                'title' => 'Galeri Hasil Foto Siap Diunduh',
+                'message' => "Fotografer {$photographer->nama} telah mengunggah tautan galeri hasil foto untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Silakan akses dan unduh hasilnya.",
+                'data' => [
+                    'contract_id' => $contract->id,
+                    'url' => route('client.galleries'),
+                ],
+                'is_read' => false,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Tautan galeri foto berhasil diunggah & dikirimkan ke Klien!');
     }

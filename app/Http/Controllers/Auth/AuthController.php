@@ -41,8 +41,16 @@ class AuthController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
+        if ($request->filled('redirect')) {
+            session(['url.intended' => $request->input('redirect')]);
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $intended = session('url.intended') ?: $request->input('redirect');
             $request->session()->regenerate();
+            if ($intended) {
+                session(['url.intended' => $intended]);
+            }
 
             $user = Auth::user();
             return $this->redirectBasedOnRole($user)
@@ -91,6 +99,10 @@ class AuthController extends Controller
             'role.in' => 'Pilihan role akun tidak valid.',
         ]);
 
+        if ($request->filled('redirect')) {
+            session(['url.intended' => $request->input('redirect')]);
+        }
+
         $user = User::create([
             'nama' => $request->nama,
             'email' => $request->email,
@@ -100,6 +112,11 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+        $intended = session('url.intended') ?: $request->input('redirect');
+        $request->session()->regenerate();
+        if ($intended) {
+            session(['url.intended' => $intended]);
+        }
 
         return $this->redirectBasedOnRole($user)
             ->with('success', 'Akun Anda berhasil dibuat. Selamat datang di LensMatch!');
@@ -133,24 +150,28 @@ class AuthController extends Controller
         if (session()->has('url.intended')) {
             $intended = session()->pull('url.intended');
 
-            // Validasi apakah intended URL sesuai dengan role pengguna saat ini
-            $isAllowed = true;
-            if (in_array($user->role, ['super_admin', 'admin'])) {
-                if (str_contains($intended, '/photographer')) {
-                    $isAllowed = false;
+            // Hindari looping kembali ke halaman login atau register
+            $authPaths = [url('/login'), url('/register'), route('login'), route('register')];
+            if (!empty($intended) && !in_array($intended, $authPaths)) {
+                // Validasi apakah intended URL sesuai dengan role pengguna saat ini
+                $isAllowed = true;
+                if (in_array($user->role, ['super_admin', 'admin'])) {
+                    if (str_contains($intended, '/photographer') || str_contains($intended, '/client')) {
+                        $isAllowed = false;
+                    }
+                } elseif ($user->role === 'photographer') {
+                    if (str_contains($intended, '/admin') || str_contains($intended, '/client')) {
+                        $isAllowed = false;
+                    }
+                } elseif ($user->role === 'client') {
+                    if (str_contains($intended, '/admin') || str_contains($intended, '/photographer')) {
+                        $isAllowed = false;
+                    }
                 }
-            } elseif ($user->role === 'photographer') {
-                if (str_contains($intended, '/admin')) {
-                    $isAllowed = false;
-                }
-            } elseif ($user->role === 'client') {
-                if (str_contains($intended, '/admin') || str_contains($intended, '/photographer')) {
-                    $isAllowed = false;
-                }
-            }
 
-            if ($isAllowed) {
-                return redirect()->to($intended);
+                if ($isAllowed) {
+                    return redirect()->to($intended);
+                }
             }
         }
 

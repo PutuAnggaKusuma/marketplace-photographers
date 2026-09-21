@@ -27,31 +27,31 @@
         </p>
       </div>
 
-      <!-- Spacious Floating Search Box (Pure White Center, Gray Border Only, Flex Centered Icon) -->
-      <form action="{{ url('/fotografer') }}" method="GET" class="max-w-4xl mx-auto bg-white dark:bg-gray-800 px-5 sm:px-6 lg:px-7 py-3.5 sm:py-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row gap-3.5 sm:gap-4 items-stretch">
+      <!-- Symmetrical Search Bar (Shorter Category, Balanced Search & Button, Symmetrical with Header) -->
+      <form action="{{ url('/fotografer') }}" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-3.5 max-w-3xl mx-auto items-center">
         
-        <!-- 1. Location Input (PURE WHITE CENTER, THIN GRAY BORDER ONLY, FLEX CENTERED ICON) -->
-        <div class="flex-1 w-full flex items-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-4 py-3.5 sm:py-4 focus-within:ring-2 focus-within:ring-amber-400 transition">
-          <svg class="w-4 h-4 text-gray-400 shrink-0 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- 1. Location Input (Balanced Search Field - 5 of 12 Cols) -->
+        <div class="md:col-span-5 w-full h-11 sm:h-12 flex items-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-3.5 shadow-xs focus-within:ring-2 focus-within:ring-amber-400 transition">
+          <svg class="w-4 h-4 text-gray-400 shrink-0 mr-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
-          <input type="text" name="location" placeholder="Cari kota / wilayah (mis: Bali, Jakarta, Bandung)..." class="w-full bg-transparent border-0 outline-none p-0 text-xs sm:text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:ring-0 leading-normal" />
+          <input type="text" name="location" placeholder="Cari kota / wilayah..." class="w-full bg-transparent border-0 outline-none p-0 text-xs sm:text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:ring-0 leading-normal font-medium truncate" />
         </div>
 
-        <!-- 2. Category Dropdown Select (Standardized Alpine.js Custom Floating Dropdown) -->
-        <div class="w-full md:w-64 relative" x-data="{ 
+        <!-- 2. Category Dropdown Select (Shortened Width - 4 of 12 Cols) -->
+        <div class="md:col-span-4 w-full relative h-11 sm:h-12" x-data="{ 
           open: false, 
           selectedId: '{{ request('category', '') }}',
-          selectedName: '{{ request('category') && $categories->firstWhere('id', request('category')) ? $categories->firstWhere('id', request('category'))->nama_kategori : 'Semua Kategori Sesi' }}' 
+          selectedName: '{{ request('category') && $categories->firstWhere('id', request('category')) ? $categories->firstWhere('id', request('category'))->nama_kategori : 'Semua Kategori' }}' 
         }">
           <input type="hidden" name="category" :value="selectedId" />
           
           <button @click="open = !open" 
                   type="button" 
-                  class="w-full pl-4 pr-10 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 text-left flex items-center justify-between cursor-pointer transition shadow-xs">
+                  class="w-full h-full pl-3.5 pr-8 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 text-left flex items-center justify-between cursor-pointer transition shadow-xs">
             <span x-text="selectedName" class="truncate"></span>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
               <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
               </svg>
@@ -71,11 +71,10 @@
                style="display: none;">
             
             <button type="button" 
-                    @click="selectedId = ''; selectedName = 'Semua Kategori Sesi'; open = false" 
+                    @click="selectedId = ''; selectedName = 'Semua Kategori'; open = false" 
                     class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
                     :class="selectedId === '' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600' : ''">
-              <span>Semua Kategori Sesi</span>
-              
+              <span>Semua Kategori</span>
             </button>
 
             @foreach($categories as $category)
@@ -84,17 +83,16 @@
                       class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition flex items-center justify-between text-left cursor-pointer"
                       :class="selectedId === '{{ $category->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600' : ''">
                 <span>{{ $category->nama_kategori }}</span>
-                
               </button>
             @endforeach
 
           </div>
         </div>
 
-        <!-- 3. Button Temukan Fotografer (MATCHING HEIGHT & HOVER) -->
-        <button type="submit" class="w-full md:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:scale-105 transition-all duration-200 shrink-0 flex items-center justify-center gap-2 self-stretch">
+        <!-- 3. Button Temukan Fotografer (3 of 12 Cols) -->
+        <button type="submit" class="md:col-span-3 w-full h-11 sm:h-12 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-sm hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer">
           <svg class="w-4 h-4 text-gray-900 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
-          <span>Temukan Fotografer</span>
+          <span class="truncate">Temukan</span>
         </button>
 
       </form>

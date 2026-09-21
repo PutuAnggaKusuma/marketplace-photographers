@@ -32,7 +32,8 @@
     <!-- Icon Container -->
     <div class="w-14 h-14 rounded-full mx-auto flex items-center justify-center shrink-0 shadow-sm"
       :class="{
-        'bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400': iconType === 'danger' || iconType === 'logout',
+        'bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400': iconType === 'danger' || iconType === 'delete' || iconType === 'logout',
+        'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400': iconType === 'check' || iconType === 'success',
         'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400': iconType === 'warning',
         'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400': iconType === 'info'
       }">
@@ -40,8 +41,11 @@
       <template x-if="iconType === 'logout'">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
       </template>
-      <template x-if="iconType === 'danger'">
+      <template x-if="iconType === 'danger' || iconType === 'delete'">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+      </template>
+      <template x-if="iconType === 'check' || iconType === 'success'">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
       </template>
       <template x-if="iconType === 'warning'">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>

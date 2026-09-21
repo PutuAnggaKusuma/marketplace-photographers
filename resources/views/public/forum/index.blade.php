@@ -3,7 +3,7 @@
 @section('title', 'Forum Diskusi Fotografer — LensMatch')
 
 @section('content')
-<section class="pt-10 pb-4 lg:pt-12 lg:pb-6 bg-white dark:bg-gray-900/50 min-h-screen" 
+<section class="pt-10 pb-4 lg:pt-12 lg:pb-6 bg-white dark:bg-gray-900 min-h-screen" 
          x-data="forumSectionApp()" 
          id="forum-main-section">
 

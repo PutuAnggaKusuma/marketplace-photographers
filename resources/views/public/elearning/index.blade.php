@@ -398,7 +398,7 @@
 
   </div>
 
-  <!-- Universal Login Requirement Modal for Guest E-Learning Access -->
+  <!-- Universal Login Requirement Modal for Guest E-Learning Access (Square Box, Plain X, No Batal Button) -->
   <div x-show="loginModal" 
        x-cloak 
        x-transition:enter="transition ease-out duration-300"
@@ -412,30 +412,27 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-gray-200 dark:border-gray-700 p-7 space-y-6">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
         
+        <!-- Header without Icon & Plain Close Button -->
         <div class="flex items-start justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25"></path></svg>
-            </div>
-            <div>
-              <h3 class="text-base font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
-              <p class="text-xs text-gray-500">Akses Akademi E-Learning LensMatch</p>
-            </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Akses Akademi E-Learning LensMatch</p>
           </div>
-          <button type="button" @click="closeModal()" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white text-base font-black">✕</button>
+          <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-base font-bold transition cursor-pointer p-0.5 leading-none">✕</button>
         </div>
 
-        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-          Untuk dapat membaca materi edukasi E-Learning <strong class="text-amber-600 dark:text-amber-400" x-text="targetCourseTitle ? '“' + targetCourseTitle + '”' : ''"></strong> dan meningkatkan skill fotografi, Anda harus masuk ke akun LensMatch terlebih dahulu.
+        <!-- Body Text -->
+        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed">
+          Untuk dapat membaca materi edukasi E-Learning <strong class="font-bold text-gray-900 dark:text-white" x-text="targetCourseTitle ? '“' + targetCourseTitle + '”' : ''"></strong> dan meningkatkan skill fotografi, Anda harus masuk ke akun LensMatch terlebih dahulu.
         </p>
 
-        <div class="flex flex-col gap-2.5 pt-2">
-          <a :href="'{{ route('login') }}?redirect=' + encodeURIComponent(targetRedirectUrl)" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition text-center">
+        <!-- Action Button -->
+        <div class="pt-1">
+          <a :href="'{{ route('login') }}?redirect=' + encodeURIComponent(targetRedirectUrl)" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
             Masuk ke Akun
           </a>
-          
         </div>
 
       </div>

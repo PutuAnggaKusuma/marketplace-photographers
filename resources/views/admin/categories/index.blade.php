@@ -56,7 +56,7 @@
         </div>
         <a href="{{ route('admin.categories.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-            <span>+ Tambah Kategori Baru</span>
+            <span>Tambah Kategori Baru</span>
         </a>
     </div>
 

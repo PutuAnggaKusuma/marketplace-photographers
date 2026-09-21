@@ -18,7 +18,7 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Silakan masuk ke akun Anda terlebih dahulu.');
+            return redirect()->guest(route('login'))->with('error', 'Silakan masuk ke akun Anda terlebih dahulu.');
         }
 
         $user = Auth::user();

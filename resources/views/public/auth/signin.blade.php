@@ -19,11 +19,12 @@
           roleDropdownOpen: false,
           setMode(newMode) {
             this.mode = newMode;
+            const searchParams = window.location.search;
             if (newMode === 'register') {
-              window.history.pushState({}, '', '/register');
+              window.history.pushState({}, '', '/register' + searchParams);
               document.title = 'Daftar Akun Baru — LensMatch';
             } else {
-              window.history.pushState({}, '', '/login');
+              window.history.pushState({}, '', '/login' + searchParams);
               document.title = 'Masuk ke Akun — LensMatch';
             }
           },
@@ -170,6 +171,9 @@
               <!-- Sign In Form -->
               <form action="{{ route('login') }}" method="POST" class="space-y-4 pt-1">
                 @csrf
+                @if(request()->filled('redirect') || session()->has('url.intended'))
+                  <input type="hidden" name="redirect" value="{{ request('redirect', session('url.intended')) }}">
+                @endif
                 
                 <!-- Email -->
                 <div class="space-y-1.5">
@@ -280,6 +284,9 @@
               <!-- Sign Up Form -->
               <form action="{{ route('register') }}" method="POST" class="space-y-3.5 pt-1">
                 @csrf
+                @if(request()->filled('redirect') || session()->has('url.intended'))
+                  <input type="hidden" name="redirect" value="{{ request('redirect', session('url.intended')) }}">
+                @endif
                 
                 <!-- Nama Lengkap -->
                 <div class="space-y-1">
@@ -413,12 +420,12 @@
           <div class="absolute inset-0 w-full h-full overflow-hidden transition-opacity duration-700 ease-in-out bg-cover bg-center"
                :class="mode === 'login' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
                style="clip-path: url(#havenix-shape-right); -webkit-clip-path: url(#havenix-shape-right); background-image: url('https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1920&q=85');">
-            <!-- Bottom Dark Gradient for Maximum Text Contrast -->
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent"></div>
+            <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             
             <!-- Bottom-Left Tagline Text (Placed safely away from bottom-right cutout) -->
             <div class="absolute bottom-8 left-8 sm:left-10 right-28 text-left z-10">
-              <p class="text-xs sm:text-sm xl:text-[14px] font-semibold text-white/95 leading-relaxed drop-shadow-md max-w-sm">
+              <p class="text-xs sm:text-sm xl:text-[14px] font-medium text-gray-300 leading-relaxed drop-shadow-md max-w-sm">
                 Temukan ribuan fotografer profesional terpercaya untuk setiap momen berharga Anda.
               </p>
             </div>
@@ -429,12 +436,12 @@
           <div class="absolute inset-0 w-full h-full overflow-hidden transition-opacity duration-700 ease-in-out bg-cover bg-center"
                :class="mode === 'register' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
                style="clip-path: url(#havenix-shape-left); -webkit-clip-path: url(#havenix-shape-left); background-image: url('https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?w=1920&q=85');">
-            <!-- Bottom Dark Gradient for Maximum Text Contrast -->
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-950/85 via-gray-950/20 to-transparent"></div>
+            <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             
             <!-- Bottom-Right Tagline Text (Placed safely away from bottom-left cutout) -->
             <div class="absolute bottom-8 right-8 sm:right-10 left-28 text-right z-10">
-              <p class="text-xs sm:text-sm xl:text-[14px] font-semibold text-white/95 leading-relaxed drop-shadow-md max-w-sm ml-auto">
+              <p class="text-xs sm:text-sm xl:text-[14px] font-medium text-gray-300 leading-relaxed drop-shadow-md max-w-sm ml-auto">
                 Mulai perjalanan fotografi Anda bersama ribuan kreator & klien di seluruh penjuru negeri.
               </p>
             </div>

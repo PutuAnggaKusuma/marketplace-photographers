@@ -5,6 +5,7 @@ import "../css/app.css";
 
 import Alpine from "alpinejs";
 import persist from "@alpinejs/persist";
+import collapse from "@alpinejs/collapse";
 import flatpickr from "flatpickr";
 import Dropzone from "dropzone";
 
@@ -16,6 +17,7 @@ import "./components/calendar-init.js";
 import "./components/image-resize";
 
 Alpine.plugin(persist);
+Alpine.plugin(collapse);
 window.Alpine = Alpine;
 Alpine.start();
 

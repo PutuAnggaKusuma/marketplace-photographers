@@ -138,7 +138,7 @@
             <!-- Action Button Footer -->
             <div class="flex items-center justify-end pt-4">
                 <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition">
-                    Simpan Perubahan
+                    Perbaharui Data
                 </button>
             </div>
 

@@ -35,7 +35,7 @@
         
         <!-- Search Keyword Row (Search Icon on the RIGHT side) -->
         <div class="relative">
-          <input type="text" name="q" value="{{ $searchKeyword }}" placeholder="Cari nama fotografer, nama studio, atau kata kunci bio..." class="w-full pl-5 pr-12 py-3.5 sm:py-4 text-xs sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none placeholder-gray-400 font-medium" />
+          <input type="text" name="q" value="{{ $searchKeyword }}" placeholder="Cari nama fotografer, keahlian, atau kata kunci bio..." class="w-full pl-5 pr-12 py-3.5 sm:py-4 text-xs sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none placeholder-gray-400 font-medium" />
           <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-amber-500 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8"></circle>

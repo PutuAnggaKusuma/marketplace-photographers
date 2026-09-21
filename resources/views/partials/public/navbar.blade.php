@@ -1,31 +1,91 @@
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/95 dark:border-gray-800 shadow-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 sm:h-20">
-      <!-- Logo -->
-      <div class="flex items-center gap-3">
-        <a href="{{ url('/') }}" class="flex items-center gap-2">
-          <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600' fill='none'%3E%3Crect width='800' height='600' fill='%23F3F4F6'/%3E%3Cpath d='M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z' stroke='%239CA3AF' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='400' cy='320' r='30' stroke='%239CA3AF' stroke-width='12'/%3E%3Cline x1='310' y1='240' x2='490' y2='390' stroke='%23EF4444' stroke-width='10' stroke-linecap='round'/%3E%3Ctext x='400' y='450' font-family='sans-serif' font-size='22' font-weight='700' fill='%236B7280' text-anchor='middle'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-9 sm:h-10 w-auto" alt="LensMatch Logo" />
-        </a>
-      </div>
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/95 dark:border-gray-800 shadow-xs shrink-0">
+@if(request()->routeIs('public.elearning.show'))
+  <div 
+    class="w-full mx-auto transition-all duration-500 ease-in-out"
+    :class="classroomSidebarOpen ? 'max-w-full px-4 sm:px-8' : 'max-w-[1380px] px-4 sm:px-6 lg:px-8'"
+  >
+@else
+  <div class="{{ (request()->routeIs('client.chat*') || request()->is('chat*')) ? 'w-full px-4 sm:px-8' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' }}">
+@endif
+    <div class="flex items-center justify-between {{ (request()->routeIs('public.elearning.show') || request()->routeIs('public.elearning.checkout') || request()->routeIs('client.chat*') || request()->is('chat*')) ? 'h-16' : 'h-16 sm:h-20' }}">
+      @if(request()->routeIs('public.elearning.show') || request()->routeIs('public.elearning.checkout'))
+        <!-- Dedicated Learning Classroom Top Bar (Full-Width & Focused) -->
+        <div class="flex items-center gap-4 min-w-0">
+          <a href="{{ url('/') }}" class="flex items-center gap-2 shrink-0" title="Ke Beranda LensMatch">
+            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'600\' viewBox=\'0 0 800 600\' fill=\'none\'%3E%3Crect width=\'800\' height=\'600\' fill=\'%23F3F4F6\'/%3E%3Cpath d=\'M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z\' stroke=\'%239CA3AF\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Ccircle cx=\'400\' cy=\'320\' r=\'30\' stroke=\'%239CA3AF\' stroke-width=\'12\'/%3E%3Cline x1=\'310\' y1=\'240\' x2=\'490\' y2=\'390\' stroke=\'%23EF4444\' stroke-width=\'10\' stroke-linecap=\'round\'/%3E%3Ctext x=\'400\' y=\'450\' font-family=\'sans-serif\' font-size=\'22\' font-weight=\'700\' fill=\'%236B7280\' text-anchor=\'middle\'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-9 sm:h-10 w-auto" alt="LensMatch Logo" />
+          </a>
+          <span class="text-gray-300 dark:text-gray-700 hidden sm:inline">|</span>
+          @if(request()->routeIs('public.elearning.checkout') && isset($course))
+            <a href="{{ route('public.elearning.show', $course->slug) }}" class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+              <span>Kembali ke Ruang Belajar</span>
+            </a>
+          @else
+            <a href="{{ route('public.elearning.katalog') }}" class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+              <span>Katalog Akademi</span>
+            </a>
+          @endif
+        </div>
 
-      <!-- Navigation Links with Pure Yellow Text Active Highlight -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
-        <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
-          Beranda
-        </a>
-        <a href="{{ url('/fotografer') }}" class="{{ request()->is('fotografer*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
-          Cari Fotografer
-        </a>
-        <a href="{{ url('/forum') }}" class="{{ request()->is('forum*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
-          Komunitas Forum
-        </a>
-        <a href="{{ url('/lomba') }}" class="{{ request()->is('lomba*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
-          Informasi Lomba
-        </a>
-        <a href="{{ url('/elearning') }}" class="{{ request()->is('elearning*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
-          E-Learning
-        </a>
-      </nav>
+        <!-- Center Course Title in Classroom Navbar -->
+        <div class="hidden md:flex items-center min-w-0 px-4">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate max-w-md lg:max-w-lg">
+            @if(request()->routeIs('public.elearning.checkout'))
+              Checkout Akses Kursus
+            @else
+              {{ isset($course) ? $course->judul : 'Akademi LensMatch' }}
+            @endif
+          </span>
+        </div>
+      @elseif(request()->routeIs('client.chat*') || request()->is('chat*'))
+        <!-- Dedicated Chat Room Top Bar (Full-Width & Focused) -->
+        <div class="flex items-center gap-4 min-w-0">
+          <a href="{{ url('/') }}" class="flex items-center gap-2 shrink-0" title="Ke Beranda LensMatch">
+            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'600\' viewBox=\'0 0 800 600\' fill=\'none\'%3E%3Crect width=\'800\' height=\'600\' fill=\'%23F3F4F6\'/%3E%3Cpath d=\'M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z\' stroke=\'%239CA3AF\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Ccircle cx=\'400\' cy=\'320\' r=\'30\' stroke=\'%239CA3AF\' stroke-width=\'12\'/%3E%3Cline x1=\'310\' y1=\'240\' x2=\'490\' y2=\'390\' stroke=\'%23EF4444\' stroke-width=\'10\' stroke-linecap=\'round\'/%3E%3Ctext x=\'400\' y=\'450\' font-family=\'sans-serif\' font-size=\'22\' font-weight=\'700\' fill=\'%236B7280\' text-anchor=\'middle\'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-9 sm:h-10 w-auto" alt="LensMatch Logo" />
+          </a>
+          <span class="text-gray-300 dark:text-gray-700 hidden sm:inline">|</span>
+          <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('client.bookings') }}" 
+             onclick="if (window.history.length > 1 && document.referrer && document.referrer !== window.location.href) { event.preventDefault(); window.history.back(); }" 
+             class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            <span>Kembali</span>
+          </a>
+        </div>
+
+        <!-- Center Title in Chat Navbar -->
+        <div class="hidden md:flex items-center min-w-0 px-4">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate max-w-md lg:max-w-lg">
+            Ruang Diskusi & Chat Fotografer
+          </span>
+        </div>
+      @else
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <a href="{{ url('/') }}" class="flex items-center gap-2">
+            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'600\' viewBox=\'0 0 800 600\' fill=\'none\'%3E%3Crect width=\'800\' height=\'600\' fill=\'%23F3F4F6\'/%3E%3Cpath d=\'M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z\' stroke=\'%239CA3AF\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Ccircle cx=\'400\' cy=\'320\' r=\'30\' stroke=\'%239CA3AF\' stroke-width=\'12\'/%3E%3Cline x1=\'310\' y1=\'240\' x2=\'490\' y2=\'390\' stroke=\'%23EF4444\' stroke-width=\'10\' stroke-linecap=\'round\'/%3E%3Ctext x=\'400\' y=\'450\' font-family=\'sans-serif\' font-size=\'22\' font-weight=\'700\' fill=\'%236B7280\' text-anchor=\'middle\'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" src="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" class="h-9 sm:h-10 w-auto" alt="LensMatch Logo" />
+          </a>
+        </div>
+
+        <!-- Navigation Links with Pure Yellow Text Active Highlight -->
+        <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
+          <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
+            Beranda
+          </a>
+          <a href="{{ url('/fotografer') }}" class="{{ request()->is('fotografer*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
+            Cari Fotografer
+          </a>
+          <a href="{{ url('/forum') }}" class="{{ request()->is('forum*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
+            Komunitas Forum
+          </a>
+          <a href="{{ url('/lomba') }}" class="{{ request()->is('lomba*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
+            Informasi Lomba
+          </a>
+          <a href="{{ url('/elearning') }}" class="{{ request()->is('elearning*') ? 'text-amber-400 dark:text-amber-400 font-extrabold' : 'text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition' }}">
+            E-Learning
+          </a>
+        </nav>
+      @endif
 
       <!-- Auth Buttons, Notifications & User Profile Dropdown -->
       <div class="flex items-center gap-3 sm:gap-4">
@@ -47,19 +107,18 @@
 
             <!-- Notifications Dropdown List -->
             <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden">
-              <div class="px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/70 dark:bg-gray-900/60">
+              <div class="px-5 py-3.5 flex items-center justify-between bg-white dark:bg-gray-800">
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-black text-gray-900 dark:text-white">Notifikasi Saya</h3>
                   <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
                 </div>
-                <button type="button" @click="markAllRead()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline">Tandai dibaca</button>
+                <button type="button" @click="markAllRead()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer">Tandai dibaca</button>
               </div>
 
               <div class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
                 <template x-for="notif in notifications" :key="notif.id">
                   <div @click="openNotif(notif)" 
-                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3"
-                       :class="!notif.is_read ? 'bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50/80 dark:hover:bg-amber-950/40' : 'hover:bg-gray-50 dark:hover:bg-gray-700/40'">
+                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3 bg-white dark:bg-gray-800 hover:bg-gray-50/60 dark:hover:bg-gray-750/50">
                     
                     <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                          :class="{
@@ -82,19 +141,18 @@
                       </template>
                     </div>
 
-                    <div class="min-w-0 flex-1 space-y-0.5">
-                      <div class="flex items-center justify-between">
-                        <p class="text-xs font-bold text-gray-900 dark:text-white truncate" x-text="notif.title"></p>
-                        <span x-show="!notif.is_read" class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                    <div class="min-w-0 flex-1 space-y-1">
+                      <div class="flex items-start justify-between gap-2">
+                        <p class="text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-medium" x-text="notif.message || notif.title"></p>
+                        <span x-show="!notif.is_read" class="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1"></span>
                       </div>
-                      <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2" x-text="notif.message"></p>
                       <p class="text-[10px] text-gray-400 font-medium" x-text="notif.created_at"></p>
                     </div>
                   </div>
                 </template>
 
                 <template x-if="notifications.length === 0">
-                  <div class="px-5 py-8 text-center text-gray-400 space-y-1">
+                  <div class="px-5 py-8 text-center text-gray-400 space-y-1 bg-white dark:bg-gray-800">
                     <p class="text-xs font-bold">Belum ada notifikasi baru.</p>
                   </div>
                 </template>

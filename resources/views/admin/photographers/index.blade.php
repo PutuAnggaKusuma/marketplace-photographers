@@ -116,7 +116,7 @@
                     $sortLabels = [
                         'latest' => 'Urutan: Terbaru',
                         'oldest' => 'Urutan: Terlama',
-                        'name_asc' => 'Nama Studio (A-Z)'
+                        'name_asc' => 'Nama Fotografer (A-Z)'
                     ];
                     $curSortName = $sortLabels[$sort ?? 'latest'] ?? 'Urutan: Terbaru';
                 @endphp
