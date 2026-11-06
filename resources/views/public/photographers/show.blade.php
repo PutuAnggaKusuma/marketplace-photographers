@@ -12,324 +12,321 @@
   $avatarUrl = $photographer->foto_url ?? ($photographer->foto ? (str_starts_with($photographer->foto, 'http') ? $photographer->foto : asset('storage/' . $photographer->foto)) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80');
 @endphp
 
-<!-- Photographer Profile Details (Eclips Doctor Profile Design System — Dribbble Reference) -->
-<section class="relative pt-8 pb-12 lg:pt-12 lg:pb-16 bg-gray-50/60 dark:bg-gray-900/60 overflow-hidden"
-         x-data="{
-           activeTab: 'services',
-           lightboxOpen: false,
-           lightboxSrc: '',
-           lightboxTitle: '',
-           lightboxIndex: 0,
-           lightboxImages: [],
-           openLightbox(src, title, index = 0, images = []) {
-             this.lightboxSrc = src;
-             this.lightboxTitle = title;
-             this.lightboxIndex = index;
-             this.lightboxImages = images.length ? images : [src];
-             this.lightboxOpen = true;
-           },
-           nextImage() {
-             if (!this.lightboxImages.length) return;
-             this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length;
-             this.lightboxSrc = this.lightboxImages[this.lightboxIndex];
-           },
-           prevImage() {
-             if (!this.lightboxImages.length) return;
-             this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
-             this.lightboxSrc = this.lightboxImages[this.lightboxIndex];
-           }
-         }">
-  
-  <!-- Subtle Elegant Fluid Background Curve Accent (Dribbble Eclips Reference) -->
-  <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-60 dark:opacity-20 select-none">
-    <svg class="absolute -top-10 left-1/2 -translate-x-1/2 w-[1300px] h-[340px]" viewBox="0 0 1300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M-80 90 C 220 260, 520 -30, 840 180 C 1040 310, 1260 110, 1380 130" stroke="url(#wave-grad-1)" stroke-width="42" stroke-linecap="round" opacity="0.14"/>
-      <path d="M-30 130 C 270 300, 570 10, 890 220 C 1090 350, 1310 150, 1430 170" stroke="url(#wave-grad-2)" stroke-width="20" stroke-linecap="round" opacity="0.10"/>
-      <defs>
-        <linearGradient id="wave-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#f59e0b" />
-          <stop offset="50%" stop-color="#3b82f6" />
-          <stop offset="100%" stop-color="#10b981" />
-        </linearGradient>
-        <linearGradient id="wave-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#10b981" />
-          <stop offset="50%" stop-color="#f59e0b" />
-          <stop offset="100%" stop-color="#3b82f6" />
-        </linearGradient>
-      </defs>
-    </svg>
-  </div>
+<!-- Wrapper with Global Alpine State (Rule #66, #78, #86 Compliant) -->
+<div x-data="{
+       activeTab: 'services',
+       lightboxOpen: false,
+       lightboxSrc: '',
+       lightboxTitle: '',
+       lightboxIndex: 0,
+       lightboxImages: [],
+       openLightbox(src, title, index = 0, images = []) {
+         this.lightboxSrc = src;
+         this.lightboxTitle = title;
+         this.lightboxIndex = index;
+         this.lightboxImages = images.length ? images : [src];
+         this.lightboxOpen = true;
+       },
+       nextImage() {
+         if (!this.lightboxImages.length) return;
+         this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length;
+         this.lightboxSrc = this.lightboxImages[this.lightboxIndex];
+       },
+       prevImage() {
+         if (!this.lightboxImages.length) return;
+         this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
+         this.lightboxSrc = this.lightboxImages[this.lightboxIndex];
+       }
+     }">
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
-
-    <!-- Top Navigation / Back Button -->
-    <div class="flex items-center justify-between">
-      <a href="{{ route('public.photographers.katalog') }}" 
-         class="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-        <span>Kembali ke Katalog</span>
-      </a>
-
-      <!-- Mitra ID Tag -->
-      <span class="text-[11px] font-mono font-bold text-gray-400 dark:text-gray-500">
-        #FTR-{{ str_pad($photographer->id, 5, '0', STR_PAD_LEFT) }}
-      </span>
+  <!-- Photographer Profile Details (Eclips Doctor Profile Design System — Dribbble Reference) -->
+  <section class="relative pt-8 pb-12 lg:pt-12 lg:pb-16 bg-gray-50/60 dark:bg-gray-900/60 overflow-hidden">
+    
+    <!-- Subtle Elegant Fluid Background Curve Accent (Dribbble Eclips Reference) -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-60 dark:opacity-20 select-none">
+      <svg class="absolute -top-10 left-1/2 -translate-x-1/2 w-[1300px] h-[340px]" viewBox="0 0 1300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M-80 90 C 220 260, 520 -30, 840 180 C 1040 310, 1260 110, 1380 130" stroke="url(#wave-grad-1)" stroke-width="42" stroke-linecap="round" opacity="0.14"/>
+        <path d="M-30 130 C 270 300, 570 10, 890 220 C 1090 350, 1310 150, 1430 170" stroke="url(#wave-grad-2)" stroke-width="20" stroke-linecap="round" opacity="0.10"/>
+        <defs>
+          <linearGradient id="wave-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f59e0b" />
+            <stop offset="50%" stop-color="#3b82f6" />
+            <stop offset="100%" stop-color="#10b981" />
+          </linearGradient>
+          <linearGradient id="wave-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#10b981" />
+            <stop offset="50%" stop-color="#f59e0b" />
+            <stop offset="100%" stop-color="#3b82f6" />
+          </linearGradient>
+        </defs>
+      </svg>
     </div>
 
-    <!-- Centered Header Section (Dribbble Eclips Style) -->
-    <div class="text-center space-y-2 max-w-xl mx-auto">
-      <!-- Breadcrumb Navigation -->
-      <nav class="flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
-        <a href="{{ route('public.photographers.katalog') }}" class="hover:text-amber-500 transition">Katalog Fotografer</a>
-        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-        <span class="text-gray-900 dark:text-white font-bold">{{ $photographer->nama }}</span>
-      </nav>
-      <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-        Detail Profil Fotografer
-      </h1>
-      <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-        Informasi profil resmi mitra fotografer terverifikasi LensMatch, spesialisasi keahlian, tarif layanan, dan ulasan asli klien.
-      </p>
-    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
 
-    <!-- Main Profile Card (Eclips Structure: Portrait Photo Left + Details Right) -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 dark:border-gray-700/80">
-      
-      <!-- Top Section: Photo + Metadata -->
-      <div class="flex flex-col md:flex-row items-center md:items-stretch gap-6 lg:gap-8">
+      <!-- Top Navigation / Back Button -->
+      <div class="flex items-center justify-between">
+        <a href="{{ route('public.photographers.katalog') }}" 
+           class="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+          <span>Kembali ke Katalog</span>
+        </a>
+
+        <!-- Mitra ID Tag (No '#' per User Mandate) -->
+        <span class="text-[11px] font-mono font-bold text-gray-400 dark:text-gray-500">
+          FTR-{{ str_pad($photographer->id, 5, '0', STR_PAD_LEFT) }}
+        </span>
+      </div>
+
+      <!-- Centered Header Section (Dribbble Eclips Style) -->
+      <div class="text-center space-y-2 max-w-xl mx-auto">
+        <!-- Breadcrumb Navigation -->
+        <nav class="flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <a href="{{ route('public.photographers.katalog') }}" class="hover:text-amber-500 transition">Katalog Fotografer</a>
+          <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+          <span class="text-gray-900 dark:text-white font-bold">{{ $photographer->nama }}</span>
+        </nav>
+        <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+          Detail Profil Fotografer
+        </h1>
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          Informasi profil resmi mitra fotografer terverifikasi LensMatch, spesialisasi keahlian, tarif layanan, dan ulasan asli klien.
+        </p>
+      </div>
+
+      <!-- Main Profile Card (Eclips Structure: Portrait Photo Left + Details Right - Rule #66 Compliant) -->
+      <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xs border border-gray-100 dark:border-gray-700/80">
         
-        <!-- Left: Portrait Photo with Rounded Corners (Dribbble Reference) -->
-        <div class="w-full md:w-64 lg:w-72 h-80 sm:h-96 md:h-auto rounded-2xl overflow-hidden bg-gradient-to-b from-sky-50 via-amber-50/30 to-amber-100/20 dark:from-gray-800 dark:to-gray-750 flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-700/80 shadow-xs relative group">
-          <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/avatar-default.png') }}';" 
-               src="{{ $avatarUrl }}" 
-               alt="{{ $photographer->nama }}" 
-               class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300">
+        <!-- Top Section: Photo + Metadata -->
+        <div class="flex flex-col md:flex-row items-center md:items-stretch gap-6 lg:gap-8">
           
-          @if($photographer->is_verified)
-            <!-- Verified Mitra Badge Overlay -->
-            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xs text-[10px] font-extrabold text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/60 shadow-xs flex items-center gap-1">
-              <svg class="w-3 h-3 text-amber-500 fill-amber-500" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span>Verified Mitra</span>
-            </div>
-          @endif
-        </div>
+          <!-- Left: Portrait Photo with Rounded Corners (Rule #66: Clean portrait, NO badge pinned on top of photo) -->
+          <div class="w-full md:w-64 lg:w-72 h-80 sm:h-96 md:h-auto rounded-2xl overflow-hidden bg-gradient-to-b from-sky-50 via-amber-50/30 to-amber-100/20 dark:from-gray-800 dark:to-gray-750 flex items-center justify-center shrink-0 border border-gray-100 dark:border-gray-700/80 shadow-xs relative group">
+            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/avatar-default.png') }}';" 
+                 src="{{ $avatarUrl }}" 
+                 alt="{{ $photographer->nama }}" 
+                 class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300">
+          </div>
 
-        <!-- Right: Professional Credentials & Fee (Dribbble Layout) -->
-        <div class="flex-1 flex flex-col justify-between space-y-4 w-full">
-          
-          <div class="space-y-2">
-            <!-- Studio Name & Role -->
-            <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-amber-500 dark:text-amber-400">
-                Mitra Fotografer Profesional
-              </span>
-              <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-0.5">
-                {{ $photographer->nama }}
-              </h2>
+          <!-- Right: Professional Credentials & Fee (Rule #66: Proportional pricing, no giant yellow text) -->
+          <div class="flex-1 flex flex-col justify-between space-y-4 w-full">
+            
+            <div class="space-y-2">
+              <!-- Photographer Name & Verified Status -->
+              <div class="flex items-center gap-2">
+                <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                  {{ $photographer->nama }}
+                </h2>
+                @if($photographer->is_verified)
+                  <span title="Mitra Terverifikasi LensMatch" class="inline-flex items-center text-amber-500 dark:text-amber-400">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                @endif
+              </div>
+
+              <!-- Categories -->
               @if($photographer->categories && $photographer->categories->isNotEmpty())
-                <p class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 leading-snug mt-1">
+                <p class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 leading-snug">
                   Spesialisasi: {{ $photographer->categories->pluck('nama_kategori')->join(', ') }}
+                </p>
+              @endif
+
+              <!-- Bio Snippet -->
+              @if(!empty(trim($photographer->deskripsi_bio)))
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed pt-1">
+                  {{ $photographer->deskripsi_bio }}
                 </p>
               @endif
             </div>
 
-            <!-- Bio Snippet -->
-            @if(!empty(trim($photographer->deskripsi_bio)))
-              <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed pt-1">
-                {{ $photographer->deskripsi_bio }}
-              </p>
-            @endif
-          </div>
+            <!-- Dashed Divider -->
+            <div class="border-b border-dashed border-gray-200 dark:border-gray-700"></div>
 
-          <!-- Dashed Divider -->
-          <div class="border-b border-dashed border-gray-200 dark:border-gray-700"></div>
+            <!-- Grid 2-Kolom: Lokasi & Tarif Layanan (Rule #66 Point 3 & Rule #89 Point 2 Compliant) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-0.5">
+                <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Lokasi & Basis Studio</span>
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {{ $photographer->city ? ucwords(strtolower($photographer->city->name)) : ($photographer->alamat ?: 'Indonesia') }}
+                </p>
+              </div>
 
-          <!-- Working at / Studio Base -->
-          <div class="space-y-0.5">
-            <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Lokasi & Basis Studio</span>
-            <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
-              {{ $photographer->city ? ucwords(strtolower($photographer->city->name)) : ($photographer->alamat ?: 'Indonesia') }}
-            </p>
-          </div>
-
-          <!-- Dashed Divider -->
-          <div class="border-b border-dashed border-gray-200 dark:border-gray-700"></div>
-
-          <!-- Consultation Fee / Tarif Layanan Sesi -->
-          <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-            <div>
-              <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Tarif Layanan Sesi Foto</span>
-              <div class="flex items-baseline gap-2 mt-0.5">
-                <span class="text-xl sm:text-2xl font-black text-amber-500 dark:text-amber-400">
+              <div class="space-y-0.5">
+                <span class="text-xs font-medium text-gray-400 dark:text-gray-500">Tarif Layanan Sesi Foto</span>
+                <p class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                   Mulai Rp {{ number_format($lowestPrice, 0, ',', '.') }}
-                </span>
-                <span class="text-xs text-gray-400 font-normal">(Termasuk proteksi escrow)</span>
+                  <span class="text-xs font-normal text-gray-400 ml-1">/ sesi</span>
+                </p>
               </div>
             </div>
-            <span class="text-[11px] text-gray-400 sm:text-right">Per paket sesi pemotretan</span>
+
           </div>
 
         </div>
 
-      </div>
-
-      <!-- Middle: Stats Bar (4 columns, clean minimalist per Rule #64) -->
-      <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700/80 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center sm:text-left">
-        <div>
-          <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Pengalaman Studio</p>
-          <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">5+ Tahun</p>
+        <!-- Middle: Stats Bar (4 columns - Rule #66 Point 5 & Rule #15 Dynamic Data Compliant) -->
+        <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700/80 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center sm:text-left">
+          <div>
+            <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Pengalaman Studio</p>
+            <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">
+              {{ max(1, (int) now()->diffInYears($photographer->created_at)) }}+ Tahun
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Portofolio</p>
+            <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">
+              {{ $photographer->portfolios->count() }} Karya
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Bergabung Sejak</p>
+            <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">
+              {{ $photographer->created_at ? $photographer->created_at->locale('id')->translatedFormat('d M Y') : '-' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Rating & Ulasan</p>
+            <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5 flex items-center justify-center sm:justify-start gap-1">
+              <span class="text-amber-400">★</span>
+              <span>{{ $avgRating }}</span>
+              <span class="text-xs font-normal text-gray-400">({{ $totalReviews }})</span>
+            </p>
+          </div>
         </div>
-        <div>
-          <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">ID Registrasi Mitra</p>
-          <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">#FTR-{{ str_pad($photographer->id, 5, '0', STR_PAD_LEFT) }}</p>
-        </div>
-        <div>
-          <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Bergabung Sejak</p>
-          <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5">{{ $photographer->created_at ? $photographer->created_at->locale('id')->translatedFormat('d M Y') : '15 Agu 2026' }}</p>
-        </div>
-        <div>
-          <p class="text-[11px] font-medium text-gray-400 dark:text-gray-500">Rating & Ulasan</p>
-          <p class="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-0.5 flex items-center justify-center sm:justify-start gap-1">
-            <span class="text-amber-400">★</span>
-            <span>{{ $avgRating }}</span>
-            <span class="text-xs font-normal text-gray-400">({{ $totalReviews }})</span>
-          </p>
-        </div>
-      </div>
 
-      <!-- Bottom: Action Buttons (Dribbble Layout: Wide Primary CTA + Chat + Bookmark) -->
-      <div class="mt-6 pt-2 flex flex-col sm:flex-row items-center gap-3">
-        <a href="{{ url('/booking/create?photographer_id=' . $photographer->id) }}" 
-           class="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-sm text-center shadow-xs transition cursor-pointer">
-          Reservasi Sesi Foto Sekarang
-        </a>
+        <!-- Bottom: Action Buttons (Rule #66 Point 4: Content-based button width, no forced stretching) -->
+        <div class="mt-6 pt-2 flex flex-col sm:flex-row items-center gap-3">
+          <a href="{{ url('/booking/create?photographer_id=' . $photographer->id) }}" 
+             class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-sm text-center shadow-xs transition cursor-pointer">
+            Reservasi Sesi Foto Sekarang
+          </a>
 
-        <a href="{{ route('chat.start', $photographer->id) }}" 
-           class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-800 dark:text-gray-100 font-bold text-sm text-center transition cursor-pointer flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-          <span>Tanya & Chat Fotografer</span>
-        </a>
+          <a href="{{ route('chat.start', $photographer->id) }}" 
+             class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-800 dark:text-gray-100 font-bold text-sm text-center transition cursor-pointer flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            <span>Tanya & Chat Fotografer</span>
+          </a>
 
-        <!-- Bookmark Favorit Button (Rule #93 Compliant with Live Toast) -->
-        <div x-data="{ isFavorited: {{ ($isFavorited ?? false) ? 'true' : 'false' }}, loading: false }" class="w-full sm:w-auto">
-          <button type="button" 
-                  @click="
-                    if (!{{ Auth::check() ? 'true' : 'false' }}) {
-                      window.location.href = '{{ route('login', ['redirect' => url()->full()]) }}';
-                      return;
-                    }
-                    if (loading) return;
-                    loading = true;
-                    fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
-                      method: 'POST',
-                      headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+          <!-- Bookmark Favorit Button (Rule #93 Compliant with Live Toast) -->
+          <div x-data="{ isFavorited: {{ ($isFavorited ?? false) ? 'true' : 'false' }}, loading: false }" class="w-full sm:w-auto">
+            <button type="button" 
+                    @click="
+                      if (!{{ Auth::check() ? 'true' : 'false' }}) {
+                        window.location.href = '{{ route('login', ['redirect' => url()->full()]) }}';
+                        return;
                       }
-                    })
-                    .then(async res => {
-                      const data = await res.json().catch(() => ({}));
-                      if (!res.ok) {
-                        throw new Error(data.message || 'Gagal memproses favorit.');
-                      }
-                      return data;
-                    })
-                    .then(data => {
-                      loading = false;
-                      if (data.success) {
-                        isFavorited = data.is_favorited;
+                      if (loading) return;
+                      loading = true;
+                      fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
+                        method: 'POST',
+                        headers: {
+                          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                          'Accept': 'application/json',
+                          'Content-Type': 'application/json',
+                          'X-Requested-With': 'XMLHttpRequest'
+                        }
+                      })
+                      .then(async res => {
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                          throw new Error(data.message || 'Gagal memproses favorit.');
+                        }
+                        return data;
+                      })
+                      .then(data => {
+                        loading = false;
+                        if (data.success) {
+                          isFavorited = data.is_favorited;
+                          window.dispatchEvent(new CustomEvent('show-toast', { 
+                            detail: { 
+                              message: data.message, 
+                              type: 'success' 
+                            } 
+                          }));
+                        }
+                      })
+                      .catch(err => {
+                        loading = false;
                         window.dispatchEvent(new CustomEvent('show-toast', { 
                           detail: { 
-                            message: data.message, 
-                            type: 'success' 
+                            message: err.message || 'Terjadi kesalahan sistem.', 
+                            type: 'warning' 
                           } 
                         }));
-                      }
-                    })
-                    .catch(err => {
-                      loading = false;
-                      window.dispatchEvent(new CustomEvent('show-toast', { 
-                        detail: { 
-                          message: err.message || 'Terjadi kesalahan sistem.', 
-                          type: 'warning' 
-                        } 
-                      }));
-                    });
-                  "
-                  class="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 font-bold text-sm text-center transition shadow-2xs inline-flex items-center justify-center gap-2 cursor-pointer"
-                  :class="isFavorited ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800' : 'text-gray-700 dark:text-gray-300'">
-            <svg class="w-4 h-4 transition-colors" :class="isFavorited ? 'fill-current text-amber-500' : 'fill-none stroke-current stroke-2'" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-            </svg>
-            <span x-text="isFavorited ? 'Tersimpan di Favorit' : 'Simpan ke Favorit'"></span>
-          </button>
+                      });
+                    "
+                    class="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 font-bold text-sm text-center transition shadow-2xs inline-flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-0"
+                    :class="isFavorited ? 'text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800' : 'text-gray-700 dark:text-gray-300'">
+              <svg class="w-4 h-4 transition-colors" :class="isFavorited ? 'fill-current text-amber-500' : 'fill-none stroke-current stroke-2'" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+              </svg>
+              <span x-text="isFavorited ? 'Tersimpan di Favorit' : 'Simpan ke Favorit'"></span>
+            </button>
+          </div>
         </div>
+
       </div>
 
     </div>
+  </section>
 
-  </div>
-</section>
+  <!-- Detailed Tabs & Content Section (Rule #58 & Rule #78 Compliant: Flat Underline Tabs) -->
+  <section class="py-10 bg-white dark:bg-gray-900 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-<!-- Detailed Tabs & Content Section (Rule #58 & Rule #78 Compliant: Flat Underline Tabs) -->
-<section class="py-10 bg-white dark:bg-gray-900 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <!-- Tab Navigation (Clean Underline Style, No Box Backgrounds, Rule #78 Compliant) -->
+      <div class="flex items-center gap-6 sm:gap-8 overflow-x-auto pb-1">
+        <button type="button" 
+                @click="activeTab = 'services'" 
+                class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 focus:outline-none focus:ring-0"
+                :class="activeTab === 'services' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === 'services' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Paket Layanan</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
+                :class="activeTab === 'services' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
+            {{ $validServices->count() }}
+          </span>
+        </button>
 
-    <!-- Tab Navigation (Clean Underline Style, No Box Backgrounds) -->
-    <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto pb-1">
-      <button type="button" 
-              @click="activeTab = 'services'" 
-              class="py-3 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-              :class="activeTab === 'services' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
-        <span :class="activeTab === 'services' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Paket Layanan</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
-              :class="activeTab === 'services' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
-          {{ $validServices->count() }}
-        </span>
-      </button>
+        <button type="button" 
+                @click="activeTab = 'portfolio'" 
+                class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 focus:outline-none focus:ring-0"
+                :class="activeTab === 'portfolio' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === 'portfolio' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Galeri Portofolio</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
+                :class="activeTab === 'portfolio' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
+            {{ $photographer->portfolios->count() }}
+          </span>
+        </button>
 
-      <button type="button" 
-              @click="activeTab = 'portfolio'" 
-              class="py-3 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-              :class="activeTab === 'portfolio' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
-        <span :class="activeTab === 'portfolio' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Galeri Portofolio</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
-              :class="activeTab === 'portfolio' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
-          {{ $photographer->portfolios->count() }}
-        </span>
-      </button>
+        <button type="button" 
+                @click="activeTab = 'availability'" 
+                class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 focus:outline-none focus:ring-0"
+                :class="activeTab === 'availability' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === 'availability' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Kalender Ketersediaan</span>
+        </button>
 
-      <button type="button" 
-              @click="activeTab = 'availability'" 
-              class="py-3 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-              :class="activeTab === 'availability' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
-        <span :class="activeTab === 'availability' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Kalender Ketersediaan</span>
-      </button>
+        <button type="button" 
+                @click="activeTab = 'reviews'" 
+                class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 focus:outline-none focus:ring-0"
+                :class="activeTab === 'reviews' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === 'reviews' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Ulasan Klien</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
+                :class="activeTab === 'reviews' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
+            {{ $totalReviews }}
+          </span>
+        </button>
 
-      <button type="button" 
-              @click="activeTab = 'reviews'" 
-              class="py-3 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-              :class="activeTab === 'reviews' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
-        <span :class="activeTab === 'reviews' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Ulasan Klien</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
-              :class="activeTab === 'reviews' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
-          {{ $photographer->testimonials->count() }}
-        </span>
-      </button>
-
-      <button type="button" 
-              @click="activeTab = 'faqs'" 
-              class="py-3 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0"
-              :class="activeTab === 'faqs' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
-        <span :class="activeTab === 'faqs' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Tanya Jawab</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
-              :class="activeTab === 'faqs' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
-          {{ $photographer->faqs->count() }}
-        </span>
-      </button>
-    </div>
+        <button type="button" 
+                @click="activeTab = 'faqs'" 
+                class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 focus:outline-none focus:ring-0"
+                :class="activeTab === 'faqs' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === 'faqs' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Tanya Jawab</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold" 
+                :class="activeTab === 'faqs' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
+            {{ $photographer->faqs->count() }}
+          </span>
+        </button>
+      </div>
 
     <!-- TAB 1: PAKET LAYANAN & PRICE LIST -->
     <div x-show="activeTab === 'services'" class="space-y-6">
@@ -660,44 +657,32 @@
         <div class="grid grid-cols-7 gap-2 sm:gap-3">
           <template x-for="(day, idx) in calendarDays" :key="idx">
             <div @click="selectDay(day)"
-                 class="min-h-[70px] sm:min-h-[85px] p-2 rounded-2xl border transition-all duration-200 flex flex-col justify-between"
+                 class="min-h-[70px] sm:min-h-[85px] p-2.5 rounded-2xl border transition-all duration-200 flex flex-col justify-between"
                  :class="{
                    'opacity-30 pointer-events-none border-transparent bg-gray-50/30 dark:bg-gray-850/30': !day.isCurrentMonth,
                    'opacity-40 border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-850 cursor-not-allowed': day.isCurrentMonth && day.isPast,
-                   'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-900 dark:text-rose-200 cursor-pointer': day.isCurrentMonth && !day.isPast && day.status === 'blocked',
-                   'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 cursor-pointer': day.isCurrentMonth && !day.isPast && day.status === 'booked',
-                   'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-900/50 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 cursor-pointer hover:shadow-xs': day.isCurrentMonth && !day.isPast && day.status === 'available',
+                   'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 shadow-2xs': day.isCurrentMonth && !day.isPast,
                    'ring-2 ring-amber-500 shadow-md': selectedDate === day.dateStr
                  }">
               
-              <!-- Date Number & Today Dot -->
+              <!-- Date Number & Today Indicator -->
               <div class="flex items-center justify-between">
-                <span class="text-xs sm:text-sm font-black" 
+                <span class="text-xs sm:text-sm font-black text-gray-900 dark:text-white" 
                       :class="day.isToday ? 'w-6 h-6 rounded-full bg-amber-400 text-gray-950 flex items-center justify-center shadow-xs' : ''"
                       x-text="day.dayNumber">
                 </span>
-                
-                <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'available'">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                </template>
-                <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'booked'">
-                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                </template>
-                <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'blocked'">
-                  <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                </template>
               </div>
 
-              <!-- Mini Status Label in Cell -->
+              <!-- Mini Status Label in Cell (Pure Colored Text - Rule #67 Compliant, Zero Dots) -->
               <div class="text-[10px] font-bold truncate">
                 <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'available'">
-                  <span class="text-emerald-700 dark:text-emerald-400">Tersedia</span>
+                  <span class="text-emerald-600 dark:text-emerald-400 font-bold">Tersedia</span>
                 </template>
                 <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'booked'">
-                  <span class="text-amber-700 dark:text-amber-400">Terisi Sesi</span>
+                  <span class="text-blue-600 dark:text-blue-400 font-bold">Terisi Sesi</span>
                 </template>
                 <template x-if="day.isCurrentMonth && !day.isPast && day.status === 'blocked'">
-                  <span class="text-rose-700 dark:text-rose-400">Libur</span>
+                  <span class="text-rose-600 dark:text-rose-400 font-bold">Libur</span>
                 </template>
               </div>
 
@@ -707,12 +692,7 @@
 
         <!-- Selected Day Detail Drawer / Panel -->
         <template x-if="selectedDateInfo">
-          <div class="p-5 rounded-2xl border transition-all"
-               :class="{
-                 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800': selectedDateInfo.status === 'available',
-                 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800': selectedDateInfo.status === 'booked',
-                 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800': selectedDateInfo.status === 'blocked'
-               }">
+          <div class="p-5 rounded-2xl border bg-gray-50 dark:bg-gray-850/60 border-gray-200 dark:border-gray-700/80 transition-all">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div class="space-y-1">
                 <div class="flex items-center gap-2">
@@ -721,16 +701,16 @@
                 </div>
                 
                 <template x-if="selectedDateInfo.status === 'available'">
-                  <p class="text-xs text-emerald-800 dark:text-emerald-300 font-medium">
-                    Jadwal pada tanggal ini <strong>TERSEDIA PENUH</strong> untuk sesi pemotretan. Anda dapat langsung memilih paket dan memesan jadwal ini.
+                  <p class="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                    Status: <span class="text-emerald-600 dark:text-emerald-400 font-bold">Tersedia Penuh</span> untuk sesi pemotretan. Anda dapat langsung memilih paket dan memesan jadwal ini.
                   </p>
                 </template>
 
                 <template x-if="selectedDateInfo.status === 'booked'">
-                  <div class="text-xs text-amber-900 dark:text-amber-200 font-medium space-y-1">
-                    <p>Tanggal ini telah memiliki jadwal sesi pemotretan aktif:</p>
+                  <div class="text-xs text-gray-700 dark:text-gray-300 font-medium space-y-1">
+                    <p>Status: <span class="text-blue-600 dark:text-blue-400 font-bold">Terisi Sesi</span> — tanggal ini telah memiliki jadwal sesi pemotretan aktif:</p>
                     <template x-for="bk in selectedDateInfo.bookedInfo" :key="bk.time_formatted">
-                      <div class="flex items-center gap-2 font-bold">
+                      <div class="flex items-center gap-2 font-bold text-gray-800 dark:text-gray-200">
                         <span>•</span>
                         <span x-text="bk.service_name + ' (' + bk.time_formatted + ')'"></span>
                       </div>
@@ -739,8 +719,8 @@
                 </template>
 
                 <template x-if="selectedDateInfo.status === 'blocked'">
-                  <p class="text-xs text-rose-800 dark:text-rose-300 font-medium">
-                    Fotografer tidak menerima sesi pemotretan pada tanggal ini: <strong x-text="selectedDateInfo.blockedInfo ? selectedDateInfo.blockedInfo.keterangan : 'Libur / Cuti Pribadi'"></strong>.
+                  <p class="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                    Status: <span class="text-rose-600 dark:text-rose-400 font-bold">Libur</span> — fotografer tidak menerima sesi pemotretan pada tanggal ini: <strong x-text="selectedDateInfo.blockedInfo ? selectedDateInfo.blockedInfo.keterangan : 'Libur / Cuti Pribadi'"></strong>.
                   </p>
                 </template>
               </div>
@@ -756,21 +736,25 @@
           </div>
         </template>
 
-        <!-- Legend Bar -->
+        <!-- Legend Bar (Rule #67 Compliant: Pure Colored Text, No Dot Badges) -->
         <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-gray-700/60 text-xs">
-          <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-gray-600 dark:text-gray-300 font-semibold">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-xs"></span>
-              <span>Tersedia untuk Booking</span>
+          <div class="flex flex-wrap items-center gap-4 sm:gap-6 font-semibold">
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 dark:text-emerald-400 font-bold">Tersedia</span>
+              <span class="text-gray-400 font-normal">(Terbuka untuk Booking)</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-amber-400 shadow-xs"></span>
-              <span>Terisi Sesi Klien</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-blue-600 dark:text-blue-400 font-bold">Terisi Sesi</span>
+              <span class="text-gray-400 font-normal">(Jadwal Klien Aktif)</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full bg-rose-500 shadow-xs"></span>
-              <span>Libur / Tutup Operasional</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-rose-600 dark:text-rose-400 font-bold">Libur</span>
+              <span class="text-gray-400 font-normal">(Tutup Operasional)</span>
             </div>
+          </div>
+
+          <span class="text-[11px] text-gray-400">Klik tanggal pada kalender untuk melihat rincian</span>
+        </div>
           </div>
 
           <span class="text-[11px] text-gray-400">Klik tanggal pada kalender untuk melihat detail</span>
@@ -893,7 +877,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs overflow-hidden transition">
               <button type="button" 
                       @click="openFaq = (openFaq === {{ $faq->id }} ? null : {{ $faq->id }})" 
-                      class="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-750 transition">
+                      class="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-750 transition focus:outline-none focus:ring-0">
                 <span class="text-sm font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
                   <span class="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 font-black text-xs flex items-center justify-center shrink-0">
                     Q
@@ -989,4 +973,5 @@
   </div>
 
 </section>
+</div>
 @endsection
