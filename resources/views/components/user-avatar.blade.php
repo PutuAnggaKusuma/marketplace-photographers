@@ -2,8 +2,8 @@
   x-user-avatar component (LensMatch UI Standard — Rule #44)
   
   MEKANISME AVATAR USER:
-  1. Jika user memiliki foto profil (role_photographers.foto) → tampilkan <img>
-  2. Jika TIDAK ada foto → tampilkan lingkaran dengan HURUF INISIAL NAMA USER
+  1. Jika user memiliki foto profil (role_photographers.foto) : tampilkan <img>
+  2. Jika TIDAK ada foto : tampilkan lingkaran dengan HURUF INISIAL NAMA USER
 
   Usage:
     <x-user-avatar :user="$post->user" />

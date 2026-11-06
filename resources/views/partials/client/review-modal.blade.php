@@ -27,52 +27,66 @@
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700/80">
 
-            <form method="POST" action="{{ route('client.reviews.store') }}" class="p-6 space-y-5">
+            <form method="POST" :action="formAction" class="p-6 sm:p-7 space-y-5">
                 @csrf
+                <template x-if="isEdit">
+                    <input type="hidden" name="_method" value="PUT">
+                </template>
                 <input type="hidden" name="id_contract" :value="contractId">
                 <input type="hidden" name="rating" :value="rating">
 
-                <!-- Header -->
-                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center font-black text-sm">
-                            <svg class="w-5 h-5 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white" id="modal-title">Beri Ulasan Fotografer</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="photoName || 'Fotografer'"></p>
-                        </div>
-                    </div>
-                    <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                <!-- Close 'X' Button in Top Right (Only when isEdit is true; Batal button is removed below to avoid 3 buttons horizontally) -->
+                <button type="button" 
+                        x-show="isEdit"
+                        @click="closeModal()" 
+                        class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/60 cursor-pointer"
+                        title="Tutup">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <!-- Header (No Icon, Centered Title) -->
+                <div class="border-b border-gray-100 dark:border-gray-700 pb-4 text-center space-y-1">
+                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white" id="modal-title" x-text="isEdit ? 'Ulasan Fotografer' : 'Beri Ulasan Fotografer'"></h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="photoName || 'Fotografer'"></p>
                 </div>
 
                 <!-- Star Rating Picker -->
                 <div class="text-center space-y-2 py-2">
-                    <label class="block text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">Pilih Kepuasan Layanan (1 - 5 Bintang)</label>
+                    <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Pilih Kepuasan Layanan (1 - 5 Bintang)</label>
                     <div class="flex items-center justify-center gap-2">
                         <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
                             <button type="button" 
                                     @mouseenter="hoverRating = star" 
                                     @mouseleave="hoverRating = rating"
                                     @click="setRating(star)"
-                                    class="p-1 transition-transform hover:scale-125 focus:outline-none">
+                                    class="p-1 transition-transform hover:scale-125 focus:outline-none cursor-pointer">
                                 <svg class="w-9 h-9 transition-colors" 
-                                     :class="(hoverRating || rating) >= star ? 'text-amber-400 fill-amber-400 drop-shadow-sm' : 'text-gray-200 dark:text-gray-700 fill-transparent'"
+                                     :class="(hoverRating || rating) >= star ? 'text-amber-400 fill-amber-400 drop-shadow-sm' : 'text-gray-300 dark:text-gray-600 fill-transparent'"
                                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                                 </svg>
                             </button>
                         </template>
                     </div>
-                    <div class="text-xs font-extrabold text-amber-600 dark:text-amber-400 h-4" x-text="getRatingLabel(hoverRating || rating)"></div>
+                    <div class="text-xs font-extrabold h-4 flex items-center justify-center gap-1.5">
+                        <template x-if="(hoverRating || rating) > 0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-gray-900 dark:text-white" x-text="getRatingLabelText(hoverRating || rating)"></span>
+                                <span class="text-amber-500 dark:text-amber-400" x-text="'(' + (hoverRating || rating) + '/5)'"></span>
+                            </div>
+                        </template>
+                        <template x-if="(hoverRating || rating) === 0">
+                            <span class="text-gray-400 dark:text-gray-500 font-normal">Pilih jumlah bintang kepuasan (1 - 5)</span>
+                        </template>
+                    </div>
                 </div>
 
                 <!-- Written Testimonial Textarea -->
                 <div class="space-y-1.5 text-left">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                        Ulasan Testimoni Anda <span class="text-amber-500"> <span class="text-rose-500">*</span></span>
+                        Ulasan Testimoni Anda <span class="text-rose-500">*</span>
                     </label>
                     <textarea name="deskripsi_review" 
                               x-model="reviewText" 
@@ -82,17 +96,34 @@
                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-none"></textarea>
                 </div>
 
-                <!-- Modal Actions -->
-                <div class="flex items-center justify-between pt-2">
-                    <button type="button" @click="closeModal()" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
-                        Batal
-                    </button>
+                <!-- Modal Actions (Always Centered, Maximum 2 Buttons, Never 3 Buttons Horizontally) -->
+                <div class="flex items-center justify-center gap-3 pt-3">
+                    <template x-if="!isEdit">
+                        <button type="button" @click="closeModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+                            Batal
+                        </button>
+                    </template>
+
+                    <template x-if="isEdit">
+                        <button type="button" 
+                                @click="deleteReview()"
+                                class="px-5 py-2.5 rounded-xl border border-rose-200 dark:border-rose-800/80 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 font-bold text-xs transition cursor-pointer">
+                            Hapus Ulasan
+                        </button>
+                    </template>
+
                     <button type="submit" 
-                            :disabled="!reviewText.trim() || reviewText.length < 5"
+                            :disabled="!rating || rating < 1 || !reviewText.trim() || reviewText.length < 5"
                             class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
-                        Kirim Ulasan
+                        <span x-text="isEdit ? 'Perbaharui Data' : 'Simpan Data'"></span>
                     </button>
                 </div>
+            </form>
+
+            <!-- Hidden Delete Review Form -->
+            <form id="delete-review-form" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="_method" value="DELETE">
             </form>
 
         </div>
@@ -103,37 +134,60 @@
 function reviewModalApp() {
     return {
         isOpen: false,
+        isEdit: false,
         contractId: null,
+        testimonialId: null,
         photoName: '',
         serviceName: '',
-        rating: 5,
-        hoverRating: 5,
+        rating: 0,
+        hoverRating: 0,
         reviewText: '',
+        formAction: '{{ route('client.reviews.store') }}',
         openModal(detail) {
             if (detail) {
                 this.contractId = detail.contractId || null;
+                this.testimonialId = detail.testimonialId || null;
                 this.photoName = detail.photoName || '';
                 this.serviceName = detail.serviceName || '';
-                this.rating = 5;
-                this.hoverRating = 5;
-                this.reviewText = '';
+                this.isEdit = !!detail.isEdit;
+                this.rating = this.isEdit && detail.rating ? Number(detail.rating) : 0;
+                this.hoverRating = this.rating;
+                this.reviewText = detail.reviewText || '';
+                this.formAction = this.isEdit 
+                    ? `/client/reviews/${this.testimonialId}` 
+                    : '{{ route('client.reviews.store') }}';
             }
             this.isOpen = true;
         },
         closeModal() {
             this.isOpen = false;
         },
+        deleteReview() {
+            if (!this.testimonialId) return;
+            const targetId = this.testimonialId;
+            this.closeModal();
+            window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                detail: {
+                    title: 'Hapus Ulasan dan Rating?',
+                    message: 'Apakah Anda yakin ingin menghapus ulasan dan bintang penilaian ini secara permanen?',
+                    confirmText: 'Ya, Hapus Ulasan',
+                    type: 'danger',
+                    actionUrl: '/client/reviews/' + targetId,
+                    method: 'DELETE'
+                }
+            }));
+        },
         setRating(val) {
             this.rating = val;
             this.hoverRating = val;
         },
-        getRatingLabel(val) {
+        getRatingLabelText(val) {
             const labels = {
-                5: 'Sangat Memuaskan & Sempurna (5/5)',
-                4: 'Bagus & Memuaskan (4/5)',
-                3: 'Cukup Baik (3/5)',
-                2: 'Kurang Memuaskan (2/5)',
-                1: 'Kecewa / Perlu Perbaikan (1/5)'
+                5: 'Sangat Memuaskan & Sempurna',
+                4: 'Bagus & Memuaskan',
+                3: 'Cukup Baik',
+                2: 'Kurang Memuaskan',
+                1: 'Kecewa / Perlu Perbaikan'
             };
             return labels[val] || '';
         }

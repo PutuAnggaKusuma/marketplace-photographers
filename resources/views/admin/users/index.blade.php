@@ -8,9 +8,7 @@
     <!-- Page Title Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pengelolaan Akun Klien</span>
             <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Manajemen User</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola data seluruh akun klien pengguna platform, monitoring status registrasi, dan informasi kontak penyewa jasa</p>
         </div>
     </div>
 
@@ -20,28 +18,24 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Klien Terdaftar</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalClients }} Klien</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Akun klien di database</p>
         </div>
 
         <!-- Card 2: Email Terverifikasi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Email Terverifikasi</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerifiedClients }} Akun</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Status akun aktif</p>
         </div>
 
         <!-- Card 3: Total Transaksi Sesi Foto -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Booking Klien</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalBookings }} Sesi</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Reservasi pemotretan klien</p>
         </div>
 
         <!-- Card 4: Total Belanja Klien -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Belanja Klien</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalSpending, 0, ',', '.') }}</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Akumulasi nilai pesanan sesi foto</p>
         </div>
     </div>
 
@@ -86,8 +80,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari nama, email, nomor HP klien..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -119,10 +113,20 @@
                                 </div>
                             </td>
 
-                            <!-- Role Badge (Murni Klien) -->
+                            <!-- Role (Tipe Akun) -->
                             <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
-                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                    Klien
+                                <span class="text-xs font-bold text-gray-900 dark:text-white">
+                                    @if($usr->role === 'client')
+                                        Klien
+                                    @elseif($usr->role === 'photographer')
+                                        Fotografer
+                                    @elseif($usr->role === 'admin')
+                                        Admin
+                                    @elseif($usr->role === 'super_admin')
+                                        Super Admin
+                                    @else
+                                        {{ ucfirst($usr->role ?? 'Klien') }}
+                                    @endif
                                 </span>
                             </td>
 

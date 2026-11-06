@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\RoleAdmin;
+use App\Models\RoleClient;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +16,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. Super Admin (Permanent Protected Root Account)
-        User::updateOrCreate(
+        $superAdmin = User::updateOrCreate(
             ['email' => 'superadmin@lensmatch.com'],
             [
                 'nama' => 'Super Admin LensMatch',
@@ -24,9 +26,16 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        RoleAdmin::updateOrCreate(
+            ['id_user' => $superAdmin->id],
+            [
+                'nama' => 'Super Admin LensMatch',
+                'no_telepon' => '081200000001',
+            ]
+        );
 
         // 2. Staff Admin 1
-        User::updateOrCreate(
+        $admin1 = User::updateOrCreate(
             ['email' => 'admin@lensmatch.com'],
             [
                 'nama' => 'Admin 1',
@@ -34,6 +43,13 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
                 'is_protected' => false,
                 'email_verified_at' => now(),
+            ]
+        );
+        RoleAdmin::updateOrCreate(
+            ['id_user' => $admin1->id],
+            [
+                'nama' => 'Admin 1',
+                'no_telepon' => '081200000002',
             ]
         );
 
@@ -62,7 +78,7 @@ class UserSeeder extends Seeder
         );
 
         // 5. Client (Dian & Febri)
-        User::updateOrCreate(
+        $clientUser = User::updateOrCreate(
             ['email' => 'dian@gmail.com'],
             [
                 'nama' => 'Dian & Febri',
@@ -70,6 +86,14 @@ class UserSeeder extends Seeder
                 'role' => 'client',
                 'is_protected' => false,
                 'email_verified_at' => now(),
+            ]
+        );
+        RoleClient::updateOrCreate(
+            ['id_user' => $clientUser->id],
+            [
+                'nama' => 'Dian & Febri',
+                'nomor_telepon' => '081234567899',
+                'alamat' => 'Jakarta Selatan',
             ]
         );
     }

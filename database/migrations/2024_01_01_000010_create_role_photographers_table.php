@@ -20,7 +20,11 @@ return new class extends Migration
             $table->char('province_code', 2)->nullable();
             $table->char('city_code', 4)->nullable();
             $table->text('deskripsi_bio')->nullable();
+            $table->string('nama_bank', 50)->nullable();
+            $table->string('nomor_rekening', 50)->nullable();
+            $table->string('atas_nama_rekening', 100)->nullable();
             $table->boolean('is_verified')->default(false);
+            $table->boolean('is_onboarded')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

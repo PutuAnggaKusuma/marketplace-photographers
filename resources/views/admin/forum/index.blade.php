@@ -8,41 +8,35 @@
     <!-- Page Title Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pusat Komunitas & Diskusi</span>
             <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Moderasi Forum Komunitas</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Monitor postingan diskusi publik, tangani laporan spam, dan moderasi komentar anggota</p>
         </div>
     </div>
 
-    <!-- 4 Stat Cards Summary -->
+    <!-- 4 Stat Cards Summary (Rule #64 Minimalist Standard) -->
     <div id="dashboard-stats-container">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Topik Diskusi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Topik Diskusi</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPosts }} Topik</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Diskusi komunitas aktif</p>
         </div>
 
         <!-- Card 2: Total Balasan Komentar -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Balasan Komentar</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalComments }} Balasan</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Interaksi pengguna komunitas</p>
         </div>
 
         <!-- Card 3: Topik Bulan Ini -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Bulan Ini</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $thisMonthPosts }} Topik</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Diskusi aktif periode berjalan</p>
         </div>
 
         <!-- Card 4: Topik Paling Ramai -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Paling Ramai</span>
             <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight truncate" title="{{ $topPost ? $topPost->judul : '-' }}">{{ $topPost ? $topPost->judul : '-' }}</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium"><span class="font-bold text-gray-700 dark:text-gray-300">{{ $topPost ? $topPost->comments_count : 0 }}</span> balasan komentar aktif</p>
         </div>
     </div>
 
@@ -89,8 +83,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari topik diskusi atau penulis..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -151,7 +145,7 @@
                                                 method: 'POST'
                                             })"
                                             class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
-                                        Hapus Spam
+                                        Hapus
                                     </button>
                                 </div>
                             </td>

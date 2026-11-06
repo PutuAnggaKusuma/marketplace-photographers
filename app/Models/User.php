@@ -100,6 +100,11 @@ class User extends Authenticatable
         return $this->hasOne(RoleClient::class, 'id_user', 'id');
     }
 
+    public function roleAdmin()
+    {
+        return $this->hasOne(RoleAdmin::class, 'id_user', 'id');
+    }
+
     /**
      * Get the user's avatar URL from their rolePhotographer foto.
      * Returns null if no foto is set (views should fall back to initials).
@@ -110,7 +115,7 @@ class User extends Authenticatable
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        $foto = $this->rolePhotographer?->foto;
+        $foto = $this->rolePhotographer?->foto ?? $this->roleClient?->foto ?? $this->roleAdmin?->foto;
         if (!$foto) return null;
         return str_starts_with($foto, 'http') ? $foto : asset('storage/' . $foto);
     }

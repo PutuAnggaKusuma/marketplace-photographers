@@ -15,6 +15,7 @@
 
     <form action="{{ route('public.elearning.checkout.process', $course->slug) }}" method="POST">
       @csrf
+      <input type="hidden" name="payment_method" :value="selectedMethod">
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         

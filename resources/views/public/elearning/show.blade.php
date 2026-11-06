@@ -658,39 +658,49 @@
         @endif
 
         <!-- STEP 2: LESSON TITLE -->
-        <div class="pt-1">
+        <div class="pt-1 space-y-1">
+          <!-- Breadcrumb Navigation -->
+          <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <a href="{{ route('public.elearning.index') }}" class="hover:text-amber-500 transition">E-Learning</a>
+            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            <span class="hover:text-amber-500 transition truncate max-w-[150px]">{{ $course->judul }}</span>
+            @if($currentLesson)
+              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+              <span class="text-gray-900 dark:text-white font-bold truncate max-w-[150px]">{{ $currentLesson->judul }}</span>
+            @endif
+          </nav>
           <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
-            {{ $currentLesson->judul }}
+            {{ $currentLesson ? $currentLesson->judul : $course->judul }}
           </h1>
         </div>
 
-        <!-- STEP 3: TAB NAVIGASI MATERI (Text Murni dengan Underline Aktif Kuning Amber-400) -->
-        <div class="pt-2 flex items-center gap-6 sm:gap-8 text-sm sm:text-base font-semibold overflow-x-auto">
+        <!-- STEP 3: TAB NAVIGASI MATERI (Pill Style, Bebas Garis Bawah/Kanan) -->
+        <div class="pt-2 flex items-center gap-6 text-xs sm:text-sm overflow-x-auto pb-1">
           <button 
             type="button" 
             @click="activeTab = 'deskripsi'"
-            class="pb-2.5 text-sm sm:text-base transition cursor-pointer shrink-0"
-            :class="activeTab === 'deskripsi' ? 'text-amber-400 dark:text-amber-400 font-extrabold border-b-2 border-amber-400' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 border-b-2 border-transparent font-medium'"
+            class="py-2 transition cursor-pointer shrink-0 flex items-center gap-2"
+            :class="activeTab === 'deskripsi' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
           >
-            Deskripsi
+            <span :class="activeTab === 'deskripsi' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Deskripsi</span>
           </button>
           
           <button 
             type="button" 
             @click="activeTab = 'lampiran'"
-            class="pb-2.5 text-sm sm:text-base transition cursor-pointer shrink-0"
-            :class="activeTab === 'lampiran' ? 'text-amber-400 dark:text-amber-400 font-extrabold border-b-2 border-amber-400' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 border-b-2 border-transparent font-medium'"
+            class="py-2 transition cursor-pointer shrink-0 flex items-center gap-2"
+            :class="activeTab === 'lampiran' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
           >
-            Lampiran
+            <span :class="activeTab === 'lampiran' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Lampiran</span>
           </button>
 
           <button 
             type="button" 
             @click="activeTab = 'catatan'"
-            class="pb-2.5 text-sm sm:text-base transition cursor-pointer shrink-0"
-            :class="activeTab === 'catatan' ? 'text-amber-400 dark:text-amber-400 font-extrabold border-b-2 border-amber-400' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 border-b-2 border-transparent font-medium'"
+            class="py-2 transition cursor-pointer shrink-0 flex items-center gap-2"
+            :class="activeTab === 'catatan' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
           >
-            Catatan
+            <span :class="activeTab === 'catatan' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Catatan</span>
           </button>
         </div>
 
@@ -899,21 +909,11 @@
         @click.stop
         class="relative w-full max-w-[400px] bg-white dark:bg-gray-850 rounded-2xl p-6 sm:p-7 shadow-2xl border border-gray-100 dark:border-gray-800 z-10 space-y-4 text-left"
       >
-        <!-- Header & Close Button -->
-        <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">
+        <!-- Header (Rule #59 Compliant: Centered without Icon, NO X button) -->
+        <div class="text-center space-y-1">
+          <h3 class="text-base font-black text-gray-900 dark:text-white tracking-tight text-center">
             Selesaikan Materi Ini?
           </h3>
-          <button 
-            type="button" 
-            @click="showCompleteConfirmModal = false"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition cursor-pointer"
-            title="Tutup"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
         <!-- Content Message -->
@@ -921,12 +921,12 @@
           Apakah Anda yakin telah selesai mempelajari materi <strong>"{{ $currentLesson->judul }}"</strong>? Setelah ditandai selesai, status ini tidak dapat dibatalkan.
         </p>
 
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-end gap-2.5 pt-2">
+        <!-- Action Buttons (Rule #59 Compliant: Centered Buttons) -->
+        <div class="flex items-center justify-center gap-3 pt-2">
           <button 
             type="button" 
             @click="showCompleteConfirmModal = false"
-            class="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition cursor-pointer"
+            class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition cursor-pointer"
           >
             Batal
           </button>
@@ -934,7 +934,7 @@
             type="button" 
             @click="completeCurrentLesson()"
             :disabled="loadingToggle"
-            class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-extrabold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
             <svg x-show="loadingToggle" class="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

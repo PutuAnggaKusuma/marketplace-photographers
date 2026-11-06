@@ -21,7 +21,7 @@ class PhotographerSeeder extends Seeder
         $catWedding = Category::firstOrCreate(['nama_kategori' => 'Wedding & Prewedding']);
         $catTravel  = Category::firstOrCreate(['nama_kategori' => 'Vacation & Travel']);
         $catEvent   = Category::firstOrCreate(['nama_kategori' => 'Event & Konser']);
-        $catPortrait= Category::firstOrCreate(['nama_kategori' => 'Studio & Portrait']);
+        $catPortrait= Category::firstOrCreate(['nama_kategori' => 'Studio & Portrait'], ['icon_url' => 'https://images.unsplash.com/photo-1768818928341-3b31b8965c6d?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D', 'slug' => 'studio-portrait']);
         $catProduct = Category::firstOrCreate(['nama_kategori' => 'Commercial & Produk']);
 
         $provBali = Province::where('name', 'LIKE', '%BALI%')->first();
@@ -75,8 +75,11 @@ class PhotographerSeeder extends Seeder
             ['id_photographer' => $alexPhoto->id, 'judul' => 'Romantic Sunset at Melasti Beach'],
             ['deskripsi' => 'Sesi prewedding momen matahari terbenam dengan gaun putih dan pemandangan tebing Melasti Bali.']
         );
-        PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1519225429980-715cb0215aed?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80']);
 
         // 2. Budi Event Captures
         $userBudi = User::firstOrCreate(
@@ -117,7 +120,10 @@ class PhotographerSeeder extends Seeder
             ['id_photographer' => $budiPhoto->id, 'judul' => 'Jakarta Live Music Festival 2025'],
             ['deskripsi' => 'Aksi panggung musisi papan atas Indonesia dalam konser musik outdoor skala besar.']
         );
-        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80']);
 
         // 3. Clara Commercial
         $userClara = User::firstOrCreate(
@@ -158,7 +164,10 @@ class PhotographerSeeder extends Seeder
             ['id_photographer' => $claraPhoto->id, 'judul' => 'Culinary Product Shoot for Bu Lilik'],
             ['deskripsi' => 'Pencahayaan makanan natural untuk kemasan kuliner tradisional Indonesia.']
         );
-        PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80']);
 
         // 4. Dewa Portrait Studio
         $userDewa = User::firstOrCreate(
@@ -229,5 +238,13 @@ class PhotographerSeeder extends Seeder
                 'deskripsi_layanan' => 'Foto jalan-jalan santai 2.5 jam di spot ikonik Bali dengan proses edit warna cepat di hari yang sama.',
             ]
         );
+
+        // Mark all seeded photographers as onboarded and configure default bank info
+        RolePhotographer::query()->update([
+            'is_onboarded' => true,
+            'nama_bank' => 'BCA',
+            'nomor_rekening' => '8830129841',
+            'atas_nama_rekening' => 'Alex Visual Studio',
+        ]);
     }
 }

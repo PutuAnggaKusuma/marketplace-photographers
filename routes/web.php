@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Client\ClientBookingController;
 use App\Http\Controllers\Photographer\PhotographerBookingController;
 use App\Http\Controllers\Public\BookingController;
@@ -16,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $testimonials = \App\Models\Testimonial::with(['client.user', 'photographer'])->latest()->take(10)->get();
     $categories = \App\Models\Category::all();
-    $featuredPhotographers = \App\Models\RolePhotographer::with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
+    $featuredPhotographers = \App\Models\RolePhotographer::where('is_onboarded', true)->with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
         ->take(4)
         ->get();
-    $totalPhotographers = \App\Models\RolePhotographer::count();
+    $totalPhotographers = \App\Models\RolePhotographer::where('is_onboarded', true)->count();
     $totalCategories = \App\Models\Category::count();
 
     return view('public.home', compact(
@@ -29,11 +30,12 @@ Route::get('/', function () {
         'totalPhotographers',
         'totalCategories'
     ));
-});
+})->name('home');
 
 Route::get('/fotografer', [PhotographerController::class, 'index'])->name('public.photographers.index');
 Route::get('/fotografer/katalog', [PhotographerController::class, 'katalog'])->name('public.photographers.katalog');
-Route::get('/fotografer/{id}', [PhotographerController::class, 'show']);
+Route::get('/fotografer/{id}', [PhotographerController::class, 'show'])->name('public.photographers.show');
+Route::get('/user/{id}', [\App\Http\Controllers\Public\ProfileController::class, 'publicShow'])->name('public.user.show');
 Route::get('/api/cities/{provinceCode}', [PhotographerController::class, 'getCities']);
 
 // Public E-Learning & Forum Routes
@@ -53,6 +55,8 @@ Route::post('/forum/store', [\App\Http\Controllers\Public\ForumController::class
 Route::post('/forum/{id}/comment', [\App\Http\Controllers\Public\ForumController::class, 'storeComment'])->name('public.forum.comment')->middleware('auth');
 Route::post('/forum/comment/{id}/like', [\App\Http\Controllers\Public\ForumController::class, 'likeComment'])->name('public.forum.comment.like');
 Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumController::class, 'dislikeComment'])->name('public.forum.comment.dislike');
+Route::post('/forum/comment/{id}/report', [\App\Http\Controllers\Public\ForumController::class, 'reportComment'])->name('public.forum.comment.report')->middleware('auth');
+Route::post('/forum/comment/{id}/user-delete', [\App\Http\Controllers\Public\ForumController::class, 'deleteComment'])->name('public.forum.comment.delete')->middleware('auth');
 
 // Public Photo Contest Routes
 Route::get('/lomba', [\App\Http\Controllers\Public\ContestController::class, 'index'])->name('public.contests.index');
@@ -74,16 +78,47 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Password Reset Routes
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/chat/unread-count', [\App\Http\Controllers\Public\ChatController::class, 'getUnreadCount'])->name('chat.unread-count');
+    Route::post('/chat/typing', [\App\Http\Controllers\Public\ChatController::class, 'setTyping'])->name('chat.typing');
+    Route::patch('/chat/messages/{id}', [\App\Http\Controllers\Public\ChatController::class, 'updateMessage'])->name('chat.message.update');
+    Route::delete('/chat/messages/{id}', [\App\Http\Controllers\Public\ChatController::class, 'deleteMessage'])->name('chat.message.delete');
+    Route::post('/chat/custom-offer', [\App\Http\Controllers\Public\ChatController::class, 'storeCustomOffer'])->name('chat.custom_offer.store');
+    Route::post('/chat/custom-offer/{id}/accept', [\App\Http\Controllers\Public\ChatController::class, 'acceptCustomOffer'])->name('chat.custom_offer.accept');
+    Route::post('/chat/custom-offer/{id}/reject', [\App\Http\Controllers\Public\ChatController::class, 'rejectCustomOffer'])->name('chat.custom_offer.reject');
     Route::get('/notifications/unread', [\App\Http\Controllers\Public\NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Public\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Public\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
+
+// Universal Dashboard & Base Route Role Dispatcher
+Route::get('/dashboard', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    $role = auth()->user()->role;
+    if (in_array($role, ['super_admin', 'admin'])) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($role === 'photographer') {
+        return redirect()->route('photographer.dashboard');
+    } else {
+        return redirect('/');
+    }
+})->name('dashboard');
+
+Route::get('/admin', fn() => redirect()->route('admin.dashboard'));
+Route::get('/photographer', fn() => redirect()->route('photographer.dashboard'));
+Route::get('/client', fn() => redirect('/'));
 
 /*
 |--------------------------------------------------------------------------
@@ -94,22 +129,30 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/pembayaran/{id}', [BookingController::class, 'showInvoice'])->name('booking.invoice');
+    Route::get('/pembayaran/{id}/cetak', [BookingController::class, 'printInvoice'])->name('booking.invoice.print');
+    Route::post('/pembayaran/{id}/konfirmasi', [BookingController::class, 'confirmPayment'])->name('booking.pay.confirm');
+    Route::get('/elearning/transaksi/{id}/cetak', [\App\Http\Controllers\Public\ElearningController::class, 'printInvoice'])->name('elearning.invoice.print');
 
     // Client Dashboard & Order History
     Route::get('/client/bookings', [ClientBookingController::class, 'index'])->name('client.bookings');
+    Route::post('/client/bookings/{id}/cancel', [ClientBookingController::class, 'cancelBooking'])->name('client.bookings.cancel');
+    Route::post('/client/bookings/{id}/reschedule', [ClientBookingController::class, 'requestReschedule'])->name('client.bookings.reschedule');
+    Route::post('/client/bookings/{id}/reschedule-respond', [ClientBookingController::class, 'respondReschedule'])->name('client.bookings.reschedule-respond');
     Route::get('/client/invoices', [ClientBookingController::class, 'invoices'])->name('client.invoices');
+    Route::get('/client/favorites', [\App\Http\Controllers\Client\ClientFavoriteController::class, 'index'])->name('client.favorites');
+    Route::post('/client/favorites/{photographerId}/toggle', [\App\Http\Controllers\Client\ClientFavoriteController::class, 'toggle'])->name('client.favorites.toggle');
     Route::get('/client/galleries', [ClientBookingController::class, 'galleries'])->name('client.galleries');
+    Route::post('/client/bookings/{id}/confirm-gallery', [ClientBookingController::class, 'confirmGallery'])->name('client.bookings.confirm-gallery');
+    Route::post('/client/bookings/{id}/request-revision', [ClientBookingController::class, 'requestRevision'])->name('client.bookings.request-revision');
     Route::post('/client/reviews', [\App\Http\Controllers\Public\ReviewController::class, 'store'])->name('client.reviews.store');
+    Route::put('/client/reviews/{id}', [\App\Http\Controllers\Public\ReviewController::class, 'update'])->name('client.reviews.update');
+    Route::delete('/client/reviews/{id}', [\App\Http\Controllers\Public\ReviewController::class, 'destroy'])->name('client.reviews.destroy');
 
     // Real-Time Chat Client Routes
     Route::get('/chat', [ChatController::class, 'index'])->name('client.chat');
     Route::get('/chat/start/{photographerId}', [ChatController::class, 'startChat'])->name('chat.start');
     Route::get('/chat/messages/{chatBookingId}', [ChatController::class, 'getMessages'])->name('chat.messages');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
-
-    // Photographer Financial Reports & Export Routes
-    Route::get('/reports', [\App\Http\Controllers\Photographer\ReportController::class, 'index'])->name('reports');
-    Route::get('/reports/export', [\App\Http\Controllers\Photographer\ReportController::class, 'export'])->name('reports.export');
 });
 
 /*
@@ -119,10 +162,6 @@ Route::middleware(['auth', 'role:client'])->group(function () {
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/users', function () {
-        return view('admin.users.index');
-    })->name('users');
 
     // Admin Category Management Routes
     Route::get('/categories', [\App\Http\Controllers\Admin\CategoryController::class, 'index'])->name('categories');
@@ -155,8 +194,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     // Monitoring Transaksi & Escrow Admin
     Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions');
     Route::get('/transactions/{id}', [\App\Http\Controllers\Admin\TransactionController::class, 'show'])->name('transactions.show');
+    Route::post('/transactions/{id}/verify-payment', [\App\Http\Controllers\Admin\TransactionController::class, 'verifyPayment'])->name('transactions.verify-payment');
+    Route::post('/transactions/{id}/reject-payment', [\App\Http\Controllers\Admin\TransactionController::class, 'rejectPayment'])->name('transactions.reject-payment');
     Route::post('/transactions/{id}/release-payout', [\App\Http\Controllers\Admin\TransactionController::class, 'releasePayout'])->name('transactions.release-payout');
     Route::post('/transactions/{id}/refund', [\App\Http\Controllers\Admin\TransactionController::class, 'processRefund'])->name('transactions.refund');
+
+    // Admin Activity Logs & Audit Trail Routes
+    Route::get('/activity-logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity_logs');
+    Route::post('/activity-logs/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clearOld'])->name('activity_logs.clear');
 
     // Admin Photo Contest Management Routes
     Route::get('/contests', [\App\Http\Controllers\Admin\ContestController::class, 'index'])->name('contests');
@@ -198,6 +243,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::get('/forum', [\App\Http\Controllers\Admin\ForumController::class, 'index'])->name('forum');
     Route::post('/forum/{id}/delete', [\App\Http\Controllers\Admin\ForumController::class, 'destroy'])->name('forum.destroy');
     Route::post('/forum/comment/{id}/delete', [\App\Http\Controllers\Admin\ForumController::class, 'destroyComment'])->name('forum.comment.destroy');
+    Route::post('/forum/comment/{id}/dismiss-reports', [\App\Http\Controllers\Admin\ForumController::class, 'dismissReports'])->name('forum.comment.dismiss_reports');
 });
 
 /*
@@ -207,6 +253,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 */
 Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:photographer'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Photographer\DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/onboarding/complete', [\App\Http\Controllers\Photographer\OnboardingController::class, 'complete'])->name('onboarding.complete');
 
     Route::get('/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index'])->name('profile');
 
@@ -227,12 +274,22 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
     Route::get('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'index'])->name('availability');
     Route::get('/availability/create', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'create'])->name('availability.create');
     Route::post('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'store'])->name('availability.store');
+    Route::post('/availability/working-hours', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'updateWorkingHours'])->name('availability.update-working-hours');
     Route::post('/availability/{id}/delete', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'destroy'])->name('availability.delete');
 
     // Photographer Booking Order Management & Gallery Upload Routes
     Route::get('/bookings', [PhotographerBookingController::class, 'index'])->name('bookings');
     Route::post('/bookings/{id}/status', [PhotographerBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{id}/gallery', [PhotographerBookingController::class, 'uploadGallery'])->name('bookings.gallery');
+    Route::post('/bookings/{id}/reschedule', [PhotographerBookingController::class, 'requestReschedule'])->name('bookings.reschedule');
+    Route::post('/bookings/{id}/reschedule-respond', [PhotographerBookingController::class, 'respondReschedule'])->name('bookings.reschedule-respond');
+    Route::post('/bookings/{id}/rate-client', [PhotographerBookingController::class, 'rateClient'])->name('bookings.rate-client');
+
+    // Photographer Custom FAQ Routes
+    Route::get('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'index'])->name('faqs');
+    Route::post('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'store'])->name('faqs.store');
+    Route::post('/faqs/{id}/update', [\App\Http\Controllers\Photographer\FaqController::class, 'update'])->name('faqs.update');
+    Route::post('/faqs/{id}/delete', [\App\Http\Controllers\Photographer\FaqController::class, 'destroy'])->name('faqs.destroy');
 
     // Real-Time Chat Photographer Studio Routes
     Route::get('/chat', [ChatController::class, 'photographerIndex'])->name('chat');
@@ -243,6 +300,7 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
     // Photographer Financial Reports & Export Routes
     Route::get('/reports', [\App\Http\Controllers\Photographer\ReportController::class, 'index'])->name('reports');
     Route::get('/reports/export', [\App\Http\Controllers\Photographer\ReportController::class, 'export'])->name('reports.export');
+    Route::post('/reports/{id}/request-payout', [\App\Http\Controllers\Photographer\ReportController::class, 'requestPayout'])->name('reports.request-payout');
 });
 /*
 |--------------------------------------------------------------------------

@@ -17,8 +17,7 @@ class PortfolioController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) $photographer = RolePhotographer::first();
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
         $categories = \App\Models\Category::orderBy('nama_kategori', 'asc')->get();
 
         return view('photographer.portfolio.create', compact('photographer', 'categories'));
@@ -30,8 +29,7 @@ class PortfolioController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) $photographer = RolePhotographer::first();
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $portfolio = \App\Models\PhotographerPortfolio::where('id_photographer', $photographer->id)->findOrFail($id);
         $categories = \App\Models\Category::orderBy('nama_kategori', 'asc')->get();
@@ -45,10 +43,7 @@ class PortfolioController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $search = $request->query('search', '');
         $sort = $request->query('sort', 'latest');
@@ -97,26 +92,29 @@ class PortfolioController extends Controller
     }
 
     /**
-     * Simpan Album Portofolio Baru Beserta Foto-Fotonya.
+     * Simpan Album Portofolio Baru Beserta Foto-Fotonya (Minimal 4 Foto Standar Platform).
      */
     public function store(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string|max:1000',
-            'foto_files' => 'nullable|array',
-            'foto_files.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:204800',
+            'judul' => 'required|string|min:3|max:255',
+            'deskripsi' => 'required|string|min:15|max:1000',
+            'foto_files' => 'required|array|min:4',
+            'foto_files.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:20480',
         ], [
             'judul.required' => 'Judul album portofolio wajib diisi.',
+            'judul.min' => 'Judul album portofolio minimal 3 karakter.',
             'deskripsi.required' => 'Deskripsi portofolio wajib diisi.',
-            'foto_files.*.image' => 'File harus berupa format gambar valid (JPG, PNG, WEBP).',
-            'foto_files.*.max' => 'Ukuran file foto maksimal 200MB.',
+            'deskripsi.min' => 'Deskripsi portofolio minimal 15 karakter agar informatif bagi calon klien.',
+            'foto_files.required' => 'Wajib mengunggah minimal 4 foto untuk membuat 1 album portofolio baru.',
+            'foto_files.array' => 'Format file foto harus berupa kumpulan gambar.',
+            'foto_files.min' => 'Wajib mengunggah minimal 4 foto untuk membuat 1 album portofolio baru sesuai standar platform.',
+            'foto_files.*.required' => 'File foto tidak boleh kosong.',
+            'foto_files.*.image' => 'Setiap file harus berupa format gambar valid (JPG, PNG, WEBP).',
+            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20MB.',
         ]);
 
         $portfolio = PhotographerPortfolio::create([
@@ -129,6 +127,11 @@ class PortfolioController extends Controller
             foreach ($request->file('foto_files') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->storeAs('portfolios', $filename, 'public');
+
+                // Terapkan auto-watermarking proteksi karya publik
+                $storagePath = storage_path('app/public/portfolios/' . $filename);
+                \App\Services\WatermarkService::applyWatermark($storagePath, $photographer->nama ?? 'LensMatch Verified');
+
                 $url = asset('storage/portfolios/' . $filename);
 
                 PortfolioMedia::create([
@@ -138,28 +141,38 @@ class PortfolioController extends Controller
             }
         }
 
-        return redirect()->route('photographer.portfolio')->with('success', 'Album portofolio karya berhasil ditambahkan!');
+        return redirect()->route('photographer.portfolio')->with('success', 'Album portofolio karya berhasil ditambahkan dengan ' . count($request->file('foto_files')) . ' foto!');
     }
 
     /**
-     * Perbarui Album Portofolio.
+     * Perbarui Album Portofolio (Memastikan Minimal 4 Foto).
      */
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $portfolio = PhotographerPortfolio::where('id_photographer', $photographer->id)->findOrFail($id);
 
         $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string|max:1000',
+            'judul' => 'required|string|min:3|max:255',
+            'deskripsi' => 'required|string|min:15|max:1000',
             'foto_files' => 'nullable|array',
-            'foto_files.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:204800',
+            'foto_files.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
+        ], [
+            'judul.required' => 'Judul album portofolio wajib diisi.',
+            'judul.min' => 'Judul album portofolio minimal 3 karakter.',
+            'deskripsi.required' => 'Deskripsi portofolio wajib diisi.',
+            'deskripsi.min' => 'Deskripsi portofolio minimal 15 karakter.',
+            'foto_files.*.image' => 'Setiap file harus berupa format gambar valid (JPG, PNG, WEBP).',
+            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20MB.',
         ]);
+
+        $currentCount = $portfolio->medias()->count();
+        $newFilesCount = $request->hasFile('foto_files') ? count($request->file('foto_files')) : 0;
+        if (($currentCount + $newFilesCount) < 4) {
+            return back()->withErrors(['foto_files' => 'Setiap album portofolio wajib memiliki minimal 4 foto (total saat ini: ' . ($currentCount + $newFilesCount) . ' foto).'])->withInput();
+        }
 
         $portfolio->update([
             'judul' => trim($request->judul),
@@ -170,6 +183,11 @@ class PortfolioController extends Controller
             foreach ($request->file('foto_files') as $file) {
                 $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $file->storeAs('portfolios', $filename, 'public');
+
+                // Terapkan auto-watermarking proteksi karya publik
+                $storagePath = storage_path('app/public/portfolios/' . $filename);
+                \App\Services\WatermarkService::applyWatermark($storagePath, $photographer->nama ?? 'LensMatch Verified');
+
                 $url = asset('storage/portfolios/' . $filename);
 
                 PortfolioMedia::create([
@@ -188,10 +206,7 @@ class PortfolioController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $portfolio = PhotographerPortfolio::where('id_photographer', $photographer->id)->findOrFail($id);
         PortfolioMedia::where('id_portofolio', $portfolio->id)->delete();

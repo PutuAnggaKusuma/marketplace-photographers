@@ -83,4 +83,64 @@ class ReviewController extends Controller
 
         return redirect()->back()->with('success', 'Terima kasih! Ulasan dan rating Anda berhasil disimpan.');
     }
+
+    /**
+     * Perbarui Ulasan & Rating yang Sudah Ada.
+     */
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $client = RoleClient::where('id_user', $user->id)->first();
+        if (!$client) {
+            return redirect()->back()->with('error', 'Hanya akun Klien yang dapat memperbarui ulasan.');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'deskripsi_review' => 'required|string|min:5|max:1000',
+        ], [
+            'rating.required' => 'Silakan pilih bintang rating (1 - 5).',
+            'deskripsi_review.required' => 'Tuliskan ulasan testimoni Anda.',
+            'deskripsi_review.min' => 'Ulasan minimal 5 karakter.',
+        ]);
+
+        $testimonial = Testimonial::where('id', $id)
+            ->where('id_client', $client->id)
+            ->firstOrFail();
+
+        $testimonial->update([
+            'rating' => (int) $request->rating,
+            'deskripsi_review' => trim($request->deskripsi_review),
+        ]);
+
+        return redirect()->back()->with('success', 'Ulasan dan rating Anda berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus Ulasan & Rating Klien.
+     */
+    public function destroy($id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $client = RoleClient::where('id_user', $user->id)->first();
+        if (!$client) {
+            return redirect()->back()->with('error', 'Hanya akun Klien yang dapat menghapus ulasan.');
+        }
+
+        $testimonial = Testimonial::where('id', $id)
+            ->where('id_client', $client->id)
+            ->firstOrFail();
+
+        $testimonial->delete();
+
+        return redirect()->back()->with('success', 'Ulasan Anda berhasil dihapus.');
+    }
 }

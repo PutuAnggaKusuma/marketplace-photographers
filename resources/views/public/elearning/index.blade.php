@@ -6,22 +6,16 @@
 <div x-data="elearningOverviewApp()" id="elearning-main-section" class="bg-white dark:bg-gray-900 min-h-screen">
 
   <!-- 1. GRATTER-STYLE CENTERED HERO SECTION WITH WARM AMBER GRADIENT BACKGROUND -->
-  <section class="w-full relative bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white dark:from-gray-800/80 dark:via-gray-800/30 dark:to-gray-900 pt-10 sm:pt-14 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden reveal-on-scroll">
-    <div class="max-w-6xl mx-auto space-y-10 text-center">
+  <section class="w-full relative bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white dark:from-gray-800/80 dark:via-gray-800/30 dark:to-gray-900 pt-10 sm:pt-14 pb-14 sm:pb-20 overflow-hidden reveal-on-scroll">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-center">
       
       <!-- Centered Header Typography -->
       <div class="space-y-4 max-w-3xl mx-auto">
-        <div class="flex justify-center">
-          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 uppercase tracking-widest shadow-2xs">
-            AKADEMI EDUKASI FOTOGRAFI
-          </span>
-        </div>
-        
         <h1 class="text-3xl sm:text-5xl lg:text-[52px] font-black text-gray-900 dark:text-white tracking-tight leading-[1.12]">
           Tingkatkan Skill Fotografi — Raih <span class="text-amber-500 dark:text-amber-400">Potensi Terbaikmu</span>
         </h1>
         <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed pt-1">
-          Panduan edukasi komprehensif dari fotografer profesional terkemuka untuk membantu kamu menguasai teknik kamera, retouching warna Lightroom, dan manajemen bisnis studio.
+          Panduan edukasi terstruktur dari fotografer profesional terkemuka untuk membantu kamu menguasai teknik kamera, retouching warna Lightroom, dan manajemen bisnis studio.
         </p>
       </div>
 
@@ -29,7 +23,7 @@
       <div class="flex items-center justify-center pt-1">
         <a href="{{ route('public.elearning.katalog') }}" class="px-8 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 inline-flex items-center gap-2">
           <span>Mulai Belajar Gratis</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
         </a>
       </div>
 
@@ -96,19 +90,19 @@
           </div>
         </div>
 
-        <!-- Floating Card 2 (Bottom-Left Key Statistics Card) -->
-        <div class="hidden lg:block absolute -left-8 xl:-left-12 bottom-4 w-56 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border border-amber-300/40 space-y-3 z-20 text-left transform -rotate-3 animate-float-2">
+        <!-- Floating Card 2 (Bottom-Left Course Overview Card) -->
+        <div class="hidden lg:block absolute -left-8 xl:-left-12 bottom-4 w-56 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 space-y-2.5 z-20 text-left transform -rotate-3 animate-float-2">
           <div>
-            <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">KEY STATISTICS</span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Ringkasan Materi</span>
           </div>
           <div class="space-y-2">
-            <div class="bg-amber-50 dark:bg-amber-950/60 p-2.5 rounded-xl border border-amber-200/50 flex items-center justify-between">
-              <span class="text-xs font-black text-amber-900 dark:text-amber-300">{{ $totalCategories }}+ Kategori Utama</span>
-              <span class="text-[10px] text-amber-600 dark:text-amber-400 font-bold">100% Gratis</span>
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-900 dark:text-white">{{ $totalCategories }}+ Kategori Utama</span>
+              <span class="font-medium text-gray-500 dark:text-gray-400">100% Gratis</span>
             </div>
-            <div class="bg-emerald-50 dark:bg-emerald-950/60 p-2.5 rounded-xl border border-emerald-200/50 flex items-center justify-between">
-              <span class="text-xs font-black text-emerald-900 dark:text-emerald-300">Real-time Progress</span>
-              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Tersimpan</span>
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-gray-900 dark:text-white">Progres Belajar</span>
+              <span class="font-medium text-gray-500 dark:text-gray-400">Tersimpan</span>
             </div>
           </div>
         </div>
@@ -131,7 +125,7 @@
           </div>
           <div class="p-3.5 space-y-1 text-left">
             <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">MAHIR</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">Bisnis Studio & Escrow</h4>
+            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">Bisnis Studio & Keuangan</h4>
           </div>
         </div>
 
@@ -141,7 +135,7 @@
   </section>
 
   <!-- BODY CONTENT WRAPPER -->
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <!-- 2. STATS BAR SECTION (Beranda-style, above Key Benefits) -->
     <section class="w-full reveal-on-scroll">
@@ -172,16 +166,13 @@
         <!-- Section Header Row (Header Left, Subtext Right) -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div class="space-y-2 max-w-xl">
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-              KEUNGGULAN UTAMA
-            </span>
             <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
               Key <span class="text-amber-500 dark:text-amber-400">Benefits</span>
             </h2>
           </div>
 
           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md leading-relaxed">
-            Di Akademi LensMatch, kami tidak hanya memberikan materi — kami memberikan ekosistem belajar komprehensif yang dirancang untuk melejitkan karir dan bisnis studio fotografi Anda.
+            Di Akademi LensMatch, kami tidak hanya memberikan materi — kami memberikan kurikulum belajar bertahap yang dirancang untuk melejitkan karir dan bisnis studio fotografi Anda.
           </p>
         </div>
 
@@ -358,14 +349,14 @@
                 @auth
                   <a href="{{ route('public.elearning.show', $course->slug) }}" class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs">
                     <span>Mulai Belajar</span>
-                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                   </a>
                 @else
                   <button type="button" 
                           @click="openGuestLoginModal('{{ route('public.elearning.show', $course->slug) }}', '{{ addslashes($course->judul) }}')" 
                           class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs">
                     <span>Mulai Belajar</span>
-                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                   </button>
                 @endauth
               </div>
@@ -374,8 +365,8 @@
           </div>
         @empty
           <div class="col-span-full bg-white dark:bg-gray-800 p-12 sm:p-16 rounded-3xl border border-gray-200 dark:border-gray-700 text-center space-y-3 shadow-xs">
-            <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl mb-2">
-              📚
+            <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
             </div>
             <h3 class="text-lg font-black text-gray-900 dark:text-white">Materi E-Learning Tidak Ditemukan</h3>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
@@ -387,10 +378,19 @@
 
       <!-- Prominent "Lihat Lebih Banyak Modul" CTA Button Container -->
       <div class="pt-8 text-center">
-        <a href="{{ route('public.elearning.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
-          <span>Lihat Lebih Banyak Modul</span>
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
-        </a>
+        @auth
+          <a href="{{ route('public.elearning.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
+            <span>Lihat Lebih Banyak Modul</span>
+            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+          </a>
+        @else
+          <button type="button" 
+                  @click="openGuestLoginModal('{{ route('public.elearning.katalog') }}', 'Katalog Modul Edukasi')"
+                  class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group cursor-pointer">
+            <span>Lihat Lebih Banyak Modul</span>
+            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+          </button>
+        @endauth
       </div>
 
     </div>
@@ -412,19 +412,18 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
         
-        <!-- Header without Icon & Plain Close Button -->
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Akses Akademi E-Learning LensMatch</p>
-          </div>
-          <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-base font-bold transition cursor-pointer p-0.5 leading-none">✕</button>
+        <!-- Plain Close Button Absolute Top Right -->
+        <button type="button" @click="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+
+        <!-- Header without Icon & Centered -->
+        <div class="text-center">
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
         </div>
 
-        <!-- Body Text -->
-        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed">
+        <!-- Body Text (Centered) -->
+        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center">
           Untuk dapat membaca materi edukasi E-Learning <strong class="font-bold text-gray-900 dark:text-white" x-text="targetCourseTitle ? '“' + targetCourseTitle + '”' : ''"></strong> dan meningkatkan skill fotografi, Anda harus masuk ke akun LensMatch terlebih dahulu.
         </p>
 

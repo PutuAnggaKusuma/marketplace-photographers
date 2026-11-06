@@ -17,8 +17,7 @@ class ServiceController extends Controller
     public function create()
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) $photographer = RolePhotographer::first();
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         return view('photographer.services.create', compact('photographer'));
     }
@@ -29,8 +28,7 @@ class ServiceController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) $photographer = RolePhotographer::first();
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $service = PhotographerService::with('details')
             ->where('id_photographer', $photographer->id)
@@ -45,10 +43,7 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $search = $request->query('search', '');
         $sort = $request->query('sort', 'latest');
@@ -109,23 +104,39 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $request->validate([
-            'nama_layanan' => 'required|string|max:255',
-            'tarif_harga' => 'required|numeric|min:0',
-            'deskripsi_layanan' => 'required|string|max:1000',
-            'fitur' => 'nullable|array',
-            'fitur.*' => 'nullable|string|max:255',
+            'nama_layanan' => 'required|string|min:3|max:100',
+            'tarif_harga' => 'required|numeric|min:10000',
+            'deskripsi_layanan' => 'required|string|min:15|max:1000',
+            'fitur' => 'required|array|min:1',
+            'fitur.*' => 'required|string|min:3|max:255',
         ], [
             'nama_layanan.required' => 'Nama paket layanan wajib diisi.',
+            'nama_layanan.min' => 'Nama paket layanan minimal 3 karakter.',
+            'nama_layanan.max' => 'Nama paket layanan maksimal 100 karakter.',
             'tarif_harga.required' => 'Tarif harga paket wajib diisi.',
-            'tarif_harga.numeric' => 'Tarif harga harus berupa angka.',
+            'tarif_harga.numeric' => 'Tarif harga harus berupa nominal angka valid.',
+            'tarif_harga.min' => 'Tarif harga paket minimal Rp 10.000.',
             'deskripsi_layanan.required' => 'Deskripsi paket layanan wajib diisi.',
+            'deskripsi_layanan.min' => 'Deskripsi paket layanan minimal 15 karakter agar informatif bagi calon klien.',
+            'deskripsi_layanan.max' => 'Deskripsi paket layanan maksimal 1.000 karakter.',
+            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
+            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
+            'fitur.*.required' => 'Rincian benefit/fasilitas paket tidak boleh kosong.',
+            'fitur.*.min' => 'Rincian benefit/fasilitas minimal 3 karakter.',
+            'fitur.*.max' => 'Rincian benefit/fasilitas maksimal 255 karakter.',
         ]);
+
+        $validFiturs = array_values(array_filter(
+            $request->input('fitur', []),
+            fn($item) => !empty(trim($item ?? ''))
+        ));
+
+        if (empty($validFiturs)) {
+            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas layanan yang terisi.'])->withInput();
+        }
 
         $service = PhotographerService::create([
             'id_photographer' => $photographer->id,
@@ -134,17 +145,12 @@ class ServiceController extends Controller
             'deskripsi_layanan' => trim($request->deskripsi_layanan),
         ]);
 
-        if ($request->has('fitur') && is_array($request->fitur)) {
-            foreach ($request->fitur as $item) {
-                $trimmed = trim($item);
-                if (!empty($trimmed)) {
-                    ServiceDetail::create([
-                        'id_p_service' => $service->id,
-                        'nama_fitur' => $trimmed,
-                        'tarif_harga' => 0,
-                    ]);
-                }
-            }
+        foreach ($validFiturs as $item) {
+            ServiceDetail::create([
+                'id_p_service' => $service->id,
+                'nama_fitur' => trim($item),
+                'tarif_harga' => 0,
+            ]);
         }
 
         return redirect()->route('photographer.services')->with('success', 'Paket layanan fotografi berhasil ditambahkan!');
@@ -156,24 +162,41 @@ class ServiceController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $service = PhotographerService::where('id_photographer', $photographer->id)->findOrFail($id);
 
         $request->validate([
-            'nama_layanan' => 'required|string|max:255',
-            'tarif_harga' => 'required|numeric|min:0',
-            'deskripsi_layanan' => 'required|string|max:1000',
-            'fitur' => 'nullable|array',
-            'fitur.*' => 'nullable|string|max:255',
+            'nama_layanan' => 'required|string|min:3|max:100',
+            'tarif_harga' => 'required|numeric|min:10000',
+            'deskripsi_layanan' => 'required|string|min:15|max:1000',
+            'fitur' => 'required|array|min:1',
+            'fitur.*' => 'required|string|min:3|max:255',
         ], [
             'nama_layanan.required' => 'Nama paket layanan wajib diisi.',
+            'nama_layanan.min' => 'Nama paket layanan minimal 3 karakter.',
+            'nama_layanan.max' => 'Nama paket layanan maksimal 100 karakter.',
             'tarif_harga.required' => 'Tarif harga paket wajib diisi.',
+            'tarif_harga.numeric' => 'Tarif harga harus berupa nominal angka valid.',
+            'tarif_harga.min' => 'Tarif harga paket minimal Rp 10.000.',
             'deskripsi_layanan.required' => 'Deskripsi paket layanan wajib diisi.',
+            'deskripsi_layanan.min' => 'Deskripsi paket layanan minimal 15 karakter agar informatif bagi calon klien.',
+            'deskripsi_layanan.max' => 'Deskripsi paket layanan maksimal 1.000 karakter.',
+            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
+            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
+            'fitur.*.required' => 'Rincian benefit/fasilitas paket tidak boleh kosong.',
+            'fitur.*.min' => 'Rincian benefit/fasilitas minimal 3 karakter.',
+            'fitur.*.max' => 'Rincian benefit/fasilitas maksimal 255 karakter.',
         ]);
+
+        $validFiturs = array_values(array_filter(
+            $request->input('fitur', []),
+            fn($item) => !empty(trim($item ?? ''))
+        ));
+
+        if (empty($validFiturs)) {
+            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas layanan yang terisi.'])->withInput();
+        }
 
         $service->update([
             'nama_layanan' => trim($request->nama_layanan),
@@ -183,17 +206,12 @@ class ServiceController extends Controller
 
         // Sync service details
         ServiceDetail::where('id_p_service', $service->id)->delete();
-        if ($request->has('fitur') && is_array($request->fitur)) {
-            foreach ($request->fitur as $item) {
-                $trimmed = trim($item);
-                if (!empty($trimmed)) {
-                    ServiceDetail::create([
-                        'id_p_service' => $service->id,
-                        'nama_fitur' => $trimmed,
-                        'tarif_harga' => 0,
-                    ]);
-                }
-            }
+        foreach ($validFiturs as $item) {
+            ServiceDetail::create([
+                'id_p_service' => $service->id,
+                'nama_fitur' => trim($item),
+                'tarif_harga' => 0,
+            ]);
         }
 
         return redirect()->route('photographer.services')->with('success', 'Paket layanan berhasil diperbarui!');
@@ -205,12 +223,18 @@ class ServiceController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $service = PhotographerService::where('id_photographer', $photographer->id)->findOrFail($id);
+
+        $hasActiveBookings = \App\Models\ContractBooking::where('id_service', $service->id)
+            ->whereIn('status_booking', ['pending', 'confirmed'])
+            ->exists();
+
+        if ($hasActiveBookings) {
+            return back()->with('error', 'Paket layanan tidak dapat dihapus karena masih digunakan pada pesanan aktif (pending/confirmed).');
+        }
+
         ServiceDetail::where('id_p_service', $service->id)->delete();
         $service->delete();
 

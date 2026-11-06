@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/95 dark:border-gray-800 shadow-xs shrink-0">
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/95 dark:border-gray-800 shrink-0">
 @if(request()->routeIs('public.elearning.show'))
   <div 
     class="w-full mx-auto transition-all duration-500 ease-in-out"
@@ -17,12 +17,12 @@
           <span class="text-gray-300 dark:text-gray-700 hidden sm:inline">|</span>
           @if(request()->routeIs('public.elearning.checkout') && isset($course))
             <a href="{{ route('public.elearning.show', $course->slug) }}" class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
               <span>Kembali ke Ruang Belajar</span>
             </a>
           @else
             <a href="{{ route('public.elearning.katalog') }}" class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
               <span>Katalog Akademi</span>
             </a>
           @endif
@@ -48,7 +48,7 @@
           <a href="{{ url()->previous() != url()->current() ? url()->previous() : route('client.bookings') }}" 
              onclick="if (window.history.length > 1 && document.referrer && document.referrer !== window.location.href) { event.preventDefault(); window.history.back(); }" 
              class="text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-amber-400 dark:hover:text-amber-400 transition inline-flex items-center gap-1.5 shrink-0 cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             <span>Kembali</span>
           </a>
         </div>
@@ -106,26 +106,42 @@
             </button>
 
             <!-- Notifications Dropdown List -->
-            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden">
-              <div class="px-5 py-3.5 flex items-center justify-between bg-white dark:bg-gray-800">
+            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden text-left">
+              <div class="px-5 py-3.5 flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800">
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-black text-gray-900 dark:text-white">Notifikasi Saya</h3>
                   <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
                 </div>
-                <button type="button" @click="markAllRead()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer">Tandai dibaca</button>
+                <button type="button" 
+                        @click="markAllRead()" 
+                        :disabled="isMarkingAll || unreadCount === 0"
+                        class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                  <svg x-show="isMarkingAll" 
+                       x-cloak 
+                       class="animate-spin h-3 w-3 text-amber-500 dark:text-amber-400 shrink-0" 
+                       xmlns="http://www.w3.org/2000/svg" 
+                       fill="none" 
+                       viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Tandai dibaca</span>
+                </button>
               </div>
 
-              <div class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
+              <div class="max-h-80 overflow-y-auto overflow-x-hidden divide-y divide-gray-100 dark:divide-gray-700/60">
                 <template x-for="notif in notifications" :key="notif.id">
                   <div @click="openNotif(notif)" 
-                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3 bg-white dark:bg-gray-800 hover:bg-gray-50/60 dark:hover:bg-gray-750/50">
+                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3 hover:bg-gray-50/80 dark:hover:bg-gray-700/40 relative"
+                       :class="!notif.is_read ? 'bg-amber-50/30 dark:bg-amber-950/20' : 'bg-white dark:bg-gray-800'">
                     
                     <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                          :class="{
                             'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300': notif.type === 'booking',
                             'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300': notif.type === 'payout' || notif.type === 'payment',
                             'bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300': notif.type === 'gallery',
-                            'bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300': notif.type === 'chat'
+                            'bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300': notif.type === 'chat',
+                            'bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-300': notif.type === 'security'
                          }">
                       <template x-if="notif.type === 'booking'">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -143,9 +159,9 @@
 
                     <div class="min-w-0 flex-1 space-y-1">
                       <div class="flex items-start justify-between gap-2">
-                        <p class="text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-medium" x-text="notif.message || notif.title"></p>
-                        <span x-show="!notif.is_read" class="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1"></span>
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white leading-snug break-words [overflow-wrap:anywhere]" x-text="notif.title || 'Notifikasi'"></h4>
                       </div>
+                      <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-normal break-words [overflow-wrap:anywhere]" x-text="notif.message"></p>
                       <p class="text-[10px] text-gray-400 font-medium" x-text="notif.created_at"></p>
                     </div>
                   </div>
@@ -166,9 +182,27 @@ function headerNotifApp() {
         notifOpen: false,
         unreadCount: 0,
         notifications: [],
+        isMarkingAll: false,
         init() {
             this.fetchNotifs();
             setInterval(() => this.fetchNotifs(), 30000);
+
+            @auth
+            const listenEcho = () => {
+                if (window.Echo) {
+                    window.Echo.private('user.{{ auth()->id() }}')
+                        .listen('.notification.received', (e) => {
+                            if (e.notification) {
+                                this.notifications.unshift(e.notification);
+                                this.unreadCount++;
+                            }
+                        });
+                } else {
+                    setTimeout(listenEcho, 500);
+                }
+            };
+            listenEcho();
+            @endauth
         },
         fetchNotifs() {
             fetch('{{ route("notifications.unread") }}', {
@@ -184,6 +218,9 @@ function headerNotifApp() {
             .catch(err => console.error(err));
         },
         markAllRead() {
+            if (this.isMarkingAll || this.unreadCount === 0) return;
+            this.isMarkingAll = true;
+            const start = Date.now();
             fetch('{{ route("notifications.read-all") }}', {
                 method: 'POST',
                 headers: {
@@ -198,6 +235,14 @@ function headerNotifApp() {
                     this.unreadCount = 0;
                     this.notifications.forEach(n => n.is_read = true);
                 }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                const elapsed = Date.now() - start;
+                const remaining = Math.max(0, 450 - elapsed);
+                setTimeout(() => {
+                    this.isMarkingAll = false;
+                }, remaining);
             });
         },
         openNotif(notif) {
@@ -244,6 +289,10 @@ function headerNotifApp() {
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                   <span>Reservasi Saya</span>
                 </a>
+                <a href="{{ url('/client/favorites') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
+                  <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                  <span>Fotografer Favorit</span>
+                </a>
                 <a href="{{ url('/client/invoices') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                   <span>Invoice & Pembayaran</span>
@@ -263,12 +312,12 @@ function headerNotifApp() {
               @elseif(auth()->user()->role === 'photographer')
                 <a href="{{ route('photographer.dashboard') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                  <span>Dashboard Fotografer</span>
+                  <span>Dashboard</span>
                 </a>
               @else
                 <a href="{{ route('admin.dashboard') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                  <span>Dashboard Admin Utama</span>
+                  <span>Dashboard</span>
                 </a>
               @endif
               

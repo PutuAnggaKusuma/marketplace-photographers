@@ -8,9 +8,6 @@
 
     <!-- Header -->
     <div class="space-y-2 text-center">
-      <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-400 text-gray-900">
-        Dokumen Legal Resmi
-      </span>
       <h1 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Kebijakan Privasi & Syarat Ketentuan</h1>
       <p class="text-xs text-gray-500 dark:text-gray-400">Terakhir diperbarui: 15 Agustus 2026</p>
     </div>
@@ -25,7 +22,7 @@
 
       <div class="space-y-3">
         <h2 class="text-base font-extrabold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">2. Sistem Rekening Bersama (Escrow Guarantee)</h2>
-        <p>Seluruh transaksi pemesanan jasa fotografi wajib melalui sistem Rekening Bersama Escrow LensMatch. Dana pembayaran disimpan dengan aman di sistem platform dan hanya akan dicairkan ke rekening fotografer setelah sesi pemotretan serta penyerahan file foto diselesaikan secara sah.</p>
+        <p>Seluruh transaksi pemesanan jasa fotografi wajib melalui sistem Rekening Bersama LensMatch. Dana pembayaran disimpan dengan aman di sistem platform dan hanya akan dicairkan ke rekening fotografer setelah sesi pemotretan serta penyerahan file foto diselesaikan secara sah.</p>
       </div>
 
       <div class="space-y-3">

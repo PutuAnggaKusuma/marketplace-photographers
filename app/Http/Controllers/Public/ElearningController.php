@@ -133,10 +133,18 @@ class ElearningController extends Controller
 
         $userProgress = $userId ? $course->getUserProgress() : null;
 
-        // Cek status kepemilikan / pembelian kursus
-        $isPurchased = session()->get("elearning_purchased_{$course->id}", false);
+        // Cek status kepemilikan / pembelian kursus dari Database MySQL
+        $isPurchased = false;
         if ($course->harga == 0 || !$course->is_premium) {
             $isPurchased = true;
+        } elseif ($userId) {
+            $isPurchased = \App\Models\ElearningTransaction::where('id_user', $userId)
+                ->where('id_e_learning', $course->id)
+                ->where('payment_status', 'completed')
+                ->exists();
+            if (!$isPurchased) {
+                $isPurchased = session()->get("elearning_purchased_{$course->id}", false);
+            }
         }
 
         // Tentukan apakah tahapan saat ini terkunci (harus bayar)
@@ -317,29 +325,98 @@ class ElearningController extends Controller
      */
     public function checkout($slug)
     {
+        if (!Auth::check()) {
+            return redirect()->guest(route('login'))->with('warning', 'Silakan masuk ke akun Anda terlebih dahulu untuk melanjutkan proses checkout kursus.');
+        }
+
         $course = Elearning::where('slug', $slug)
             ->with(['modules.lessons'])
             ->firstOrFail();
+
+        // Jika gratis, langsung berikan akses
+        if ($course->harga == 0 || !$course->is_premium) {
+            \App\Models\ELearningProgress::firstOrCreate(
+                ['id_user' => Auth::id(), 'id_e_learning' => $course->id],
+                ['status' => 'sedang_belajar', 'progress_percentage' => 0]
+            );
+            return redirect()->route('public.elearning.show', $course->slug)->with('info', 'Kursus ini gratis dan langsung terbuka untuk Anda.');
+        }
+
+        // Cek apakah sudah pernah dibeli
+        $alreadyPurchased = \App\Models\ElearningTransaction::where('id_user', Auth::id())
+            ->where('id_e_learning', $course->id)
+            ->where('payment_status', 'completed')
+            ->exists();
+
+        if ($alreadyPurchased) {
+            return redirect()->route('public.elearning.show', $course->slug)->with('info', 'Anda sudah memiliki akses penuh ke kursus ini.');
+        }
 
         return view('public.elearning.checkout', compact('course'));
     }
 
     /**
-     * Proses Konfirmasi Pembayaran Kursus E-Learning.
+     * Proses Konfirmasi Pembayaran Kursus E-Learning (Tercatat di Database).
      */
     public function processCheckout(Request $request, $slug)
     {
+        if (!Auth::check()) {
+            return redirect()->guest(route('login'))->with('warning', 'Silakan masuk ke akun Anda terlebih dahulu untuk menyelesaikan pembayaran.');
+        }
+
         $course = Elearning::where('slug', $slug)->firstOrFail();
 
-        // Simpan tanda pembelian kursus pada sesi
-        session()->put("elearning_purchased_{$course->id}", true);
+        $request->validate([
+            'payment_method' => 'nullable|in:qris,bank,ewallet',
+        ]);
 
-        if (Auth::check()) {
+        $method = $request->input('payment_method', 'qris');
+        $invoiceCode = 'INV-ELN-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
+
+        // Cek apakah transaksi sudah ada
+        $existingTx = \App\Models\ElearningTransaction::where('id_user', Auth::id())
+            ->where('id_e_learning', $course->id)
+            ->where('payment_status', 'completed')
+            ->first();
+
+        if (!$existingTx) {
+            $existingTx = \App\Models\ElearningTransaction::create([
+                'id_user' => Auth::id(),
+                'id_e_learning' => $course->id,
+                'invoice_code' => $invoiceCode,
+                'nominal' => $course->harga ?: 0,
+                'payment_method' => $method,
+                'payment_status' => 'completed',
+                'paid_at' => now(),
+            ]);
+
+            // Aktifkan progress pembelajaran
             \App\Models\ELearningProgress::firstOrCreate(
                 ['id_user' => Auth::id(), 'id_e_learning' => $course->id],
                 ['status' => 'sedang_belajar', 'progress_percentage' => 0]
             );
+
+            $formattedHarga = 'Rp ' . number_format($course->harga ?: 0, 0, ',', '.');
+
+            // Kirim Notifikasi in-app
+            \App\Models\Notification::send(
+                Auth::id(),
+                'Pembelian Kursus Berhasil',
+                "Pembayaran untuk kursus '{$course->judul}' sebesar {$formattedHarga} berhasil dikonfirmasi. Akses kurikulum terbuka penuh.",
+                'course_enrolled',
+                route('public.elearning.show', $course->slug)
+            );
+
+            // Rekam ke Activity Log
+            \App\Models\ActivityLog::record(
+                'elearning_purchase',
+                "Pengguna " . Auth::user()->nama . " membeli kursus '{$course->judul}' ({$invoiceCode}) seharga {$formattedHarga}",
+                $course,
+                ['nominal' => $course->harga, 'invoice_code' => $invoiceCode, 'method' => $method]
+            );
         }
+
+        session()->put("elearning_purchased_{$course->id}", true);
 
         return redirect()->route('public.elearning.show', $course->slug)->with('success', 'Pembayaran berhasil dikonfirmasi! Seluruh materi kursus kini terbuka.');
     }
@@ -387,5 +464,17 @@ class ElearningController extends Controller
             'percentage',
             'totalLessons'
         ));
+    }
+
+    /**
+     * Tampilkan Dokumen Invoice Resmi Transaksi E-Learning Print/PDF Ready.
+     */
+    public function printInvoice(Request $request, $id)
+    {
+        $transaction = \App\Models\ElearningTransaction::with(['elearning', 'user'])
+            ->where('id_user', Auth::id())
+            ->findOrFail($id);
+
+        return view('public.elearning.invoice-print', compact('transaction'));
     }
 }

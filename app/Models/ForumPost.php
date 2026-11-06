@@ -16,6 +16,7 @@ class ForumPost extends Model
         'id_user',
         'judul',
         'deskripsi',
+        'kategori',
     ];
 
     public function user()
@@ -26,5 +27,15 @@ class ForumPost extends Model
     public function comments()
     {
         return $this->hasMany(ForumComment::class, 'id_forum_post');
+    }
+
+    public function rootComments()
+    {
+        return $this->hasMany(ForumComment::class, 'id_forum_post')->whereNull('parent_id');
+    }
+
+    public function medias()
+    {
+        return $this->hasMany(ForumPostMedia::class, 'id_forum_post');
     }
 }

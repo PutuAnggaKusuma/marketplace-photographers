@@ -70,7 +70,7 @@
 
   <!-- Warning Badge-->
   <span
-    class="inline-flex items-center justify-center gap-1 rounded-full bg-warning-50 py-0.5 pl-2.5 pr-2 text-sm font-medium text-warning-600 dark:bg-warning-500/15 dark:text-orange-400"
+    class="inline-flex items-center justify-center gap-1 rounded-full bg-warning-50 py-0.5 pl-2.5 pr-2 text-sm font-medium text-warning-600 dark:bg-warning-500/15 dark:text-amber-400"
   >
     Warning
 

@@ -8,40 +8,35 @@
     <!-- Page Title Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Kurasi Kualitas Platform</span>
+            
             <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Manajemen Fotografer</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola data seluruh mitra fotografer, monitoring legalitas portofolio, status verifikasi centang biru, dan manajemen katalog layanan</p>
         </div>
     </div>
 
-    <!-- 4 Clean Summary Metric Cards (Gray Subtitle) -->
+    <!-- 4 Clean Summary Metric Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Studio -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Mitra Fotografer</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStudios }} Fotografer</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Terdaftar di ekosistem</p>
         </div>
 
         <!-- Card 2: Terverifikasi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Fotografer Terverifikasi</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified }} Fotografer</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Lencana Verified Aktif</p>
         </div>
 
         <!-- Card 3: Menunggu Verifikasi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Verifikasi</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalUnverified }} Fotografer</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Butuh Peninjauan Portofolio</p>
         </div>
 
         <!-- Card 4: Total Paket Layanan -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Layanan Terlisting</span>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Paket Layanan</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalServices }} Paket</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Aktif di Katalog Publik</p>
         </div>
     </div>
 
@@ -146,8 +141,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari fotografer, nama, kota..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -215,9 +210,15 @@
                                 @endif
                             </td>
 
-                            <!-- Aksi -->
+                                                        <!-- Aksi -->
                             <td class="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('public.photographers.show', $photo->id) }}" 
+                                       target="_blank"
+                                       class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block">
+                                        Lihat
+                                    </a>
+
                                     <form action="{{ route('admin.photographers.verify', $photo->id) }}" method="POST" class="inline">
                                         @csrf
                                         @if($photo->is_verified)

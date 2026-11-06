@@ -28,4 +28,9 @@ class PhotographerService extends Model
     {
         return $this->hasMany(ServiceDetail::class, 'id_p_service');
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(ContractBooking::class, 'id_service');
+    }
 }

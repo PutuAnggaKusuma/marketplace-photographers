@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Moderasi Ulasan & Rating Pelanggan Admin - LensMatch')
+@section('title', 'Moderasi Ulasan Klien Pelanggan Admin - LensMatch')
 
 @section('content')
 <div x-data="dashboardLiveTable()" class="space-y-6">
@@ -8,9 +8,7 @@
     <!-- Page Title Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pusat Kepuasan Pelanggan</span>
-            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Moderasi Ulasan & Rating</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pantau seluruh testimoni ulasan pelanggan, kelola status publikasi, dan bersihkan ulasan spam</p>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Ulasan Klien</h1>
         </div>
     </div>
 
@@ -21,7 +19,6 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Ulasan Masuk</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalReviews }} Ulasan</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Ulasan pelanggan terdaftar</p>
         </div>
 
         <!-- Card 2: Rata-Rata Rating Platform -->
@@ -31,21 +28,18 @@
                 <span>{{ $avgRating }}</span>
                 <svg class="w-5 h-5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
             </h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Skor kepuasan klien platform</p>
         </div>
 
         <!-- Card 3: Total Ulasan Bintang 5 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Testimoni Bintang 5</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $fiveStarReviews }} Ulasan</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Rating bintang sempurna</p>
         </div>
 
         <!-- Card 4: Ulasan Disembunyikan -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ulasan Disembunyikan</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $hiddenReviews }} Ulasan</h2>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Moderasi ulasan non-aktif</p>
         </div>
     </div>
 
@@ -151,8 +145,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari ulasan, klien, fotografer..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 

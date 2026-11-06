@@ -3,14 +3,17 @@
 @section('title', 'Laporan Keuangan Fotografer - LensMatch')
 
 @section('content')
-<div x-data="dashboardLiveTable()" class="space-y-6">
+<div x-data="Object.assign(dashboardLiveTable(), { 
+    isPayoutModalOpen: false, 
+    payoutData: {},
+    openPayoutModal(data) { this.payoutData = data; this.isPayoutModalOpen = true; },
+    closePayoutModal() { this.isPayoutModalOpen = false; }
+})" class="space-y-6">
 
     <!-- Page Title & Header Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pusat Informasi Keuangan</span>
-            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Laporan Keuangan & Statistik Fotografer</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pantau akumulasi omzet bersih, proyeksi pencairan escrow, dan unduh laporan resmi keuangan Anda</p>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Laporan Keuangan</h1>
         </div>
 
         <div class="flex items-center gap-2">
@@ -25,44 +28,28 @@
     <!-- 4 Summary Stat Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Net Income -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm relative overflow-hidden">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Omzet Bersih Fotografer</span>
-            <div class="mt-3">
-                <h2 class="text-xl font-black text-gray-900 dark:text-white">Rp {{ number_format($totalNetIncome, 0, ',', '.') }}</h2>
-                <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium mt-1"><span class="font-bold text-gray-700 dark:text-gray-300">90%</span> Payout Diterima Bersih</p>
-            </div>
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Omzet Bersih Fotografer</span>
+            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalNetIncome, 0, ',', '.') }}</h2>
         </div>
 
-        <!-- Card 2: Escrow Pending -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm relative overflow-hidden">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Escrow Pending</span>
-            <div class="mt-3">
-                <h2 class="text-xl font-black text-gray-900 dark:text-white">Rp {{ number_format($totalEscrowPending, 0, ',', '.') }}</h2>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1">Proyeksi Pencairan Sesi Foto</p>
-            </div>
+        <!-- Card 2: Dana Tertahan -->
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Dana Tertahan</span>
+            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowPending, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 3: Completed Count -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm relative overflow-hidden">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sesi Foto Selesai</span>
-            <div class="mt-3">
-                <h2 class="text-xl font-black text-gray-900 dark:text-white">{{ $completedCount }} Sesi</h2>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1">Terverifikasi Selesai</p>
-            </div>
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Foto Selesai</span>
+            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $completedCount }} Sesi</h2>
         </div>
 
         <!-- Card 4: Avg Revenue per Session -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm relative overflow-hidden">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rata-Rata / Sesi</span>
-            <div class="mt-3">
-                <h2 class="text-xl font-black text-gray-900 dark:text-white">Rp {{ number_format($avgRevenuePerSession, 0, ',', '.') }}</h2>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1">
-                    Komisi Platform (<span class="font-bold text-gray-700 dark:text-gray-300">10%</span>): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($totalMarketplaceFee, 0, ',', '.') }}</span>
-                </p>
-            </div>
+        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rata-Rata / Sesi</span>
+            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($avgRevenuePerSession, 0, ',', '.') }}</h2>
         </div>
-    </div>
-
     </div>
 
     <!-- Monthly Revenue Visual Bar Chart Card -->
@@ -140,7 +127,7 @@
         <!-- Table Header & Status Filter Tabs -->
         <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-                <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Rincian Transaksi & Pencairan Payout</h3>
+                <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Riwayat Pencairan Dana</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Daftar lengkap pendapatan per pesanan sesi foto</p>
             </div>
 
@@ -149,7 +136,7 @@
                     $tTabs = [
                         'all' => 'Semua Transaksi',
                         'paid' => 'Pencairan Selesai',
-                        'holding' => 'Escrow Pending'
+                        'holding' => 'Dana Tertahan'
                     ];
                 @endphp
                 @foreach($tTabs as $k => $l)
@@ -171,7 +158,7 @@
                         <th class="py-3.5 px-4 sm:px-6">Tanggal Sesi</th>
                         <th class="py-3.5 px-4 sm:px-6">Total Tarif</th>
                         <th class="py-3.5 px-4 sm:px-6">Fee Platform (10%)</th>
-                        <th class="py-3.5 px-4 sm:px-6">Net Payout Fotografer (90%)</th>
+                        <th class="py-3.5 px-4 sm:px-6">Pendapatan Bersih (90%)</th>
                         <th class="py-3.5 px-4 sm:px-6">Status Pencairan</th>
                     </tr>
                 </thead>
@@ -193,7 +180,7 @@
                             <!-- Klien & Layanan -->
                             <td class="py-4 px-4 sm:px-6">
                                 <div class="font-bold text-gray-900 dark:text-white">{{ $c->client->nama ?? 'Klien' }}</div>
-                                <div class="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                                     {{ $c->bookingDetail->service->nama_layanan ?? 'Paket Foto Custom' }}
                                 </div>
                             </td>
@@ -209,12 +196,12 @@
                             </td>
 
                             <!-- Fee Platform -->
-                            <td class="py-4 px-4 sm:px-6 text-amber-600 dark:text-amber-400 font-bold">
+                            <td class="py-4 px-4 sm:px-6 font-medium text-gray-600 dark:text-gray-300">
                                 Rp {{ number_format($feeAmount, 0, ',', '.') }}
                             </td>
 
-                            <!-- Net Payout -->
-                            <td class="py-4 px-4 sm:px-6 font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                            <!-- Pendapatan Bersih -->
+                            <td class="py-4 px-4 sm:px-6 font-black text-gray-900 dark:text-white text-sm">
                                 Rp {{ number_format($netPayout, 0, ',', '.') }}
                             </td>
 
@@ -222,22 +209,46 @@
                             <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
                                 @if($c->status_payout === 'paid')
                                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                        Payout Dicairkan
+                                        Sudah Ditransfer
                                     </span>
                                     @if($c->payout_at)
                                         <p class="text-[10px] text-gray-400 mt-0.5">{{ $c->payout_at->format('d M Y, H:i') }}</p>
                                     @endif
                                 @elseif($c->status_payout === 'ready')
-                                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
-                                        Siap Dicairkan
-                                    </span>
+                                    @if($c->payout_requested_at)
+                                        <div class="space-y-0.5">
+                                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                                Menunggu Transfer Admin
+                                            </span>
+                                            <p class="text-[10px] text-gray-400">Diajukan {{ $c->payout_requested_at->format('d M, H:i') }}</p>
+                                        </div>
+                                    @else
+                                        <div class="space-y-1.5">
+                                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 block">
+                                                Siap Dicairkan
+                                            </span>
+                                            <button type="button" 
+                                                    @click="openPayoutModal({{ json_encode([
+                                                        'id' => $c->id,
+                                                        'contract_code' => '#KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
+                                                        'amount' => 'Rp ' . number_format($netPayout, 0, ',', '.'),
+                                                        'bank_name' => $photographer->nama_bank,
+                                                        'bank_account' => $photographer->nomor_rekening,
+                                                        'bank_holder' => $photographer->atas_nama_rekening,
+                                                        'action_url' => route('photographer.reports.request-payout', $c->id)
+                                                    ]) }})"
+                                                    class="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-[11px] rounded-lg shadow-2xs transition inline-block cursor-pointer">
+                                                Tarik Saldo
+                                            </button>
+                                        </div>
+                                    @endif
                                 @elseif($c->status_payout === 'refunded')
                                     <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
                                         Refund
                                     </span>
                                 @else
                                     <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                                        Holding Escrow
+                                        Dana Ditahan
                                     </span>
                                 @endif
                             </td>
@@ -259,6 +270,70 @@
                 {{ $contracts->links('partials.dashboard.pagination') }}
             </div>
         @endif
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Pengajuan Payout (Rule #59 Compliant) -->
+    <div x-show="isPayoutModalOpen" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+         style="display: none;">
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-5"
+             @click.away="closePayoutModal()">
+            
+            <!-- Modal Title & Subtitle (Centered, No Icon on Title - Rule #59) -->
+            <div class="text-center space-y-1">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Ajukan Pencairan Dana Payout</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Pastikan informasi rekening bank Anda sudah sesuai sebelum melanjutkan pengajuan.</p>
+            </div>
+
+            <!-- Details Box -->
+            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 space-y-3 text-xs">
+                <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
+                    <span class="text-gray-500 dark:text-gray-400">Nomor Kontrak:</span>
+                    <span class="font-bold text-gray-900 dark:text-white font-mono" x-text="payoutData.contract_code"></span>
+                </div>
+                <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
+                    <span class="text-gray-500 dark:text-gray-400">Nominal Bersih (90%):</span>
+                    <span class="font-black text-emerald-600 dark:text-emerald-400 text-sm" x-text="payoutData.amount"></span>
+                </div>
+                <div class="space-y-1 pt-1">
+                    <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Rekening Bank Tujuan:</span>
+                    <template x-if="payoutData.bank_name && payoutData.bank_account">
+                        <div class="font-semibold text-gray-900 dark:text-white leading-relaxed">
+                            <span class="font-black text-amber-600 dark:text-amber-400" x-text="payoutData.bank_name"></span> - <span x-text="payoutData.bank_account"></span>
+                            <div class="text-[11px] text-gray-500" x-text="'a.n ' + (payoutData.bank_holder || '-')"></div>
+                        </div>
+                    </template>
+                    <template x-if="!payoutData.bank_name || !payoutData.bank_account">
+                        <div class="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-[11px]">
+                            Rekening belum diisi. Silakan lengkapi di <a href="{{ route('photographer.profile') }}" class="font-bold underline">Pengaturan Profil</a>.
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons (Centered, Max 2 Buttons - Rule #59) -->
+            <form :action="payoutData.action_url" method="POST">
+                @csrf
+                <div class="flex items-center justify-center gap-3 pt-2">
+                    <button type="button" 
+                            @click="closePayoutModal()"
+                            class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            :disabled="!payoutData.bank_name || !payoutData.bank_account"
+                            class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-gray-950 font-extrabold text-xs shadow-xs transition cursor-pointer">
+                        Ya, Tarik Saldo
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

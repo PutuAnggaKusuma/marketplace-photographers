@@ -37,7 +37,7 @@
         <h4 class="text-white text-xs font-bold uppercase tracking-wider mb-4 border-b border-zinc-700/60 pb-2">Bantuan & Syarat</h4>
         <ul class="space-y-2.5 text-xs">
           <li><a href="{{ route('public.faq') }}" class="hover:text-amber-400 transition">Pusat Bantuan & FAQ</a></li>
-          <li><a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Kebijakan Privasi & Escrow</a></li>
+          <li><a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Kebijakan Privasi & Keamanan Pembayaran</a></li>
           <li><a href="{{ route('public.terms') }}" class="hover:text-amber-400 transition">Syarat & Ketentuan Platform</a></li>
         </ul>
       </div>

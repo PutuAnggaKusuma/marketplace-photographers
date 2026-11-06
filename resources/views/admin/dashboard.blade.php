@@ -8,9 +8,7 @@
   <!-- 1. Header Row -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pusat Kendali Sistem</span>
-      <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Admin Dashboard</h1>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ringkasan metrik finansial, performa transaksi escrow, dan pemantauan aktivitas ekosistem LensMatch</p>
+      <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Dashboard</h1>
     </div>
     
     <div class="flex items-center gap-2">
@@ -46,7 +44,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingPayouts }} Payout Siap Cair</p>
+          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingPayouts }} Dana Siap Tarik</p>
           <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Sesi selesai & verifikasi Klien</span>
         </div>
       </div>
@@ -74,142 +72,131 @@
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total User Registrasi</span>
       <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ number_format($totalUsers, 0, ',', '.') }}</p>
-      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium"><span class="font-bold text-gray-700 dark:text-gray-300">{{ $totalClients }}</span> klien dan <span class="font-bold text-gray-700 dark:text-gray-300">{{ $totalPhotographers }}</span> fotografer</p>
     </div>
 
     <!-- Card 2: Fotografer Terverifikasi -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Fotografer Terverifikasi</span>
       <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ $verifiedPhotographers }}</p>
-      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Fotografer aktif & terlisting katalog</p>
     </div>
 
     <!-- Card 3: Total Kontrak Booking -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Kontrak Booking</span>
       <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ number_format($totalContracts, 0, ',', '.') }}</p>
-      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Reservasi sesi foto tervalidasi</p>
     </div>
 
     <!-- Card 4: Total Omzet Transaksi -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Omzet Transaksi</span>
       <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">Rp {{ number_format($grossRevenue, 0, ',', '.') }}</p>
-      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Komisi Platform (<span class="font-bold text-gray-700 dark:text-gray-300">10%</span>): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($platformFee, 0, ',', '.') }}</span></p>
     </div>
   </div>
 
-  <!-- 4. Middle Section: Financial Trends Chart + Category Demand Breakdown -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
-    <!-- Left: 8 Cols - Monthly GMV & Revenue Chart -->
-    <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Omzet & Transaksi Bulanan</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perkembangan Gross Merchandise Value (GMV) per bulan (dalam Juta Rupiah)</p>
-        </div>
-        <div class="flex items-center gap-4 text-xs font-bold">
-          <div class="flex items-center gap-1.5 text-gray-900 dark:text-white">
-            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
-            <span>Total Omzet (GMV)</span>
-          </div>
-          <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-            <span class="w-3 h-3 rounded-full bg-gray-800 dark:bg-gray-300"></span>
-            <span>Komisi Platform (10%)</span>
-          </div>
-        </div>
+  <!-- 4. Section: Tren Omzet & Transaksi Bulanan -->
+  <div class="w-full bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+      <div>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Omzet & Transaksi Bulanan</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perkembangan Gross Merchandise Value (GMV) per bulan (dalam Juta Rupiah)</p>
       </div>
-
-      <!-- Vector SVG Area/Bar Visual Chart -->
-      <div class="h-64 sm:h-72 w-full flex flex-col justify-between pt-2">
-        <div class="h-full w-full relative flex items-end justify-between gap-2 sm:gap-4 px-1 pb-6">
-          
-          <!-- Background Horizontal Scale Lines -->
-          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6 opacity-30 dark:opacity-20">
-            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
-            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
-            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
-            <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
-          </div>
-
-          <!-- 12 Monthly Bar Columns -->
-          @foreach($months as $idx => $m)
-            @php
-              $val = $monthlyRevenue[$idx] ?? 30;
-              $fee = $monthlyCommission[$idx] ?? 3;
-              $heightPercent = min(100, max(15, ($val / 75) * 100));
-            @endphp
-            <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
-              <!-- Tooltip on Hover -->
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none absolute -top-12 bg-gray-900 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap z-30">
-                <span>Omzet: Rp {{ $val }} Jt</span>
-                <span class="block text-amber-300 font-semibold text-[9px]">Fee: Rp {{ $fee }} Jt</span>
-              </div>
-              
-              <!-- Column Bars -->
-              <div class="w-full max-w-[28px] bg-gray-100 dark:bg-gray-700/60 rounded-t-lg relative flex flex-col justify-end overflow-hidden" style="height: {{ $heightPercent }}%;">
-                <div class="w-full bg-amber-400 group-hover:bg-amber-500 transition-colors rounded-t-lg" style="height: 100%;"></div>
-                <div class="w-full bg-gray-900 dark:bg-white/80 absolute bottom-0 h-2"></div>
-              </div>
-              
-              <!-- Month Label -->
-              <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-2 absolute -bottom-5">{{ $m }}</span>
-            </div>
-          @endforeach
+      <div class="flex items-center gap-4 text-xs font-bold shrink-0">
+        <div class="flex items-center gap-1.5 text-gray-900 dark:text-white">
+          <span class="w-3.5 h-2 rounded-xs bg-amber-400"></span>
+          <span>Total Omzet (GMV)</span>
         </div>
-      </div>
-      
-      <!-- Summary Bar Bottom Stats (Clean Whitespace without Top Border) -->
-      <div class="grid grid-cols-3 gap-2 pt-4 text-center">
-        <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Rata-Rata Bulanan</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 48.8 Juta</p>
-        </div>
-        <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Bulan Tertinggi (Des)</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 72.0 Juta</p>
-        </div>
-        <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Akumulasi Komisi</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp 48.5 Juta</p>
+        <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+          <span class="w-3.5 h-2 rounded-xs bg-gray-800 dark:bg-gray-300"></span>
+          <span>Komisi Platform (10%)</span>
         </div>
       </div>
     </div>
 
-    <!-- Right: 4 Cols - Category Demand Breakdown -->
-    <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
-      <div>
-        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Kategori Sesi Terlaris</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pangsa pasar & minat pesanan klien</p>
-      </div>
+    <!-- Vector SVG Area/Bar Visual Chart -->
+    <div class="h-64 sm:h-72 w-full flex flex-col justify-between pt-2">
+      <div class="h-full w-full relative flex items-end justify-between gap-2 sm:gap-4 px-1 pb-6">
+        
+        <!-- Background Horizontal Scale Lines -->
+        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6 opacity-30 dark:opacity-20">
+          <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+          <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+          <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+          <div class="border-b border-dashed border-gray-300 dark:border-gray-600 w-full"></div>
+        </div>
 
-      <!-- Categories Progress Bars -->
-      <div class="space-y-3.5 pt-0.5">
-        @foreach($categoryStats as $cat)
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-gray-800 dark:text-gray-200">{{ $cat['name'] }}</span>
-              <span class="font-black text-gray-900 dark:text-white">{{ $cat['share'] }}% ({{ $cat['count'] }})</span>
+        <!-- 12 Monthly Bar Columns -->
+        @foreach($months as $idx => $m)
+          @php
+            $val = $monthlyRevenue[$idx] ?? 30;
+            $fee = $monthlyCommission[$idx] ?? 3;
+            $heightPercent = min(100, max(15, ($val / 75) * 100));
+          @endphp
+          <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
+            <!-- Tooltip on Hover -->
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none absolute -top-12 bg-gray-900 text-white text-[10px] font-extrabold px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap z-30">
+              <span>Omzet: Rp {{ $val }} Jt</span>
+              <span class="block text-amber-300 font-semibold text-[9px]">Fee: Rp {{ $fee }} Jt</span>
             </div>
-            <div class="w-full bg-gray-100 dark:bg-gray-700 h-2.5 rounded-full overflow-hidden">
-              <div class="{{ $cat['color'] }} h-full rounded-full transition-all duration-500" style="width: {{ $cat['share'] }}%"></div>
-            </div>
+            
+            <!-- Column Bars (1 Solid Color: Amber) -->
+            <div class="w-full max-w-[28px] bg-amber-400 group-hover:bg-amber-500 transition-all duration-300 rounded-t-lg" style="height: {{ $heightPercent }}%;"></div>
+            
+            <!-- Month Label -->
+            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mt-2 absolute -bottom-5">{{ $m }}</span>
           </div>
         @endforeach
       </div>
+    </div>
+    
+    <!-- Summary Bar Bottom Stats -->
+    <div class="grid grid-cols-3 gap-2 pt-4 text-center border-t border-gray-100 dark:border-gray-700/60">
+      <div>
+        <span class="text-[10px] font-bold text-gray-400 uppercase">Rata-Rata Bulanan</span>
+        <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $avgMonthlyRevenue }} Juta</p>
+      </div>
+      <div>
+        <span class="text-[10px] font-bold text-gray-400 uppercase">Bulan Tertinggi</span>
+        <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $maxMonthlyRevenue }} Juta</p>
+      </div>
+      <div>
+        <span class="text-[10px] font-bold text-gray-400 uppercase">Akumulasi Komisi</span>
+        <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $totalCommission }} Juta</p>
+      </div>
+    </div>
+  </div>
 
-      <div class="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-900/50 space-y-1.5">
-        <h4 class="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Pangsa Pasar Tertinggi</h4>
-        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-          Kategori <strong class="text-gray-900 dark:text-white font-bold">Wedding & Prewedding</strong> mendominasi <strong class="text-gray-900 dark:text-white font-bold">42%</strong> nilai transaksi platform di wilayah Bali & Jabodetabek.
-        </p>
+  <!-- 5. Section: Kategori Sesi Terlaris (Dedicated Section Below Chart) -->
+  <div class="w-full bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60">
+      <div>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Kategori Sesi Terlaris</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pangsa pasar & minat pesanan sesi foto klien</p>
+      </div>
+
+      <!-- Pangsa Pasar Tertinggi Badge -->
+      <div class="px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 self-start sm:self-auto">
+        <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Pangsa Pasar Tertinggi:</span>
+        <span class="text-xs text-gray-800 dark:text-gray-200 font-bold">Wedding & Prewedding (54%)</span>
       </div>
     </div>
 
+    <!-- Categories Progress Bars Responsive Grid (3 Columns) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @foreach($categoryStats as $cat)
+        <div class="p-3.5 rounded-xl bg-gray-50/80 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-gray-800 dark:text-gray-200 truncate pr-2">{{ $cat['name'] }}</span>
+            <span class="font-black text-gray-900 dark:text-white shrink-0">{{ $cat['share'] }}% <span class="text-gray-400 font-semibold text-[11px]">({{ $cat['count'] }})</span></span>
+          </div>
+          <div class="w-full bg-gray-200/80 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+            <div class="{{ $cat['color'] }} h-full rounded-full transition-all duration-500" style="width: {{ $cat['share'] }}%"></div>
+          </div>
+        </div>
+      @endforeach
+    </div>
   </div>
 
-  <!-- 5. Bottom Section: Recent Transactions (8 cols) + Top Performing Photographers (4 cols) -->
+  <!-- 6. Bottom Section: Recent Transactions (8 cols) + Top Performing Photographers (4 cols) -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     
     <!-- Left: 8 Cols - Recent Transactions Table -->
@@ -253,7 +240,7 @@
       <div class="pt-2 flex justify-end">
         <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition">
           <span>Kelola Fotografer</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
         </a>
       </div>
     </div>

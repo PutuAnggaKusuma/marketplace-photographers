@@ -25,6 +25,20 @@ class Notification extends Model
         'is_read' => 'boolean',
     ];
 
+    /**
+     * Otomatis pancarkan broadcast WebSocket ke recipient via Reverb saat notifikasi dibuat.
+     */
+    protected static function booted()
+    {
+        static::created(function ($notification) {
+            try {
+                broadcast(new \App\Events\RealtimeNotificationSent($notification));
+            } catch (\Throwable $e) {
+                // Jangan gagalkan transaksi database jika Reverb sedang offline
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');

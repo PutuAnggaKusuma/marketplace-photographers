@@ -1,234 +1,461 @@
 @extends('layouts.admin')
 
+
+
 @section('title', 'Edit Materi E-Learning — Admin')
 
+
+
 @section('content')
+
 <div class="space-y-6">
 
+
+
     <!-- Standard Golden Header -->
+
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-500 block mb-1">
-                Edukasi & Pengembangan Talenta
-            </span>
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
+                <a href="{{ route('admin.elearning') }}" class="hover:text-amber-500 transition">E-Learning</a>
+                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                <span class="text-gray-900 dark:text-white font-bold">Edit Materi</span>
+            </nav>
             <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                 Edit Materi E-Learning
             </h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">
-                Perbarui isi tutorial, video pembelajaran, atau cover thumbnail modul edukasi.
-            </p>
         </div>
+
         <div>
+
             <a href="{{ route('admin.elearning') }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
+
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+
                 <span>Kembali</span>
+
             </a>
+
         </div>
+
     </div>
 
+
+
     <!-- Main Vertical Form Card -->
+
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
+
          x-data="{
+
             previewUrl: '{{ $material->thumbnail_url ?: ($material->thumbnail ? asset('storage/' . $material->thumbnail) : '') }}',
+
             fileChosen(event) {
+
                 const file = event.target.files[0];
+
                 if (file) this.previewUrl = URL.createObjectURL(file);
+
             }
+
          }">
+
         <form action="{{ route('admin.elearning.update', $material->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+
             @csrf
 
-            <!-- 1. Judul Materi -->
+
+
+            <!-- Row 1: Judul Materi & Kategori (Horizontal 2 Kolom) -->
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <div>
+
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                     Judul Materi E-Learning <span class="text-rose-500">*</span>
+
                 </label>
+
                 <input type="text" 
+
                        name="judul" 
+
                        value="{{ old('judul', $material->judul) }}"
+
                        required 
+
                        placeholder="Contoh: Menguasai Komposisi Golden Ratio dalam Fotografi Portrait Outdoor" 
+
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('judul') border-rose-500 @enderror">
+
                 @error('judul')
+
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                 @enderror
+
             </div>
 
-            <!-- 2. Kategori Materi (Alpine.js Custom Floating Dropdown - Rule #16) -->
+
+
             <div>
+
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                     Kategori Materi <span class="text-rose-500">*</span>
+
                 </label>
+
                 @php
+
                     $selectedCatId = old('id_kategori', $material->id_kategori ?? '');
+
                     $selectedCatName = '';
+
                     foreach($categories as $cat) {
+
                         if ($cat->id == $selectedCatId) {
+
                             $selectedCatName = $cat->nama_kategori;
+
                             break;
+
                         }
+
                     }
+
                     if (!$selectedCatName) {
+
                         $selectedCatName = '-- Pilih Kategori Materi --';
+
                     }
+
                 @endphp
+
                 <div class="relative w-full" x-data="{ open: false, selectedId: '{{ $selectedCatId }}', selectedName: '{{ $selectedCatName }}' }">
+
                     <input type="hidden" name="id_kategori" :value="selectedId" required>
+
                     <button @click="open = !open" type="button" 
+
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition @error('id_kategori') border-rose-500 @enderror">
+
                         <span x-text="selectedName" :class="selectedId ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
+
                         <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+
                     </button>
+
                     <div x-show="open" @click.away="open = false" x-transition 
+
                          class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+
                         @foreach($categories as $cat)
+
                             <button type="button" 
+
                                     @click="selectedId = '{{ $cat->id }}'; selectedName = '{{ addslashes($cat->nama_kategori) }}'; open = false" 
+
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
+
                                     :class="selectedId == '{{ $cat->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+
                                 <span>{{ $cat->nama_kategori }}</span>
-                                <span x-show="selectedId == '{{ $cat->id }}'" class="text-amber-600 font-bold">✓</span>
+
+                                <span x-show="selectedId == '{{ $cat->id }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+
                             </button>
+
                         @endforeach
+
                     </div>
+
                 </div>
+
                 @error('id_kategori')
+
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                 @enderror
+
             </div>
+
+
+
+            </div>
+
+
 
             <!-- 3. Tipe Akses & Harga Kursus (Pure Vertical Dropdown) -->
+
             @php
+
                 $initialIsPremium = old('is_premium', $material->is_premium ? '1' : ($material->harga > 0 ? '1' : '0'));
+
                 $initialAccessName = $initialIsPremium == '1' ? 'Berbayar (Akses Kursus Berbayar)' : 'Akses Gratis (Semua Pengguna)';
+
             @endphp
+
             <div x-data="{ 
+
                     openAccess: false, 
+
                     isPremium: '{{ $initialIsPremium }}', 
+
                     accessName: '{{ $initialAccessName }}' 
+
                  }" 
-                 class="space-y-5">
+
+                 class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 
+
                 <!-- Dropdown Tipe Akses -->
+
                 <div>
+
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                         Tipe Akses Kursus <span class="text-rose-500">*</span>
+
                     </label>
+
                     <div class="relative w-full">
+
                         <input type="hidden" name="is_premium" :value="isPremium">
+
                         <button @click="openAccess = !openAccess" type="button" 
+
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
+
                             <span x-text="accessName" class="truncate"></span>
+
                             <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="openAccess ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+
                         </button>
+
                         <div x-show="openAccess" @click.away="openAccess = false" x-transition 
+
                              class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden" style="display: none;">
+
                             <button type="button" 
+
                                     @click="isPremium = '0'; accessName = 'Akses Gratis (Semua Pengguna)'; openAccess = false" 
+
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40"
+
                                     :class="isPremium === '0' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+
                                 <span>Akses Gratis (Semua Pengguna)</span>
-                                <span x-show="isPremium === '0'" class="text-amber-600 font-bold">✓</span>
+
+                                <span x-show="isPremium === '0'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+
                             </button>
+
                             <button type="button" 
+
                                     @click="isPremium = '1'; accessName = 'Berbayar (Akses Kursus Berbayar)'; openAccess = false" 
+
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
+
                                     :class="isPremium === '1' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+
                                 <span>Berbayar (Akses Kursus Berbayar)</span>
-                                <span x-show="isPremium === '1'" class="text-amber-600 font-bold">✓</span>
+
+                                <span x-show="isPremium === '1'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+
                             </button>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
 
                 <!-- Harga Kursus Vertikal di Bawahnya (Hanya Muncul Jika Berbayar) -->
+
                 <div x-show="isPremium === '1'" x-transition class="space-y-1.5">
+
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+
                         Harga Kursus (Rp) <span class="text-rose-500">*</span>
+
                     </label>
+
                     <input type="number" 
+
                            name="harga" 
+
                            value="{{ old('harga', $material->harga ?? 149000) }}"
+
                            min="0"
+
                            step="1000"
+
                            placeholder="Contoh: 149000" 
+
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('harga') border-rose-500 @enderror">
+
                     <p class="text-[11px] text-gray-400 dark:text-gray-500">Masukkan nominal angka murni tanpa titik atau koma.</p>
+
                     @error('harga')
+
                         <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                     @enderror
+
                 </div>
+
             </div>
+
+
 
             <!-- 4. URL Video Youtube (Opsional) -->
+
             <div>
+
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                     Link Video Pembelajaran YouTube / Vimeo (Opsional)
+
                 </label>
+
                 <input type="url" 
+
                        name="video_url" 
+
                        value="{{ old('video_url', $material->video_url) }}"
+
                        placeholder="https://www.youtube.com/watch?v=..." 
+
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('video_url') border-rose-500 @enderror">
+
                 @error('video_url')
+
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                 @enderror
+
             </div>
+
+
 
             <!-- 4. Konten / Isi Pembelajaran -->
+
             <div>
+
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                     Isi Lengkap Modul Pembelajaran <span class="text-rose-500">*</span>
+
                 </label>
+
                 <textarea name="konten" 
+
                           rows="8" 
+
                           required 
+
                           placeholder="Tuliskan materi pembelajaran, rincian teknis, langkah-langkah praktis, dan panduan foto selengkapnya..." 
+
                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y @error('konten') border-rose-500 @enderror">{{ old('konten', $material->konten) }}</textarea>
+
                 @error('konten')
+
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                 @enderror
+
             </div>
+
+
 
             <!-- 5. Foto Thumbnail Modul -->
+
             <div>
+
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+
                     Cover Banner / Gambar Thumbnail Modul
+
                 </label>
+
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+
                     <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+
                         <template x-if="previewUrl">
+
                             <img :src="previewUrl" onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" class="w-full h-full object-cover">
+
                         </template>
+
                         <template x-if="!previewUrl">
+
                             <div class="text-center p-3 text-gray-400">
+
                                 <svg class="w-8 h-8 mx-auto mb-1 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+
                                 <span class="text-[10px] font-bold">Thumbnail</span>
+
                             </div>
+
                         </template>
+
                     </div>
+
+
 
                     <div class="space-y-2">
+
                         <label class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition">
+
                             <span>Ganti Thumbnail</span>
+
                             <input type="file" name="thumbnail" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="hidden">
+
                         </label>
+
                         <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10MB.</p>
+
                     </div>
+
                 </div>
+
                 @error('thumbnail')
+
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
                 @enderror
+
             </div>
 
-            <!-- Action Button Footer -->
-            <div class="flex items-center justify-end pt-4">
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition">
+
+
+            <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol submit, rata kanan gap-3) -->
+
+            <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol submit, rata kanan gap-3, Rule #41: No border-t Divider) -->
+            <div class="flex items-center justify-end gap-3 pt-4">
+                <a href="{{ route('admin.elearning') }}" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition text-center shadow-2xs cursor-pointer">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs shadow-xs transition cursor-pointer">
                     Perbaharui Data
                 </button>
             </div>
+
         </form>
+
     </div>
 
+
+
 </div>
+
 @endsection

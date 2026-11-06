@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Photographer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Contract;
 use App\Models\ContractBooking;
 use App\Models\PhotographerAvailability;
@@ -12,17 +13,18 @@ use App\Models\RolePhotographer;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravolt\Indonesia\Models\Province;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id ?? 0)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
-        $photographerId = $photographer ? $photographer->id : null;
+        $photographer = RolePhotographer::firstOrCreate(
+            ['id_user' => $user->id],
+            ['nama' => $user->nama]
+        );
+        $photographerId = $photographer->id;
 
         // 1. Actionable Operational Queues (100% Dynamic from Database)
         // Queue 1: Order Booking Baru Perlu Dikonfirmasi
@@ -132,8 +134,24 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
+        // Pengingat Sesi Pintar H-1 & Hari-H untuk Fotografer
+        $urgentSession = ContractBooking::whereHas('contract', function ($q) use ($photographerId) {
+                $q->where('id_photographer', $photographerId)
+                  ->whereNotIn('status_contract', ['cancelled', 'completed']);
+            })
+            ->upcomingUrgent()
+            ->with(['contract.client.user', 'service'])
+            ->first();
+
+        // Data pendukung Onboarding Wizard
+        $onboardingCategories = Category::all();
+        $onboardingProvinces = Province::orderBy('name', 'asc')->get();
+
         return view('photographer.dashboard', compact(
             'photographer',
+            'onboardingCategories',
+            'onboardingProvinces',
+            'urgentSession',
             'pendingBookingsCount',
             'needGalleryUploadCount',
             'readyPayoutCount',

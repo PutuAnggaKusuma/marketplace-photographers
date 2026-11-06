@@ -16,6 +16,7 @@ class ContestController extends Controller
     public function index(Request $request)
     {
         $statusFilter = $request->query('status', 'all');
+        $categoryFilter = $request->query('kategori', 'all');
         $sortFilter = $request->query('sort', 'terbaru');
         $search = $request->query('q');
 
@@ -24,6 +25,10 @@ class ContestController extends Controller
 
         if ($statusFilter && $statusFilter !== 'all') {
             $query->where('status', $statusFilter);
+        }
+
+        if ($categoryFilter && $categoryFilter !== 'all') {
+            $query->where('kategori', $categoryFilter);
         }
 
         if ($search) {
@@ -51,7 +56,22 @@ class ContestController extends Controller
         $contests = $query->paginate($perPage)->withQueryString();
         $totalActiveContests = PhotoContest::where('status', 'buka')->count();
 
-        return view('public.contests.index', compact('contests', 'statusFilter', 'sortFilter', 'search', 'totalActiveContests', 'perPage'));
+        // Kategori lomba unik dari database
+        $categories = PhotoContest::whereNotIn('status', ['pending_review', 'ditolak'])
+            ->whereNotNull('kategori')
+            ->distinct()
+            ->pluck('kategori');
+
+        return view('public.contests.index', compact(
+            'contests', 
+            'statusFilter', 
+            'categoryFilter',
+            'categories',
+            'sortFilter', 
+            'search', 
+            'totalActiveContests', 
+            'perPage'
+        ));
     }
 
     /**
@@ -253,6 +273,11 @@ class ContestController extends Controller
         }
 
         $contest = PhotoContest::findOrFail($id);
+
+        if ($contest->status !== 'buka' || ($contest->end_date && \Carbon\Carbon::parse($contest->end_date)->endOfDay()->isPast())) {
+            return redirect()->back()->with('error', 'Batas waktu pengunggahan karya untuk lomba foto ini telah berakhir.');
+        }
+
         $registration = \App\Models\ContestRegistration::where('id_contest', $contest->id)
             ->where('id_user', $user->id)
             ->first();

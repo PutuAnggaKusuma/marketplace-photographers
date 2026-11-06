@@ -105,7 +105,6 @@ class ElearningController extends Controller
             'thumbnail_url' => $thumbnailPath ? asset('storage/' . $thumbnailPath) : 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
             'ringkasan' => $ringkasan,
             'konten' => $request->konten,
-            'video_url' => $request->video_url,
             'view_count' => 0,
         ]);
 
@@ -168,7 +167,6 @@ class ElearningController extends Controller
             'thumbnail_url' => $thumbnailUrl,
             'ringkasan' => $ringkasan,
             'konten' => $request->konten,
-            'video_url' => $request->video_url,
         ]);
 
         return redirect()->route('admin.elearning')->with('success', 'Materi E-Learning berhasil diperbarui!');

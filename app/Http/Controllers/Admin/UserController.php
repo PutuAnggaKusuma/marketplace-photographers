@@ -60,6 +60,15 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::where('role', 'client')->findOrFail($id);
+
+        $hasActiveContracts = \App\Models\Contract::whereHas('client', function($q) use ($user) {
+            $q->where('id_user', $user->id);
+        })->whereIn('status_contract', ['pending', 'active'])->exists();
+
+        if ($hasActiveContracts) {
+            return redirect()->back()->with('error', "Akun klien '{$user->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif yang sedang berjalan.");
+        }
+
         $user->delete();
 
         return redirect()->back()->with('success', "Akun klien '{$user->nama}' berhasil dihapus.");

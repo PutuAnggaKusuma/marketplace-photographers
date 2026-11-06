@@ -3,14 +3,12 @@
 @section('title', 'Profil & Bio Fotografer — Dashboard')
 
 @section('content')
-<div class="space-y-6 w-full max-w-4xl mx-auto">
+<div class="space-y-6 w-full">
 
   <!-- Header Section -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Pengaturan Identitas</span>
-      <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Profil & Bio Fotografer</h1>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Perbarui biodata publik, kontak WhatsApp, deskripsi bio, foto profil & foto sampul dari perangkat, dan kata sandi akun Anda</p>
+      <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Profil</h1>
     </div>
   </div>
 
@@ -36,44 +34,46 @@
     $sampulUrl = $photographer?->foto_sampul ?: ($photographer?->portfolios?->first()?->medias?->first()?->media ?: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&q=80');
   @endphp
 
-  <!-- Section 1: Form Biodata & Media Fotografer (100% Vertical Flow - Rule #23) -->
+  <!-- Section 1: Form Biodata & Media Fotografer (Hybrid Responsive Form Standard) -->
   <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
     <h2 class="text-lg font-black text-gray-900 dark:text-white">Informasi Profil</h2>
 
     <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
       @csrf
 
-      <!-- Field 1: Nama Lengkap Fotografer -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap Fotografer <span class="text-rose-500">*</span></label>
-        <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+      <!-- Horizontal Row 1: Nama Lengkap & Alamat Email -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama<span class="text-rose-500">*</span></label>
+          <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Email <span class="text-rose-500">*</span></label>
+          <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
       </div>
 
-      <!-- Field 2: Alamat Email -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
-        <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+      <!-- Horizontal Row 2: Nomor Telepon / WA & Alamat / Domisili Kota -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor HP</label>
+          <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon', $photographer?->nomor_telepon) }}" placeholder="081234567890" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat</label>
+          <input type="text" name="alamat" value="{{ old('alamat', $photographer?->alamat) }}" placeholder="Jl. Sunset Road No. 88, Kuta, Bali" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
       </div>
 
-      <!-- Field 3: Nomor Telepon / WhatsApp -->
+      <!-- Vertical Field: Deskripsi Bio Fotografer -->
       <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor Telepon / WhatsApp</label>
-        <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon', $photographer?->nomor_telepon) }}" placeholder="081234567890" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Deskripsi Bio</label>
+        <textarea name="deskripsi_bio" rows="6" placeholder="Tuliskan deskripsi singkat mengenai pengalaman dan spesialisasi fotografi Anda..." class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 resize-y leading-relaxed">{{ old('deskripsi_bio', $photographer?->deskripsi_bio) }}</textarea>
       </div>
 
-      <!-- Field 4: Alamat / Domisili Kota -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat / Domisili Kota</label>
-        <input type="text" name="alamat" value="{{ old('alamat', $photographer?->alamat) }}" placeholder="Jl. Sunset Road No. 88, Kuta, Bali" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-      </div>
-
-      <!-- Field 5: Deskripsi Bio Fotografer -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Deskripsi Bio Fotografer</label>
-        <textarea name="deskripsi_bio" rows="4" placeholder="Tuliskan deskripsi singkat mengenai pengalaman dan spesialisasi fotografi Anda..." class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 resize-none">{{ old('deskripsi_bio', $photographer?->deskripsi_bio) }}</textarea>
-      </div>
-
-      <!-- Field 6: Foto Avatar Profil (Preview Kotak Diperbesar) -->
+      <!-- Vertical Component: Foto Avatar Profil -->
       <div x-data="{ 
           preview: '{{ $avatarUrl }}', 
           handleFile(e) {
@@ -89,7 +89,6 @@
               Foto Avatar Profil
           </label>
           <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-              <!-- Enlarged Avatar Preview Box -->
               <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-amber-400 shadow-sm shrink-0">
                   <img :src="preview" alt="Preview Avatar" class="w-full h-full object-cover">
               </div>
@@ -104,7 +103,7 @@
           </div>
       </div>
 
-      <!-- Field 7: Foto Sampul / Cover Banner Profil (Preview Kotak Diperbesar) -->
+      <!-- Vertical Component: Foto Sampul / Cover Banner Profil -->
       <div x-data="{ 
           previewSampul: '{{ $sampulUrl }}', 
           handleFileSampul(e) {
@@ -117,10 +116,9 @@
           }
       }" class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-3">
           <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-              Foto Sampul / Cover Banner
+              Foto Sampul
           </label>
           <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-              <!-- Enlarged Cover Banner Preview Box -->
               <div class="relative w-48 h-28 sm:w-56 sm:h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-amber-400 shadow-sm shrink-0">
                   <img :src="previewSampul" alt="Preview Sampul" class="w-full h-full object-cover">
               </div>
@@ -135,41 +133,92 @@
           </div>
       </div>
 
+      <!-- Horizontal Box: Informasi Rekening Bank (3 Kolom Responsif) -->
+      <div class="p-5 sm:p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-4">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider font-black text-gray-900 dark:text-white">Rekening Pencairan Dana (Payout)</h3>
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Digunakan oleh Admin untuk mentransfer hak pendapatan 90% hasil booking sesi pemotretan Anda.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-1">
+          <!-- Nama Bank (Alpine Custom Dropdown - Rule #11) -->
+          <div x-data="{
+            open: false,
+            selectedBank: '{{ old('nama_bank', $photographer?->nama_bank ?? 'BCA') }}',
+            banks: ['BCA', 'Bank Mandiri', 'BNI', 'BRI', 'BSI', 'CIMB Niaga', 'Permata Bank', 'Bank Danamon', 'Bank Jago', 'Jenius / BTPN']
+          }" class="relative">
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Bank Mitra</label>
+            <input type="hidden" name="nama_bank" :value="selectedBank">
+            <button type="button" 
+                    @click="open = !open" 
+                    class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 text-left">
+              <span x-text="selectedBank || 'Pilih Nama Bank'"></span>
+              <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+            </button>
+            <div x-show="open" 
+                 @click.away="open = false" 
+                 x-cloak 
+                 class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 max-h-48 overflow-y-auto">
+              <template x-for="b in banks" :key="b">
+                <button type="button" 
+                        @click="selectedBank = b; open = false" 
+                        class="w-full text-left px-4 py-2 text-xs hover:bg-amber-50 dark:hover:bg-amber-950/40 text-gray-800 dark:text-gray-200"
+                        :class="{'font-bold text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30': selectedBank === b}"
+                        x-text="b">
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Nomor Rekening -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor Rekening Bank</label>
+            <input type="text" name="nomor_rekening" value="{{ old('nomor_rekening', $photographer?->nomor_rekening) }}" placeholder="Contoh: 1234567890" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+
+          <!-- Atas Nama Rekening -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Pemilik Rekening</label>
+            <input type="text" name="atas_nama_rekening" value="{{ old('atas_nama_rekening', $photographer?->atas_nama_rekening) }}" placeholder="Contoh: Budi Santoso" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end pt-3">
-        <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
+        <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
           Perbaharui Data
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Section 2: Keamanan & Ganti Password (100% Vertical Flow - Rule #23) -->
+  <!-- Section 2: Keamanan & Ganti Password (Hybrid Responsive Form Standard) -->
   <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
-    <h2 class="text-lg font-black text-gray-900 dark:text-white">Keamanan & Kata Sandi</h2>
+    <h2 class="text-lg font-black text-gray-900 dark:text-white">Perbaharui Kata Sandi</h2>
 
     <form action="{{ route('profile.password') }}" method="POST" class="space-y-6">
       @csrf
 
-      <!-- Field 1: Kata Sandi Saat Ini -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Saat Ini <span class="text-rose-500">*</span></label>
-        <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-      </div>
+      <!-- Horizontal Row: 3 Password Inputs Side-by-Side -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Saat Ini <span class="text-rose-500">*</span></label>
+          <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
 
-      <!-- Field 2: Kata Sandi Baru -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Baru <span class="text-rose-500">*</span></label>
-        <input type="password" name="new_password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-      </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Baru <span class="text-rose-500">*</span></label>
+          <input type="password" name="new_password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
 
-      <!-- Field 3: Konfirmasi Kata Sandi Baru -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span></label>
-        <input type="password" name="new_password_confirmation" required placeholder="Ulangi kata sandi baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span></label>
+          <input type="password" name="new_password_confirmation" required placeholder="Ulangi kata sandi baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
       </div>
 
       <div class="flex justify-end pt-3">
-        <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
+        <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
           Perbaharui Data
         </button>
       </div>

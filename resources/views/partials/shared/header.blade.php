@@ -76,26 +76,42 @@
             </button>
 
             <!-- Notifications Dropdown List -->
-            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden text-left">
-              <div class="px-5 py-3.5 flex items-center justify-between bg-white dark:bg-gray-800">
+            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak x-transition class="absolute right-0 mt-3 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden text-left">
+              <div class="px-5 py-3.5 flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800">
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-black text-gray-900 dark:text-white">Notifikasi Saya</h3>
                   <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
                 </div>
-                <button type="button" @click="markAllRead()" class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer">Tandai dibaca</button>
+                <button type="button" 
+                        @click="markAllRead()" 
+                        :disabled="isMarkingAll || unreadCount === 0"
+                        class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                  <svg x-show="isMarkingAll" 
+                       x-cloak 
+                       class="animate-spin h-3 w-3 text-amber-500 dark:text-amber-400 shrink-0" 
+                       xmlns="http://www.w3.org/2000/svg" 
+                       fill="none" 
+                       viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Tandai dibaca</span>
+                </button>
               </div>
 
-              <div class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60">
+              <div class="max-h-80 overflow-y-auto overflow-x-hidden divide-y divide-gray-100 dark:divide-gray-700/60">
                 <template x-for="notif in notifications" :key="notif.id">
                   <div @click="openNotif(notif)" 
-                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3 bg-white dark:bg-gray-800 hover:bg-gray-50/60 dark:hover:bg-gray-750/50">
+                       class="px-5 py-3.5 transition cursor-pointer flex items-start gap-3 hover:bg-gray-50/80 dark:hover:bg-gray-700/40 relative"
+                       :class="!notif.is_read ? 'bg-amber-50/30 dark:bg-amber-950/20' : 'bg-white dark:bg-gray-800'">
                     
                     <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                          :class="{
                             'bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300': notif.type === 'booking',
                             'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300': notif.type === 'payout' || notif.type === 'payment',
                             'bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300': notif.type === 'gallery',
-                            'bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300': notif.type === 'chat'
+                            'bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300': notif.type === 'chat',
+                            'bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-300': notif.type === 'security'
                          }">
                       <template x-if="notif.type === 'booking'">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -113,9 +129,9 @@
 
                     <div class="min-w-0 flex-1 space-y-1">
                       <div class="flex items-start justify-between gap-2">
-                        <p class="text-xs text-gray-800 dark:text-gray-200 leading-relaxed font-medium" x-text="notif.message || notif.title"></p>
-                        <span x-show="!notif.is_read" class="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1"></span>
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white leading-snug break-words [overflow-wrap:anywhere]" x-text="notif.title || 'Notifikasi'"></h4>
                       </div>
+                      <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-normal break-words [overflow-wrap:anywhere]" x-text="notif.message"></p>
                       <p class="text-[10px] text-gray-400 font-medium" x-text="notif.created_at"></p>
                     </div>
                   </div>
@@ -181,9 +197,27 @@ function headerNotifApp() {
         notifOpen: false,
         unreadCount: 0,
         notifications: [],
+        isMarkingAll: false,
         init() {
             this.fetchNotifs();
             setInterval(() => this.fetchNotifs(), 30000);
+
+            @auth
+            const listenEcho = () => {
+                if (window.Echo) {
+                    window.Echo.private('user.{{ auth()->id() }}')
+                        .listen('.notification.received', (e) => {
+                            if (e.notification) {
+                                this.notifications.unshift(e.notification);
+                                this.unreadCount++;
+                            }
+                        });
+                } else {
+                    setTimeout(listenEcho, 500);
+                }
+            };
+            listenEcho();
+            @endauth
         },
         fetchNotifs() {
             fetch('{{ route("notifications.unread") }}', {
@@ -199,6 +233,9 @@ function headerNotifApp() {
             .catch(err => console.error(err));
         },
         markAllRead() {
+            if (this.isMarkingAll || this.unreadCount === 0) return;
+            this.isMarkingAll = true;
+            const start = Date.now();
             fetch('{{ route("notifications.read-all") }}', {
                 method: 'POST',
                 headers: {
@@ -213,6 +250,14 @@ function headerNotifApp() {
                     this.unreadCount = 0;
                     this.notifications.forEach(n => n.is_read = true);
                 }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                const elapsed = Date.now() - start;
+                const remaining = Math.max(0, 450 - elapsed);
+                setTimeout(() => {
+                    this.isMarkingAll = false;
+                }, remaining);
             });
         },
         openNotif(notif) {

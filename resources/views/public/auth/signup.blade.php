@@ -1,17 +1,185 @@
+@php
+  $isRegister = request()->is('register');
+@endphp
 <!doctype html>
 <html lang="id" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ request()->is('register') ? 'Daftar Akun Baru — LensMatch' : 'Masuk ke Akun — LensMatch' }}</title>
+    <title>{{ $isRegister ? 'Daftar Akun Baru — LensMatch' : 'Masuk ke Akun — LensMatch' }}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
       [x-cloak] { display: none !important; }
+
+      /* ========================================================
+         LensMatch Auth System: 2 Distinct Animations
+         1. Entrance Animation (Animasi 2): Smooth entrance on page load
+         2. Slide Toggle Animation (Animasi 1): Smooth horizontal track sliding
+         ======================================================== */
+
+      /* ANIMASI 2: Smooth Entrance on Page Load */
+      @keyframes authCardEntrance {
+        0% {
+          opacity: 0;
+          transform: translateY(16px) scale(0.992);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes ambientEntrance {
+        0% {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        100% {
+          opacity: 0.6;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-auth-card {
+        animation: authCardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: opacity, transform;
+      }
+
+      .animate-ambient-enter {
+        animation: ambientEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: opacity, transform;
+      }
+
+      /* ANIMASI 1: Desktop Horizontal Sliding Track (lg: >= 1024px) */
+      @media (min-width: 1024px) {
+        .auth-panel-form {
+          transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+          transform: translate3d(0, 0, 0);
+          will-change: transform;
+        }
+
+        .auth-panel-visual {
+          transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+          transform: translate3d(0, 0, 0);
+          will-change: transform;
+        }
+
+        /* Register Mode: Form slides right (+138%), Visual card slides left (-96%) */
+        .auth-mode-register .auth-panel-form {
+          transform: translate3d(138%, 0, 0);
+        }
+
+        .auth-mode-register .auth-panel-visual {
+          transform: translate3d(-96%, 0, 0);
+        }
+      }
+
+      /* Form Cross-Fade and Soft Horizontal Shift */
+      .auth-form-login,
+      .auth-form-register {
+        transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+        will-change: opacity, transform;
+      }
+
+      .auth-mode-login .auth-form-login {
+        opacity: 1;
+        pointer-events: auto;
+        position: relative;
+        z-index: 10;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .auth-mode-login .auth-form-register {
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        transform: translate3d(24px, 0, 0);
+      }
+
+      .auth-mode-register .auth-form-login {
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        transform: translate3d(-24px, 0, 0);
+      }
+
+      .auth-mode-register .auth-form-register {
+        opacity: 1;
+        pointer-events: auto;
+        position: relative;
+        z-index: 10;
+        transform: translate3d(0, 0, 0);
+      }
+
+      /* Visual Card Image Cross-Fade */
+      .auth-visual-login,
+      .auth-visual-register {
+        transition: opacity 0.55s ease-in-out;
+        will-change: opacity;
+      }
+
+      .auth-mode-login .auth-visual-login {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .auth-mode-login .auth-visual-register {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .auth-mode-register .auth-visual-login {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .auth-mode-register .auth-visual-register {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Ambient Background SVG Illustrations */
+      .auth-ambient-login,
+      .auth-ambient-register {
+        transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+        will-change: opacity, transform;
+      }
+
+      .auth-mode-login .auth-ambient-login {
+        opacity: 0.6;
+        pointer-events: auto;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .auth-mode-login .auth-ambient-register {
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(0, 12px, 0);
+      }
+
+      .auth-mode-register .auth-ambient-login {
+        opacity: 0;
+        pointer-events: none;
+        transform: translate3d(0, 12px, 0);
+      }
+
+      .auth-mode-register .auth-ambient-register {
+        opacity: 0.6;
+        pointer-events: auto;
+        transform: translate3d(0, 0, 0);
+      }
     </style>
   </head>
-  <body class="min-h-screen bg-gradient-to-b from-amber-50/80 via-[#f6f4f0] to-[#edf0f4] text-gray-900 font-sans antialiased flex items-center justify-center p-3 sm:p-6 lg:p-10 relative overflow-hidden"
+  <body class="min-h-screen bg-gradient-to-b from-amber-50/80 via-[#f6f4f0] to-[#edf0f4] text-gray-900 font-sans antialiased flex items-center justify-center p-3 sm:p-6 lg:p-10 relative overflow-hidden {{ $isRegister ? 'auth-mode-register' : 'auth-mode-login' }}"
         x-data="{
-          mode: '{{ request()->is('register') ? 'register' : 'login' }}',
+          mode: '{{ $isRegister ? 'register' : 'login' }}',
           showPassLogin: false,
           showPassRegister: false,
           selectedRole: '{{ old('role', 'client') }}',
@@ -34,39 +202,24 @@
               document.title = this.mode === 'register' ? 'Daftar Akun Baru — LensMatch' : 'Masuk ke Akun — LensMatch';
             });
           }
-        }">
+        }"
+        :class="{ 'auth-mode-register': mode === 'register', 'auth-mode-login': mode === 'login' }">
 
     <!-- Background Ambient Illustrations (Strictly 1 SVG per Mode, Bottom-Positioned) -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 animate-ambient-enter" aria-hidden="true">
       
       <!-- 1. LOGIN MODE: ONLY lensmatch-login.svg (Bottom-Left) -->
-      <div x-show="mode === 'login'" 
-           x-transition:enter="transition ease-out duration-500"
-           x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-           x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-           x-transition:leave="transition ease-in duration-300"
-           x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-           x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-           x-cloak
-           class="absolute bottom-2 left-2 sm:left-4 lg:left-8 z-0">
+      <div class="absolute bottom-2 left-2 sm:left-4 lg:left-8 z-0 auth-ambient-login">
         <img src="{{ asset('images/login-and-signup/lensmatch-login.svg') }}" 
              alt="Login Illustration" 
-             class="w-36 sm:w-44 lg:w-56 xl:w-64 h-auto max-h-[260px] object-contain opacity-60 select-none drop-shadow-sm" />
+             class="w-36 sm:w-44 lg:w-56 xl:w-64 h-auto max-h-[260px] object-contain select-none drop-shadow-sm" />
       </div>
 
       <!-- 2. REGISTER MODE: ONLY lensmatch-register.svg (Bottom-Right) -->
-      <div x-show="mode === 'register'" 
-           x-transition:enter="transition ease-out duration-500"
-           x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-           x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-           x-transition:leave="transition ease-in duration-300"
-           x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-           x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-           x-cloak
-           class="absolute bottom-2 right-2 sm:right-4 lg:right-8 z-0">
+      <div class="absolute bottom-2 right-2 sm:right-4 lg:right-8 z-0 auth-ambient-register">
         <img src="{{ asset('images/login-and-signup/lensmatch-register.svg') }}" 
              alt="Register Illustration" 
-             class="w-36 sm:w-44 lg:w-56 xl:w-64 h-auto max-h-[260px] object-contain opacity-60 select-none drop-shadow-sm" />
+             class="w-36 sm:w-44 lg:w-56 xl:w-64 h-auto max-h-[260px] object-contain select-none drop-shadow-sm" />
       </div>
 
     </div>
@@ -117,20 +270,18 @@
     </svg>
 
     <!-- Main Stationary Floating White Card Container -->
-    <div class="w-full max-w-7xl bg-white rounded-[36px] sm:rounded-[44px] shadow-[0_25px_70px_rgba(0,0,0,0.07)] border border-gray-100/90 px-6 sm:px-10 lg:px-14 py-8 sm:py-12 lg:py-14 relative z-10 overflow-hidden">
+    <div class="w-full max-w-7xl bg-white rounded-[36px] sm:rounded-[44px] shadow-[0_25px_70px_rgba(0,0,0,0.07)] border border-gray-100/90 px-6 sm:px-10 lg:px-14 py-8 sm:py-12 lg:py-14 relative z-10 overflow-hidden animate-auth-card">
       
       <!-- Inner Relative Container with Balanced Proportions -->
       <div class="relative w-full min-h-[640px] flex items-center justify-between">
 
         <!-- PANEL 1: FORM COLUMN (Smooth Hardware-Accelerated Sliding Track - 42% width) -->
-        <div class="w-full lg:w-[42%] z-20 transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]"
-             :class="mode === 'register' ? 'lg:translate-x-[138%]' : 'lg:translate-x-0'">
+        <div class="w-full lg:w-[42%] z-20 auth-panel-form">
 
           <div class="w-full max-w-[440px] mx-auto relative min-h-[580px]">
 
             <!-- ==================== SIGN IN (LOGIN) FORM ==================== -->
-            <div class="w-full space-y-6 transition-all duration-500 ease-out"
-                 :class="mode === 'login' ? 'opacity-100 translate-x-0 pointer-events-auto relative z-10' : 'opacity-0 -translate-x-6 pointer-events-none absolute inset-0 z-0'">
+            <div class="w-full space-y-6 auth-form-login">
 
               <!-- Brand Logo & Heading (Centered - Title in Solid Black text-gray-900) -->
               <div class="space-y-3.5 text-center">
@@ -171,14 +322,14 @@
               <!-- Sign In Form -->
               <form action="{{ route('login') }}" method="POST" class="space-y-4 pt-1">
                 @csrf
-                @if(request()->filled('redirect') || session()->has('url.intended'))
-                  <input type="hidden" name="redirect" value="{{ request('redirect', session('url.intended')) }}">
+                @if(request()->filled('redirect'))
+                  <input type="hidden" name="redirect" value="{{ request('redirect') }}">
                 @endif
                 
                 <!-- Email -->
                 <div class="space-y-1.5">
                   <label class="block text-xs font-bold text-gray-600">
-                    Email
+                    Email <span class="text-rose-500">*</span>
                   </label>
                   <input type="email" 
                          name="email" 
@@ -194,7 +345,7 @@
                 <!-- Password -->
                 <div class="space-y-1.5">
                   <label class="block text-xs font-bold text-gray-600">
-                    Kata Sandi
+                    Kata Sandi <span class="text-rose-500">*</span>
                   </label>
                   <div class="relative">
                     <input :type="showPassLogin ? 'text' : 'password'" 
@@ -225,11 +376,10 @@
                   </a>
                 </div>
 
-                <!-- Button -->
+                <!-- Button (Clean Pure Text Standard without Icons) -->
                 <div class="pt-2">
-                  <button type="submit" class="w-full py-3.5 px-6 bg-[#222222] hover:bg-amber-400 text-white hover:text-gray-900 font-extrabold text-sm rounded-xl transition duration-200 shadow-md flex items-center justify-center gap-2 group cursor-pointer">
-                    <span>Masuk ke Akun</span>
-                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                  <button type="submit" class="w-full py-3.5 px-6 bg-[#222222] hover:bg-amber-400 text-white hover:text-gray-900 font-extrabold text-sm rounded-xl transition duration-200 shadow-md text-center cursor-pointer">
+                    Masuk ke Akun
                   </button>
                 </div>
 
@@ -249,8 +399,7 @@
 
 
             <!-- ==================== SIGN UP (REGISTER) FORM ==================== -->
-            <div class="w-full space-y-5 transition-all duration-500 ease-out"
-                 :class="mode === 'register' ? 'opacity-100 translate-x-0 pointer-events-auto relative z-10' : 'opacity-0 translate-x-6 pointer-events-none absolute inset-0 z-0'">
+            <div class="w-full space-y-5 auth-form-register">
 
               <!-- Brand Logo & Heading (Centered - Title in Solid Black text-gray-900) -->
               <div class="space-y-3 text-center">
@@ -284,14 +433,14 @@
               <!-- Sign Up Form -->
               <form action="{{ route('register') }}" method="POST" class="space-y-3.5 pt-1">
                 @csrf
-                @if(request()->filled('redirect') || session()->has('url.intended'))
-                  <input type="hidden" name="redirect" value="{{ request('redirect', session('url.intended')) }}">
+                @if(request()->filled('redirect'))
+                  <input type="hidden" name="redirect" value="{{ request('redirect') }}">
                 @endif
                 
                 <!-- Nama Lengkap -->
                 <div class="space-y-1">
                   <label class="block text-xs font-bold text-gray-600">
-                    Nama Lengkap
+                    Nama Lengkap <span class="text-rose-500">*</span>
                   </label>
                   <input type="text" 
                          name="nama" 
@@ -307,7 +456,7 @@
                 <!-- Role Selector (Standardized Alpine Dropdown) -->
                 <div class="space-y-1">
                   <label class="block text-xs font-bold text-gray-600">
-                    Daftar Sebagai
+                    Daftar Sebagai <span class="text-rose-500">*</span>
                   </label>
                   <input type="hidden" name="role" :value="selectedRole" />
                   
@@ -315,7 +464,7 @@
                     <button @click="roleDropdownOpen = !roleDropdownOpen" 
                             type="button" 
                             class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer">
-                      <span x-text="selectedRoleLabel"></span>
+                       <span x-text="selectedRoleLabel"></span>
                       <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="roleDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
                       </svg>
@@ -345,10 +494,26 @@
                   @enderror
                 </div>
 
+                <!-- Nomor WhatsApp -->
+                <div class="space-y-1">
+                  <label class="block text-xs font-bold text-gray-600">
+                    Nomor WhatsApp <span class="text-rose-500">*</span>
+                  </label>
+                  <input type="tel" 
+                         name="nomor_telepon" 
+                         value="{{ old('nomor_telepon') }}" 
+                         required 
+                         placeholder="081234567890" 
+                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
+                  @error('nomor_telepon')
+                    <p class="text-[11px] font-bold text-red-500 mt-0.5">{{ $message }}</p>
+                  @enderror
+                </div>
+
                 <!-- Email -->
                 <div class="space-y-1">
                   <label class="block text-xs font-bold text-gray-600">
-                    Email
+                    Email <span class="text-rose-500">*</span>
                   </label>
                   <input type="email" 
                          name="email" 
@@ -364,7 +529,7 @@
                 <!-- Password -->
                 <div class="space-y-1">
                   <label class="block text-xs font-bold text-gray-700">
-                    Kata Sandi
+                    Kata Sandi <span class="text-rose-500">*</span>
                   </label>
                   <div class="relative">
                     <input :type="showPassRegister ? 'text' : 'password'" 
@@ -384,11 +549,10 @@
                   @enderror
                 </div>
 
-                <!-- Button -->
+                <!-- Button (Clean Pure Text Standard without Icons) -->
                 <div class="pt-2">
-                  <button type="submit" class="w-full py-3.5 px-6 bg-[#222222] hover:bg-amber-400 text-white hover:text-gray-900 font-extrabold text-sm rounded-xl transition duration-200 shadow-md flex items-center justify-center gap-2 group cursor-pointer">
-                    <span>Daftar Sekarang</span>
-                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                  <button type="submit" class="w-full py-3.5 px-6 bg-[#222222] hover:bg-amber-400 text-white hover:text-gray-900 font-extrabold text-sm rounded-xl transition duration-200 shadow-md text-center cursor-pointer">
+                    Daftar Sekarang
                   </button>
                 </div>
 
@@ -412,14 +576,12 @@
 
 
         <!-- PANEL 2: VISUAL CARD (Pre-rendered Hardware-Accelerated Dual Clip-Paths - 51% width) -->
-        <div class="hidden lg:block lg:w-[51%] h-[630px] z-10 transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] relative"
-             :class="mode === 'register' ? 'lg:-translate-x-[96%]' : 'lg:translate-x-0'">
+        <div class="hidden lg:block lg:w-[51%] h-[630px] z-10 relative auth-panel-visual">
 
           <!-- Visual Layer 1: Login Shape (Right Organic Cutout) -->
           <!-- In Login Mode: Bottom-Left is SOLID (No cutout). Bottom-Right has cutout. So place text on bottom-left! -->
-          <div class="absolute inset-0 w-full h-full overflow-hidden transition-opacity duration-700 ease-in-out bg-cover bg-center"
-               :class="mode === 'login' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
-               style="clip-path: url(#havenix-shape-right); -webkit-clip-path: url(#havenix-shape-right); background-image: url('https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1920&q=85');">
+          <div class="absolute inset-0 w-full h-full overflow-hidden bg-cover bg-center auth-visual-login"
+               style="clip-path: url(#havenix-shape-right); -webkit-clip-path: url(#havenix-shape-right); background-image: url('https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1080&q=80&auto=format&fit=crop');">
             <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
             <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             
@@ -433,9 +595,8 @@
 
           <!-- Visual Layer 2: Register Shape (Left Mirrored Organic Cutout) -->
           <!-- In Register Mode: Bottom-Right is SOLID (No cutout). Bottom-Left has cutout. So place text on bottom-right! -->
-          <div class="absolute inset-0 w-full h-full overflow-hidden transition-opacity duration-700 ease-in-out bg-cover bg-center"
-               :class="mode === 'register' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
-               style="clip-path: url(#havenix-shape-left); -webkit-clip-path: url(#havenix-shape-left); background-image: url('https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?w=1920&q=85');">
+          <div class="absolute inset-0 w-full h-full overflow-hidden bg-cover bg-center auth-visual-register"
+               style="clip-path: url(#havenix-shape-left); -webkit-clip-path: url(#havenix-shape-left); background-image: url('https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?w=1080&q=80&auto=format&fit=crop');">
             <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
             <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             

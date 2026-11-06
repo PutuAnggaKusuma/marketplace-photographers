@@ -88,6 +88,29 @@ class PhotographerVerificationController extends Controller
 
         $statusText = $newStatus ? 'diverifikasi (Centang Biru Aktif)' : 'dibatalkan verifikasinya';
 
+        \App\Models\ActivityLog::record(
+            'photographer_verified',
+            "Admin mengubah status verifikasi studio '{$photographer->nama}' menjadi: {$statusText}",
+            $photographer,
+            ['is_verified' => $newStatus]
+        );
+
+        // Notifikasi In-App ke Fotografer
+        if ($photographer->id_user) {
+            $notifTitle = $newStatus ? 'Profil Fotografer Diverifikasi' : 'Status Verifikasi Dinonaktifkan';
+            $notifMsg = $newStatus
+                ? "Selamat! Profil fotografer '{$photographer->nama}' telah resmi diverifikasi oleh LensMatch. Lencana centang biru kini aktif pada profil dan katalog publik Anda."
+                : "Status verifikasi centang biru pada profil studio '{$photographer->nama}' telah dinonaktifkan oleh Admin.";
+
+            \App\Models\Notification::send(
+                $photographer->id_user,
+                $notifTitle,
+                $notifMsg,
+                'photographer_verified',
+                url('/photographer/dashboard')
+            );
+        }
+
         return redirect()->back()->with('success', "Status studio '{$photographer->nama}' berhasil {$statusText}.");
     }
 
@@ -97,7 +120,21 @@ class PhotographerVerificationController extends Controller
     public function destroy($id)
     {
         $photographer = RolePhotographer::findOrFail($id);
+
+        $hasActive = \App\Models\Contract::where('id_photographer', $photographer->id)
+            ->whereIn('status_contract', ['pending', 'active'])
+            ->exists();
+        if ($hasActive) {
+            return redirect()->back()->with('error', "Studio '{$photographer->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif yang sedang berjalan.");
+        }
+
         $user = $photographer->user;
+
+        \App\Models\ActivityLog::record(
+            'photographer_deleted',
+            "Admin menghapus studio '{$photographer->nama}' dan akun terkait",
+            $photographer
+        );
 
         $photographer->delete();
         if ($user) {

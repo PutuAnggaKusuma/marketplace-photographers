@@ -17,10 +17,10 @@ class ReportController extends Controller
         public function index(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(
+            ['id_user' => $user->id],
+            ['nama' => $user->nama]
+        );
 
         $statusFilter = $request->query('status', 'all');
         $sort = $request->query('sort', 'latest');
@@ -94,10 +94,10 @@ class ReportController extends Controller
     public function export(Request $request)
     {
         $user = Auth::user();
-        $photographer = RolePhotographer::where('id_user', $user->id)->first();
-        if (!$photographer) {
-            $photographer = RolePhotographer::first();
-        }
+        $photographer = RolePhotographer::firstOrCreate(
+            ['id_user' => $user->id],
+            ['nama' => $user->nama]
+        );
 
         $selectedYear = $request->query('year', date('Y'));
 
@@ -120,5 +120,68 @@ class ReportController extends Controller
             'totalEscrowPending',
             'totalMarketplaceFee'
         ));
+    }
+
+    /**
+     * Ajukan Pencairan Dana Payout (90%) ke Rekening Fotografer.
+     */
+    public function requestPayout(Request $request, $id)
+    {
+        $user = Auth::user();
+        $photographer = RolePhotographer::firstOrCreate(
+            ['id_user' => $user->id],
+            ['nama' => $user->nama]
+        );
+
+        $contract = Contract::where('id_photographer', $photographer->id)->findOrFail($id);
+
+        if ($contract->status_payout !== 'ready') {
+            return redirect()->back()->with('error', 'Status pesanan belum siap dicairkan atau dana telah diproses sebelumnya.');
+        }
+
+        if (empty($photographer->nama_bank) || empty($photographer->nomor_rekening)) {
+            return redirect()->route('photographer.profile')
+                ->with('warning', 'Silakan lengkapi informasi Rekening Bank (Nama Bank, Nomor Rekening, Atas Nama) di profil Anda sebelum mengajukan pencairan payout.');
+        }
+
+        $feeRate = 0.10;
+        $feeMarketplace = $contract->jumlah * $feeRate;
+        $netPayout = $contract->jumlah - $feeMarketplace;
+        $formattedAmount = 'Rp ' . number_format($netPayout, 0, ',', '.');
+        $contractCode = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+
+        $contract->update([
+            'payout_requested_at' => now(),
+            'fee_marketplace' => $feeMarketplace,
+            'payout_amount' => $netPayout,
+            'payout_notes' => "Diajukan oleh Fotografer pada " . now()->format('d M Y, H:i') . " WIB ke {$photographer->nama_bank} ({$photographer->nomor_rekening}) a.n {$photographer->atas_nama_rekening}.",
+        ]);
+
+        // Notifikasi ke seluruh Admin & Super Admin
+        $admins = \App\Models\User::whereIn('role', ['super_admin', 'admin'])->get();
+        foreach ($admins as $adm) {
+            \App\Models\Notification::send(
+                $adm->id,
+                'Pengajuan Pencairan Payout Baru',
+                "Fotografer {$photographer->nama} mengajukan pencairan payout sebesar {$formattedAmount} untuk sesi {$contractCode}.",
+                'payout_request',
+                route('admin.transactions', ['search' => $contractCode])
+            );
+        }
+
+        // Catat ke Activity Log
+        \App\Models\ActivityLog::record(
+            'payout_requested',
+            "Fotografer {$photographer->nama} mengajukan pencairan dana payout sebesar {$formattedAmount} untuk sesi {$contractCode}",
+            $contract,
+            [
+                'payout_amount' => $netPayout,
+                'bank_name' => $photographer->nama_bank,
+                'bank_account' => $photographer->nomor_rekening,
+                'bank_holder' => $photographer->atas_nama_rekening,
+            ]
+        );
+
+        return redirect()->back()->with('success', "Permintaan pencairan payout sebesar {$formattedAmount} berhasil diajukan ke Admin!");
     }
 }

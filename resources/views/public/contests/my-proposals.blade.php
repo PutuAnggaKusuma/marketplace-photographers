@@ -4,22 +4,15 @@
 
 @section('content')
 <section class="pt-8 pb-16 lg:pt-10 lg:pb-24 bg-gray-50/50 dark:bg-gray-900/50 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
     <!-- Top Header & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div class="space-y-1">
-        <div class="flex items-center gap-2 text-xs font-bold text-gray-400">
-          <a href="{{ route('public.contests.index') }}" class="hover:text-amber-500 transition">Informasi Lomba</a>
-          <span>/</span>
-          <span class="text-amber-600 dark:text-amber-400">Riwayat Pengajuan</span>
-        </div>
+
         <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-          Riwayat Pengajuan Event Lomba Foto
+          Riwayat Pengajuan Lomba Foto
         </h1>
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          Pantau status kurasi dan verifikasi event lomba yang telah Anda ajukan ke Tim Admin LensMatch.
-        </p>
       </div>
 
       <div class="flex items-center gap-3 shrink-0">
@@ -73,7 +66,6 @@
             <div class="shrink-0">
               @if($contest->status === 'pending_review')
                 <span class="px-3.5 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-xs inline-flex items-center gap-1.5 border border-amber-300/80 dark:border-amber-800">
-                  <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                   <span>Menunggu Verifikasi Admin</span>
                 </span>
               @elseif($contest->status === 'buka')
@@ -130,9 +122,7 @@
             <h4 class="text-sm font-black text-gray-900 dark:text-white">Belum Ada Pengajuan Lomba</h4>
             <p class="text-xs text-gray-400">Anda belum pernah mengajukan event lomba foto baru di LensMatch.</p>
           </div>
-          <a href="{{ route('public.contests.propose.create') }}" class="inline-block px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition">
-            Ajukan Event Lomba Sekarang
-          </a>
+
         </div>
       @endforelse
 

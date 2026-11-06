@@ -7,14 +7,11 @@
          x-data="contestSectionApp()" 
          id="contest-main-section">
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 lg:space-y-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 lg:space-y-10">
 
     <!-- Header Section (Matching Forum Standard Typography & Spacing) -->
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
       <div class="space-y-2">
-        <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-          INFORMASI LOMBA
-        </span>
         <h1 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight">
           Informasi Lomba & Event Fotografi
         </h1>
@@ -25,8 +22,8 @@
 
       <div class="flex items-center gap-3 shrink-0">
         @auth
-          <a href="{{ route('public.contests.propose.history') }}" class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-2 shadow-2xs">
-            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <a href="{{ route('public.contests.propose.history') }}" class="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition inline-flex items-center gap-2 shadow-2xs">
+            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span>Riwayat Pengajuan</span>
           </a>
         @endauth
@@ -39,10 +36,35 @@
 
     <!-- Filter Control Bar (Exact UI Matching Komunitas Forum Page - Pure White Inputs & Proportional Spacing) -->
     <div class="bg-white dark:bg-gray-800 p-7 sm:p-8 lg:p-9 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6 items-end">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-5 items-end">
         
-        <!-- Filter 1: Status Lomba (Alpine.js Custom Select - Pure White Background) -->
+        <!-- Filter 1: Kategori Lomba (Alpine.js Custom Select) -->
         <div class="md:col-span-3">
+          <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
+            KATEGORI LOMBA
+          </label>
+          <div class="relative" x-data="{ open: false, selectedCode: '{{ $categoryFilter ?? 'all' }}', selectedText: '{{ $categoryFilter && $categoryFilter !== 'all' ? $categoryFilter : 'Semua Kategori' }}' }">
+            <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
+              <span class="truncate" x-text="selectedText"></span>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </button>
+            <div x-show="open" @click.away="open = false" x-cloak x-transition class="absolute z-50 w-full top-full mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 rounded-xl shadow-xl py-1 text-left overflow-hidden max-h-56 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/50">
+              <div @click="selectedCode = 'all'; selectedText = 'Semua Kategori'; open = false; applyFilter('kategori', 'all');" class="px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer" :class="selectedCode === 'all' ? 'bg-amber-50/70 text-amber-600' : ''">
+                Semua Kategori
+              </div>
+              @foreach($categories as $catName)
+                <div @click="selectedCode = '{{ $catName }}'; selectedText = '{{ $catName }}'; open = false; applyFilter('kategori', '{{ $catName }}');" class="px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer" :class="selectedCode === '{{ $catName }}' ? 'bg-amber-50/70 text-amber-600' : ''">
+                  {{ $catName }}
+                </div>
+              @endforeach
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter 2: Status Lomba (Alpine.js Custom Select - Pure White Background) -->
+        <div class="md:col-span-2">
           <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
             STATUS LOMBA
           </label>
@@ -67,13 +89,13 @@
           </div>
         </div>
 
-        <!-- Filter 2: Urutkan (Alpine.js Custom Select - Pure White Background) -->
-        <div class="md:col-span-3">
+        <!-- Filter 3: Urutkan (Alpine.js Custom Select - Pure White Background) -->
+        <div class="md:col-span-2">
           <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
             URUTKAN
           </label>
           <div class="relative" x-data="{ open: false, selectedCode: '{{ $sortFilter }}', selectedText: '{{ $sortFilter === "populer" ? "Paling Populer" : ($sortFilter === "deadline" ? "Segera Berakhir" : "Terbaru") }}' }">
-            <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer">
               <span class="truncate" x-text="selectedText"></span>
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                 <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
@@ -93,8 +115,8 @@
           </div>
         </div>
 
-        <!-- Filter 3: Search Input (Pure White Background Matching Forum Page) -->
-        <div class="md:col-span-6">
+        <!-- Filter 4: Search Input (Pure White Background Matching Forum Page) -->
+        <div class="md:col-span-5">
           <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
             CARI EVENT LOMBA
           </label>
@@ -174,8 +196,8 @@
               <!-- Bottom Action Button (Lihat Detail ->) -->
               <div class="pt-2 mt-auto">
                 <a href="{{ route('public.contests.show', $contest->id) }}" class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-xs">
-                  <span>Lihat Detail</span>
-                  <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+                  <span>Lihat Lomba</span>
+                  <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                 </a>
               </div>
 
@@ -213,6 +235,7 @@ function contestSectionApp() {
     return {
         searchQuery: '{{ $search }}',
         currentStatus: '{{ $statusFilter }}',
+        currentCategory: '{{ $categoryFilter ?? "all" }}',
         currentSort: '{{ $sortFilter }}',
         
         submitSearch() {
@@ -221,6 +244,7 @@ function contestSectionApp() {
 
         applyFilter(type, value) {
             if (type === 'status') this.currentStatus = value;
+            if (type === 'kategori') this.currentCategory = value;
             if (type === 'sort') this.currentSort = value;
             this.fetchContestsPage(this.buildUrl(1));
         },
@@ -228,6 +252,7 @@ function contestSectionApp() {
         buildUrl(page = 1) {
             const url = new URL('{{ route("public.contests.index") }}', window.location.origin);
             if (this.currentStatus && this.currentStatus !== 'all') url.searchParams.set('status', this.currentStatus);
+            if (this.currentCategory && this.currentCategory !== 'all') url.searchParams.set('kategori', this.currentCategory);
             if (this.currentSort && this.currentSort !== 'terbaru') url.searchParams.set('sort', this.currentSort);
             if (this.searchQuery) url.searchParams.set('q', this.searchQuery);
             if (page > 1) url.searchParams.set('page', page);

@@ -17,7 +17,7 @@ class HelpController extends Controller
                 'items' => [
                     [
                         'q' => 'Bagaimana cara melakukan booking sesi foto di LensMatch?',
-                        'a' => 'Pilih studio fotografer pada halaman Katalog Fotografer, pilih paket layanan yang diinginkan, tentukan tanggal & lokasi pemotretan, lalu klik tombol "Booking Sesi Foto Ini".'
+                        'a' => 'Pilih fotografer pada halaman Katalog Fotografer, pilih paket layanan yang diinginkan, tentukan tanggal & lokasi pemotretan, lalu klik tombol "Booking Sesi Foto Ini".'
                     ],
                     [
                         'q' => 'Apakah saya bisa membatalkan jadwal booking yang sudah disetujui?',
@@ -51,7 +51,11 @@ class HelpController extends Controller
                 'items' => [
                     [
                         'q' => 'Bagaimana cara fotografer mendapatkan badge Verified Studio Centang Biru?',
-                        'a' => 'Studio fotografer dapat mengajukan verifikasi profil dengan melengkapi identitas resmi, alamat studio, dan minimal 3 portofolio karya asli. Tim Admin LensMatch akan me-review dan memberikan centang biru.'
+                        'a' => 'Fotografer dapat mengajukan verifikasi profil dengan melengkapi identitas resmi, alamat studio, dan minimal 3 portofolio karya asli. Tim Admin LensMatch akan me-review dan memberikan centang biru.'
+                    ],
+                    [
+                        'q' => 'Bagaimana standar penilaian performa & reputasi fotografer dihitung?',
+                        'a' => 'LensMatch menerapkan sistem penilaian otomatis dan transparan tanpa rekayasa data: (1) Rating & Ulasan: Dihitung secara objektif hanya dari klien yang telah menyelesaikan kontrak pemotretan dan pembayaran sah via Escrow. (2) Jam Terbang (Sesi Selesai): Dihitung dari akumulasi transaksi kontrak pemotretan yang berhasil diselesaikan secara tuntas. (3) Respon Cepat: Terdeteksi otomatis jika fotografer aktif online di platform dalam 24 jam terakhir untuk memastikan ketersediaan komunikasi yang responsif bagi calon klien.'
                     ],
                     [
                         'q' => 'Apakah saya bisa mendaftar sebagai Klien sekaligus Fotografer?',

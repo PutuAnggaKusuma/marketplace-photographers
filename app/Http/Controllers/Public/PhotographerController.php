@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\RolePhotographer;
+use App\Models\RoleClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravolt\Indonesia\Models\City;
 use Laravolt\Indonesia\Models\Province;
 
@@ -19,8 +21,18 @@ class PhotographerController extends Controller
         // Pure dynamic database categories with photos and descriptions
         $categories = Category::all();
         
-        // Take top 4 featured photographers (with services, portfolios, testimonials)
-        $featuredPhotographers = RolePhotographer::with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
+        // Take top 4 featured photographers (with services, portfolios, testimonials) that have completed onboarding
+        $featuredPhotographers = RolePhotographer::where('is_onboarded', true)->with([
+            'user', 'province', 'city', 'categories',
+            'services' => function ($q) {
+                $q->whereNotNull('tarif_harga')
+                  ->where('tarif_harga', '>', 0)
+                  ->whereNotNull('deskripsi_layanan')
+                  ->where('deskripsi_layanan', '!=', '')
+                  ->with('details');
+            },
+            'portfolios.medias', 'testimonials'
+        ])
             ->take(4)
             ->get();
 
@@ -50,6 +62,17 @@ class PhotographerController extends Controller
         $locationKeyword = $request->input('location');
         $priceMin = $request->input('price_min');
         $priceMax = $request->input('price_max');
+        $ratingMin = $request->input('rating_min');
+        $selectedSort = $request->input('sort', 'rekomendasi');
+
+        $sortLabels = [
+            'rekomendasi' => 'Rekomendasi',
+            'rating' => 'Rating Tertinggi',
+            'harga_terendah' => 'Harga Terendah',
+            'harga_tertinggi' => 'Harga Tertinggi',
+            'terpopuler' => 'Paling Banyak Dipesan',
+            'terbaru' => 'Terbaru Bergabung',
+        ];
 
         // Cities list based on selected province or default top cities
         $cities = collect();
@@ -57,7 +80,28 @@ class PhotographerController extends Controller
             $cities = City::where('province_code', $selectedProvince)->orderBy('name', 'asc')->get();
         }
 
-        $query = RolePhotographer::with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials']);
+        $query = RolePhotographer::where('is_onboarded', true)->with([
+            'user', 'province', 'city', 'categories',
+            'services' => function ($q) {
+                $q->whereNotNull('tarif_harga')
+                  ->where('tarif_harga', '>', 0)
+                  ->whereNotNull('deskripsi_layanan')
+                  ->where('deskripsi_layanan', '!=', '')
+                  ->with('details');
+            },
+            'portfolios.medias', 'testimonials'
+        ]);
+
+        // Subqueries for Real Sorting & Minimum Rating Filter
+        $query->withAvg('testimonials', 'rating')
+              ->withCount('testimonials')
+              ->withCount('contracts')
+              ->withMin(['services' => function ($sq) {
+                  $sq->whereNotNull('tarif_harga')
+                     ->where('tarif_harga', '>', 0)
+                     ->whereNotNull('deskripsi_layanan')
+                     ->where('deskripsi_layanan', '!=', '');
+              }], 'tarif_harga');
 
         // Strict Location Search from Beranda (Matches ONLY Location, Address, Province, or City)
         if ($locationKeyword) {
@@ -120,12 +164,52 @@ class PhotographerController extends Controller
             });
         }
 
+        // Filter by Minimum Rating
+        if ($ratingMin) {
+            $query->having('testimonials_avg_rating', '>=', (float) $ratingMin);
+        }
+
+        // Apply Sorting Clauses
+        switch ($selectedSort) {
+            case 'rating':
+                $query->orderByRaw('testimonials_avg_rating IS NULL, testimonials_avg_rating DESC')
+                      ->orderBy('testimonials_count', 'desc');
+                break;
+            case 'harga_terendah':
+                $query->orderByRaw('services_min_tarif_harga IS NULL, services_min_tarif_harga ASC');
+                break;
+            case 'harga_tertinggi':
+                $query->orderByRaw('services_min_tarif_harga IS NULL, services_min_tarif_harga DESC');
+                break;
+            case 'terpopuler':
+                $query->orderBy('contracts_count', 'desc')
+                      ->orderBy('testimonials_count', 'desc');
+                break;
+            case 'terbaru':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'rekomendasi':
+            default:
+                $query->orderBy('is_verified', 'desc')
+                      ->orderByRaw('testimonials_avg_rating IS NULL, testimonials_avg_rating DESC')
+                      ->orderBy('created_at', 'desc');
+                break;
+        }
+
         $perPage = (int) $request->query('per_page', 10);
         if (!in_array($perPage, [10, 20, 50, 100])) {
             $perPage = 10;
         }
 
         $photographers = $query->paginate($perPage)->withQueryString();
+
+        $favoritedIds = [];
+        if (Auth::check()) {
+            $clientProfile = RoleClient::where('id_user', Auth::id())->first();
+            if ($clientProfile) {
+                $favoritedIds = $clientProfile->favorites()->pluck('id_photographer')->toArray();
+            }
+        }
 
         return view('public.photographers.katalog', compact(
             'photographers',
@@ -138,7 +222,11 @@ class PhotographerController extends Controller
             'searchKeyword',
             'locationKeyword',
             'priceMin',
-            'priceMax'
+            'priceMax',
+            'ratingMin',
+            'selectedSort',
+            'sortLabels',
+            'favoritedIds'
         ));
     }
 
@@ -152,11 +240,24 @@ class PhotographerController extends Controller
             'province',
             'city',
             'categories',
-            'services.details',
+            'services' => function ($q) {
+                $q->whereNotNull('tarif_harga')
+                  ->where('tarif_harga', '>', 0)
+                  ->whereNotNull('deskripsi_layanan')
+                  ->where('deskripsi_layanan', '!=', '')
+                  ->with('details');
+            },
             'portfolios.medias',
             'availabilities',
+            'faqs' => function ($q) {
+                $q->where('is_active', true)->orderBy('urutan', 'asc');
+            },
             'testimonials.client.user'
         ])->findOrFail($id);
+
+        if (!$photographer->is_onboarded && (!Auth::check() || (Auth::id() !== $photographer->id_user && !Auth::user()->hasRole(['admin', 'super_admin'])))) {
+            abort(404, 'Profil fotografer belum aktif atau sedang dalam tahap onboarding.');
+        }
 
         $testimonials = $photographer->testimonials()->with('client.user')->orderBy('created_at', 'desc')->get();
         $totalReviews = $testimonials->count();
@@ -170,7 +271,66 @@ class PhotographerController extends Controller
             1 => $testimonials->where('rating', 1)->count(),
         ];
 
-        return view('public.photographers.show', compact('photographer', 'testimonials', 'totalReviews', 'avgRating', 'starCounts'));
+        // Real-Time Calendar Availability Data (Blocked & Booked Dates)
+        $blockedDates = $photographer->availabilities
+            ->where('tanggal', '>=', date('Y-m-d'))
+            ->mapWithKeys(function ($item) {
+                $timeInfo = ($item->jam_mulai && $item->jam_selesai && ($item->jam_mulai != '00:00:00' || $item->jam_selesai != '23:59:59'))
+                    ? substr($item->jam_mulai, 0, 5) . ' - ' . substr($item->jam_selesai, 0, 5) . ' WIB'
+                    : 'Seharian Penuh';
+                return [$item->tanggal => [
+                    'keterangan' => $item->keterangan ?: 'Libur / Tidak Menerima Sesi',
+                    'time_info' => $timeInfo,
+                    'is_all_day' => (!$item->jam_mulai || !$item->jam_selesai || ($item->jam_mulai == '00:00:00' && $item->jam_selesai == '23:59:59')),
+                ]];
+            })
+            ->toArray();
+
+        $contractBookings = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
+            $q->where('id_photographer', $photographer->id)
+              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
+        })->where('booking_date', '>=', date('Y-m-d'))
+          ->with(['service'])
+          ->get();
+
+        $bookedDates = [];
+        foreach ($contractBookings as $b) {
+            $d = $b->booking_date;
+            if (!isset($bookedDates[$d])) {
+                $bookedDates[$d] = [];
+            }
+            $serviceName = $b->service->nama_layanan ?? 'Sesi Foto Terjadwal';
+            $jamMulai = substr($b->jam_mulai ?: '08:00', 0, 5);
+            $jamSelesai = substr($b->jam_selesai ?: '12:00', 0, 5);
+            $durasi = $b->durasi ?: '4 Jam';
+            
+            $bookedDates[$d][] = [
+                'jam_mulai' => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+                'durasi' => $durasi,
+                'service_name' => $serviceName,
+                'time_formatted' => "{$jamMulai} — {$jamSelesai} WIB",
+            ];
+        }
+
+        $isFavorited = false;
+        if (Auth::check()) {
+            $clientProfile = RoleClient::where('id_user', Auth::id())->first();
+            if ($clientProfile) {
+                $isFavorited = $clientProfile->favorites()->where('id_photographer', $photographer->id)->exists();
+            }
+        }
+
+        return view('public.photographers.show', compact(
+            'photographer', 
+            'testimonials', 
+            'totalReviews', 
+            'avgRating', 
+            'starCounts',
+            'blockedDates',
+            'bookedDates',
+            'isFavorited'
+        ));
     }
 
     /**

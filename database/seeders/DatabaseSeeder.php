@@ -2,24 +2,30 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Seeds\IndonesiaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (class_exists(IndonesiaSeeder::class) && Province::count() === 0) {
+            $this->call(IndonesiaSeeder::class);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UserSeeder::class,
+            CategorySeeder::class,
+            PhotographerSeeder::class,
+            BookingContractSeeder::class,
+            PhotoContestSeeder::class,
+            ContestSubmissionSeeder::class,
+            ElearningCurriculumSeeder::class,
+            ActivityLogSeeder::class,
         ]);
     }
 }

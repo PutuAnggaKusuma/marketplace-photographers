@@ -14,6 +14,7 @@ class ForumController extends Controller
      */
         public function index(Request $request)
     {
+        $tab = $request->query('tab', 'discussions');
         $search = $request->query('search', '');
         $sort = $request->query('sort', 'latest');
 
@@ -45,7 +46,38 @@ class ForumController extends Controller
         $thisMonthPosts = ForumPost::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
         $topPost = ForumPost::withCount('comments')->orderByDesc('comments_count')->first();
 
-        return view('admin.forum.index', compact('posts', 'search', 'sort', 'totalPosts', 'totalComments', 'thisMonthPosts', 'topPost'));
+        // Reported Comments Data
+        $reportedQuery = ForumComment::has('reports')
+            ->with(['user', 'post', 'reports.user'])
+            ->withCount(['reports as pending_reports_count' => function ($q) {
+                $q->where('status', 'pending');
+            }])
+            ->withCount('reports');
+
+        if (!empty($search) && $tab === 'reports') {
+            $reportedQuery->where(function ($q) use ($search) {
+                $q->where('comment', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $reportedComments = $reportedQuery->orderByDesc('pending_reports_count')->orderByDesc('created_at')->paginate($perPage, ['*'], 'reports_page')->withQueryString();
+        $pendingReportsCount = \App\Models\ForumCommentReport::where('status', 'pending')->count();
+
+        return view('admin.forum.index', compact(
+            'posts', 
+            'search', 
+            'sort', 
+            'totalPosts', 
+            'totalComments', 
+            'thisMonthPosts', 
+            'topPost',
+            'tab',
+            'reportedComments',
+            'pendingReportsCount'
+        ));
     }
 
     public function destroy($id)
@@ -58,13 +90,26 @@ class ForumController extends Controller
     }
 
     /**
-     * Moderasi: Hapus Komentar Forum Spam.
+     * Moderasi: Hapus Komentar Forum Spam / Pelanggaran.
      */
     public function destroyComment($id)
     {
         $comment = ForumComment::findOrFail($id);
+        \App\Models\ForumCommentReport::where('id_comment', $comment->id)->update(['status' => 'reviewed']);
         $comment->delete();
 
         return redirect()->back()->with('success', 'Komentar forum berhasil dihapus.');
+    }
+
+    /**
+     * Moderasi: Abaikan Laporan Komentar & Pulihkan Tampilan.
+     */
+    public function dismissReports($id)
+    {
+        $comment = ForumComment::findOrFail($id);
+        $comment->update(['is_hidden' => false]);
+        \App\Models\ForumCommentReport::where('id_comment', $comment->id)->update(['status' => 'dismissed']);
+
+        return redirect()->back()->with('success', 'Laporan berhasil diabaikan dan komentar dipulihkan.');
     }
 }

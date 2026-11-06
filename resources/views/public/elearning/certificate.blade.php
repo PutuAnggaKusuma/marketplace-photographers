@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sertifikat Kelulusan - {{ $course->judul }} - {{ $user->nama }}</title>
+  <link rel="icon" type="image/png" href="{{ asset('images/logo/lensmatch_logo_transparent_yellow.png') }}" />
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,7 +72,7 @@
   <!-- Floating Action Bar (Hidden in Print) -->
   <div class="no-print w-full max-w-[1050px] mb-6 flex flex-wrap items-center justify-between gap-4 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl border border-gray-200 shadow-sm">
     <a href="{{ route('public.elearning.show', $course->slug) }}" class="inline-flex items-center gap-2 text-xs font-bold text-gray-700 hover:text-amber-600 transition">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
       <span>Kembali ke Ruang Belajar</span>
     </a>
 

@@ -8,25 +8,22 @@
 
     <!-- Page Header Banner -->
     <div class="bg-gradient-to-r from-gray-900 via-amber-950 to-gray-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl border border-amber-500/20 text-center space-y-4">
-      <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-400 text-gray-900">
-        Pusat Informasi & Bantuan
-      </span>
       <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
         Ada yang Bisa Kami Bantu?
       </h1>
       <p class="text-xs sm:text-sm text-gray-300 max-w-xl mx-auto leading-relaxed">
-        Temukan jawaban lengkap seputar cara booking sesi foto, garansi pembayaran escrow, verifikasi fotografer, dan kompetisi lomba foto.
+        Temukan jawaban lengkap seputar cara booking sesi foto, garansi pembayaran aman, verifikasi fotografer, dan kompetisi lomba foto.
       </p>
     </div>
 
     <!-- Category Nav Tabs -->
-    <div class="flex items-center justify-center gap-2 overflow-x-auto pb-2">
+    <div class="flex items-center justify-center gap-6 overflow-x-auto pb-1 text-xs sm:text-sm">
       @foreach($faqs as $catKey => $catData)
         <button type="button" 
                 @click="activeTab = '{{ $catKey }}'; activeKey = null" 
-                class="px-5 py-2.5 rounded-2xl text-xs font-extrabold transition shrink-0"
-                :class="activeTab === '{{ $catKey }}' ? 'bg-amber-500 text-white shadow-md' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100'">
-          {{ $catData['title'] }}
+                class="py-2 transition cursor-pointer shrink-0 flex items-center gap-2"
+                :class="activeTab === '{{ $catKey }}' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'">
+          <span :class="activeTab === '{{ $catKey }}' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">{{ $catData['title'] }}</span>
         </button>
       @endforeach
     </div>

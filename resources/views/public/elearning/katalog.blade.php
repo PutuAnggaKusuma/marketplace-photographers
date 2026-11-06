@@ -7,18 +7,15 @@
          x-data="elearningKatalogApp()" 
          id="elearning-katalog-section">
 
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
     <!-- 1. PURE CLEAN CATALOG PAGE HEADER (No Hero, No "Kenapa Akademi Ini") -->
     <div class="space-y-3">
-      <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400 block pt-1">
-        KATALOG LENGKAP E-LEARNING
-      </span>
       <h1 class="text-3xl sm:text-4xl lg:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight">
         Jelajahi Seluruh Modul Edukasi Fotografi
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed mt-2">
-        Temukan panduan komprehensif teknik kamera, retouching warna, hingga manajemen studio dari fotografer profesional terkemuka.
+        Temukan panduan lengkap teknik kamera, retouching warna, hingga manajemen studio dari fotografer profesional terkemuka.
       </p>
     </div>
 
@@ -189,14 +186,14 @@
                 @auth
                   <a href="{{ route('public.elearning.show', $course->slug) }}" class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs">
                     <span>Mulai Belajar</span>
-                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                   </a>
                 @else
                   <button type="button" 
                           @click="openGuestLoginModal('{{ route('public.elearning.show', $course->slug) }}', '{{ addslashes($course->judul) }}')" 
                           class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs cursor-pointer">
                     <span>Mulai Belajar</span>
-                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path></svg>
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                   </button>
                 @endauth
               </div>
@@ -205,8 +202,8 @@
           </div>
         @empty
           <div class="col-span-full bg-white dark:bg-gray-800 p-12 sm:p-16 rounded-3xl border border-gray-200 dark:border-gray-700 text-center space-y-3 shadow-xs">
-            <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xl mb-2">
-              📚
+            <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
             </div>
             <h3 class="text-lg font-black text-gray-900 dark:text-white">Materi E-Learning Tidak Ditemukan</h3>
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
@@ -241,19 +238,18 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
         
-        <!-- Header without Icon & Plain Close Button -->
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Akses Akademi E-Learning LensMatch</p>
-          </div>
-          <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-base font-bold transition cursor-pointer p-0.5 leading-none">✕</button>
+        <!-- Plain Close Button Absolute Top Right -->
+        <button type="button" @click="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+
+        <!-- Header without Icon & Centered -->
+        <div class="text-center">
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
         </div>
 
-        <!-- Body Text -->
-        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed">
+        <!-- Body Text (Centered) -->
+        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center">
           Untuk dapat membaca materi edukasi E-Learning <strong class="font-bold text-gray-900 dark:text-white" x-text="targetCourseTitle ? '“' + targetCourseTitle + '”' : ''"></strong> dan meningkatkan skill fotografi, Anda harus masuk ke akun LensMatch terlebih dahulu.
         </p>
 

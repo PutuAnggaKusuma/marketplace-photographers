@@ -281,6 +281,39 @@ layer(base);
   transform: translateY(0);
 }
 
+/* Silky-Smooth GPU Hardware-Accelerated Auth Entrance Animations */
+@keyframes authCardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ambientEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translateY(0);
+  }
+}
+
+.animate-auth-card {
+  animation: authCardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+.animate-ambient-enter {
+  animation: ambientEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
 /* Floating Animation Keyframes for Hero Gallery Photos */
 @keyframes floatSlow {
   0%, 100% {

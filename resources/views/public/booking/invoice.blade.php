@@ -1,116 +1,259 @@
 @extends('layouts.app')
 
-@section('title', 'Invoice Pembayaran Booking #' . $payment->external_id . ' — LensMatch')
+@section('title', 'Invoice #' . ($payment->external_id ?? ('KTRK-' . $contract->id)) . ' — LensMatch')
 
 @section('content')
-<section class="py-16 sm:py-20 lg:py-24 bg-white dark:bg-gray-900 min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10" x-data="{ showModal: false }">
+<section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false }">
 
-    <!-- Flash Alert Success -->
+    <!-- Flash Alert Messages -->
     @if(session('success'))
-      <div class="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-3">
-        <svg class="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+      <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-3">
         <span>{{ session('success') }}</span>
       </div>
     @endif
+    @if(session('error'))
+      <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs sm:text-sm text-rose-800 dark:text-rose-300 font-bold flex items-center gap-3">
+        <span>{{ session('error') }}</span>
+      </div>
+    @endif
 
-    <!-- Invoice Header Card -->
-    <div class="bg-white dark:bg-gray-800 p-8 sm:p-10 lg:p-12 rounded-3xl border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-8">
+    <!-- Breadcrumb Navigation -->
+    <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+      <a href="{{ route('client.invoices') }}" class="hover:text-amber-500 transition">Faktur Pembayaran</a>
+      <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+      <span class="text-gray-900 dark:text-white font-bold">Rincian Faktur #{{ $payment->external_id ?? ('KTRK-' . $contract->id) }}</span>
+    </nav>
+
+    <!-- Top Action Navigation -->
+    <div class="flex items-center justify-between">
+      <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        <span>Kembali ke Reservasi Saya</span>
+      </a>
+
+      @if($payment && $payment->payment_status === 'completed')
+        <a href="{{ route('booking.invoice.print', $contract->id) }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs cursor-pointer">
+          Cetak PDF
+        </a>
+      @endif
+    </div>
+
+    <!-- Official Invoice Document Sheet (Rule #89) -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-10 lg:p-12 space-y-8">
       
-      <!-- Top Invoice Row -->
+      <!-- 1. Document Header -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-gray-100 dark:border-gray-700 pb-8">
         <div class="space-y-1">
-          <span class="text-[11px] uppercase font-black tracking-widest text-amber-600 dark:text-amber-400">Tagihan Resmi LensMatch Escrow</span>
-          <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-1">{{ $payment->external_id }}</h1>
-          <p class="text-xs sm:text-sm text-gray-500">Dibuat pada: {{ $contract->created_at->format('d M Y, H:i') }} WIB</p>
-        </div>
-
-        <div class="text-left sm:text-right space-y-2">
-          <span class="px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 inline-flex items-center gap-2">
-            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span>Menunggu Pembayaran</span>
+          <span class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+            Lens<span class="text-amber-500">Match</span>
           </span>
-          <p class="text-xs text-gray-400">Batas waktu: {{ \Carbon\Carbon::parse($contract->expired_at)->format('d M Y, H:i') }} WIB</p>
-        </div>
-      </div>
-
-      <!-- Photographer & Client Info Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs sm:text-sm border-b border-gray-100 dark:border-gray-700 pb-8">
-        <div class="space-y-1.5 p-5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60">
-          <span class="font-black text-gray-400 uppercase text-[10px] tracking-wider block mb-1">Fotografer:</span>
-          <h3 class="font-black text-base text-gray-900 dark:text-white">{{ $contract->photographer->nama }}</h3>
-          <p class="text-gray-500 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>  {{ $contract->photographer->city->name ?? $contract->photographer->alamat }}</p>
-          <p class="text-gray-500">{{ $contract->photographer->nomor_telepon }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Platform Marketplace Fotografi Indonesia</p>
+          <p class="text-[11px] text-gray-400">support@lensmatch.id</p>
         </div>
 
-        <div class="space-y-1.5 p-5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60">
-          <span class="font-black text-gray-400 uppercase text-[10px] tracking-wider block mb-1">Pemesan / Klien:</span>
-          <h3 class="font-black text-base text-gray-900 dark:text-white">{{ $contract->client->nama }}</h3>
-          <p class="text-gray-500">Email: {{ $contract->client->user->email ?? auth()->user()->email }}</p>
-          <p class="text-gray-500">Lokasi: {{ $contract->bookingDetail->lokasi }}</p>
-        </div>
-      </div>
-
-      <!-- Booking Details Summary -->
-      <div class="space-y-4">
-        <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Rincian Sesi Foto</h4>
-
-        <div class="bg-gray-50/70 dark:bg-gray-900/60 p-6 rounded-2xl space-y-3 text-xs sm:text-sm border border-gray-100 dark:border-gray-700/60">
-          <div class="flex justify-between">
-            <span class="text-gray-500 font-medium">Paket Layanan</span>
-            <span class="font-bold text-gray-900 dark:text-white">{{ $contract->bookingDetail->service->nama_layanan }}</span>
+        <div class="text-left sm:text-right space-y-1">
+          <div class="flex sm:justify-end items-center gap-2">
+            <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Invoice</h1>
+            @if($payment && $payment->payment_status === 'completed')
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                Lunas
+              </span>
+            @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                Menunggu Verifikasi
+              </span>
+            @else
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                Menunggu Pembayaran
+              </span>
+            @endif
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500 font-medium">Tanggal Pelaksanaan</span>
-            <span class="font-bold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($contract->bookingDetail->booking_date)->format('d F Y') }}</span>
+          <p class="text-xs font-mono text-gray-500 dark:text-gray-400">#{{ $payment->external_id ?? ('KTRK-' . $contract->id) }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Tanggal: {{ $contract->created_at->translatedFormat('d F Y') }}</p>
+        </div>
+      </div>
+
+      <!-- 2. Flat Editorial Billing Info (Klien & Fotografer) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs sm:text-sm">
+        <div class="space-y-1">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block mb-1">Ditagihkan Kepada:</span>
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{{ $contract->client->nama ?? 'Klien' }}</h4>
+          <p class="text-gray-500 dark:text-gray-400">{{ $contract->client->user->email ?? auth()->user()->email ?? '-' }}</p>
+          @if($contract->bookingDetail?->lokasi)
+            <p class="text-gray-500 dark:text-gray-400">Lokasi Acara: {{ $contract->bookingDetail->lokasi }}</p>
+          @endif
+        </div>
+
+        <div class="space-y-1 sm:text-right">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block mb-1">Penyedia Jasa:</span>
+          <h4 class="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</h4>
+          <p class="text-gray-500 dark:text-gray-400">{{ $contract->photographer->city->name ?? $contract->photographer->alamat ?? '-' }}</p>
+          <p class="text-gray-500 dark:text-gray-400">{{ $contract->photographer->nomor_telepon ?? '-' }}</p>
+        </div>
+      </div>
+
+      <!-- 3. Line-Item Table (Tabel Rincian Layanan Standar Industri) -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-400">
+              <th class="py-3 pr-4">Deskripsi Layanan</th>
+              <th class="py-3 px-4 text-center">Jadwal Sesi</th>
+              <th class="py-3 px-4 text-center">Tipe Pembayaran</th>
+              <th class="py-3 pl-4 text-right">Jumlah</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60">
+            <tr>
+              <td class="py-4 pr-4">
+                <span class="font-bold text-gray-900 dark:text-white block">
+                  {{ $contract->bookingDetail?->service?->nama_layanan ?? 'Paket Layanan Fotografi' }}
+                </span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">
+                  Sesi foto bersama {{ $contract->photographer->nama ?? 'Mitra Fotografer' }}
+                </span>
+              </td>
+              <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
+                <span>{{ $contract->bookingDetail && $contract->bookingDetail->booking_date ? \Carbon\Carbon::parse($contract->bookingDetail->booking_date)->translatedFormat('d F Y') : '-' }}</span>
+                @if($contract->bookingDetail?->jam_mulai)
+                  <span class="block text-gray-400 text-[11px]">{{ $contract->bookingDetail->jam_mulai }} WIB</span>
+                @endif
+              </td>
+              <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                {{ $contract->payment_type === 'dp' ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh' }}
+              </td>
+              <td class="py-4 pl-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                Rp {{ number_format($contract->jumlah, 0, ',', '.') }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4. Rangkuman Kalkulasi Tagihan (Rata Kanan Bawah) -->
+      <div class="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="w-full sm:w-72 space-y-2 text-xs sm:text-sm">
+          <div class="flex justify-between text-gray-500 dark:text-gray-400">
+            <span>Subtotal</span>
+            <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($contract->jumlah, 0, ',', '.') }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500 font-medium">Jam Sesi</span>
-            <span class="font-bold text-gray-900 dark:text-white">{{ $contract->bookingDetail->jam_mulai }} WIB</span>
+          <div class="flex justify-between text-gray-500 dark:text-gray-400">
+            <span>Biaya Layanan Platform</span>
+            <span class="font-medium text-gray-900 dark:text-white">Gratis</span>
+          </div>
+          <div class="pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-baseline">
+            <span class="font-bold text-gray-900 dark:text-white text-sm">Total Tagihan</span>
+            <span class="font-black text-gray-900 dark:text-white text-lg sm:text-xl">
+              Rp {{ number_format($contract->jumlah, 0, ',', '.') }}
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Total Price Banner -->
-      <div class="p-8 rounded-3xl bg-amber-400 text-gray-900 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg shadow-amber-400/20">
-        <div>
-          <span class="text-xs font-black uppercase tracking-wider block opacity-80 mb-1">Total Tagihan Yang Harus Dibayar</span>
-          <span class="text-3xl sm:text-4xl font-black">Rp {{ number_format($contract->jumlah, 0, ',', '.') }}</span>
+      <!-- 5. Status & Action Section (Tenang, Bersih, Bebas Banner Neon) -->
+      @if($payment && $payment->payment_status === 'completed')
+        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-0.5">
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">Pembayaran Terverifikasi</span>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pembayaran telah diterima dan jadwal sesi foto Anda telah terkonfirmasi.</p>
+          </div>
+          <a href="{{ route('client.bookings') }}" class="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-extrabold text-xs rounded-xl transition shadow-xs cursor-pointer">
+            Lihat Jadwal Reservasi
+          </a>
         </div>
+      @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
+        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-0.5">
+            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 block">Bukti Transfer Sedang Diverifikasi</span>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Struk transfer Anda sedang diperiksa oleh Tim Admin. Jadwal sesi foto akan aktif otomatis setelah disetujui.</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <a href="{{ $payment->bukti_transfer }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs">
+              Lihat Struk
+            </a>
+            <button type="button" @click="showModal = true" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+              Unggah Ulang
+            </button>
+          </div>
+        </div>
+      @else
+        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold text-gray-900 dark:text-white block">Instruksi Pembayaran</span>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Silakan transfer nominal tagihan ke rekening bank berikut:</p>
+            </div>
+            @if($contract->expired_at)
+              <span class="text-[11px] text-gray-400">Batas waktu: {{ \Carbon\Carbon::parse($contract->expired_at)->translatedFormat('d M Y, H:i') }} WIB</span>
+            @endif
+          </div>
 
-        <button type="button" @click="showModal = true" class="w-full sm:w-auto px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white font-black text-xs sm:text-sm rounded-2xl transition shadow-lg shrink-0 flex items-center justify-center gap-2.5 cursor-pointer">
-          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-          <span>Bayar Sekarang (Simulasi QRIS/Transfer)</span>
-        </button>
-      </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs">
+            <div>
+              <span class="text-gray-400 block text-[11px]">Bank Tujuan</span>
+              <strong class="font-bold text-gray-900 dark:text-white">Bank Central Asia (BCA)</strong>
+            </div>
+            <div>
+              <span class="text-gray-400 block text-[11px]">Nomor Rekening</span>
+              <strong class="font-mono font-bold text-gray-900 dark:text-white text-sm">8840-1928-3746</strong>
+            </div>
+            <div>
+              <span class="text-gray-400 block text-[11px]">Atas Nama</span>
+              <strong class="font-bold text-gray-900 dark:text-white">PT LensMatch Indonesia</strong>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button type="button" @click="showModal = true" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+              Unggah Bukti Transfer
+            </button>
+          </div>
+        </div>
+      @endif
 
     </div>
 
-    <!-- Modal Simulasi Bayar -->
-    <div x-show="showModal" @click.away="showModal = false" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-gray-800 max-w-md w-full p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 text-center">
-        <div class="space-y-2">
-          <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+    <!-- Modal Unggah Bukti Transfer (Rule #59 & Rule #89) -->
+    <div x-show="showModal" 
+         x-cloak 
+         @keydown.escape.window="showModal = false" 
+         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div @click.away="showModal = false" class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 text-center">
+        
+        <div class="space-y-1">
+          <h3 class="text-lg font-black text-gray-900 dark:text-white">Unggah Bukti Transfer</h3>
+          <p class="text-xs text-gray-500">Silakan unggah foto struk transfer ke rekening Bank BCA 8840-1928-3746 a.n. PT LensMatch Indonesia</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700 rounded-2xl flex justify-between items-center text-xs">
+          <span class="text-gray-500">Total Nominal:</span>
+          <span class="font-black text-gray-900 dark:text-white text-sm">
+            Rp {{ number_format(($payment ? $payment->payment_amount : $contract->jumlah), 0, ',', '.') }}
+          </span>
+        </div>
+
+        <!-- Form Unggah Bukti Transfer -->
+        <form action="{{ route('booking.pay.confirm', $contract->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4 text-left">
+          @csrf
+          <input type="hidden" name="payment_id" value="{{ $payment?->id }}">
+          
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Foto Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
+            <input type="file" name="bukti_transfer" accept="image/*" required class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
+            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 10 MB)</p>
           </div>
-          <h3 class="text-xl font-black text-gray-900 dark:text-white">Simulasi Instan QRIS & Transfer Bank</h3>
-          <p class="text-xs sm:text-sm text-gray-500">Silakan gunakan kode QRIS dummy atau transfer ke rekening penampungan resmi LensMatch Escrow.</p>
-        </div>
 
-        <div class="p-5 bg-gray-50 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700 rounded-2xl space-y-2 text-xs sm:text-sm">
-          <p class="font-extrabold text-gray-800 dark:text-gray-200">Bank Central Asia (BCA)</p>
-          <p class="text-lg font-black text-amber-600 dark:text-amber-400">8840-1928-3746</p>
-          <p class="text-xs text-gray-500">a.n. PT LensMatch Indonesia Escrow</p>
-        </div>
+          <div class="flex items-center justify-center gap-3 pt-2">
+            <button type="button" @click="showModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+              Batal
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+              Simpan Data
+            </button>
+          </div>
+        </form>
 
-        <div class="space-y-3 pt-2">
-          <button type="button" @click="showModal = false" class="w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs sm:text-sm rounded-xl shadow-md transition cursor-pointer">
-            Konfirmasi Pembayaran Selesai
-          </button>
-          <button type="button" @click="showModal = false" class="w-full py-2 text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 cursor-pointer">
-            Tutup
-          </button>
-        </div>
       </div>
     </div>
 

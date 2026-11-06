@@ -221,7 +221,7 @@
       >
         <div class="flex items-center gap-4">
           <div
-            class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-orange-500/[0.08] text-orange-500"
+            class="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-amber-500/[0.08] text-amber-500"
           >
             <svg
               class="fill-current"

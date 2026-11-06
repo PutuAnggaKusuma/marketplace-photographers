@@ -15,8 +15,20 @@ class ForumComment extends Model
     protected $fillable = [
         'id_forum_post',
         'id_user',
+        'parent_id',
         'comment',
+        'is_hidden',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(ForumComment::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(ForumComment::class, 'parent_id')->orderBy('created_at', 'asc');
+    }
 
     public function post()
     {
@@ -26,5 +38,10 @@ class ForumComment extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(ForumCommentReport::class, 'id_comment');
     }
 }

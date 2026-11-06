@@ -50,12 +50,9 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Edukasi & Pembelajaran Fotografi</span>
             <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Materi E-Learning</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kelola artikel tutorial, panduan teknik kamera, dan materi edukasi untuk pengguna platform</p>
         </div>
         <a href="{{ route('admin.elearning.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
             <span>Tambah Materi Baru</span>
         </a>
     </div>
@@ -74,28 +71,24 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Materi</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $materials->total() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Modul artikel & panduan aktif</p>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kursus Berbayar</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::where('is_premium', true)->orWhere('harga', '>', 0)->count() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Materi akses berbayar & premium</p>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Edukasi</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $categories->count() }} Kategori</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Topik fotografi beragam</p>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pembaca</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::sum('view_count') }} View</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Akumulasi pembaca materi</p>
         </div>
     </div>
 
@@ -140,8 +133,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari judul materi atau kategori..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -177,7 +170,7 @@
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
-                                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60">
+                                    <span class="font-bold text-gray-700 dark:text-gray-300 text-xs">
                                         {{ $m->kategori ?? ($m->category ? $m->category->nama_kategori : 'Umum') }}
                                     </span>
                                 </td>
@@ -187,7 +180,7 @@
                                             <span class="text-xs font-bold text-gray-900 dark:text-white block">
                                                 Rp {{ number_format($m->harga ?? 149000, 0, ',', '.') }}
                                             </span>
-                                            <span class="text-[11px] text-amber-600 dark:text-amber-500 font-medium block">
+                                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
                                                 Berbayar
                                             </span>
                                         </div>
@@ -205,7 +198,7 @@
                                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
                                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Aktif</span>
                                 </td>
-                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <a href="{{ route('admin.elearning.curriculum', $m->id) }}" 
                                            class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60 font-bold text-xs transition text-center inline-block">

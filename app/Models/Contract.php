@@ -22,6 +22,7 @@ class Contract extends Model
         'payout_amount',
         'status_payout',
         'payout_at',
+        'payout_requested_at',
         'payout_notes',
         'is_validated_photographer',
         'is_validated_client',
@@ -31,6 +32,7 @@ class Contract extends Model
 
     protected $casts = [
         'payout_at' => 'datetime',
+        'payout_requested_at' => 'datetime',
         'expired_at' => 'datetime',
         'fee_marketplace' => 'float',
         'payout_amount' => 'float',
@@ -53,6 +55,11 @@ class Contract extends Model
         return $this->hasOne(ContractBooking::class, 'id_contract');
     }
 
+    public function detail()
+    {
+        return $this->bookingDetail();
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class, 'id_contract');
@@ -61,5 +68,15 @@ class Contract extends Model
     public function testimonial()
     {
         return $this->hasOne(Testimonial::class, 'id_contract');
+    }
+
+    public function cancellation()
+    {
+        return $this->hasOne(ContractCancellation::class, 'id_contract');
+    }
+
+    public function photographerClientReview()
+    {
+        return $this->hasOne(PhotographerClientReview::class, 'id_contract');
     }
 }

@@ -52,7 +52,7 @@ class CategorySeeder extends Seeder
             [
                 'nama_kategori' => 'Studio & Personal Portrait',
                 'slug'          => 'studio-portrait',
-                'icon'          => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80',
+                'icon'          => 'https://images.unsplash.com/photo-1768818928341-3b31b8965c6d?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
             ],
         ];
 
@@ -61,7 +61,7 @@ class CategorySeeder extends Seeder
                 ['slug' => $cat['slug']],
                 [
                     'nama_kategori' => $cat['nama_kategori'],
-                    'icon'          => $cat['icon'],
+                    'icon_url'      => $cat['icon'],
                     'created_at'    => now(),
                     'updated_at'    => now(),
                 ]

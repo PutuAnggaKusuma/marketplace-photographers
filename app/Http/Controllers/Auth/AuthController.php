@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\RoleClient;
+use App\Models\RolePhotographer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +22,11 @@ class AuthController extends Controller
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        if ($request->has('redirect')) {
+        if ($request->filled('redirect')) {
             session(['url.intended' => $request->query('redirect')]);
+        } else {
+            // Bersihkan residu session lama jika user membuka /login secara mandiri (misal dari Navbar Beranda)
+            session()->forget('url.intended');
         }
 
         return view('public.auth.signin');
@@ -71,8 +76,11 @@ class AuthController extends Controller
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        if ($request->has('redirect')) {
+        if ($request->filled('redirect')) {
             session(['url.intended' => $request->query('redirect')]);
+        } else {
+            // Bersihkan residu session lama jika user membuka /register secara mandiri
+            session()->forget('url.intended');
         }
 
         return view('public.auth.signup');
@@ -88,6 +96,7 @@ class AuthController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', 'in:client,photographer'],
+            'nomor_telepon' => ['required', 'string', 'regex:/^[0-9+\-\s()]+$/', 'min:9', 'max:20'],
         ], [
             'nama.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Alamat email wajib diisi.',
@@ -97,6 +106,10 @@ class AuthController extends Controller
             'password.min' => 'Kata sandi minimal 8 karakter.',
             'role.required' => 'Pilihan role akun wajib dipilih.',
             'role.in' => 'Pilihan role akun tidak valid.',
+            'nomor_telepon.required' => 'Nomor WhatsApp wajib diisi.',
+            'nomor_telepon.regex' => 'Format nomor WhatsApp tidak valid.',
+            'nomor_telepon.min' => 'Nomor WhatsApp minimal 9 digit.',
+            'nomor_telepon.max' => 'Nomor WhatsApp maksimal 20 digit.',
         ]);
 
         if ($request->filled('redirect')) {
@@ -110,6 +123,22 @@ class AuthController extends Controller
             'role' => $request->role,
             'is_protected' => false,
         ]);
+
+        // Auto-provisioning profil role sesuai pilihan pendaftaran
+        if ($user->role === 'photographer') {
+            RolePhotographer::create([
+                'id_user' => $user->id,
+                'nama' => $user->nama,
+                'nomor_telepon' => $request->nomor_telepon,
+                'is_onboarded' => false,
+            ]);
+        } elseif ($user->role === 'client') {
+            RoleClient::create([
+                'id_user' => $user->id,
+                'nama' => $user->nama,
+                'nomor_telepon' => $request->nomor_telepon,
+            ]);
+        }
 
         Auth::login($user);
         $intended = session('url.intended') ?: $request->input('redirect');
@@ -153,24 +182,37 @@ class AuthController extends Controller
             // Hindari looping kembali ke halaman login atau register
             $authPaths = [url('/login'), url('/register'), route('login'), route('register')];
             if (!empty($intended) && !in_array($intended, $authPaths)) {
-                // Validasi apakah intended URL sesuai dengan role pengguna saat ini
-                $isAllowed = true;
-                if (in_array($user->role, ['super_admin', 'admin'])) {
-                    if (str_contains($intended, '/photographer') || str_contains($intended, '/client')) {
-                        $isAllowed = false;
+                // If intended is generic /dashboard, let role dispatch it directly
+                $parsedPath = parse_url($intended, PHP_URL_PATH) ?? $intended;
+                if ($parsedPath === '/dashboard' || $parsedPath === 'dashboard') {
+                    $intended = null;
+                } else {
+                    // Validasi apakah intended URL sesuai dengan role pengguna saat ini
+                    $isAllowed = true;
+                    if (in_array($user->role, ['super_admin', 'admin'])) {
+                        if (str_contains($intended, '/photographer') || 
+                            str_contains($intended, '/client') || 
+                            str_contains($intended, '/booking') || 
+                            str_contains($intended, '/pembayaran')) {
+                            $isAllowed = false;
+                        }
+                    } elseif ($user->role === 'photographer') {
+                        if (str_contains($intended, '/admin') || 
+                            str_contains($intended, '/client') || 
+                            str_contains($intended, '/booking') || 
+                            str_contains($intended, '/pembayaran')) {
+                            $isAllowed = false;
+                        }
+                    } elseif ($user->role === 'client') {
+                        if (str_contains($intended, '/admin') || 
+                            str_contains($intended, '/photographer')) {
+                            $isAllowed = false;
+                        }
                     }
-                } elseif ($user->role === 'photographer') {
-                    if (str_contains($intended, '/admin') || str_contains($intended, '/client')) {
-                        $isAllowed = false;
-                    }
-                } elseif ($user->role === 'client') {
-                    if (str_contains($intended, '/admin') || str_contains($intended, '/photographer')) {
-                        $isAllowed = false;
-                    }
-                }
 
-                if ($isAllowed) {
-                    return redirect()->to($intended);
+                    if ($isAllowed) {
+                        return redirect()->to($intended);
+                    }
                 }
             }
         }

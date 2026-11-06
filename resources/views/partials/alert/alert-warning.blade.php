@@ -2,7 +2,7 @@
   class="rounded-xl border border-warning-500 bg-warning-50 p-4 dark:border-warning-500/30 dark:bg-warning-500/15"
 >
   <div class="flex items-start gap-3">
-    <div class="-mt-0.5 text-warning-500 dark:text-orange-400">
+    <div class="-mt-0.5 text-warning-500 dark:text-amber-400">
       <svg
         class="fill-current"
         width="24"
@@ -44,7 +44,7 @@
   class="rounded-xl border border-warning-500 bg-warning-50 p-4 dark:border-warning-500/30 dark:bg-warning-500/15"
 >
   <div class="flex items-start gap-3">
-    <div class="-mt-0.5 text-warning-500 dark:text-orange-400">
+    <div class="-mt-0.5 text-warning-500 dark:text-amber-400">
       <svg
         class="fill-current"
         width="24"

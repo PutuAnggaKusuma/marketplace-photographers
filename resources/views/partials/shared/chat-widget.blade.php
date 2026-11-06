@@ -18,7 +18,7 @@
   <div x-show="open" x-cloak x-transition class="absolute bottom-16 right-0 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="bg-amber-400 text-gray-900 font-black px-4 py-3 flex justify-between items-center">
       <span class="font-extrabold text-sm">Real-time Chat LensMatch</span>
-      <button @click="open = false" class="text-gray-900 hover:text-black font-black text-sm">✕</button>
+      <button @click="open = false" class="text-gray-900 hover:text-black p-1 transition cursor-pointer" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>
     <div class="p-4 h-64 overflow-y-auto space-y-3 text-xs">
       <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-2xl max-w-[85%] text-gray-800 dark:text-gray-200 font-medium leading-relaxed">

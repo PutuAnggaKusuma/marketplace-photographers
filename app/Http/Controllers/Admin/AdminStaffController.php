@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\RoleAdmin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ class AdminStaffController extends Controller
      */
     public function create()
     {
+        $this->authorizeSuperAdmin();
+
         return view('admin.admins.create');
     }
 
@@ -89,6 +92,10 @@ class AdminStaffController extends Controller
     {
         $this->authorizeSuperAdmin();
 
+        if (!$request->has('nama') && $request->has('name')) {
+            $request->merge(['nama' => $request->name]);
+        }
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
@@ -97,14 +104,19 @@ class AdminStaffController extends Controller
             'role' => 'required|in:admin,super_admin',
         ]);
 
-        User::create([
+        $user = User::create([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
-            'no_hp' => $validated['no_hp'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'is_protected' => ($validated['role'] === 'super_admin'),
             'email_verified_at' => now(),
+        ]);
+
+        RoleAdmin::create([
+            'id_user' => $user->id,
+            'nama' => $user->nama,
+            'no_telepon' => $validated['no_hp'] ?? null,
         ]);
 
         return redirect()->back()->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");

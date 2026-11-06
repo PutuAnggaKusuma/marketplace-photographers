@@ -10,7 +10,7 @@
       <h3 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white/90">
         Transaksi Booking & Verifikasi Terkini
       </h3>
-      <p class="text-xs text-gray-400 mt-0.5">Monitoring pemesanan sesi foto & status escrow real-time</p>
+      <p class="text-xs text-gray-400 mt-0.5">Monitoring pemesanan sesi foto & status pembayaran real-time</p>
     </div>
 
     <div class="flex items-center gap-2">
@@ -80,11 +80,11 @@
               </p>
             </td>
 
-            <!-- Status Transaksi & Escrow -->
+            <!-- Status Transaksi -->
             <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
               @if($item->status_payout === 'paid' || $item->status_contract === 'completed')
                 <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  Payout Dicairkan
+                  Sudah Ditransfer
                 </span>
               @elseif($item->status_payout === 'ready')
                 <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
@@ -100,7 +100,7 @@
                 </span>
               @else
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                  Holding Escrow
+                  Dana Ditahan
                 </span>
               @endif
             </td>

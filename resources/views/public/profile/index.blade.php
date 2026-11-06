@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Pengaturan Akun & Profil - LensMatch')
+@section('title', 'Pengaturan Akun & Profil — LensMatch')
 
 @section('content')
 <section class="py-12 bg-white dark:bg-gray-900 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
     <!-- Flash Messages -->
     @if(session('success'))
@@ -26,41 +26,55 @@
       $avatarUrl = $photographer?->foto ?: ($client?->foto ?: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80');
     @endphp
 
-    <!-- Section 1: Informasi Biodata Profil (100% Vertical Flow - Rule #23) -->
+    <!-- Section 1: Informasi Biodata Profil (Hybrid Responsive Form Standard) -->
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
       <h2 class="text-lg font-black text-gray-900 dark:text-white">Informasi Profil</h2>
 
       <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
-          <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+        <!-- Horizontal Row 1: Nama Lengkap & Alamat Email -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
+            <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
+            <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
-          <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-        </div>
+        <!-- Horizontal Row 2: Nomor Telepon / WA & Domisili Kota / Peran -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor Telepon / WhatsApp</label>
+            <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon', $photographer?->nomor_telepon ?: $client?->nomor_telepon) }}" placeholder="081234567890" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor Telepon / WhatsApp</label>
-          <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon', $photographer?->nomor_telepon ?: $client?->nomor_telepon) }}" placeholder="081234567890" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none">
+          @if($user->role === 'photographer')
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat / Domisili Kota</label>
+              <input type="text" name="alamat" value="{{ old('alamat', $photographer?->alamat) }}" placeholder="Jl. Raya Kuta No. 45, Badung, Bali" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+          @else
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Tipe Akun Pengguna</label>
+              <input type="text" value="{{ ucfirst($user->role ?? 'Klien') }}" disabled class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400 cursor-not-allowed">
+            </div>
+          @endif
         </div>
 
         @if($user->role === 'photographer')
-          <div>
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat / Domisili Kota</label>
-            <input type="text" name="alamat" value="{{ old('alamat', $photographer?->alamat) }}" placeholder="Jl. Raya Kuta No. 45, Badung, Bali" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none">
-          </div>
-
+          <!-- Vertical Long Field: Deskripsi Bio Fotografer -->
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Deskripsi Bio Fotografer</label>
-            <textarea name="deskripsi_bio" rows="3" placeholder="Tuliskan deskripsi singkat mengenai pengalaman fotografi Anda..." class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-none">{{ old('deskripsi_bio', $photographer?->deskripsi_bio) }}</textarea>
+            <textarea name="deskripsi_bio" rows="6" placeholder="Tuliskan deskripsi lengkap mengenai pengalaman fotografi, spesialisasi, dan pendekatan artistik Anda..." class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-y focus:ring-2 focus:ring-amber-500 leading-relaxed">{{ old('deskripsi_bio', $photographer?->deskripsi_bio) }}</textarea>
           </div>
         @endif
 
-        <!-- Pure Image File Upload from Device with Live Preview (Enlarged Box) -->
+        <!-- Vertical Component: Foto Avatar Profil -->
         <div x-data="{ 
             preview: '{{ $avatarUrl }}', 
             handleFile(e) {
@@ -91,37 +105,40 @@
         </div>
 
         <div class="flex justify-end pt-3">
-          <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
+          <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
             Perbaharui Data
           </button>
         </div>
       </form>
     </div>
 
-    <!-- Section 2: Keamanan & Ganti Password (100% Vertical Flow - Rule #23) -->
+    <!-- Section 2: Keamanan & Ganti Password (Hybrid Responsive Form Standard) -->
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
       <h2 class="text-lg font-black text-gray-900 dark:text-white">Keamanan & Kata Sandi</h2>
 
       <form action="{{ route('profile.password') }}" method="POST" class="space-y-6">
         @csrf
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Saat Ini <span class="text-rose-500">*</span></label>
-          <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-        </div>
+        <!-- Horizontal Row: 3 Password Inputs Side-by-Side -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Saat Ini <span class="text-rose-500">*</span></label>
+            <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Baru <span class="text-rose-500">*</span></label>
-          <input type="password" name="new_password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
-        </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Baru <span class="text-rose-500">*</span></label>
+            <input type="password" name="new_password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span></label>
-          <input type="password" name="new_password_confirmation" required placeholder="Ulangi kata sandi baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span></label>
+            <input type="password" name="new_password_confirmation" required placeholder="Ulangi kata sandi baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
         </div>
 
         <div class="flex justify-end pt-3">
-          <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition">
+          <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
             Perbaharui Data
           </button>
         </div>

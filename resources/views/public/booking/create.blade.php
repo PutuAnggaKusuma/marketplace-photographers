@@ -4,9 +4,37 @@
 
 @section('content')
 <section class="py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-900 min-h-screen">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 lg:space-y-12" x-data="{ 
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 lg:space-y-12" x-data="{ 
     basePrice: {{ $service->tarif_harga }},
     extraTotal: 0,
+    paymentType: 'full',
+    selectedDate: '{{ old('tanggal_sesi', $preselectedDate ?? date('Y-m-d', strtotime('+2 days'))) }}',
+    blockedDates: {{ Illuminate\Support\Js::from($blockedDates ?? []) }},
+    bookedDates: {{ Illuminate\Support\Js::from($bookedDates ?? []) }},
+    get totalBill() {
+        return this.basePrice + this.extraTotal;
+    },
+    get dpAmount() {
+        return Math.round(this.totalBill * 0.3);
+    },
+    get remainingAmount() {
+        return this.totalBill - this.dpAmount;
+    },
+    get currentPayAmount() {
+        return this.paymentType === 'dp' ? this.dpAmount : this.totalBill;
+    },
+    get isDateUnavailable() {
+        return this.blockedDates.includes(this.selectedDate) || this.bookedDates.includes(this.selectedDate);
+    },
+    get dateUnavailableReason() {
+        if (this.blockedDates.includes(this.selectedDate)) {
+            return 'Fotografer sedang libur / memblokir tanggal ini.';
+        }
+        if (this.bookedDates.includes(this.selectedDate)) {
+            return 'Jadwal fotografer sudah terisi oleh pesanan sesi foto lain.';
+        }
+        return '';
+    },
     updateExtraTotal() {
       let sum = 0;
       document.querySelectorAll('.addon-checkbox:checked').forEach(cb => {
@@ -17,10 +45,15 @@
   }">
 
     <!-- Page Header (Standard Proportional Typography & Clean Spacing) -->
-    <div class="text-center space-y-3 max-w-2xl mx-auto">
-      <span class="inline-block px-3.5 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
-        Langkah 1 dari 2 — Formulir Pemesanan Sesi Foto
-      </span>
+    <div class="text-center space-y-2 max-w-2xl mx-auto">
+      <!-- Breadcrumb Navigation -->
+      <nav class="flex items-center justify-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1">
+        <a href="{{ route('public.photographers.katalog') }}" class="hover:text-amber-500 transition">Katalog</a>
+        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        <a href="{{ url('/fotografer/' . $photographer->id) }}" class="hover:text-amber-500 transition truncate max-w-[150px]">{{ $photographer->nama }}</a>
+        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        <span class="text-gray-900 dark:text-white font-bold">Reservasi Sesi Foto</span>
+      </nav>
       <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
         Form Reservasi Sesi Foto
       </h1>
@@ -52,7 +85,20 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Tanggal Sesi Foto <span class="text-rose-500">*</span></label>
-              <input type="date" name="tanggal_sesi" min="{{ date('Y-m-d') }}" value="{{ old('tanggal_sesi', date('Y-m-d', strtotime('+2 days'))) }}" required class="w-full px-4 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition" />
+              <input type="date" 
+                     name="tanggal_sesi" 
+                     min="{{ date('Y-m-d') }}" 
+                     x-model="selectedDate"
+                     required 
+                     class="w-full px-4 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition" />
+              
+              <!-- Real-time Warning if Date is Blocked or Booked -->
+              <template x-if="isDateUnavailable">
+                <div class="mt-2 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-[11px] font-bold flex items-center gap-2">
+                  <svg class="w-4 h-4 shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  <span x-text="dateUnavailableReason"></span>
+                </div>
+              </template>
             </div>
 
             <!-- Custom Alpine.js Dropdown for Jam Mulai Sesi -->
@@ -155,7 +201,7 @@
               <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             </div>
             <div>
-              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">Catatan & Preferensi Khusus</h2>
+              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">Catatan Khusus</h2>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">Sampaikan konsep foto, dresscode, atau request khusus kepada fotografer</p>
             </div>
           </div>
@@ -182,8 +228,8 @@
           <!-- Photographer Profile Info -->
           <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60">
             <x-user-avatar :user="$photographer->user" size="w-10 h-10" />
-            <div class="min-w-0">
-              <h4 class="text-xs font-black text-gray-900 dark:text-white truncate">{{ $photographer->nama }}</h4>
+            <div class="flex-1">
+              <h4 class="text-xs font-black text-gray-900 dark:text-white leading-snug">{{ $photographer->nama }}</h4>
               <p class="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
                 <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
                 <span class="truncate">{{ $photographer->city->name ?? $photographer->alamat }}</span>
@@ -192,7 +238,7 @@
           </div>
 
           <!-- Service Package Selection -->
-          <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 space-y-2">
+          <div class="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300">Paket Terpilih</span>
               <span class="text-xs font-black text-amber-600 dark:text-amber-400">Rp {{ number_format($service->tarif_harga, 0, ',', '.') }}</span>
@@ -202,6 +248,33 @@
               <input type="hidden" name="service_id" value="{{ $service->id }}">
               <p class="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed mt-1 line-clamp-3">{{ $service->deskripsi_layanan }}</p>
             </div>
+            @if(isset($allServices) && $allServices->count() > 1)
+              <div class="pt-2 border-t border-amber-200/70 dark:border-amber-800/60" x-data="{ openPkgDropdown: false }">
+                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">Ganti Pilihan Paket:</label>
+                <div class="relative">
+                  <button type="button"
+                          @click="openPkgDropdown = !openPkgDropdown"
+                          class="w-full flex items-center justify-between px-3 py-1.5 text-xs font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-900 rounded-lg border border-amber-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer">
+                    <span>{{ $service->nama_layanan }} &mdash; Rp {{ number_format($service->tarif_harga, 0, ',', '.') }}</span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openPkgDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </button>
+                  <div x-show="openPkgDropdown"
+                       @click.outside="openPkgDropdown = false"
+                       x-transition
+                       class="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
+                       style="display: none;">
+                    @foreach($allServices as $s)
+                      <a href="{{ url('/booking/create?photographer_id=' . $photographer->id . '&service_id=' . $s->id) }}"
+                         class="block w-full text-left px-3 py-2 text-xs font-bold rounded-lg text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition {{ $s->id == $service->id ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 font-black' : '' }}">
+                        {{ $s->nama_layanan }} &mdash; Rp {{ number_format($s->tarif_harga, 0, ',', '.') }}
+                      </a>
+                    @endforeach
+                  </div>
+                </div>
+              </div>
+            @endif
           </div>
 
           <!-- Extra Feature Add-ons (If Available) -->
@@ -224,6 +297,42 @@
             </div>
           @endif
 
+          <!-- Pilihan Skema Pembayaran (Bayar Penuh / DP 30%) -->
+          <div class="space-y-2.5">
+            <span class="text-[11px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider block">Skema Pembayaran:</span>
+            <input type="hidden" name="payment_type" :value="paymentType">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <!-- Opsi 1: Bayar Penuh 100% -->
+              <div @click="paymentType = 'full'" 
+                   :class="paymentType === 'full' ? 'border-amber-400 bg-amber-50/70 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 shadow-2xs' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                   class="p-3.5 rounded-xl border transition cursor-pointer select-none space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black">Bayar Penuh (100%)</span>
+                  <span class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0" :class="paymentType === 'full' ? 'border-amber-500 bg-white dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600'">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500" x-show="paymentType === 'full'"></span>
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">Pembayaran aman & bergaransi LensMatch</p>
+                <p class="text-xs font-black text-gray-900 dark:text-white pt-1" x-text="'Rp ' + (totalBill).toLocaleString('id-ID')"></p>
+              </div>
+
+              <!-- Opsi 2: Uang Muka DP 30% -->
+              <div @click="paymentType = 'dp'" 
+                   :class="paymentType === 'dp' ? 'border-amber-400 bg-amber-50/70 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 shadow-2xs' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                   class="p-3.5 rounded-xl border transition cursor-pointer select-none space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-black">Uang Muka (DP 30%)</span>
+                  <span class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0" :class="paymentType === 'dp' ? 'border-amber-500 bg-white dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600'">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500" x-show="paymentType === 'dp'"></span>
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">Sisa 70% dilunasi kemudian</p>
+                <p class="text-xs font-black text-amber-600 dark:text-amber-400 pt-1" x-text="'Rp ' + (dpAmount).toLocaleString('id-ID')"></p>
+              </div>
+            </div>
+          </div>
+
           <!-- Total Calculation (Clean Spaced Layout Without Line Dividers) -->
           <div class="space-y-3 pt-1">
             <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -234,9 +343,29 @@
               <span>Fitur Tambahan</span>
               <span class="font-bold text-gray-800 dark:text-gray-200" x-text="'Rp ' + (extraTotal).toLocaleString('id-ID')">Rp 0</span>
             </div>
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 font-medium">
+              <span>Total Nilai Sesi</span>
+              <span class="font-bold text-gray-900 dark:text-white" x-text="'Rp ' + (totalBill).toLocaleString('id-ID')">
+                Rp {{ number_format($service->tarif_harga, 0, ',', '.') }}
+              </span>
+            </div>
+
+            <template x-if="paymentType === 'dp'">
+              <div class="space-y-2 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+                  <span>Tagihan DP (30%) Sekarang</span>
+                  <span x-text="'Rp ' + (dpAmount).toLocaleString('id-ID')"></span>
+                </div>
+                <div class="flex justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                  <span>Sisa Pelunasan Nanti (70%)</span>
+                  <span class="font-medium" x-text="'Rp ' + (remainingAmount).toLocaleString('id-ID')"></span>
+                </div>
+              </div>
+            </template>
+
             <div class="flex justify-between items-center text-gray-900 dark:text-white pt-2">
-              <span class="text-xs font-bold">Total Tagihan</span>
-              <span class="text-lg font-black text-amber-600 dark:text-amber-400" x-text="'Rp ' + (basePrice + extraTotal).toLocaleString('id-ID')">
+              <span class="text-xs font-bold">Total Dibayar Sekarang</span>
+              <span class="text-lg font-black text-amber-600 dark:text-amber-400" x-text="'Rp ' + (currentPayAmount).toLocaleString('id-ID')">
                 Rp {{ number_format($service->tarif_harga, 0, ',', '.') }}
               </span>
             </div>
@@ -244,8 +373,11 @@
 
           <!-- Submit Action Button -->
           <div class="pt-2">
-            <button type="submit" class="w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-              <svg class="w-4 h-4 text-gray-900 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <button type="submit" 
+                    :disabled="isDateUnavailable"
+                    :class="isDateUnavailable ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-500' : 'bg-amber-400 hover:bg-amber-500 text-gray-900 shadow-md cursor-pointer'"
+                    class="w-full py-3.5 font-black text-xs rounded-xl transition text-center block">
+              
               <span>Lanjut ke Invoice Pembayaran</span>
             </button>
           </div>

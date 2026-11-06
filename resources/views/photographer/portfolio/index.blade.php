@@ -50,13 +50,11 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Galeri Karya & Etalase Visual</span>
-            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Portofolio & Galeri Foto</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Daftar foto hasil karya pemotretan terbaik Anda yang ditampilkan pada katalog publik</p>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Portofolio</h1>
         </div>
         <a href="{{ route('photographer.portfolio.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-            <span>Tambah Portofolio Baru</span>
+            <span>Tambah Portofolio</span>
         </a>
     </div>
 
@@ -72,30 +70,26 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- Card 1 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Foto Portofolio</span>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Portofolio</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->total() }} Karya</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Karya terpublikasi di etalase</p>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Spesialisasi</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $topCategoryName ?? 'Wedding' }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Fokus utama tema pemotretan</p>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Variasi Tema</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->unique('kategori')->count() }} Kategori</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Keanekaragaman jenis sesi foto</p>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Terakhir Diperbarui</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->first()?->created_at ? $portfolios->first()->created_at->format('d M Y') : '-' }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Waktu unggah karya terbaru</p>
         </div>
     </div>
 
@@ -140,8 +134,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari judul atau deskripsi karya..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -178,7 +172,7 @@
 
                                 <!-- Kategori -->
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
-                                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60">
+                                    <span class="font-bold text-gray-700 dark:text-gray-300 text-xs">
                                         {{ $port->category ? $port->category->nama_kategori : 'Karya Foto' }}
                                     </span>
                                 </td>

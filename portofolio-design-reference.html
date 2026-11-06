@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popular Collections</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #dcdfe8;
+    --bg-circle: #e5e7ef;
+    --panel: #eff0f3;
+    --card: #ffffff;
+    --ink: #232645;
+    --muted: #4a4d68;
+    --radius-card: 26px;
+    --radius-photo: 20px;
+    --radius-thumb: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 32px 20px;
+    background: var(--bg);
+    font-family: "Poppins", system-ui, sans-serif;
+    color: var(--ink);
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* lingkaran samar di belakang panel */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -140px;
+    left: 50%;
+    width: 520px;
+    height: 520px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--bg-circle);
+    z-index: 0;
+  }
+
+  .panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1040px;
+    padding: 36px 36px 40px;
+    background: var(--panel);
+    border-radius: 30px;
+  }
+
+  h1 {
+    font-family: "Merriweather", Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--ink);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    list-style: none;
+  }
+
+  .tags button {
+    border: 0;
+    background: #fff;
+    color: var(--ink);
+    font: 600 11px/1 "Poppins", sans-serif;
+    padding: 7px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .tags button:hover { background: var(--ink); color: #fff; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px;
+    margin-top: 36px;
+  }
+
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 26%;
+    column-gap: 8px;
+    padding: 14px 14px 16px;
+    background: var(--card);
+    border-radius: var(--radius-card);
+    color: inherit;
+    text-decoration: none;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(35, 38, 69, .10); }
+  .card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  /* Ganti background-image tiap .photo dengan foto Anda sendiri:
+     style="--src: url('img/people-1.jpg')" */
+  .photo {
+    background-color: #bbb;
+    background-image: var(--src, var(--fallback));
+    background-size: cover;
+    background-position: center;
+  }
+
+  .main {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    aspect-ratio: 1.1 / 1;
+    border-radius: var(--radius-photo);
+  }
+
+  /* tinggi kolom ini mengikuti tinggi foto utama */
+  .thumbs {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    min-height: 0;
+  }
+  .thumbs .photo {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-thumb);
+  }
+
+  .meta {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    padding: 0 4px;
+  }
+  .meta strong { font-size: 14px; font-weight: 600; }
+  .count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .count svg { width: 14px; height: 14px; }
+
+  /* Placeholder warna (hapus kalau sudah pakai foto asli) */
+  .people-main { --fallback: radial-gradient(ellipse at 38% 42%, #9a7b6d 0%, #4a3a35 38%, #181514 100%); }
+  .people-1 { --fallback: radial-gradient(circle at 50% 40%, #d9b9a3, #6b5246 70%); }
+  .people-2 { --fallback: radial-gradient(circle at 50% 45%, #efe3da, #8d7a6f 75%); }
+  .people-3 { --fallback: radial-gradient(circle at 50% 45%, #c6a893, #5b4a41 75%); }
+
+  .nature-main { --fallback: linear-gradient(120deg, #f2a870 0%, #cf6a30 28%, #8a3b1d 52%, #e08a4b 74%, #f6b27a 100%); }
+  .nature-1 { --fallback: linear-gradient(135deg, #e4793a, #5f2414); }
+  .nature-2 { --fallback: linear-gradient(135deg, #f4a26a, #a9441f); }
+  .nature-3 { --fallback: linear-gradient(135deg, #d9692c, #6e2a14); }
+
+  .history-main { --fallback: linear-gradient(to bottom, #86b6e0 0 52%, #c98a68 52% 78%, #a9593e 78% 100%); }
+  .history-1 { --fallback: linear-gradient(to bottom, #9bc0de 0 60%, #7d6a5e 60% 100%); }
+  .history-2 { --fallback: linear-gradient(to bottom, #b8d3e8 0 55%, #8b7b72 55% 100%); }
+  .history-3 { --fallback: linear-gradient(to bottom, #a7c8e2 0 50%, #a98f7e 50% 100%); }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; gap: 20px; }
+    .panel { padding: 24px 20px 28px; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+  <section class="panel" aria-labelledby="judul">
+    <h1 id="judul">Popular Collections</h1>
+
+    <ul class="tags">
+      <li><button type="button">Profile</button></li>
+      <li><button type="button">New York</button></li>
+      <li><button type="button">Relaxing</button></li>
+      <li><button type="button">Person</button></li>
+      <li><button type="button">Fashion</button></li>
+    </ul>
+
+    <div class="grid">
+      <a class="card" href="#people" aria-label="People, 144 foto">
+        <div class="photo main people-main" role="img" aria-label="Potret seorang perempuan"></div>
+        <div class="thumbs">
+          <div class="photo people-1"></div>
+          <div class="photo people-2"></div>
+          <div class="photo people-3"></div>
+        </div>
+        <div class="meta">
+          <strong>People</strong>
+          <span class="count">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+            144
+          </span>
+        </div>
+      </a>
+
+      <a class="card" href="#nature" aria-label="Nature, 7 ribu foto">
+        <div class="photo main nature-main" role="img" aria-label="Formasi tebing batu pasir oranye"></div>
+        <div class="thumbs">
+          <div class="photo nature-1"></div>
+          <div class="photo nature-2"></div>
+          <div class="photo nature-3"></div>
+        </div>
+        <div class="meta">
+          <strong>Nature</strong>
+          <span class="count">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+            7K
+          </span>
+        </div>
+      </a>
+
+      <a class="card" href="#history" aria-label="History, 98 foto">
+        <div class="photo main history-main" role="img" aria-label="Panorama kota tua dengan menara dan kubah"></div>
+        <div class="thumbs">
+          <div class="photo history-1"></div>
+          <div class="photo history-2"></div>
+          <div class="photo history-3"></div>
+        </div>
+        <div class="meta">
+          <strong>History</strong>
+          <span class="count">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+            98
+          </span>
+        </div>
+      </a>
+    </div>
+  </section>
+</body>
+</html>

@@ -32,12 +32,19 @@
       </div>
     @endif
 
-    <!-- Back Navigation -->
-    <div>
-      <a href="{{ route('public.contests.index') }}" class="text-xs font-bold text-gray-500 hover:text-amber-500 transition inline-flex items-center gap-1.5">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-        <span>Kembali ke Katalog Event Lomba</span>
-      </a>
+    <!-- Breadcrumb & Back Navigation -->
+    <div class="space-y-2">
+      <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+        <a href="{{ route('public.contests.index') }}" class="hover:text-amber-500 transition">Informasi Lomba</a>
+        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        <span class="text-gray-900 dark:text-white font-bold truncate max-w-md">{{ $contest->judul_lomba }}</span>
+      </nav>
+      <div>
+        <a href="{{ route('public.contests.index') }}" class="text-xs font-bold text-gray-500 hover:text-amber-500 transition inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+          <span>Kembali ke Katalog Event Lomba</span>
+        </a>
+      </div>
     </div>
 
     <!-- Main Contest Card -->
@@ -160,7 +167,7 @@
 
         <!-- Kolom Kanan: 5 Tahapan Kompetisi -->
         <div class="space-y-4">
-          <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Jadwal & Tahapan Lomba</h3>
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Jadwal Lomba</h3>
           <div class="space-y-3.5 text-sm">
             <div class="flex items-start gap-3.5">
               <span class="w-6 h-6 rounded-full bg-amber-400 text-gray-950 font-black flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-2xs">
@@ -185,7 +192,7 @@
               </span>
               <div class="space-y-0.5 min-w-0">
                 <div class="flex items-center gap-2">
-                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Pengumpulan & Upload Karya</h4>
+                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Pengumpulan Karya</h4>
                   @if($stage === 'submission')
                     <span class="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-black">Aktif Sekarang</span>
                   @endif
@@ -202,7 +209,7 @@
               </span>
               <div class="space-y-0.5 min-w-0">
                 <div class="flex items-center gap-2">
-                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Kurasi & Penjurian Dewan Juri</h4>
+                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Penjurian Karya</h4>
                   @if($stage === 'judging')
                     <span class="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-black">Aktif Sekarang</span>
                   @endif
@@ -219,7 +226,7 @@
               </span>
               <div class="space-y-0.5 min-w-0">
                 <div class="flex items-center gap-2">
-                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Pengumuman Pemenang & Panggung Kehormatan</h4>
+                  <h4 class="text-xs font-bold text-gray-900 dark:text-white">Pengumuman Pemenang</h4>
                 </div>
                 <p class="text-[11px] text-gray-500 dark:text-gray-400">
                   {{ $contest->announcement_date ? $contest->announcement_date->translatedFormat('d M Y') : 'TBA' }}
@@ -321,7 +328,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
                   <div>
                     <h3 class="text-lg font-black text-gray-900 dark:text-white">Formulir Pendaftaran Calon Peserta</h3>
-                    <p class="text-xs text-gray-500">Tahap 1: Kurasi Kualifikasi & Portofolio Peserta</p>
+                    <p class="text-xs text-gray-500">Tahap 1: Seleksi Portofolio Peserta</p>
                   </div>
                   <div>
                     <button type="button" @click="useProfile()" class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-extrabold text-xs transition inline-flex items-center gap-1.5 cursor-pointer shadow-2xs">
@@ -410,7 +417,7 @@
                       Batal
                     </button>
                     <button type="submit" class="px-7 py-3 bg-amber-400 hover:bg-amber-500 text-gray-950 font-black text-xs rounded-xl shadow-xs transition cursor-pointer">
-                      Kirim Formulir Pendaftaran
+                      Simpan Data
                     </button>
                   </div>
                 </form>
@@ -418,7 +425,7 @@
             </div>
 
           @elseif($userRegistration->status_pendaftaran === 'pending')
-            <!-- CASE 2: Menunggu Review Kurasi Admin -->
+            <!-- CASE 2: Menunggu Review Admin -->
             <div class="p-6 sm:p-8 rounded-3xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-4">
               <div class="flex items-center gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-amber-400 text-gray-950 flex items-center justify-center shrink-0">
@@ -508,17 +515,17 @@
                   <div x-data="{ transferFileName: null }" class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
                     <div class="flex items-center gap-3">
-                      <label class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
+                      <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
                         <span>Pilih File Struk Bukti</span>
-                        <input type="file" name="bukti_transfer" required accept="image/*,.pdf" class="hidden" @change="transferFileName = $event.target.files[0]?.name">
+                        <input type="file" name="bukti_transfer" required accept="image/*,.pdf" class="sr-only" @change="transferFileName = $event.target.files[0]?.name">
                       </label>
                       <span x-text="transferFileName ? transferFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
                     </div>
                     <p class="text-[11px] text-gray-400">Format JPG, PNG, atau PDF (maks. 5MB)</p>
                   </div>
-                  <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
-                    Kirim Bukti Pembayaran
+                  <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+                    Simpan Data
                   </button>
                 </form>
               @endif
@@ -557,7 +564,7 @@
                           <h5 class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $mySub->judul_karya }}</h5>
                           <p class="text-[11px] text-gray-500 truncate">{{ $mySub->deskripsi_karya ?? 'Tanpa deskripsi' }}</p>
                           @if($mySub->media_link)
-                            <a href="{{ $mySub->media_link }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline block truncate">Tautan Media Eksternal ↗</a>
+                            <a href="{{ $mySub->media_link }}" target="_blank" class="text-[10px] text-blue-500 font-bold hover:underline block truncate">Tautan Media Eksternal</a>
                           @endif
                           <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                             Tercatat di Sistem
@@ -591,7 +598,7 @@
                         Anda masih memiliki sisa kuota untuk mengunggah {{ ($contest->max_submissions ?? 2) - $userSubmissions->count() }} karya foto lagi.
                       </p>
                     </div>
-                    <button type="button" @click="showUploadForm = true" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+                    <button type="button" @click="showUploadForm = true" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
                       Unggah Karya Foto Baru
                     </button>
                   </div>
@@ -618,7 +625,7 @@
 
                       <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Karya Foto <span class="text-rose-500">*</span></label>
-                        <input type="text" name="judul_karya" required placeholder="mis. Pesona Senja di Tanah Lot" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="text" name="judul_karya" required placeholder="mis. Pesona Senja di Tanah Lot" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
                       </div>
 
                       <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 space-y-3">
@@ -626,7 +633,7 @@
                           Foto Karya dari Perangkat <span class="text-rose-500">*</span>
                         </label>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                          <div class="relative w-32 h-24 sm:w-40 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-purple-400 shadow-xs shrink-0 flex items-center justify-center">
+                          <div class="relative w-32 h-24 sm:w-40 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-amber-400 shadow-xs shrink-0 flex items-center justify-center">
                             <template x-if="preview">
                               <img :src="preview" alt="Preview Foto Karya" class="w-full h-full object-cover">
                             </template>
@@ -636,7 +643,7 @@
                           </div>
                           
                           <div class="flex-1 space-y-2">
-                            <label class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
+                            <label class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
                               <span>Pilih File Foto Karya</span>
                               <input type="file" name="foto_file" accept="image/*" @change="handleFile($event)" class="hidden">
                             </label>
@@ -661,8 +668,8 @@
                         <button type="button" @click="showUploadForm = false" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition">
                           Batal
                         </button>
-                        <button type="submit" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
-                          Kirim Karya Foto
+                        <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+                          Simpan Data
                         </button>
                       </div>
                     </form>

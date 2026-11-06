@@ -50,9 +50,7 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">Otoritas & Hak Akses Platform</span>
-            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Manajemen Akun Admin & Staff</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Daftar staf administrator internal dan super admin yang mengelola operasional platform</p>
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Manajemen Admin</h1>
         </div>
         <a href="{{ route('admin.admins.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
@@ -74,28 +72,24 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pengelola</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Seluruh staf & admin aktif</p>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Super Admin</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSuperAdmins ?? $admins->where('role', 'super_admin')->count() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Akses master & konfigurasi</p>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Operasional</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStaffAdmins ?? $admins->where('role', 'admin')->count() }}</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Staf verifikasi & moderasi</p>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Terdaftar</span>
             <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }} Akun</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Akun aktif terdaftar di sistem</p>
         </div>
     </div>
 
@@ -139,8 +133,8 @@
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
                        placeholder="Cari nama atau email admin..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                       class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
         </div>
 
@@ -151,8 +145,8 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                            <th class="py-3.5 px-4 sm:px-6 w-4/12">Nama Admin & Email</th>
-                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Role / Hak Akses</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-4/12">Nama</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Role</th>
                             <th class="py-3.5 px-4 sm:px-6 w-3/12">Tanggal Terdaftar</th>
                             <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
                         </tr>
@@ -160,37 +154,26 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
                         @forelse($admins as $a)
                             <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
-                                <td class="py-4 px-4 sm:px-6 align-top">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-white font-black text-xs shrink-0 shadow-xs">
-                                            {{ strtoupper(substr($a->name, 0, 2)) }}
-                                        </div>
-                                        <div>
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $a->name }}</h4>
-                                            <span class="text-[11px] text-gray-400 block mt-0.5">{{ $a->email }}</span>
-                                        </div>
+                                <td class="py-4 px-4 sm:px-6 align-middle">
+                                    <div class="min-w-0">
+                                        <h4 class="font-extrabold text-gray-900 dark:text-white text-xs sm:text-sm tracking-tight">{{ $a->nama ?? $a->name ?? 'Admin' }}</h4>
+                                        <span class="text-[11px] text-gray-400 block mt-0.5">{{ $a->email }}</span>
                                     </div>
                                 </td>
-                                <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
-                                    @if($a->role === 'super_admin')
-                                        <span class="px-2.5 py-1 rounded-lg text-xs font-black bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-900/60">
-                                            Super Admin
-                                        </span>
-                                    @else
-                                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60">
-                                            Admin Operasional
-                                        </span>
-                                    @endif
+                                <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white">
+                                        {{ $a->role === 'super_admin' ? 'Super Admin' : 'Admin Operasional' }}
+                                    </span>
                                 </td>
-                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                <td class="py-4 px-4 sm:px-6 align-middle text-gray-600 dark:text-gray-400 whitespace-nowrap">
                                     {{ $a->created_at ? $a->created_at->format('d M Y, H:i') : '-' }}
                                 </td>
-                                <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
                                     @if(auth()->id() !== $a->id)
                                         <button type="button" 
                                                 @click="$dispatch('open-confirm-modal', {
                                                     title: 'Hapus Akun Admin?',
-                                                    message: 'Apakah Anda yakin ingin mencabut hak akses dan menghapus admin {{ addslashes($a->name) }}?',
+                                                    message: 'Apakah Anda yakin ingin mencabut hak akses dan menghapus admin {{ addslashes($a->nama ?? $a->name) }}?',
                                                     buttonText: 'Ya, Hapus Admin',
                                                     iconType: 'delete',
                                                     buttonClass: 'bg-red-600 hover:bg-red-700 text-white',

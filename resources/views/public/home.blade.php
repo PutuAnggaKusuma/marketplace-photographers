@@ -6,17 +6,11 @@
 <main class="min-h-screen space-y-16 sm:space-y-24 bg-white dark:bg-gray-900 text-gray-900 dark:text-white pb-0">
   
   <!-- 1. HERO SECTION (Truvista Centered Layout) -->
-  <section class="w-full relative bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white dark:from-gray-800/80 dark:via-gray-800/30 dark:to-gray-900 pt-10 sm:pt-14 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8 overflow-hidden reveal-on-scroll">
-    <div class="max-w-6xl mx-auto space-y-7 sm:space-y-9">
+  <section class="w-full relative bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white dark:from-gray-800/80 dark:via-gray-800/30 dark:to-gray-900 pt-10 sm:pt-14 pb-4 sm:pb-6 overflow-hidden reveal-on-scroll">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-7 sm:space-y-9">
       
-      <!-- Centered Hero Titles & Kicker Tag -->
+      <!-- Centered Hero Titles -->
       <div class="max-w-3xl mx-auto text-center space-y-4 pt-2">
-        <div class="flex justify-center">
-          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 uppercase tracking-widest shadow-2xs">
-            Marketplace Fotografer Lokal
-          </span>
-        </div>
-
         <h1 class="text-3xl sm:text-4xl lg:text-[48px] font-black text-gray-900 dark:text-white tracking-tight leading-[1.12]">
           Abadikan Momen Indah <br class="hidden sm:inline" />
           <span class="text-amber-600 dark:text-amber-400">Dimanapun Anda Berada</span>
@@ -28,7 +22,7 @@
       </div>
 
       <!-- Symmetrical Search Bar (Shorter Category, Balanced Search & Button, Symmetrical with Header) -->
-      <form action="{{ url('/fotografer') }}" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-3.5 max-w-3xl mx-auto items-center">
+      <form action="{{ route('public.photographers.katalog') }}" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-3.5 max-w-3xl mx-auto items-center">
         
         <!-- 1. Location Input (Balanced Search Field - 5 of 12 Cols) -->
         <div class="md:col-span-5 w-full h-11 sm:h-12 flex items-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-3.5 shadow-xs focus-within:ring-2 focus-within:ring-amber-400 transition">
@@ -98,7 +92,7 @@
       </form>
 
       <!-- 5-Photo Staggered Floating Wave Gallery (Pasted Image 1 Floating Animation) -->
-      <div class="grid grid-cols-5 gap-3.5 sm:gap-6 items-end max-w-6xl mx-auto pt-4 sm:pt-6">
+      <div class="grid grid-cols-5 gap-3.5 sm:gap-6 items-end max-w-7xl mx-auto pt-4 sm:pt-6">
         
         <!-- Image 1 (Far Left - Floating Animation 1) -->
         <div class="h-40 sm:h-56 lg:h-64 rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-1 shadow-md hover:shadow-xl">
@@ -131,7 +125,7 @@
   </section>
 
   <!-- 2. TRUST STATS STRIP (Clean Hairline Counter Bar with Spacious Padding) -->
-  <section class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
+  <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
     <div class="py-12 sm:py-16 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center items-center">
       
       <div class="space-y-1">
@@ -184,7 +178,7 @@
             <p class="text-xs text-gray-200 leading-relaxed">{{ $cat->deskripsi }}</p>
             <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 group-hover:translate-x-1 transition pt-1">
               Lihat Fotografer Available
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </span>
           </div>
         </a>
@@ -194,9 +188,8 @@
       <a href="{{ url('/fotografer') }}" class="group bg-[#222222] text-white p-7 rounded-2xl border border-gray-800 hover:bg-amber-400 hover:text-gray-900 transition flex flex-col items-center justify-center text-center gap-5 min-h-[300px] shadow-md">
         <h3 class="text-xl font-black transition">Lihat Semua Kategori</h3>
         <div class="w-14 h-14 rounded-full bg-amber-400 text-gray-900 group-hover:bg-gray-900 group-hover:text-amber-400 flex items-center justify-center transition duration-300 shadow-md group-hover:scale-110">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
           </svg>
         </div>
       </a>
@@ -204,7 +197,7 @@
   </section>
 
   <!-- 4. CARA KERJA BOOKING (Full-Width Soft Slate Gray Section Background - Swapped Alignment with Title on Right) -->
-  <section class="w-full bg-gray-50/90 dark:bg-gray-800/60 py-28 sm:py-36 border-y border-gray-100 dark:border-gray-800 reveal-on-scroll">
+  <section class="w-full bg-gray-50/90 dark:bg-gray-800/60 py-28 sm:py-36 reveal-on-scroll">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-center">
         
@@ -222,7 +215,7 @@
           <div class="bg-white dark:bg-gray-900 p-7 sm:p-8 rounded-2xl border border-gray-200/80 dark:border-gray-700 shadow-2xs flex gap-6 items-start">
             <span class="text-2xl font-black text-amber-400 shrink-0">02</span>
             <div class="space-y-1.5">
-              <h3 class="font-bold text-base text-gray-900 dark:text-white">Validasi Kontrak & DP Escrow</h3>
+              <h3 class="font-bold text-base text-gray-900 dark:text-white">Validasi Kontrak & Pembayaran Aman</h3>
               <p class="text-xs sm:text-sm text-gray-500 leading-relaxed">Fotografer menyetujui jadwal. Sepakati ketentuan kontrak digital dan lakukan bayar DP aman yang ditahan sistem.</p>
             </div>
           </div>
@@ -244,12 +237,12 @@
             Cara Kerja Praktis & Aman di LensMatch
           </h2>
           <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl">
-            Kami memastikan setiap pesanan terlindungi dengan **Kontrak Digital resmi** dan sistem **Pembayaran DP Escrow**. Uang Anda aman sampai hasil foto dikirimkan.
+            Kami memastikan setiap pesanan terlindungi dengan **Kontrak Digital resmi** dan sistem **pembayaran aman bergaransi**. Uang Anda aman sampai hasil foto dikirimkan.
           </p>
           <div class="pt-2">
             <a href="{{ url('/fotografer') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#222222] text-white hover:bg-amber-400 hover:text-gray-900 font-bold text-xs rounded-xl transition shadow-xs">
               Mulai Cari Fotografer
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </a>
           </div>
         </div>
@@ -268,7 +261,7 @@
       </div>
       <a href="{{ url('/fotografer') }}" class="inline-flex items-center gap-1.5 text-amber-400 dark:text-amber-400 font-bold text-xs hover:underline">
         Lihat Katalog Lengkap (150+)
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
       </a>
     </div>
 
@@ -276,7 +269,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
       @foreach($featuredPhotographers as $p)
         @php
-          $lowestPrice = $p->services->min('tarif_harga') ?? 1500000;
+          $lowestPrice = $p->services->where('tarif_harga', '>', 0)->min('tarif_harga') ?? 1500000;
           $coverPortfolio = $p->portfolios->first()?->medias?->first()?->media ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80';
           $avatarUrl = $p->foto_url ?? ($p->foto ? (str_starts_with($p->foto, 'http') ? $p->foto : asset('storage/' . $p->foto)) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80');
           $rating = $p->rating_average ?? 4.9;
@@ -301,34 +294,38 @@
             <!-- Card Body Content -->
             <div class="px-6 sm:px-7 pt-4 pb-0">
               <!-- Location (Subtle & Compact Above Name) -->
-              <div class="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-400 font-medium mb-2.5">
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-400 font-light mb-2.5">
                 <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                 </svg>
-                <span class="truncate">{{ $p->city->name ?? ($p->alamat ?? 'Indonesia') }}</span>
+                <span class="truncate uppercase">{{ $p->city->name ?? ($p->alamat ?? 'Indonesia') }}</span>
               </div>
 
               <!-- Avatar & Name Row -->
               <div class="flex items-center gap-3">
                 <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" alt="{{ $p->nama }}" />
-                <h3 class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white truncate group-hover:text-amber-500 transition leading-snug">
-                  {{ $p->nama }}
-                </h3>
+                <div class="flex-1">
+                  <h3 class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-amber-500 transition leading-snug">
+                    {{ $p->nama }}
+                  </h3>
+                </div>
               </div>
 
-              <!-- Bio Description -->
-              <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mt-2.5">
-                {{ $p->deskripsi_bio ?? 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
-              </p>
+              <!-- Categories as Plain Text (Under Profile, Comma Separated) -->
+              @if($p->categories && $p->categories->isNotEmpty())
+                <div class="mt-2">
+                  <p class="text-xs font-light text-amber-700 dark:text-amber-300 leading-snug">
+                    {{ $p->categories->pluck('nama_kategori')->join(', ') }}
+                  </p>
+                </div>
+              @endif
 
-              <!-- Category Tags Row (Max 5) -->
-              <div class="flex flex-wrap gap-1.5 pt-2.5 items-center">
-                @foreach($p->categories->take(5) as $cat)
-                  <span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px] rounded-lg border border-amber-200/60 dark:border-amber-800/60 uppercase tracking-wider">
-                    {{ $cat->nama_kategori }}
-                  </span>
-                @endforeach
+              <!-- Bio Description (Under Categories with clear margin, max 500 chars) -->
+              <div class="mt-4 pt-1">
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  {{ !empty(trim($p->deskripsi_bio)) ? \Illuminate\Support\Str::limit($p->deskripsi_bio, 180) : 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
+                </p>
               </div>
             </div>
           </div>
@@ -342,7 +339,7 @@
             <div class="pt-0.5">
               <a href="{{ url('/fotografer/' . $p->id) }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-3 bg-[#222222] dark:bg-gray-700 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-extrabold transition duration-200 shadow-xs">
                 <span>Lihat Profil</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
               </a>
             </div>
           </div>
@@ -353,12 +350,12 @@
   </section>
 
   <!-- 6. TESTIMONI PELANGGAN (Strictly Non-Looping 5-Item Bounded Slider with Center Highlighted Card & Disabled Arrow State) -->
-  <section class="w-full bg-amber-50/70 dark:bg-gray-800/80 py-24 sm:py-32 border-y border-amber-100/80 dark:border-gray-800 overflow-hidden reveal-on-scroll" 
+  <section class="w-full bg-amber-50/70 dark:bg-gray-800/80 py-24 sm:py-32 overflow-hidden reveal-on-scroll" 
     x-data="{ 
       activeIndex: 1, 
       items: [
         { initial: 'DF', name: 'Dian & Febri', category: 'Sesi Prewedding — DKI Jakarta', quote: 'Cari fotografer prewedding di Jakarta jadi cepat banget. Portofolio langsung kelihatan jelas beserta pilihan paket jam fotonya.' },
-        { initial: 'SR', name: 'Siti Rahmawati', category: 'Sesi Foto Liburan — Bali', quote: 'Sistem kontrak digitalnya bikin tenang banget. Hak cipta foto dan tanggal sesi foto tercatat resmi. Pembayaran DP aman via sistem escrow.' },
+        { initial: 'SR', name: 'Siti Rahmawati', category: 'Sesi Foto Liburan — Bali', quote: 'Sistem kontrak digitalnya bikin tenang banget. Hak cipta foto dan tanggal sesi foto tercatat resmi. Pembayaran DP aman terverifikasi.' },
         { initial: 'RP', name: 'Reza Pratama', category: 'Sesi Wisuda — DI Yogyakarta', quote: 'Hasil foto wisuda saya sangat memuaskan! Fotografer ramah, datang tepat waktu, dan proses serah terima galeri foto sangat cepat.' },
         { initial: 'MK', name: 'Maya & Kevin', category: 'Ulang Tahun & Family — Bandung', quote: 'Sangat puas dengan dokumentasi foto ulang tahun anak kami di Bandung. Fotografernya pandai mengambil momen candid yang natural!' },
         { initial: 'RH', name: 'Rudi Hermawan', category: 'Foto Produk UMKM — Surabaya', quote: 'Fotografer komersial untuk produk UMKM kuliner saya sangat profesional. Hasil foto lighting studio bikin penjualan produk naik drastis.' }
@@ -473,14 +470,13 @@
           <span class="text-[11px] font-black text-amber-500 uppercase tracking-widest">Kemitraan Fotografer</span>
           <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">Apakah Anda Fotografer Profesional?</h2>
           <p class="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-xl">
-            Bergabunglah bersama 150+ fotografer di Indonesia. Kelola jadwal ketersediaan, buat paket layanan, dan terima pesanan booking dengan jaminan sistem escrow.
+            Bergabunglah bersama 150+ fotografer di Indonesia. Kelola jadwal ketersediaan, buat paket layanan, dan terima pesanan booking dengan jaminan keamanan pembayaran.
           </p>
         </div>
         <a href="{{ url('/register') }}" class="inline-flex items-center gap-2.5 px-8 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-sm rounded-xl transition shadow-lg shrink-0">
           Daftar Sebagai Fotografer
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
           </svg>
         </a>
       </div>
