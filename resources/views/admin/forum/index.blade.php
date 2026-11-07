@@ -96,7 +96,7 @@
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         <th class="py-3.5 px-4 sm:px-6 w-5/12">Topik Diskusi</th>
-                        <th class="py-3.5 px-4 sm:px-6 w-2/12">Penulis (User)</th>
+                        <th class="py-3.5 px-4 sm:px-6 w-2/12">Penulis</th>
                         <th class="py-3.5 px-4 sm:px-6 w-2/12">Tanggal Rilis</th>
                         <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Balasan</th>
                         <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>

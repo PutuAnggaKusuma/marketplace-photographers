@@ -255,13 +255,13 @@ class PhotographerController extends Controller
             'testimonials.client.user'
         ])->findOrFail($id);
 
-        if (!$photographer->is_onboarded && (!Auth::check() || (Auth::id() !== $photographer->id_user && !Auth::user()->hasRole(['admin', 'super_admin'])))) {
+        if (!$photographer->is_onboarded && (!Auth::check() || (Auth::id() !== $photographer->id_user && !in_array(Auth::user()->role, ['admin', 'super_admin'])))) {
             abort(404, 'Profil fotografer belum aktif atau sedang dalam tahap onboarding.');
         }
 
         $testimonials = $photographer->testimonials()->with('client.user')->orderBy('created_at', 'desc')->get();
         $totalReviews = $testimonials->count();
-        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : '5.0';
+        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : null;
 
         $starCounts = [
             5 => $testimonials->where('rating', 5)->count(),

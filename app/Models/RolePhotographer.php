@@ -30,6 +30,10 @@ class RolePhotographer extends Model
         'atas_nama_rekening',
         'is_verified',
         'is_onboarded',
+        'status_verifikasi',
+        'catatan_penolakan',
+        'kategori_penghapusan',
+        'alasan_penghapusan',
     ];
 
     protected $casts = [
@@ -105,13 +109,14 @@ class RolePhotographer extends Model
 
     public function getRatingAverageAttribute()
     {
-        return round($this->testimonials()->avg('rating') ?? 4.9, 1);
+        $avg = $this->testimonials()->avg('rating');
+        return $avg !== null ? round((float) $avg, 1) : null;
     }
 
     public function getFotoUrlAttribute()
     {
         if (!$this->foto) {
-            return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80';
+            return null;
         }
         if (str_starts_with($this->foto, 'http://') || str_starts_with($this->foto, 'https://')) {
             return $this->foto;
@@ -176,7 +181,8 @@ class RolePhotographer extends Model
     public function getEditorialMetricsAttribute(): array
     {
         $reviewCount = $this->testimonials()->count();
-        $avgRating = round((float) ($this->testimonials()->avg('rating') ?? 4.9), 1);
+        $rawAvg = $this->testimonials()->avg('rating');
+        $avgRating = $rawAvg !== null ? round((float) $rawAvg, 1) : null;
         $completedSessions = $this->contracts()->where('status_contract', 'completed')->count();
 
         $isFastResponse = false;
@@ -187,13 +193,21 @@ class RolePhotographer extends Model
 
         $items = [];
 
-        // 1. Rating & Ulasan (Format: 4.9 (12 ulasan))
-        $ratingText = number_format($avgRating, 1) . ($reviewCount > 0 ? ' (' . $reviewCount . ' ulasan)' : '');
-        $items[] = [
-            'type' => 'rating',
-            'text' => $ratingText,
-            'highlight' => true,
-        ];
+        // 1. Rating & Ulasan (Format: 4.9 (12 ulasan) atau 'Mitra Baru')
+        if ($avgRating !== null) {
+            $ratingText = number_format($avgRating, 1) . ($reviewCount > 0 ? ' (' . $reviewCount . ' ulasan)' : '');
+            $items[] = [
+                'type' => 'rating',
+                'text' => $ratingText,
+                'highlight' => true,
+            ];
+        } else {
+            $items[] = [
+                'type' => 'rating',
+                'text' => 'Mitra Baru',
+                'highlight' => false,
+            ];
+        }
 
         // 2. Sesi Selesai (Format: 10+ Sesi Selesai)
         if ($completedSessions >= 10) {
@@ -230,5 +244,170 @@ class RolePhotographer extends Model
     public function clientReviews()
     {
         return $this->hasMany(PhotographerClientReview::class, 'id_photographer');
+    }
+
+    /**
+     * Hitung field profil fotografer yang belum lengkap diisi.
+     */
+    public function getMissingProfileFields(): array
+    {
+        $missing = [];
+        
+        $nama = trim($this->nama ?: ($this->user?->nama ?: ''));
+        if (empty($nama)) {
+            $missing['nama'] = 'Nama Lengkap';
+        }
+
+        $email = trim($this->user?->email ?: '');
+        if (empty($email)) {
+            $missing['email'] = 'Email';
+        }
+
+        $nomorTelepon = trim($this->nomor_telepon ?: '');
+        if (empty($nomorTelepon)) {
+            $missing['nomor_telepon'] = 'Nomor WhatsApp';
+        }
+
+        $linkSosmed = trim($this->link_sosmed ?: '');
+        if (empty($linkSosmed)) {
+            $missing['link_sosmed'] = 'Instagram';
+        }
+
+        $prov = trim($this->province_code ?: '');
+        if (empty($prov)) {
+            $missing['province_code'] = 'Provinsi';
+        }
+
+        $city = trim($this->city_code ?: '');
+        if (empty($city)) {
+            $missing['city_code'] = 'Kota / Kabupaten';
+        }
+
+        $alamat = trim($this->alamat ?: '');
+        if (empty($alamat)) {
+            $missing['alamat'] = 'Alamat';
+        }
+
+        if ($this->categories()->count() === 0) {
+            $missing['categories'] = 'Kategori';
+        }
+
+        $bio = trim($this->deskripsi_bio ?: '');
+        if (empty($bio) || strlen($bio) < 15) {
+            $missing['deskripsi_bio'] = 'Bio';
+        }
+
+        $foto = trim($this->foto ?: '');
+        if (empty($foto)) {
+            $missing['foto'] = 'Foto Profil';
+        }
+
+        $fotoSampul = trim($this->foto_sampul ?: '');
+        if (empty($fotoSampul)) {
+            $missing['foto_sampul'] = 'Foto Sampul';
+        }
+
+        $namaBank = trim($this->nama_bank ?: '');
+        if (empty($namaBank)) {
+            $missing['nama_bank'] = 'Nama Bank';
+        }
+
+        $nomorRekening = trim($this->nomor_rekening ?: '');
+        if (empty($nomorRekening)) {
+            $missing['nomor_rekening'] = 'Nomor Rekening';
+        }
+
+        $atasNama = trim($this->atas_nama_rekening ?: '');
+        if (empty($atasNama)) {
+            $missing['atas_nama_rekening'] = 'Nama Pemilik Rekening';
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Hitung persentase kelengkapan data profil fotografer (0 - 100%).
+     */
+    public function getProfileCompletionPercentage(): int
+    {
+        $totalRequired = 14;
+        $missingCount = count($this->getMissingProfileFields());
+        $filledCount = max(0, $totalRequired - $missingCount);
+        return (int) round(($filledCount / $totalRequired) * 100);
+    }
+
+    /**
+     * Cek apakah seluruh data profil fotografer sudah terisi 100% lengkap.
+     */
+    public function isProfileComplete(): bool
+    {
+        return count($this->getMissingProfileFields()) === 0;
+    }
+
+    /**
+     * Hitung status kelengkapan 4 seksi utama profil (Gaya 3B: Dot Step Indicator).
+     */
+    public function getProfileSectionsStatus(): array
+    {
+        $missing = $this->getMissingProfileFields();
+
+        $sections = [
+            'kontak' => [
+                'name' => 'Kontak',
+                'is_complete' => !isset($missing['nama']) && !isset($missing['email']) && !isset($missing['nomor_telepon']) && !isset($missing['link_sosmed']),
+            ],
+            'domisili' => [
+                'name' => 'Domisili & Kategori',
+                'is_complete' => !isset($missing['province_code']) && !isset($missing['city_code']) && !isset($missing['alamat']) && !isset($missing['categories']),
+            ],
+            'rekening' => [
+                'name' => 'Rekening Bank',
+                'is_complete' => !isset($missing['nama_bank']) && !isset($missing['nomor_rekening']) && !isset($missing['atas_nama_rekening']),
+            ],
+            'media' => [
+                'name' => 'Foto & Bio',
+                'is_complete' => !isset($missing['foto']) && !isset($missing['foto_sampul']) && !isset($missing['deskripsi_bio']),
+            ],
+        ];
+
+        $completedCount = 0;
+        $incompleteNames = [];
+        foreach ($sections as $sec) {
+            if ($sec['is_complete']) {
+                $completedCount++;
+            } else {
+                $incompleteNames[] = $sec['name'];
+            }
+        }
+
+        return [
+            'sections' => $sections,
+            'completed_count' => $completedCount,
+            'total_sections' => count($sections),
+            'incomplete_names' => $incompleteNames,
+        ];
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->status_verifikasi === 'terverifikasi' || (bool) $this->is_verified;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status_verifikasi === 'menunggu';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status_verifikasi === 'ditolak';
+    }
+
+    /**
+     * Cek apakah fitur operasional fotografer boleh dibuka (Profil 100% Lengkap DAN di-ACC Admin).
+     */
+    public function isFeatureUnlocked(): bool
+    {
+        return $this->isProfileComplete() && $this->isVerified();
     }
 }

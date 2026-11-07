@@ -176,15 +176,152 @@
         transform: translate3d(0, 0, 0);
       }
     </style>
-  </head>
-  <body class="min-h-screen bg-gradient-to-b from-amber-50/80 via-[#f6f4f0] to-[#edf0f4] text-gray-900 font-sans antialiased flex items-center justify-center p-3 sm:p-6 lg:p-10 relative overflow-hidden {{ $isRegister ? 'auth-mode-register' : 'auth-mode-login' }}"
-        x-data="{
+      <script>
+      function authHandler() {
+        return {
           mode: '{{ $isRegister ? 'register' : 'login' }}',
           showPassLogin: false,
           showPassRegister: false,
           selectedRole: '{{ old('role', 'client') }}',
           selectedRoleLabel: '{{ old('role') === 'photographer' ? 'Fotografer (Penyedia Jasa)' : 'Client (Pencari Fotografer)' }}',
           roleDropdownOpen: false,
+
+          // Real-time Login Form State & Validation
+          loginForm: {
+            email: {!! json_encode(old('email', '')) !!},
+            password: '',
+          },
+          loginTouched: {
+            email: {{ $errors->has('email') ? 'true' : 'false' }},
+            password: {{ $errors->has('password') ? 'true' : 'false' }},
+          },
+          loginErrors: {
+            email: {!! json_encode($errors->first('email') ?: '') !!},
+            password: {!! json_encode($errors->first('password') ?: '') !!},
+          },
+          validateLoginEmail() {
+            const val = (this.loginForm.email || '').trim();
+            if (!val) {
+              this.loginErrors.email = 'Email wajib diisi.';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+              this.loginErrors.email = 'Format alamat email tidak valid.';
+            } else {
+              this.loginErrors.email = '';
+            }
+          },
+          validateLoginPassword() {
+            const val = this.loginForm.password || '';
+            if (!val) {
+              this.loginErrors.password = 'Kata sandi wajib diisi.';
+            } else {
+              this.loginErrors.password = '';
+            }
+          },
+          submitLogin(e) {
+            this.loginTouched.email = true;
+            this.loginTouched.password = true;
+            this.validateLoginEmail();
+            this.validateLoginPassword();
+            if (this.loginErrors.email || this.loginErrors.password) {
+              e.preventDefault();
+              if (this.loginErrors.email) {
+                this.$refs.loginEmail?.focus();
+              } else if (this.loginErrors.password) {
+                this.$refs.loginPassword?.focus();
+              }
+              return false;
+            }
+          },
+
+          // Real-time Register Form State & Validation
+          regForm: {
+            nama: {!! json_encode(old('nama', '')) !!},
+            nomor_telepon: {!! json_encode(old('nomor_telepon', '')) !!},
+            email: {!! json_encode(old('email', '')) !!},
+            password: '',
+          },
+          regTouched: {
+            nama: {{ $errors->has('nama') ? 'true' : 'false' }},
+            nomor_telepon: {{ $errors->has('nomor_telepon') ? 'true' : 'false' }},
+            email: {{ $errors->has('email') ? 'true' : 'false' }},
+            password: {{ $errors->has('password') ? 'true' : 'false' }},
+          },
+          regErrors: {
+            nama: {!! json_encode($errors->first('nama') ?: '') !!},
+            nomor_telepon: {!! json_encode($errors->first('nomor_telepon') ?: '') !!},
+            email: {!! json_encode($errors->first('email') ?: '') !!},
+            password: {!! json_encode($errors->first('password') ?: '') !!},
+          },
+          validateRegisterNama() {
+            const val = (this.regForm.nama || '').trim();
+            if (!val) {
+              this.regErrors.nama = 'Nama lengkap wajib diisi.';
+            } else if (val.length < 3) {
+              this.regErrors.nama = 'Nama lengkap minimal 3 karakter.';
+            } else {
+              this.regErrors.nama = '';
+            }
+          },
+          validateRegisterPhone() {
+            // Strict numeric only (hanya angka murni)
+            this.regForm.nomor_telepon = (this.regForm.nomor_telepon || '').replace(/\D/g, '');
+            const raw = this.regForm.nomor_telepon;
+            if (!raw) {
+              this.regErrors.nomor_telepon = 'Nomor WhatsApp wajib diisi.';
+              return;
+            }
+            if (raw.length < 9) {
+              this.regErrors.nomor_telepon = 'Nomor WhatsApp minimal 9 digit angka.';
+            } else if (raw.length > 20) {
+              this.regErrors.nomor_telepon = 'Nomor WhatsApp maksimal 20 digit angka.';
+            } else {
+              this.regErrors.nomor_telepon = '';
+            }
+          },
+          validateRegisterEmail() {
+            const val = (this.regForm.email || '').trim();
+            if (!val) {
+              this.regErrors.email = 'Alamat email wajib diisi.';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+              this.regErrors.email = 'Format alamat email tidak valid.';
+            } else {
+              this.regErrors.email = '';
+            }
+          },
+          validateRegisterPassword() {
+            const val = this.regForm.password || '';
+            if (!val) {
+              this.regErrors.password = 'Kata sandi wajib diisi.';
+            } else if (val.length < 8) {
+              this.regErrors.password = 'Kata sandi minimal 8 karakter.';
+            } else {
+              this.regErrors.password = '';
+            }
+          },
+          submitRegister(e) {
+            this.regTouched.nama = true;
+            this.regTouched.nomor_telepon = true;
+            this.regTouched.email = true;
+            this.regTouched.password = true;
+            this.validateRegisterNama();
+            this.validateRegisterPhone();
+            this.validateRegisterEmail();
+            this.validateRegisterPassword();
+
+            if (this.regErrors.nama || this.regErrors.nomor_telepon || this.regErrors.email || this.regErrors.password) {
+              e.preventDefault();
+              if (this.regErrors.nama) {
+                this.$refs.regNama?.focus();
+              } else if (this.regErrors.nomor_telepon) {
+                this.$refs.regPhone?.focus();
+              } else if (this.regErrors.email) {
+                this.$refs.regEmail?.focus();
+              } else if (this.regErrors.password) {
+                this.$refs.regPassword?.focus();
+              }
+              return false;
+            }
+          },
           setMode(newMode) {
             this.mode = newMode;
             const searchParams = window.location.search;
@@ -202,7 +339,12 @@
               document.title = this.mode === 'register' ? 'Daftar Akun Baru — LensMatch' : 'Masuk ke Akun — LensMatch';
             });
           }
-        }"
+        };
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-amber-50/80 via-[#f6f4f0] to-[#edf0f4] text-gray-900 font-sans antialiased flex items-center justify-center p-3 sm:p-6 lg:p-10 relative overflow-hidden {{ $isRegister ? 'auth-mode-register' : 'auth-mode-login' }}"
+        x-data="authHandler()"
         :class="{ 'auth-mode-register': mode === 'register', 'auth-mode-login': mode === 'login' }">
 
     <!-- Background Ambient Illustrations (Strictly 1 SVG per Mode, Bottom-Positioned) -->
@@ -320,7 +462,7 @@
               @endif
 
               <!-- Sign In Form -->
-              <form action="{{ route('login') }}" method="POST" class="space-y-4 pt-1">
+              <form action="{{ route('login') }}" method="POST" @submit="submitLogin($event)" novalidate class="space-y-4 pt-1">
                 @csrf
                 @if(request()->filled('redirect'))
                   <input type="hidden" name="redirect" value="{{ request('redirect') }}">
@@ -333,13 +475,15 @@
                   </label>
                   <input type="email" 
                          name="email" 
-                         value="{{ old('email') }}" 
+                         x-ref="loginEmail"
+                         x-model="loginForm.email"
+                         @input="loginTouched.email = true; validateLoginEmail()"
+                         @blur="loginTouched.email = true; validateLoginEmail()"
                          required 
                          placeholder="nama@email.com" 
-                         class="w-full px-4 py-3.5 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
-                  @error('email')
-                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-                  @enderror
+                         class="w-full px-4 py-3.5 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                         :class="loginErrors.email && loginTouched.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
+                  <p x-show="loginErrors.email && loginTouched.email" x-text="loginErrors.email" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <!-- Password -->
@@ -350,9 +494,14 @@
                   <div class="relative">
                     <input :type="showPassLogin ? 'text' : 'password'" 
                            name="password" 
+                           x-ref="loginPassword"
+                           x-model="loginForm.password"
+                           @input="loginTouched.password = true; validateLoginPassword()"
+                           @blur="loginTouched.password = true; validateLoginPassword()"
                            required 
                            placeholder="••••••••••••" 
-                           class="w-full pl-4 pr-11 py-3.5 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
+                           class="w-full pl-4 pr-11 py-3.5 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                           :class="loginErrors.password && loginTouched.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
                     <button type="button" 
                             @click="showPassLogin = !showPassLogin" 
                             class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 transition cursor-pointer">
@@ -360,9 +509,7 @@
                       <svg x-show="showPassLogin" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
                     </button>
                   </div>
-                  @error('password')
-                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-                  @enderror
+                  <p x-show="loginErrors.password && loginTouched.password" x-text="loginErrors.password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <!-- Remember & Forgot -->
@@ -431,7 +578,7 @@
               @endif
 
               <!-- Sign Up Form -->
-              <form action="{{ route('register') }}" method="POST" class="space-y-3.5 pt-1">
+              <form action="{{ route('register') }}" method="POST" @submit="submitRegister($event)" novalidate class="space-y-3.5 pt-1">
                 @csrf
                 @if(request()->filled('redirect'))
                   <input type="hidden" name="redirect" value="{{ request('redirect') }}">
@@ -444,13 +591,15 @@
                   </label>
                   <input type="text" 
                          name="nama" 
-                         value="{{ old('nama') }}" 
+                         x-ref="regNama"
+                         x-model="regForm.nama"
+                         @input="regTouched.nama = true; validateRegisterNama()"
+                         @blur="regTouched.nama = true; validateRegisterNama()"
                          required 
                          placeholder="Nama lengkap Anda" 
-                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
-                  @error('nama')
-                    <p class="text-[11px] font-bold text-red-500 mt-0.5">{{ $message }}</p>
-                  @enderror
+                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                         :class="regErrors.nama && regTouched.nama ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
+                  <p x-show="regErrors.nama && regTouched.nama" x-text="regErrors.nama" x-cloak class="text-[11px] font-bold text-red-500 mt-0.5"></p>
                 </div>
 
                 <!-- Role Selector (Standardized Alpine Dropdown) -->
@@ -463,7 +612,7 @@
                   <div class="relative">
                     <button @click="roleDropdownOpen = !roleDropdownOpen" 
                             type="button" 
-                            class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer">
+                            class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 font-medium text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer">
                        <span x-text="selectedRoleLabel"></span>
                       <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="roleDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -477,13 +626,13 @@
                          style="display: none;">
                       <button type="button" 
                               @click="selectedRole = 'client'; selectedRoleLabel = 'Client (Pencari Fotografer)'; roleDropdownOpen = false" 
-                              class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
+                              class="w-full px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
                               :class="selectedRole === 'client' ? 'bg-amber-50/70 text-amber-600' : ''">
                         <span>Client (Pencari Fotografer)</span>
                       </button>
                       <button type="button" 
                               @click="selectedRole = 'photographer'; selectedRoleLabel = 'Fotografer (Penyedia Jasa)'; roleDropdownOpen = false" 
-                              class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 hover:bg-amber-50 hover:text-amber-600 border-t border-gray-100 transition flex items-center justify-between text-left cursor-pointer"
+                              class="w-full px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-600 border-t border-gray-100 transition flex items-center justify-between text-left cursor-pointer"
                               :class="selectedRole === 'photographer' ? 'bg-amber-50/70 text-amber-600' : ''">
                         <span>Fotografer (Penyedia Jasa)</span>
                       </button>
@@ -501,13 +650,18 @@
                   </label>
                   <input type="tel" 
                          name="nomor_telepon" 
-                         value="{{ old('nomor_telepon') }}" 
+                         x-ref="regPhone"
+                         x-model="regForm.nomor_telepon"
+                         inputmode="numeric"
+                         pattern="[0-9]*"
+                         @keypress="if (!/[0-9]/.test($event.key)) $event.preventDefault()"
+                         @input="regForm.nomor_telepon = (regForm.nomor_telepon || '').replace(/\D/g, ''); regTouched.nomor_telepon = true; validateRegisterPhone()"
+                         @blur="regTouched.nomor_telepon = true; validateRegisterPhone()"
                          required 
                          placeholder="081234567890" 
-                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
-                  @error('nomor_telepon')
-                    <p class="text-[11px] font-bold text-red-500 mt-0.5">{{ $message }}</p>
-                  @enderror
+                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                         :class="regErrors.nomor_telepon && regTouched.nomor_telepon ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
+                  <p x-show="regErrors.nomor_telepon && regTouched.nomor_telepon" x-text="regErrors.nomor_telepon" x-cloak class="text-[11px] font-bold text-red-500 mt-0.5"></p>
                 </div>
 
                 <!-- Email -->
@@ -517,13 +671,15 @@
                   </label>
                   <input type="email" 
                          name="email" 
-                         value="{{ old('email') }}" 
+                         x-ref="regEmail"
+                         x-model="regForm.email"
+                         @input="regTouched.email = true; validateRegisterEmail()"
+                         @blur="regTouched.email = true; validateRegisterEmail()"
                          required 
                          placeholder="nama@email.com" 
-                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
-                  @error('email')
-                    <p class="text-[11px] font-bold text-red-500 mt-0.5">{{ $message }}</p>
-                  @enderror
+                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                         :class="regErrors.email && regTouched.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
+                  <p x-show="regErrors.email && regTouched.email" x-text="regErrors.email" x-cloak class="text-[11px] font-bold text-red-500 mt-0.5"></p>
                 </div>
 
                 <!-- Password -->
@@ -534,9 +690,14 @@
                   <div class="relative">
                     <input :type="showPassRegister ? 'text' : 'password'" 
                            name="password" 
+                           x-ref="regPassword"
+                           x-model="regForm.password"
+                           @input="regTouched.password = true; validateRegisterPassword()"
+                           @blur="regTouched.password = true; validateRegisterPassword()"
                            required 
                            placeholder="Minimal 8 karakter" 
-                           class="w-full pl-4 pr-11 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition shadow-2xs font-medium" />
+                           class="w-full pl-4 pr-11 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
+                           :class="regErrors.password && regTouched.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
                     <button type="button" 
                             @click="showPassRegister = !showPassRegister" 
                             class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 transition cursor-pointer">
@@ -544,9 +705,7 @@
                       <svg x-show="showPassRegister" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
                     </button>
                   </div>
-                  @error('password')
-                    <p class="text-[11px] font-bold text-red-500 mt-0.5">{{ $message }}</p>
-                  @enderror
+                  <p x-show="regErrors.password && regTouched.password" x-text="regErrors.password" x-cloak class="text-[11px] font-bold text-red-500 mt-0.5"></p>
                 </div>
 
                 <!-- Button (Clean Pure Text Standard without Icons) -->

@@ -157,9 +157,9 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        <th class="py-3.5 px-4 sm:px-6 w-3/12">Pemberi & Penerima</th>
+                        <th class="py-3.5 px-4 sm:px-6 w-3/12">Nama</th>
                         <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Rating</th>
-                        <th class="py-3.5 px-4 sm:px-6 w-4/12">Isi Pesan Testimoni</th>
+                        <th class="py-3.5 px-4 sm:px-6 w-4/12">Isi Pesan</th>
                         <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Status Publikasi</th>
                         <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
                     </tr>

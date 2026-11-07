@@ -63,6 +63,14 @@ class User extends Authenticatable
         return in_array($this->role, ['super_admin', 'admin']);
     }
 
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_array($roles)) {
+            return in_array($this->role, $roles);
+        }
+        return $this->role === $roles;
+    }
+
     public function isPhotographer(): bool
     {
         return $this->role === 'photographer';

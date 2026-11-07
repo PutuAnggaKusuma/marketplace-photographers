@@ -1416,3 +1416,113 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
      - Jika pengguna bukan berstatus role Klien (misal Admin atau Fotografer): *"Fitur ini khusus untuk akun Klien."* (warna amber/peringatan).
      - Jika belum login: dialihkan langsung ke halaman masuk (*login redirect*).
    - **DILARANG KERAS** membiarkan tombol tertekan secara pasif tanpa feedback visual atau menyembunyikan error HTTP di dalam console secara diam-diam (*silent catch*).
+
+
+---
+
+### Rule #94: Standarisasi 100% Data Dinamis & Larangan Mutlak Data Palsu/Dummy/Fallback Statis (Zero Dummy Fallback Standard)
+1. **Latar Belakang & Masalah Data Fiktif (Anti-Fabricated Data)**:
+   - Pengguna baru (misalnya fotografer atau klien yang baru mendaftar) belum mengunggah foto profil, belum menentukan domisili operasional, belum membuat paket layanan, dan belum memiliki ulasan dari klien.
+   - Sebelumnya terjadi pelanggaran serius di mana sistem menampilkan data statis buatan / fallback fiktif:
+     - Foto avatar otomatis menampilkan foto stok wanita dari Unsplash.
+     - Wilayah operasional default menjadi `"Indonesia"`.
+     - Kategori spesialisasi default menjadi `"Semua Kategori"`.
+     - Rating otomatis menampilkan `★ 4.9` atau `★ 5.0` padahal ulasan masih 0.
+     - Harga layanan menampilkan `Mulai Rp 1.500.000` padahal belum ada paket.
+     - Formulir rekening payout terisi otomatis nama bank `'BCA'`, nomor `'1234567890'`, dan nama `'Budi Santoso'`.
+   - Hal tersebut **DILARANG KERAS SECARA MUTLAK** karena melanggar prinsip keaslian data database dinamis, menimbulkan kebingungan fatal bagi pengguna, dan merusak kredibilitas sistem marketplace.
+
+2. **Larangan Mutlak Fallback Statis (Zero Dummy Fallback Tolerance)**:
+   - **DILARANG** menggunakan URL foto pihak ketiga (Unsplash, Pexels, dsb.) sebagai fallback gambar avatar, foto sampul, maupun thumbnail ketika kolom database bernilai `null` atau kosong.
+   - **DILARANG** mengembalikan nilai rating numerik palsu (`?? 4.9`, `?? 5.0`, dsb.) pada accessor model atau view Blade untuk entitas yang belum memiliki ulasan.
+   - **DILARANG** memasang harga default fiktif (`?? 1500000`, `?? 149000`, dsb.) jika data harga layanan atau kursus belum ditentukan.
+   - **DILARANG** mengisi teks wilayah/kota default (`?? 'Indonesia'`, `?? 'Jakarta'`) jika domisili pengguna belum disetel di database.
+   - **DILARANG** memberikan nilai awal fiktif pada variabel input formulir (`'BCA'`, dsb.) atau menggunakan teks placeholder yang menyerupai data asli yang telah terisi (`placeholder="1234567890"` atau `placeholder="Budi Santoso"`). Placeholder formulir WAJIB berupa kalimat instruksi yang jelas (misalnya: `placeholder="Masukkan nomor rekening"`, `placeholder="Masukkan nama pemilik rekening"`).
+   - **DILARANG** memanipulasi grafik statistik atau metrik bulanan dengan nilai dasar fiktif (seperti `$val = $monthlyRevenue[$idx] ?? 30`). Jika tidak ada omzet, nilai wajib `0` dengan tinggi bar dasar minimum (`3%`).
+
+3. **Standarisasi Representasi Data Kosong (Empty-State Standards)**:
+   - **Avatar Pengguna / Fotografer Kosong**: Wajib merender lencana lingkaran inisial nama 2 karakter kapital sesuai **Rule #44** menggunakan komponen `<x-user-avatar>` atau kontainer inisial (`{{ strtoupper(substr($user->nama, 0, 2)) }}`).
+   - **Kotak Pratinjau / Input Upload Foto Kosong (Empty State Media Preview Standard)**: Di seluruh sistem (baik profil fotografer, kartu audit verifikasi admin, profil klien, banner lomba, maupun thumbnail materi modul), jika foto belum diunggah atau data gambar kosong, kotak preview wajib menampilkan **ikon kamera outline abu-abu simpel** (`text-gray-400 dark:text-gray-500`) di dalam kontainer bergaris putus-putus netral (`border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800`) tanpa label teks verbal berlebih (seperti 'Kosong', 'Belum ada foto', atau inisial huruf).
+   - **Foto Sampul / Portofolio Kosong**: Menampilkan kontainer abu-abu netral dengan ikon kamera outline abu-abu simpel standar.
+   - **Wilayah Operasional Kosong**: Wajib menampilkan tanda strip `-` dengan kelas teks redup `text-gray-400 font-medium` (bukan string lokasi umum atau teks hitam tebal).
+   - **Spesialisasi Kategori Kosong**: Wajib menampilkan teks murni `Belum diatur` dengan warna redup `text-gray-400 font-medium` (bukan "Semua Kategori").
+   - **Rating Fotografer Kosong (0 Ulasan)**: Wajib menampilkan teks murni `Mitra Baru` (atau `Baru` pada kartu ringkas) tanpa simbol bintang `★`. Bintang kepuasan hanya boleh muncul jika rating numerik benar-benar dihitung dari tabel ulasan database (`avg('rating') !== null`).
+   - **Paket Layanan Kosong**: Wajib menampilkan teks murni `Belum ada paket` atau `Belum ada paket layanan` (bukan nominal harga default).
+   - **Thumbnail Kursus / Materi Kosong**: Menampilkan kontainer netral dengan ikon kamera outline abu-abu simpel standar.
+
+
+---
+
+### Rule #95: Standarisasi Alur Detail & Verifikasi Mitra Fotografer Admin (`/admin/photographers/{id}`)
+1. **Pemisahan Tegas Antara Backoffice Admin vs Etalase Universal Klien**:
+   - Modul `Manajemen Fotografer` pada panel Admin (`/admin/photographers`) adalah area operasional backoffice manajerial.
+   - **DILARANG KERAS** mengarahkan tombol aksi `Lihat` pada tabel Admin ke halaman publik klien (`/fotografer/{id}`). Halaman publik klien dirancang khusus untuk calon pemesan jasa foto (memuat tombol reservasi, chat, wishlist, dan menyembunyikan data rahasia seperti nomor rekening).
+   - Tombol `Lihat` pada tabel admin **WAJIB mengarahkan ke halaman internal Admin**: `route('admin.photographers.show', $id)` dengan layout manajerial `@extends('layouts.admin')`.
+
+2. **Cakupan Informasi Audit Administratif Satu Pintu & Keselarasan Field Profil**:
+   - Halaman detail audit `/admin/photographers/{id}` wajib menyajikan data pendaftaran fotografer secara komprehensif mengikuti **Rule #73 (Hybrid Responsive Layout)** dan **WAJIB 100% selaras dengan formulir profil fotografer**:
+     1. **Ringkasan Status & Kelengkapan Data**: Menampilkan status verifikasi (`Menunggu Verifikasi` / `Terverifikasi`), persentase pengisian profil (0 - 100%), dan daftar chip data yang belum diisi sesuai `RolePhotographer::getMissingProfileFields()`.
+     2. **1. Kontak**: `Nama Lengkap`, `Email`, `Nomor WhatsApp` (dengan tombol chat), `Instagram`.
+     3. **2. Domisili & Kategori**: `Provinsi`, `Kota / Kabupaten`, `Alamat`, `Kategori` (badge atau teks `Belum diatur`).
+     4. **3. Bio**: Konten deskripsi bio pengalaman mitra (atau teks `Belum diisi`).
+     5. **4. Foto Profil & Sampul**: Pratinjau foto profil dan foto sampul rasio 16:9. Jika belum diunggah, kotak audit wajib menampilkan ikon kamera outline abu-abu simpel (`text-gray-400 dark:text-gray-500`) di dalam kotak border dashed netral tanpa inisial huruf teks 'KE' atau kata 'Kosong'.
+     6. **5. Rekening Bank**: `Nama Bank`, `Nomor Rekening`, `Nama Pemilik Rekening` (tanpa terminologi asing "Payout" sesuai Rule #70).
+
+3. **Validasi Formulir Profil Fotografer Real-time (Alpine.js Client-Side Standard)**:
+   - Mengikuti standar UX pada `signup.blade.php`, formulir profil fotografer (`/photographer/profile`) wajib menggunakan validasi interaktif real-time dengan Alpine.js (`formData`, `touched`, `errors`) pada event `@input` dan `@blur`.
+   - Menampilkan teks error merah di bawah input (`text-rose-500 font-bold text-[11px]`) dan border input merah saat invalid.
+   - Saat submit, sistem memvalidasi seluruh field sekaligus, membatalkan submit jika ada yang tidak valid, lalu secara otomatis mengarahkan fokus (*focus*) dan menggulir (*smooth scroll*) ke field bermasalah pertama.
+
+4. **Standar Bilah Aksi Keputusan Admin & Form Pelanggaran (Bottom Action Bar - Rule #74 & Rule #91)**:
+   - Sisi Kiri: Tombol `Kembali` (abu-abu netral) dan tombol opsional `Lihat Etalase Publik` (hanya muncul jika fotografer telah selesai onboarding dan terverifikasi).
+   - Sisi Kanan:
+     - **Tombol `Hapus`**: Membuka dialog modal form penghapusan fotografer (Rule #59) yang mewajibkan admin memilih **Kategori Pelanggaran** (misal: Data Palsu, Pelanggaran Hak Cipta, Transaksi Luar Sistem, dsb.) dan menuliskan **Deskripsi Alasan Penghapusan**. Data pelanggaran ini tersimpan pada database dan tercatat permanen pada `ActivityLog`.
+     - **Tombol `Tolak Pendaftaran`** (muncul jika status belum ditolak): Membuka dialog modal untuk mengisi **Catatan Alasan Penolakan** (wajib diisi). Sistem mengubah status menjadi `ditolak`, mengirimkan notifikasi in-app ke fotografer, dan memunculkan banner peringatan merah di dashboard dan profil fotografer.
+     - **Tombol `Verifikasi Fotografer`** (muncul jika status `menunggu` atau `ditolak`): Mengubah status menjadi `terverifikasi`, mengaktifkan centang biru, membersihkan catatan penolakan lama, dan mengirimkan notifikasi sukses ke fotografer.
+     - **Tombol `Batalkan Verifikasi`** (muncul jika status `terverifikasi`): Mengembalikan status menjadi `menunggu`.
+
+5. **Alur Pengajuan Ulang Pasca Penolakan (Auto Re-apply)**:
+   - Jika pendaftaran fotografer ditolak, fotografer akan melihat banner merah di dashboard dan halaman profil yang memuat catatan admin.
+   - Begitu fotografer memperbaiki data profilnya dan menekan **Simpan Data**, sistem secara otomatis mengembalikan status menjadi `menunggu`, mencatat log aktivitas pengajuan ulang, dan mengirimkan notifikasi in-app kepada seluruh Administrator.
+
+---
+
+### Rule #96: Standarisasi Proporsi Card Media & Larangan Pemanipulasian Tinggi Seragam (Anti-Artificial Equal Height on Asymmetric Cards)
+1. **Penerapan `items-start` pada Grid Multi-Kolom Kartu Asimetris**:
+   - Pada tata letak grid kartu dasbor/audit (seperti pada halaman verifikasi `/admin/photographers/{id}` dan formulir profil mitra), baris grid **WAJIB menggunakan `items-start`**.
+   - **DILARANG KERAS** memaksakan perataan tinggi seragam (*stretch equal-height*) secara artifisial antar kartu yang memiliki kepadatan konten berbeda. Contoh: **Card 3 (Bio)** memiliki teks deskripsi ringkas, sedangkan **Card 4 (Foto Profil & Sampul)** memuat preview visual vertikal yang tinggi. Card 3 (Bio) **TIDAK BOLEH** dipaksa melar/molor dengan ruang kosong bawah hanya demi menyamakan tinggi Card 4 di sebelahnya. Biarkan Card Bio tampil natural dan ramping.
+
+2. **Tata Letak Vertikal untuk Card Media (Foto Profil & Sampul)**:
+   - Penempatan elemen media visual (Foto Profil dan Foto Sampul) di dalam Card Media **WAJIB menggunakan tata letak VERTIKAL (*stacked layout*)**, bukan horizontal berhimpitan yang membuat preview tampak gepeng (*squished*).
+   - **Foto Profil**: Menampilkan pratinjau persegi (1:1) minimal `w-24 h-24` (atau `w-28 h-28`).
+   - **Foto Sampul**: Menampilkan pratinjau lanskap proporsional rasio **16:9** yang tinggi dan jelas (minimal `h-44 sm:h-52` pada admin audit, dan `h-44 sm:h-48` pada profil fotografer), sehingga foto lanskap atau kotak kosong kamera tidak tertekan (*gepeng*).
+
+3. **Standar Ruang Bernapas Kartu Pembungkus (*Comfortable Card Padding & Height*)**:
+   - Kartu pembungkus media foto wajib memiliki padding yang lega (`p-6` atau `p-6 sm:p-7`) dan ruang vertikal yang lapang (*spacious*), menghindari kesan sumpek (*cramped*) antar elemen foto dan tombol upload/aksi.
+
+---
+
+### Rule #97: Standarisasi Pratinjau Modal (Lightbox) Interaktif pada Seluruh Input Field & Kotak Pratinjau Media Gambar (Interactive Image Field Lightbox Standard)
+1. **Prinsip Utama & Validasi Kejelasan Gambar Satu Pintu**:
+   - Setiap elemen formulir atau kartu audit yang menampilkan unggahan media visual (seperti Foto Profil, Foto Sampul, Banner Lomba, Bukti Transfer, dan sejenisnya) **WAJIB menyediakan fitur pratinjau modal (*lightbox dialog*) interaktif yang dapat diklik langsung**.
+   - Tujuannya adalah agar pengguna (Fotografer, Klien, maupun Admin Audit) dapat memeriksa keaslian, ketajaman, dan kesesuaian berkas resolusi penuh yang baru saja dipilih/diunggah sebelum menekan tombol simpan, atau memeriksa berkas yang telah tersimpan di database secara mendalam.
+
+2. **Kondisi Aktivasi Logika Interaktif (*Trigger Condition*)**:
+   - **Kondisi Aktif (Terdapat Berkas/Foto)**:
+     - Jika field telah memiliki foto (baik foto yang sudah tersimpan di database maupun file lokal baru yang dipilih via *client-side FileReader base64/data-URL*):
+       - Kotak pratinjau wajib menampilkan kursor pointer/zoom (`cursor-pointer group`).
+       - Memiliki efek interaktif saat di-hover (efek perbesaran halus `group-hover:scale-105` dan *overlay* gelap elegan dengan teks/ikon kaca pembesar `Pratinjau` atau `Klik untuk Pratinjau Foto`).
+       - Saat diklik, sistem membuka modal pratinjau resolusi tinggi di tengah layar.
+   - **Kondisi Kosong (*Empty State*)**:
+     - Jika field masih kosong (menampilkan ikon kamera outline abu-abu netral sesuai Rule #94):
+       - Kotak **DILARANG KERAS** memicu modal *lightbox* kosong.
+       - Interaksi klik diarahkan murni untuk memicu *file picker* (pemilihan file) atau tombol unggah.
+
+3. **Standar Desain, UX & Aksesibilitas Modal Lightbox**:
+   - **Latar Belakang (*Backdrop*)**: Menggunakan lapisan gelap elegan dengan blur (`bg-black/90 backdrop-blur-md`).
+   - **Kontrol Penutupan (*Dismissibility*)**:
+     - Tombol silang (*close button*) bulat di pojok kanan atas dengan kontras tinggi (`w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white`).
+     - Menutup otomatis saat tombol `Escape` ditekan (`@keydown.escape.window`).
+     - Menutup saat pengguna mengklik area luar gambar (`@click.outside`).
+   - **Proporsi Gambar**: Menampilkan gambar resolusi penuh secara proporsional tanpa distorsi (`max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none`).
+   - **Keterangan (*Caption Badge*)**: Menyertakan lencana keterangan semitransparan di bawah gambar yang memuat judul field (misal: "Foto Profil", "Foto Sampul") dan petunjuk penutupan modal.

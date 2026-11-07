@@ -14,7 +14,7 @@
     cities: [],
     loadingCities: false,
     selectedCategories: {{ json_encode(old('categories', $photographer->categories->pluck('id')->toArray())) }},
-    bankName: '{{ old('nama_bank', $photographer->nama_bank ?? 'BCA') }}',
+    bankName: '{{ old('nama_bank', $photographer->nama_bank ?? '') }}',
     provinceDropdownOpen: false,
     cityDropdownOpen: false,
     bankDropdownOpen: false,

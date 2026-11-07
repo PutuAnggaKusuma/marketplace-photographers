@@ -102,7 +102,7 @@ class ElearningController extends Controller
             'durasi' => '15 Menit',
             'harga' => $harga,
             'is_premium' => $isPremium,
-            'thumbnail_url' => $thumbnailPath ? asset('storage/' . $thumbnailPath) : 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
+            'thumbnail_url' => $thumbnailPath ? asset('storage/' . $thumbnailPath) : null,
             'ringkasan' => $ringkasan,
             'konten' => $request->konten,
             'view_count' => 0,

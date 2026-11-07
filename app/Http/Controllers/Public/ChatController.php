@@ -223,8 +223,8 @@ class ChatController extends Controller
 
         $client = RoleClient::firstOrCreate(['id_user' => $user->id], [
             'nama' => $user->nama,
-            'nomor_telepon' => '081234567890',
-            'alamat' => 'Jakarta, Indonesia',
+            'nomor_telepon' => null,
+            'alamat' => null,
         ]);
 
         $activeThreadId = $request->query('thread');
@@ -402,8 +402,8 @@ class ChatController extends Controller
 
         $client = RoleClient::firstOrCreate(['id_user' => $user->id], [
             'nama' => $user->nama,
-            'nomor_telepon' => '081234567890',
-            'alamat' => 'Jakarta, Indonesia',
+            'nomor_telepon' => null,
+            'alamat' => null,
         ]);
 
         $thread = ChatBooking::firstOrCreate([

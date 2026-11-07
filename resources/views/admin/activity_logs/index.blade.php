@@ -145,9 +145,9 @@
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/75 dark:bg-gray-900/30 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         <th class="py-3.5 px-4 sm:px-6">Waktu</th>
-                        <th class="py-3.5 px-4">Pengguna / Pelaku</th>
-                        <th class="py-3.5 px-4">Tipe Aktivitas</th>
-                        <th class="py-3.5 px-4 sm:px-6">Deskripsi Peristiwa</th>
+                        <th class="py-3.5 px-4">Pengguna</th>
+                        <th class="py-3.5 px-4">Aktivitas</th>
+                        <th class="py-3.5 px-4 sm:px-6">Deskripsi</th>
                         <th class="py-3.5 px-4 text-center">Metadata</th>
                     </tr>
                 </thead>

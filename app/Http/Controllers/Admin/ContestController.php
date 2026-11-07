@@ -458,7 +458,7 @@ class ContestController extends Controller
 
             'status' => $request->status,
 
-            'banner_url' => $bannerUrl ?: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80',
+            'banner_url' => $bannerUrl ?: null,
 
             'deskrpisi_lomba' => $request->deskrpisi_lomba,
 

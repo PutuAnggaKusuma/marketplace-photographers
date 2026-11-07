@@ -157,11 +157,15 @@
                             <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                                 <td class="py-4 px-4 sm:px-6 align-top">
                                     <div class="flex items-center gap-3.5">
-                                        <div class="w-14 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs">
+                                        <div class="w-14 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs flex items-center justify-center">
                                             @php
-                                                $thumbSrc = $m->thumbnail_url ?: ($m->thumbnail ? asset('storage/' . $m->thumbnail) : 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80');
+                                                $thumbSrc = $m->thumbnail_url ?: ($m->thumbnail ? asset('storage/' . $m->thumbnail) : null);
                                             @endphp
-                                            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ $thumbSrc }}" class="w-full h-full object-cover" alt="{{ $m->judul }}">
+                                            @if($thumbSrc)
+                                                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ $thumbSrc }}" class="w-full h-full object-cover" alt="{{ $m->judul }}">
+                                            @else
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                                            @endif
                                         </div>
                                         <div>
                                             <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $m->judul }}</h4>
@@ -178,7 +182,7 @@
                                     @if($m->is_premium || ($m->harga && $m->harga > 0))
                                         <div>
                                             <span class="text-xs font-bold text-gray-900 dark:text-white block">
-                                                Rp {{ number_format($m->harga ?? 149000, 0, ',', '.') }}
+                                                Rp {{ number_format($m->harga ?? 0, 0, ',', '.') }}
                                             </span>
                                             <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
                                                 Berbayar

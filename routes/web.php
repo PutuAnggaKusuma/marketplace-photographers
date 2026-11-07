@@ -177,7 +177,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
     // Admin Dedicated Photographer & Verification Routes
     Route::get('/photographers', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'index'])->name('photographers');
+    Route::get('/photographers/{id}', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'show'])->name('photographers.show');
     Route::post('/photographers/{id}/verify', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'toggleVerification'])->name('photographers.verify');
+    Route::post('/photographers/{id}/reject', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'reject'])->name('photographers.reject');
     Route::post('/photographers/{id}/delete', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'destroy'])->name('photographers.destroy');
 
     // Admin Dedicated Staff & Super Admin Management Routes (Super Admin Only)
@@ -257,50 +259,53 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
 
     Route::get('/profile', [\App\Http\Controllers\Public\ProfileController::class, 'index'])->name('profile');
 
-    Route::get('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'index'])->name('services');
-    Route::get('/services/create', [\App\Http\Controllers\Photographer\ServiceController::class, 'create'])->name('services.create');
-    Route::post('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'store'])->name('services.store');
-    Route::get('/services/{id}/edit', [\App\Http\Controllers\Photographer\ServiceController::class, 'edit'])->name('services.edit');
-    Route::post('/services/{id}/update', [\App\Http\Controllers\Photographer\ServiceController::class, 'update'])->name('services.update');
-    Route::post('/services/{id}/delete', [\App\Http\Controllers\Photographer\ServiceController::class, 'destroy'])->name('services.delete');
+    // Operational Features - Locked until 100% profile completed & Admin approved
+    Route::middleware('photographer.verified')->group(function () {
+        Route::get('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'index'])->name('services');
+        Route::get('/services/create', [\App\Http\Controllers\Photographer\ServiceController::class, 'create'])->name('services.create');
+        Route::post('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'store'])->name('services.store');
+        Route::get('/services/{id}/edit', [\App\Http\Controllers\Photographer\ServiceController::class, 'edit'])->name('services.edit');
+        Route::post('/services/{id}/update', [\App\Http\Controllers\Photographer\ServiceController::class, 'update'])->name('services.update');
+        Route::post('/services/{id}/delete', [\App\Http\Controllers\Photographer\ServiceController::class, 'destroy'])->name('services.delete');
 
-    Route::get('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'index'])->name('portfolio');
-    Route::get('/portfolio/create', [\App\Http\Controllers\Photographer\PortfolioController::class, 'create'])->name('portfolio.create');
-    Route::post('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'store'])->name('portfolio.store');
-    Route::get('/portfolio/{id}/edit', [\App\Http\Controllers\Photographer\PortfolioController::class, 'edit'])->name('portfolio.edit');
-    Route::post('/portfolio/{id}/update', [\App\Http\Controllers\Photographer\PortfolioController::class, 'update'])->name('portfolio.update');
-    Route::post('/portfolio/{id}/delete', [\App\Http\Controllers\Photographer\PortfolioController::class, 'destroy'])->name('portfolio.delete');
+        Route::get('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'index'])->name('portfolio');
+        Route::get('/portfolio/create', [\App\Http\Controllers\Photographer\PortfolioController::class, 'create'])->name('portfolio.create');
+        Route::post('/portfolio', [\App\Http\Controllers\Photographer\PortfolioController::class, 'store'])->name('portfolio.store');
+        Route::get('/portfolio/{id}/edit', [\App\Http\Controllers\Photographer\PortfolioController::class, 'edit'])->name('portfolio.edit');
+        Route::post('/portfolio/{id}/update', [\App\Http\Controllers\Photographer\PortfolioController::class, 'update'])->name('portfolio.update');
+        Route::post('/portfolio/{id}/delete', [\App\Http\Controllers\Photographer\PortfolioController::class, 'destroy'])->name('portfolio.delete');
 
-    Route::get('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'index'])->name('availability');
-    Route::get('/availability/create', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'create'])->name('availability.create');
-    Route::post('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'store'])->name('availability.store');
-    Route::post('/availability/working-hours', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'updateWorkingHours'])->name('availability.update-working-hours');
-    Route::post('/availability/{id}/delete', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'destroy'])->name('availability.delete');
+        Route::get('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'index'])->name('availability');
+        Route::get('/availability/create', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'create'])->name('availability.create');
+        Route::post('/availability', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'store'])->name('availability.store');
+        Route::post('/availability/working-hours', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'updateWorkingHours'])->name('availability.update-working-hours');
+        Route::post('/availability/{id}/delete', [\App\Http\Controllers\Photographer\AvailabilityController::class, 'destroy'])->name('availability.delete');
 
-    // Photographer Booking Order Management & Gallery Upload Routes
-    Route::get('/bookings', [PhotographerBookingController::class, 'index'])->name('bookings');
-    Route::post('/bookings/{id}/status', [PhotographerBookingController::class, 'updateStatus'])->name('bookings.status');
-    Route::post('/bookings/{id}/gallery', [PhotographerBookingController::class, 'uploadGallery'])->name('bookings.gallery');
-    Route::post('/bookings/{id}/reschedule', [PhotographerBookingController::class, 'requestReschedule'])->name('bookings.reschedule');
-    Route::post('/bookings/{id}/reschedule-respond', [PhotographerBookingController::class, 'respondReschedule'])->name('bookings.reschedule-respond');
-    Route::post('/bookings/{id}/rate-client', [PhotographerBookingController::class, 'rateClient'])->name('bookings.rate-client');
+        // Photographer Booking Order Management & Gallery Upload Routes
+        Route::get('/bookings', [PhotographerBookingController::class, 'index'])->name('bookings');
+        Route::post('/bookings/{id}/status', [PhotographerBookingController::class, 'updateStatus'])->name('bookings.status');
+        Route::post('/bookings/{id}/gallery', [PhotographerBookingController::class, 'uploadGallery'])->name('bookings.gallery');
+        Route::post('/bookings/{id}/reschedule', [PhotographerBookingController::class, 'requestReschedule'])->name('bookings.reschedule');
+        Route::post('/bookings/{id}/reschedule-respond', [PhotographerBookingController::class, 'respondReschedule'])->name('bookings.reschedule-respond');
+        Route::post('/bookings/{id}/rate-client', [PhotographerBookingController::class, 'rateClient'])->name('bookings.rate-client');
 
-    // Photographer Custom FAQ Routes
-    Route::get('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'index'])->name('faqs');
-    Route::post('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'store'])->name('faqs.store');
-    Route::post('/faqs/{id}/update', [\App\Http\Controllers\Photographer\FaqController::class, 'update'])->name('faqs.update');
-    Route::post('/faqs/{id}/delete', [\App\Http\Controllers\Photographer\FaqController::class, 'destroy'])->name('faqs.destroy');
+        // Photographer Custom FAQ Routes
+        Route::get('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'index'])->name('faqs');
+        Route::post('/faqs', [\App\Http\Controllers\Photographer\FaqController::class, 'store'])->name('faqs.store');
+        Route::post('/faqs/{id}/update', [\App\Http\Controllers\Photographer\FaqController::class, 'update'])->name('faqs.update');
+        Route::post('/faqs/{id}/delete', [\App\Http\Controllers\Photographer\FaqController::class, 'destroy'])->name('faqs.destroy');
 
-    // Real-Time Chat Photographer Studio Routes
-    Route::get('/chat', [ChatController::class, 'photographerIndex'])->name('chat');
-    Route::get('/chat/client/{clientId}', [ChatController::class, 'photographerStartChat'])->name('chat.client');
-    Route::get('/chat/messages/{chatBookingId}', [ChatController::class, 'getMessages'])->name('chat.messages');
-    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+        // Real-Time Chat Photographer Studio Routes
+        Route::get('/chat', [ChatController::class, 'photographerIndex'])->name('chat');
+        Route::get('/chat/client/{clientId}', [ChatController::class, 'photographerStartChat'])->name('chat.client');
+        Route::get('/chat/messages/{chatBookingId}', [ChatController::class, 'getMessages'])->name('chat.messages');
+        Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
-    // Photographer Financial Reports & Export Routes
-    Route::get('/reports', [\App\Http\Controllers\Photographer\ReportController::class, 'index'])->name('reports');
-    Route::get('/reports/export', [\App\Http\Controllers\Photographer\ReportController::class, 'export'])->name('reports.export');
-    Route::post('/reports/{id}/request-payout', [\App\Http\Controllers\Photographer\ReportController::class, 'requestPayout'])->name('reports.request-payout');
+        // Photographer Financial Reports & Export Routes
+        Route::get('/reports', [\App\Http\Controllers\Photographer\ReportController::class, 'index'])->name('reports');
+        Route::get('/reports/export', [\App\Http\Controllers\Photographer\ReportController::class, 'export'])->name('reports.export');
+        Route::post('/reports/{id}/request-payout', [\App\Http\Controllers\Photographer\ReportController::class, 'requestPayout'])->name('reports.request-payout');
+    });
 });
 /*
 |--------------------------------------------------------------------------

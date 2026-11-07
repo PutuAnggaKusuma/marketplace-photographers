@@ -1,5 +1,9 @@
 <aside :class="sidebarToggle ? 'translate-x-0 lg:w-[84px]' : '-translate-x-full lg:w-[280px]'"
   class="sidebar fixed left-0 top-0 z-50 flex h-screen flex-col overflow-y-hidden border-r border-gray-200 bg-white px-4 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0 transition-all duration-300 ease-in-out shadow-lg lg:shadow-none">
+  @php
+    $sidebarPhotographer = auth()->user()?->rolePhotographer;
+    $sidebarIsUnlocked = $sidebarPhotographer && $sidebarPhotographer->isFeatureUnlocked();
+  @endphp
   <!-- SIDEBAR HEADER -->
   <div :class="sidebarToggle ? 'justify-center px-0' : 'justify-between px-2'"
     class="flex items-center gap-2 pt-6 sidebar-header pb-6 border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ease-in-out">
@@ -40,93 +44,214 @@
 
           <!-- 3. Paket Layanan -->
           <li>
-            <a href="{{ url('/photographer/services') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/services') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l5.441-3.208c.827-.487 1.054-1.547.478-2.316L12.33 4.252A2.25 2.25 0 0010.554 3h-.986z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Paket Layanan</span>
-            </a>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/services') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/services*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l5.441-3.208c.827-.487 1.054-1.547.478-2.316L12.33 4.252A2.25 2.25 0 0010.554 3h-.986z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Paket Layanan</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Paket Layanan.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l5.441-3.208c.827-.487 1.054-1.547.478-2.316L12.33 4.252A2.25 2.25 0 0010.554 3h-.986z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Paket Layanan</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
           </li>
 
           <!-- 4. Portofolio -->
           <li>
-            <a href="{{ url('/photographer/portfolio') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/portfolio') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Portofolio</span>
-            </a>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/portfolio') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/portfolio*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Portofolio</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Portofolio.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Portofolio</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
           </li>
 
           <!-- 5. Tanya Jawab (FAQ) -->
           <li>
-            <a href="{{ route('photographer.faqs') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/faqs*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Tanya Jawab (FAQ)</span>
-            </a>
-          </li>
-
-          <!-- 5. Availability Kalender -->
-          <li>
-            <a href="{{ url('/photographer/availability') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/availability') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Jadwal</span>
-            </a>
-          </li>
-
-          <!-- 6. Booking Masuk -->
-          <li>
-            <a href="{{ url('/photographer/bookings') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/bookings') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Booking</span>
-            </a>
-          </li>
-
-          <!-- 7. Chat Client (Real-Time Badge) -->
-          <li>
-            <a href="{{ url('/photographer/chat') }}" class="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/chat') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <div class="flex items-center gap-3 min-w-0">
+            @if($sidebarIsUnlocked)
+              <a href="{{ route('photographer.faqs') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/faqs*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                 </svg>
-                <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Pesan</span>
-              </div>
-              
-              <!-- Real-Time Unread Count Badge in Sidebar -->
-              <span x-show="$store.chatNotifier && $store.chatNotifier.unreadCount > 0" 
-                    :class="sidebarToggle ? 'lg:hidden' : ''"
-                    x-text="$store.chatNotifier.unreadCount > 99 ? '99+' : $store.chatNotifier.unreadCount"
-                    class="px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-500 text-white shadow-xs animate-pulse shrink-0"
-                    style="display: none;">
-              </span>
-            </a>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Tanya Jawab (FAQ)</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Tanya Jawab (FAQ).' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Tanya Jawab (FAQ)</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
           </li>
 
-          <!-- 8. Laporan Keuangan -->
+          <!-- 6. Availability Kalender -->
           <li>
-            <a href="{{ url('/photographer/reports') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/reports*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Laporan Keuangan</span>
-            </a>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/availability') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/availability*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Jadwal</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Jadwal.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.253M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Jadwal</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
           </li>
 
-          <!-- 9. Event & Lomba Foto -->
+          <!-- 7. Booking Masuk -->
           <li>
-            <a href="{{ route('public.contests.propose.history') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('lomba*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.982-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.483 2.244 9.774 2 12 2c2.226 0 4.517.244 6.75.721v1.515m0 0c.982.143 1.954.317 2.916.52a6.003 6.003 0 01-5.396 4.972m2.48-5.492V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.01 6.01 0 01-4.75 0" />
-              </svg>
-              <span :class="sidebarToggle ? 'lg:hidden' : ''">Pengajuan Lomba</span>
-            </a>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/bookings') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/bookings*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Booking</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Booking.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Booking</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
+          </li>
+
+          <!-- 8. Chat Client -->
+          <li>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/chat') }}" class="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/chat*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Pesan</span>
+                </div>
+                
+                <!-- Real-Time Unread Count Badge in Sidebar -->
+                <span x-show="$store.chatNotifier && $store.chatNotifier.unreadCount > 0" 
+                      :class="sidebarToggle ? 'lg:hidden' : ''"
+                      x-text="$store.chatNotifier.unreadCount > 99 ? '99+' : $store.chatNotifier.unreadCount"
+                      class="px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-500 text-white shadow-xs animate-pulse shrink-0"
+                      style="display: none;">
+                </span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Pesan Chat.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Pesan</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
+          </li>
+
+          <!-- 9. Laporan Keuangan -->
+          <li>
+            @if($sidebarIsUnlocked)
+              <a href="{{ url('/photographer/reports') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('photographer/reports*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Laporan Keuangan</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Laporan Keuangan.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Laporan Keuangan</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
+          </li>
+
+          <!-- 10. Event & Lomba Foto -->
+          <li>
+            @if($sidebarIsUnlocked)
+              <a href="{{ route('public.contests.propose.history') }}" class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 active:scale-95 transition duration-150 {{ request()->is('lomba*') ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 font-bold' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.982-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.483 2.244 9.774 2 12 2c2.226 0 4.517.244 6.75.721v1.515m0 0c.982.143 1.954.317 2.916.52a6.003 6.003 0 01-5.396 4.972m2.48-5.492V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.01 6.01 0 01-4.75 0" />
+                </svg>
+                <span :class="sidebarToggle ? 'lg:hidden' : ''">Pengajuan Lomba</span>
+              </a>
+            @else
+              <a href="javascript:void(0)" 
+                 @click.prevent="$dispatch('show-toast', { type: 'warning', message: 'Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur Pengajuan Lomba.' })"
+                 title="Lengkapi profil 100% dan tunggu verifikasi Admin untuk membuka fitur ini"
+                 class="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-gray-400 dark:text-gray-600 opacity-40 cursor-not-allowed select-none transition duration-150">
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.982-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.483 2.244 9.774 2 12 2c2.226 0 4.517.244 6.75.721v1.515m0 0c.982.143 1.954.317 2.916.52a6.003 6.003 0 01-5.396 4.972m2.48-5.492V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.01 6.01 0 01-4.75 0" />
+                  </svg>
+                  <span :class="sidebarToggle ? 'lg:hidden' : ''" class="truncate">Pengajuan Lomba</span>
+                </div>
+                <svg :class="sidebarToggle ? 'lg:hidden' : ''" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+              </a>
+            @endif
           </li>
 
           <!-- Tombol Logout -->

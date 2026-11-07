@@ -127,9 +127,9 @@
         <!-- 12 Monthly Bar Columns -->
         @foreach($months as $idx => $m)
           @php
-            $val = $monthlyRevenue[$idx] ?? 30;
-            $fee = $monthlyCommission[$idx] ?? 3;
-            $heightPercent = min(100, max(15, ($val / 75) * 100));
+            $val = $monthlyRevenue[$idx] ?? 0;
+            $fee = $monthlyCommission[$idx] ?? 0;
+            $heightPercent = $val > 0 ? min(100, max(10, ($val / 75) * 100)) : 3;
           @endphp
           <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
             <!-- Tooltip on Hover -->
@@ -214,24 +214,39 @@
       <!-- Top Studios List -->
       <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
         @foreach($topPhotographers as $photo)
+          @php
+            $avatarPhoto = $photo->foto ? (str_starts_with($photo->foto, 'http') ? $photo->foto : asset('storage/' . $photo->foto)) : null;
+            $photoRating = $photo->rating_average;
+            $sessionsCount = $photo->contracts()->where('status_contract', 'completed')->count();
+          @endphp
           <div class="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700">
-                <img src="{{ $photo->foto ?: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80' }}" 
-                     alt="{{ $photo->nama }}" 
-                     class="w-full h-full object-cover" />
-              </div>
+              @if($avatarPhoto)
+                <div class="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-gray-100 dark:border-gray-700">
+                  <img src="{{ $avatarPhoto }}" 
+                       alt="{{ $photo->nama }}" 
+                       class="w-full h-full object-cover" />
+                </div>
+              @else
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                  {{ strtoupper(substr($photo->nama ?? 'F', 0, 2)) }}
+                </div>
+              @endif
               <div class="min-w-0">
                 <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $photo->nama }}</p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ $photo->city ? $photo->city->name : 'Indonesia' }}</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ $photo->city ? $photo->city->name : '-' }}</p>
               </div>
             </div>
             <div class="text-right shrink-0">
               <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-black">
-                <svg class="w-3 h-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                <span>4.9</span>
+                @if($photoRating)
+                  <svg class="w-3 h-3 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <span>{{ $photoRating }}</span>
+                @else
+                  <span>Baru</span>
+                @endif
               </div>
-              <span class="block text-[10px] text-gray-400 font-semibold mt-0.5">30+ Sesi</span>
+              <span class="block text-[10px] text-gray-400 font-semibold mt-0.5">{{ $sessionsCount }} Sesi</span>
             </div>
           </div>
         @endforeach

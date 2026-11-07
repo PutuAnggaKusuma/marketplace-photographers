@@ -82,7 +82,7 @@ class CategoryController extends Controller
             'nama_kategori' => trim($request->nama_kategori),
             'slug' => $slug,
             'deskripsi' => trim($request->deskripsi),
-            'icon_url' => trim($request->icon_url) ?: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
+            'icon_url' => trim($request->icon_url) ?: null,
         ]);
 
         return redirect()->back()->with('success', "Kategori '{$request->nama_kategori}' berhasil ditambahkan!");

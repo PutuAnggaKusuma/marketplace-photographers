@@ -44,12 +44,13 @@ class RoleClient extends Model
         return $this->hasMany(PhotographerClientReview::class, 'id_client')->latest();
     }
 
-    public function getAveragePhotographerRatingAttribute(): float
+    public function getAveragePhotographerRatingAttribute(): ?float
     {
-        if ($this->relationLoaded('receivedPhotographerReviews')) {
-            $avg = $this->receivedPhotographerReviews->avg('rating');
-            return round((float) ($avg ?? 5.0), 1);
-        }
-        return round((float) ($this->receivedPhotographerReviews()->avg('rating') ?? 5.0), 1);
+        $reviews = $this->relationLoaded('receivedPhotographerReviews') 
+            ? $this->receivedPhotographerReviews 
+            : $this->receivedPhotographerReviews();
+            
+        $avg = $reviews->avg('rating');
+        return $avg !== null ? round((float) $avg, 1) : null;
     }
 }

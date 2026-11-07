@@ -319,7 +319,7 @@ class ContestController extends Controller
             'id_registration' => $registration->id,
             'judul_karya' => $request->judul_karya,
             'deskripsi_karya' => $request->deskripsi_karya,
-            'image_url' => $imageUrl ?: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=800&q=80',
+            'image_url' => $imageUrl ?: null,
             'media_link' => $request->media_link,
             'status_submission' => 'verified',
         ]);
