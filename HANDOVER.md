@@ -145,6 +145,17 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
 
 ---
 
+12. **Sinkronisasi Multi-Komputer & Penggabungan Cabang `development-2`**:
+   * **Cabang Aktif**: `development-2` (Commit: `76ad04a`).
+   * **Sumber Penggabungan**:
+     - **Komputer A (Lokal)**: Commit `5327ddc` (Tipografi mikro profil fotografer, penyelarasan skala halaman reservasi, seeder 3 album portofolio riil, watermark hak cipta murni tipografi tanpa badge, layout horizontal kartu favorit dengan live toast un-save).
+     - **Komputer B (Remote `origin/development`)**: Commit `4cc64b3` (Fitur alur verifikasi fotografer oleh Admin, migrasi database `status_verifikasi` dan `catatan_penolakan`, middleware `EnsurePhotographerVerified`, detail audit `/admin/photographers/{id}`, dan penanganan representasi media kosong).
+   * **Status Migrasi Database**: `2026_11_07_032601_add_status_verifikasi_and_rejection_notes_to_role_photographers_table` telah dieksekusi dengan sukses.
+   * **Status Dependensi Wilayah**: 38 Provinsi dan 514 Kota telah terverifikasi aktif di database lokal.
+   * **Status Aset**: `npm run build` sukses dikompilasi (3.97s), cache tampilan (`php artisan view:clear`) telah dibersihkan.
+
+---
+
 ## 5. Pedoman & Pantangan Mutlak untuk Pengembang / AI
 * ❌ **Larangan Mutlak Mengistimewakan Kode / ID (Rule #89 Point 1)**: Dilarang keras menampilkan kode sistem atau ID internal database (seperti `FTR-00001`) di area navigasi atas, header, atau kartu publik. Pengunjung/klien tidak berkepentingan melihat ID database fotografer. Kode atau nomor kontrak/invoice hanyalah metadata sekunder yang diletakkan pada tabel atau dokumen cetak resmi secara netral dan tenang.
 * ❌ **Dilarang keras memakai tanda pagar `#`** untuk urutan/nomor ID data apa pun (Gunakan `KTRK-00001`, bukan `#KTRK-00001`; gunakan `1`, bukan `#1`).
