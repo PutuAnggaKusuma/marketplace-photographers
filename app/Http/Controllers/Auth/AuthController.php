@@ -147,6 +147,13 @@ class AuthController extends Controller
             session(['url.intended' => $intended]);
         }
 
+        // Khusus fotografer baru mendaftar: langsung diarahkan ke halaman profil
+        if ($user->role === 'photographer') {
+            session()->forget('url.intended');
+            return redirect()->route('photographer.profile')
+                ->with('success', 'Akun Anda berhasil dibuat. Silakan lengkapi profil Anda.');
+        }
+
         return $this->redirectBasedOnRole($user)
             ->with('success', 'Akun Anda berhasil dibuat. Selamat datang di LensMatch!');
     }

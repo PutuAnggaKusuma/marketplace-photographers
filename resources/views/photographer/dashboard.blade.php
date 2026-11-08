@@ -21,11 +21,33 @@
     </div>
   </div>
 
+  @php
+    $curPhotographer = auth()->user()->rolePhotographer;
+  @endphp
+  @if($curPhotographer && $curPhotographer->status_verifikasi === 'ditolak')
+    <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-extrabold text-sm">
+          <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+          <span>Pendaftaran Anda Ditolak</span>
+        </div>
+        <p class="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
+          Catatan Admin: <span class="font-bold">{{ $curPhotographer->catatan_penolakan ?: 'Data profil belum memenuhi persyaratan.' }}</span>
+        </p>
+        <p class="text-[11px] text-rose-600 dark:text-rose-400/80">
+          Silakan perbaiki data profil Anda, lalu simpan ulang untuk mengajukan verifikasi kembali ke Admin.
+        </p>
+      </div>
+      <a href="{{ route('photographer.profile') }}" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition text-center shrink-0">
+        Perbaiki Profil
+      </a>
+    </div>
+  @endif
+
   <!-- Pengingat Sesi Pintar H-1 & Hari-H (Smart Reminder & Countdown) -->
   @include('partials.shared.upcoming-session-banner', ['urgentSession' => $urgentSession, 'role' => 'photographer'])
 
-  <!-- Onboarding 3 Langkah ("Lengkapi Profil Fotografer Anda") -->
-  @include('partials.photographer.onboarding-wizard')
+
 
   <!-- 2. Actionable Operational Queue (3 Alert Cards Sesuai Standar Proyek) -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -217,7 +239,9 @@
             @endif
             @if($m['type'] === 'rating')
               <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                <span class="text-amber-500">★</span>
+                @if($m['highlight'])
+                  <span class="text-amber-500">★</span>
+                @endif
                 <span>{{ $m['text'] }}</span>
               </span>
             @elseif($m['type'] === 'fast_response')

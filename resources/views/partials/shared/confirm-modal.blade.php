@@ -39,7 +39,7 @@
       this.confirmOpen = false;
     },
 
-    executeConfirm() {
+    executeConfirm(btnEl = null) {
       if (this.isSubmitting) return;
       this.isSubmitting = true;
 
@@ -72,8 +72,17 @@
         }, 50);
       } else {
         // Direct Action URL Form Submit
-        const formEl = this.$refs.actionUrlForm;
+        const formEl = (btnEl ? btnEl.closest('form') : null) 
+          || this.$refs.actionUrlForm 
+          || (this.$el ? this.$el.querySelector('form') : null) 
+          || document.querySelector('#confirm-modal-root form');
         if (formEl) {
+          if (this.modalActionUrl) {
+            formEl.action = this.modalActionUrl;
+          }
+          if (this.modalMethod) {
+            formEl.method = this.modalMethod === 'GET' ? 'GET' : 'POST';
+          }
           formEl.submit();
         }
       }
@@ -144,9 +153,9 @@
       </div>
     </template>
 
-    <!-- Case 2: Action URL Submission (Hapus / Status Change) -->
+    <!-- Case 2: Action URL Submission (Hapus / Status Change / Logout) -->
     <template x-if="!targetForm && !onConfirmCallback">
-      <form x-ref="actionUrlForm" :action="modalActionUrl" :method="modalMethod === 'GET' ? 'GET' : 'POST'" class="space-y-3">
+      <form x-ref="actionUrlForm" :action="modalActionUrl" :method="modalMethod === 'GET' ? 'GET' : 'POST'" @submit.prevent="executeConfirm($el)" class="space-y-3">
         @csrf
         <template x-if="modalMethod !== 'GET' && modalMethod !== 'POST'">
           <input type="hidden" name="_method" :value="modalMethod">
@@ -159,8 +168,8 @@
                   class="py-2.5 px-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 transition cursor-pointer disabled:opacity-50">
             Batal
           </button>
-          <button type="submit" 
-                  @click="isSubmitting = true"
+          <button type="button" 
+                  @click="executeConfirm($el)" 
                   :disabled="isSubmitting"
                   :class="modalButtonClass" 
                   class="py-2.5 px-6 rounded-xl text-xs font-extrabold shadow-xs transition cursor-pointer disabled:opacity-50">

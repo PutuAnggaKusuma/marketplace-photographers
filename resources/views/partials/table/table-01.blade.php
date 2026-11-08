@@ -45,16 +45,22 @@
             }
 
             $photoImg = ($item->photographer && $item->photographer->foto) 
-                ? $item->photographer->foto 
-                : 'https://images.unsplash.com/photo-1519741497674-611481863552?w=150&q=80';
+                ? (str_starts_with($item->photographer->foto, 'http') ? $item->photographer->foto : asset('storage/' . $item->photographer->foto)) 
+                : null;
           @endphp
           <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
             <!-- Paket & Fotografer -->
             <td class="py-3.5 px-3 sm:px-4">
               <div class="flex items-center gap-3 min-w-[200px]">
-                <div class="h-11 w-11 overflow-hidden rounded-xl shrink-0 border border-gray-100 dark:border-gray-700 shadow-2xs">
-                  <img src="{{ $photoImg }}" class="w-full h-full object-cover" alt="{{ $serviceName }}" />
-                </div>
+                @if($photoImg)
+                  <div class="h-11 w-11 overflow-hidden rounded-xl shrink-0 border border-gray-100 dark:border-gray-700 shadow-2xs">
+                    <img src="{{ $photoImg }}" class="w-full h-full object-cover" alt="{{ $serviceName }}" />
+                  </div>
+                @else
+                  <div class="h-11 w-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                    {{ strtoupper(substr($item->photographer?->nama ?? 'F', 0, 2)) }}
+                  </div>
+                @endif
                 <div class="min-w-0">
                   <p class="font-extrabold text-gray-900 dark:text-white truncate max-w-[220px]">
                     {{ $serviceName }}

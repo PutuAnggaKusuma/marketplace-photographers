@@ -22,9 +22,9 @@
     <div class="space-y-4 sm:space-y-5">
       @forelse($favorites as $photographer)
         @php
-          $lowestPrice = $photographer->services->where('tarif_harga', '>', 0)->min('tarif_harga') ?? 1500000;
-          $coverPortfolio = $photographer->portfolios->first()?->medias?->first()?->media ?? 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80';
-          $avatarUrl = $photographer->foto_url;
+          $lowestPrice = $photographer->services->where('tarif_harga', '>', 0)->min('tarif_harga');
+          $coverPortfolio = $photographer->portfolios->first()?->medias?->first()?->media;
+          $avatarUrl = $photographer->foto ? (str_starts_with($photographer->foto, 'http') ? $photographer->foto : asset('storage/' . $photographer->foto)) : null;
           $rating = $photographer->rating_average;
           $reviewCount = $photographer->testimonials->count();
         @endphp
@@ -38,7 +38,14 @@
           
           <!-- Sisi Kiri: Cover Foto Portofolio Kompak (Landscape) -->
           <div class="w-full md:w-60 h-48 md:h-44 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
-            <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            @if($coverPortfolio)
+              <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            @else
+              <div class="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
+                <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                <span class="text-[10px] font-semibold">Belum ada portofolio</span>
+              </div>
+            @endif
             
             <!-- Bookmark Un-Save Icon Button (Top Left) -->
             <button type="button" 
@@ -110,11 +117,24 @@
 
             <!-- Avatar & Nama Studio -->
             <div class="flex items-center gap-3">
-              <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" />
+              @if($avatarUrl)
+                <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" />
+              @else
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs shrink-0">
+                  {{ strtoupper(substr($photographer->nama ?? 'F', 0, 2)) }}
+                </div>
+              @endif
               <div class="min-w-0 flex-1">
-                <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate block">
-                  {{ $photographer->nama }}
-                </a>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate">
+                    {{ $photographer->nama }}
+                  </a>
+                  @if($photographer->is_verified || ($photographer->status_verifikasi ?? null) === 'verified')
+                    <span title="Mitra Terverifikasi" class="text-amber-500 inline-flex items-center">
+                      <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    </span>
+                  @endif
+                </div>
               </div>
             </div>
 

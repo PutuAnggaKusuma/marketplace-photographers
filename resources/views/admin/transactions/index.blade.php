@@ -388,9 +388,9 @@
 
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 
-                        <th class="py-3.5 px-4 sm:px-6">Invoice / Kontrak</th>
+                        <th class="py-3.5 px-4 sm:px-6">Invoice</th>
 
-                        <th class="py-3.5 px-4 sm:px-6">Klien (Penyewa)</th>
+                        <th class="py-3.5 px-4 sm:px-6">Klien</th>
 
                         <th class="py-3.5 px-4 sm:px-6">Fotografer</th>
 

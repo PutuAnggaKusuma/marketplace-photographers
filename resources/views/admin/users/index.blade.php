@@ -92,7 +92,7 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        <th class="py-3.5 px-4 sm:px-6">Klien & Kontak</th>
+                        <th class="py-3.5 px-4 sm:px-6">Klien</th>
                         <th class="py-3.5 px-4 sm:px-6">Tipe Akun</th>
                         <th class="py-3.5 px-4 sm:px-6">Tanggal Bergabung</th>
                         <th class="py-3.5 px-4 sm:px-6 text-center">Aksi</th>

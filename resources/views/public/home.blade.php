@@ -269,10 +269,10 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
       @foreach($featuredPhotographers as $p)
         @php
-          $lowestPrice = $p->services->where('tarif_harga', '>', 0)->min('tarif_harga') ?? 1500000;
-          $coverPortfolio = $p->portfolios->first()?->medias?->first()?->media ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80';
-          $avatarUrl = $p->foto_url ?? ($p->foto ? (str_starts_with($p->foto, 'http') ? $p->foto : asset('storage/' . $p->foto)) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80');
-          $rating = $p->rating_average ?? 4.9;
+          $lowestPrice = $p->services->where('tarif_harga', '>', 0)->min('tarif_harga');
+          $coverPortfolio = $p->portfolios->first()?->medias?->first()?->media;
+          $avatarUrl = $p->foto ? (str_starts_with($p->foto, 'http') ? $p->foto : asset('storage/' . $p->foto)) : null;
+          $rating = $p->rating_average;
           $reviewCount = $p->testimonials->count();
         @endphp
 
@@ -282,12 +282,23 @@
           <div>
             <!-- Top Cover Image Frame -->
             <div class="relative h-56 w-full overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
-              <img src="{{ $coverPortfolio }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $p->nama }}" />
+              @if($coverPortfolio)
+                <img src="{{ $coverPortfolio }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="{{ $p->nama }}" />
+              @else
+                <div class="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
+                  <svg class="w-10 h-10 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                  <span class="text-[10px] font-semibold">Belum ada portofolio</span>
+                </div>
+              @endif
               <!-- Rating Badge Top-Right -->
               <div class="absolute top-4 right-4 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                <span>{{ $rating }}</span>
-                <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
+                @if($rating)
+                  <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <span>{{ $rating }}</span>
+                  <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
+                @else
+                  <span class="text-amber-500 text-[11px] font-bold">Baru</span>
+                @endif
               </div>
             </div>
 
@@ -299,14 +310,20 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
                 </svg>
-                <span class="truncate uppercase">{{ $p->city->name ?? ($p->alamat ?? 'Indonesia') }}</span>
+                <span class="truncate uppercase">{{ $p->city->name ?? ($p->alamat ?? '-') }}</span>
               </div>
 
               <!-- Avatar & Name Row -->
               <div class="flex items-center gap-3">
-                <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" alt="{{ $p->nama }}" />
-                <div class="flex-1">
-                  <h3 class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-amber-500 transition leading-snug">
+                @if($avatarUrl)
+                  <img src="{{ $avatarUrl }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" alt="{{ $p->nama }}" />
+                @else
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs shrink-0">
+                    {{ strtoupper(substr($p->nama ?? 'F', 0, 2)) }}
+                  </div>
+                @endif
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-amber-500 transition leading-snug truncate">
                     {{ $p->nama }}
                   </h3>
                 </div>
@@ -324,7 +341,7 @@
               <!-- Bio Description (Under Categories with clear margin, max 500 chars) -->
               <div class="mt-4 pt-1">
                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {{ !empty(trim($p->deskripsi_bio)) ? \Illuminate\Support\Str::limit($p->deskripsi_bio, 180) : 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
+                  {{ !empty(trim($p->deskripsi_bio ?? '')) ? \Illuminate\Support\Str::limit($p->deskripsi_bio, 180) : 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
                 </p>
               </div>
             </div>
@@ -333,8 +350,12 @@
           <!-- Bottom Section: Price & Full-Width Button -->
           <div class="px-6 sm:px-7 pt-3.5 pb-6 sm:pb-7 space-y-3 mt-auto">
             <div class="space-y-0.5">
-              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Mulai Dari</span>
-              <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">Rp {{ number_format($lowestPrice, 0, ',', '.') }}</p>
+              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Tarif Layanan</span>
+              @if($lowestPrice)
+                <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">Rp {{ number_format($lowestPrice, 0, ',', '.') }}</p>
+              @else
+                <p class="text-gray-400 dark:text-gray-500 font-semibold text-xs leading-tight">Belum ada paket</p>
+              @endif
             </div>
             <div class="pt-0.5">
               <a href="{{ url('/fotografer/' . $p->id) }}" class="inline-flex items-center justify-center gap-1.5 w-full text-center py-3 bg-[#222222] dark:bg-gray-700 text-white hover:bg-amber-400 hover:text-gray-900 rounded-xl text-xs font-extrabold transition duration-200 shadow-xs">

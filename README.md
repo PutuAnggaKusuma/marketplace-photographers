@@ -418,7 +418,6 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
         - `resources/views/public/home.blade.php` (seksi Fotografer Pilihan)
         - `resources/views/public/photographers/index.blade.php` (Cari Fotografer)
         - `resources/views/public/photographers/katalog.blade.php` (Katalog Fotografer)
-        - `resources/views/client/favorites/index.blade.php` (Fotografer Favorit Saya)
       - **DILARANG** membuat card fotografer dengan struktur berbeda dari standar ini tanpa persetujuan eksplisit dari prompter.
 
   44. **Standar Avatar User — Foto Profil atau Inisial Nama (LensMatch User Avatar Standard) — WAJIB DI SELURUH PROYEK**:
@@ -792,61 +791,40 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #66: Standarisasi Tampilan Halaman Detail Profil Fotografer (Unified Master Profile Card & Anti-AI Slop)
-- **1. Konsep Unified Master Profile Card (Full Menyeluruh Sampai ke Bawah)**:
-  - Halaman detail profil fotografer (`/fotografer/{id}`) **WAJIB dibungkus dalam satu Kartu Induk Tunggal (Unified Master Profile Card)** yang membentang penuh: **`w-full rounded-3xl p-6 sm:p-8 lg:p-10 border border-gray-200/80 dark:border-gray-700/80 shadow-xs bg-white dark:bg-gray-800`** di dalam container `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`.
-  - **DILARANG KERAS** memecah halaman menjadi kartu profil kecil di atas lalu membiarkan navigasi tab dan seksi paket layanan melayang terpisah (*floating disconnected islands*) di luar kartu pada latar belakang abu-abu.
-  - Kartu induk ini **mencakup menyeluruh ke bawah (*encompasses*)**:
-    1. Seksi Header Profil Studio (Foto Potret 320px + Identitas + 3 Baris Statistik + Tombol Aksi `Reservasi` & `Chat`).
-    2. Baris Navigasi Tab Teks Horizontal (Active Underline Style Rule #78).
-    3. Seluruh Konten Tab yang Terpilih (Paket Layanan, Portofolio, Kalender, Ulasan, Tanya Jawab).
+### Rule #66: Standarisasi Tampilan Halaman Detail Profil Fotografer (Eclips Doctor Profile Inspired, Full-Width Wrapper & Anti-AI Slop)
+- **1. Konsep Lebar Card Pembungkus (Sejajar Penuh dengan Konten & Navbar)**:
+  - Card pembungkus profil fotografer (`/fotografer/{id}`) **WAJIB memenuhi batas kanan-kiri container standar LensMatch**: **`w-full` di dalam `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`**.
+  - Garis batas luar tepi kiri dan kanan kartu profil atas **wajib sejajar persis (*aligned*)** dengan baris navigasi tab, kartu-kartu grid layanan/portofolio di bawahnya, serta logo dan menu navbar di atasnya.
 - **2. Tata Letak Internal yang Lapang, Tanpa Garis Divider Antar Seksi & Bersih**:
-  - **Bebas Garis Divider Horizontal Antar Seksi**: Seksi profil atas, baris tab navigasi, dan konten tab di bawahnya menyatu bersih secara mulus tanpa garis batas horizontal (*border-b*) yang memotong layar.
-  - Kartu-kartu anak di dalam tab (misal kartu paket layanan, album portofolio, kalender, breakdown ulasan, accordion FAQ) menggunakan latar bersahaja **`bg-gray-50/70 dark:bg-gray-750/70 rounded-2xl border border-gray-200/80 dark:border-gray-700/80`** sehingga memiliki elevasi kontras yang anggun di atas kartu induk putih.
-  - Tata letak dua kolom desktop pada seksi profil atas (`flex flex-col sm:flex-row sm:items-stretch gap-6 sm:gap-8`):
-    - **Kolom Kiri (Foto Potret - Standar Fixed Width & Tinggi Sejajar Tombol)**: Foto potret memiliki lebar pasti **`w-full sm:w-[320px]`** (`width: 320px; min-width: 320px; max-width: 320px; shrink-0 rounded-2xl overflow-hidden relative`) dan **tinggi membujur ke bawah mengikuti tinggi kolom kanan (`sm:self-stretch min-h-[340px]`)** sehingga bagian bawah foto potret sejajar presisi dengan baris tombol aksi (`Reservasi`). Gambar menggunakan `sm:absolute sm:inset-0 w-full h-full object-cover`. **DILARANG KERAS MENEMPELKAN BADGE DI ATAS GAMBAR/FOTO**.
+  - **Bebas Garis Divider Horizontal Antar Seksi**: Seksi profil atas dan seksi paket layanan di bawahnya menyatu bersih secara mulus tanpa garis batas bawah (*border-b*) yang memotong layar.
+  - Menggunakan padding internal yang lega: `p-6 sm:p-8 lg:p-10 rounded-3xl`.
+  - Tata letak dua kolom desktop (`flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-10`):
+    - **Kolom Kiri (Foto Potret)**: Foto potret bersih (`w-56 sm:w-64 lg:w-72 aspect-[3/4] rounded-2xl overflow-hidden bg-sky-50 dark:bg-gray-750 shrink-0 border border-gray-100 dark:border-gray-700/80 shadow-xs`). **DILARANG KERAS MENEMPELKAN BADGE DI ATAS GAMBAR/FOTO**.
     - **Kolom Kanan (Konten & Detail)**:
       - Nama Fotografer dan Spesialisasi Kategori secara langsung dan bersih (tanpa teks redundan semacam *"Mitra Fotografer LensMatch"*).
-       - **3 Seksi Vertikal Berpasangan (3 Rows x 2 Columns — Rule #66 Compliant)**:
-         - **Row 1**: Lokasi & Basis Studio (Kiri) | Tarif Layanan Sesi Foto (Kanan).
-         - **Row 2**: Pengalaman Studio (Kiri) | Portofolio Karya (Kanan) — sejajar vertikal tepat di bawah Row 1.
-         - **Row 3**: Bergabung Sejak (Kiri) | Rating & Ulasan (Kanan) — sejajar vertikal tepat di bawah Row 2.
-         - Mengalir alami ke bawah (`kebawah`), lapang, seimbang penuh dan sejajar dengan tinggi foto potret kiri, bebas dari garis divider kaku (*no dashed line alay*).
+      - Garis Dashed, Grid 2-Kolom (Lokasi & Tarif), Garis Dashed, Baris Statistik 4-Boks, hingga Tombol Aksi di bagian bawah.
 - **3. Larangan Highlight Kuning Raksasa pada Teks Harga (Sensible & Proportional Pricing)**:
   - **DILARANG KERAS** mewarnai teks harga dengan kuning/amber terang berukuran raksasa (*AI slop giant yellow price*).
   - Teks harga wajib menggunakan ukuran yang wajar dan proporsional: **`text-base sm:text-lg font-bold text-gray-900 dark:text-white`** yang tersusun rapi berdampingan dengan blok Lokasi & Basis Studio dalam grid 2-kolom seimbang.
-- **4. Standar Tombol Aksi Profil Fotografer (Opsi A - Terintegrasi di Dalam Kolom Kanan Informasi Tanpa Divider)**:
-  - Tombol aksi profil fotografer diposisikan **di dalam kolom kanan informasi**, tepat di bawah 3 baris statistik studio, bukan mengapung di bawah foto potret. Foto potret di sebelah kiri (320px x 340px) berdiri bersih tanpa tombol di bawahnya.
-  - **Teks Tombol Simpel, Murni 1 Kata & Anti-Alay (Pure Anti-AI Slop)**:
-    - Tombol Utama: **`"Reservasi"`** (Amber `bg-amber-400 font-extrabold`). DILARANG menambahkan kata ekstra seperti *"Reservasi Sesi"* apalagi *"Reservasi Sesi Foto Sekarang"*.
-    - Tombol Sekunder: **`"Chat"`** (Netral `bg-gray-100 font-bold`). DILARANG menambahkan kata ekstra seperti *"Chat Fotografer"* apalagi *"Tanya & Chat Fotografer"*.
-    - Tombol Bookmark/Favorit: Berbentuk **Icon Button** minimalis (`w-11 h-11 rounded-xl border`) dengan icon SVG bookmark interaktif (live toast notification feedback).
-  - **Larangan Mutlak Divider**: DILARANG menambahkan garis divider horizontal (`border-t`, `border-b`) pemisah tombol. Spasi murni menggunakan whitespace alami (`pt-2 gap-2.5 sm:gap-3`).
-- **5. Integrasi Statistik Studio 3 Seksi Vertikal Sejajar 2-Kolom (100% Data Riil Database & Anti-AI Slop - Rule #64 & #66 Compliant)**:
-  - Diposisikan langsung di dalam kolom kanan informasi tersusun vertikal ke bawah dalam grid 2-kolom yang presisi:
-    - **Kolom Kiri (Vertikal Kebawah)**:
-      1. **Lokasi & Basis Studio**: Kota/kabupaten domisili fotografer.
-      2. **Pengalaman Studio**: Dihitung dari tanggal registrasi (`{{ max(1, (int) now()->diffInYears($photographer->created_at)) }}+ Tahun`).
-      3. **Bergabung Sejak**: Tanggal registrasi fotografer riil (`{{ $photographer->created_at ? $photographer->created_at->locale('id')->translatedFormat('d M Y') : '-' }}`).
-    - **Kolom Kanan (Vertikal Kebawah)**:
-      1. **Tarif Layanan Sesi Foto**: Mulai Rp X / sesi dengan tipografi netral profesional.
-      2. **Portofolio**: Total karya portofolio riil di database (`{{ $photographer->portfolios->count() }} Karya`). **TIDAK ADA ID FIKTIF #FTR-0000X**.
-      3. **Rating & Ulasan**: Rating bintang amber dan ulasan riil (`★ {{ $avgRating }} ({{ $totalReviews }})`).
+- **4. Larangan Tombol Melebar Mengikuti Panjang Card (Content-Based Button Width)**:
+  - **DILARANG** memaksa tombol aksi melebar memenuhi seluruh panjang card pembungkus (`w-full` / `flex-1` di desktop melintang 1200px khas AI).
+  - Tombol aksi wajib menggunakan lebar alami berdasarkan isi konten (*content-based width* / `w-auto px-8 py-3.5` untuk primer dan `px-6 py-3.5` untuk sekunder) yang tersusun rapi di bawah kartu statistik.
+- **5. Baris Statistik 4 Kolom (100% Data Riil Database & Anti-AI Slop - Rule #64 Compliant)**:
+  - Terdiri dari 4 boks kartu berlatar lembut (`bg-gray-50 dark:bg-gray-750/70 p-3.5 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700/60`):
+    1. **Pengalaman**: `5+ Tahun`.
+    2. **Portofolio**: Total portofolio karya riil di database (`{{ $photographer->portfolios->count() }} Karya`). **TIDAK ADA ID FIKTIF #FTR-0000X**.
+    3. **Bergabung**: Tanggal bergabung riil (`d M Y`).
+    4. **Rating & Ulasan**: Bintang amber, rating rata-rata, dan jumlah ulasan klien (`★ 5.0 (X)`).
 - **6. Penyelarasan Tab Detail & Price List (Clean Text Pills)**:
   - Kontainer seluruh tab fungsional di bawahnya (Paket Layanan & Price List, Galeri Portofolio, Kalender Ketersediaan, dan Ulasan Klien) menggunakan kontainer standar: **`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`**.
   - Tombol navigasi tab berbentuk pill teks bersih bebas dari ornamen SVG berulang (*no icon clutter*).
-- **7. Tab Paket Layanan Murni Informasional (Larangan Tombol Booking di Kartu Paket)**:
-  - Kartu paket layanan pada profil publik fotografer **hanya menampilkan daftar paket beserta rincian fasilitas & benefit** yang disediakan oleh fotografer.
-  - **DILARANG meletakkan tombol "Pilih Paket & Booking" di setiap kartu paket**: Pemilihan paket sesi foto dilakukan pada halaman formulir reservasi setelah klien menekan tombol utama *"Reservasi Sesi Foto Sekarang"* pada header kartu profil.
 
 ---
 
 ### Rule #67: Standarisasi Tampilan Kalender & Larangan Mutlak Bulatan Status / Dot Badge (Anti-AI Slop)
-- **1. Keseragaman Bentuk & Warna Netral Kartu Sel Tanggal (Uniform Card Matrix)**:
-  - Seluruh kartu tanggal pada grid kalender (termasuk tanggal lampau maupun tanggal padding bulan sebelum/sesudah) **WAJIB seragam** memiliki kontainer kartu dengan border yang konsisten (`rounded-2xl border`). DILARANG menghilangkan border (`border-transparent`) atau membiarkan angka tanggal melayang tanpa kartu.
-  - Tanggal lampau atau non-aktif cukup diabukan (*grayed out*): latar abu-abu netral (`bg-gray-50 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-700/60`) dan teks angka abu-abu redup (`text-gray-400 dark:text-gray-500`).
-  - Tanggal aktif menggunakan latar putih (`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 hover:border-amber-400`).
-  - **DILARANG KERAS** mewarnai seluruh kartu kotak tanggal dengan warna blok hijau, biru, atau merah menyeluruh.
+- **1. Warna Netral Kartu Sel Tanggal (Latar Putih/Abu-Abu)**:
+  - Seluruh kartu tanggal pada kalender wajib menggunakan warna netral standar: latar putih (`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80`) untuk tanggal aktif dan abu-abu (`bg-gray-50 dark:bg-gray-850/50`) untuk tanggal lampau.
+  - **DILARANG KERAS** mewarnai seluruh kartu kotak tanggal dengan warna hijau, biru, atau merah menyeluruh.
 - **2. Pembeda Status Murni dari Warna Teks (Pure Colored Text)**:
   - Indikator ketersediaan tanggal murni berasal dari pembeda **warna teks status**:
     - **Tersedia**: `text-emerald-600 dark:text-emerald-400 font-bold`
@@ -857,25 +835,8 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 - **3. Larangan Boks Legend Status Kalender**:
   - **DILARANG** menampilkan boks pill legend status (boks *"Tersedia"*, *"Terisi Sesi"*, *"Libur/Blokir"*) di atas kalender.
 - **4. Larangan Mutlak Bulatan / Titik Status (Dot Badges) di Seluruh Sistem**:
-- **5. Penanda Hari Ini (Today Indicator) Bersanding dengan Angka Tanggal**:
-  - DILARANG menaruh pill badge terpisah `[ Hari Ini ]` di samping judul nama bulan (misal `November 2026 [ Hari Ini ]`).
-  - Penanda hari ini diletakkan langsung di samping angka tanggal pada kartu sel hari bersangkutan menggunakan teks tipografi murni `(Hari Ini)` berwarna amber (`text-[10px] font-black text-amber-600 dark:text-amber-400`), dengan highlight border kartu amber halus (`border-amber-400 dark:border-amber-500/80`).
-- **6. Kalender Profil Publik Murni Sebagai Preview Ketersediaan (Read-Only Preview)**:
-  - Kalender ketersediaan pada profil fotografer (`/fotografer/{id}`) berfungsi secara eksklusif sebagai **sarana preview informasi jadwal** untuk calon klien melihat tanggal mana yang masih buka (`Tersedia`), sudah terisi kontrak pemotretan klien lain (`Terisi Sesi`), atau jadwal tutup operasional studio (`Libur`).
-  - DILARANG KERAS menyediakan tombol interaktif pemesanan langsung di kalender publik (seperti *"Booking Langsung"* atau *"Pilih Tanggal Ini & Booking"*).
-  - Alur pemilihan tanggal dan paket pemotretan HANYA terjadi setelah calon klien menekan tombol utama **"Reservasi Sesi"** di kartu header profil fotografer.
   - **DILARANG KERAS** mengimplementasikan bulatan atau titik status (`<span class="w-* h-* rounded-full bg-*"></span>` atau `●` atau `&bull;`) di samping teks status pada kalender, tabel, badge, kartu, profil, atau elemen UI mana pun di seluruh sistem.
   - Bulatan status diklasifikasikan sebagai artefak *"AI Slop"* yang mengotori estetika UI. Seluruh indikator status wajib berupa teks murni yang bersih, rapi, dan profesional.
-- **5. Standarisasi Indikator Tanggal Hari Ini (Larangan Header Badge & Penempatan Teks Langsung di Samping Angka Tanggal)**:
-  - **DILARANG** membuat tombol/badge terpisah seperti `[ Hari Ini ]` di header kalender di samping nama bulan (`November 2026 [Hari Ini]`).
-  - **DILARANG** membuat bulatan kuning / dot badge mengelilingi atau menempel pada angka tanggal.
-  - Indikator tanggal hari ini **WAJIB berupa teks bersih langsung di samping angka tanggal**: contoh `6 (Hari Ini)` dengan styling `text-amber-600 dark:text-amber-400 font-extrabold text-[10px] sm:text-[11px]`, serta border kartu aktif hari ini bernuansa amber halus (`border-amber-400 dark:border-amber-500`).
-  - Seluruh divider horizontal garis pemotong (`border-t` / `border-b`) pada kalender, header, dan footer dieliminasi total mengikuti filosofi Anti-AI Slop, mengandalkan spasi alami (`space-y-6`).
-- **6. Tab Kalender Ketersediaan Murni Informasional Preview (Larangan Mutlak Tombol Booking di Kalender Profil Publik)**:
-  - Kalender ketersediaan pada profil publik fotografer (`/fotografer/{id}`) **berfungsi 100% sebagai kalender preview informasional** untuk melihat jadwal kosong (*Tersedia*), jadwal terisi sesi pemotretan (*Terisi Sesi*), dan hari libur operasional (*Libur*).
-  - **DILARANG KERAS** menyediakan tombol booking di area kalender ketersediaan (seperti tombol *"Booking Langsung"* pada header tab atau tombol *"Pilih Tanggal Ini & Booking"* pada panel drawer rincian tanggal terpilih).
-  - Seluruh proses pemesanan/reservasi (pemilihan paket, penentuan tanggal kalender untuk booking, durasi, jam, dan lokasi) **HANYA BERJALAN SETELAH** klien menekan tombol utama *"Reservasi Sesi Foto Sekarang"* pada header kartu profil fotografer yang mengarahkan ke formulir reservasi resmi (`/booking/create?photographer_id=...`).
-  - Mengklik sel tanggal pada kalender ketersediaan hanya menampilkan drawer ringkasan rincian tanggal (jadwal sesi pemotretan aktif yang terisi atau keterangan libur) secara tenang dan elegan tanpa tombol aksi booking.
 
 ---
 
@@ -1042,26 +1003,23 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - Koleksi album portofolio ditampilkan secara vertikal membujur ke bawah per album koleksi:
      `<div class="space-y-8 sm:space-y-10">`
    - Setiap kartu album portofolio mengambil lebar penuh (`w-full`), menyajikan karya fotografi secara megah, lapang, dan tidak terhimpit.
-2. **Spesifikasi Kartu Album (Gambar Paling Besar di KIRI + 3 Gambar Kecil Bertumpuk VERTIKAL di KANAN)**:
-   - **Card Outer (Lapang & Lega)**:
-     `bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 lg:p-9 border border-gray-200/80 dark:border-gray-700/80 shadow-xs hover:shadow-md transition space-y-6`
-   - **Tata Letak Grid Responsif**:
-     `grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-4 items-stretch`
-   - **Foto Utama Paling Besar (Hero Photo — di KIRI)**:
-     - Mengambil porsi dominan kiri (`md:col-span-8`):
-       `relative w-full h-[280px] sm:h-[380px] md:h-[480px] lg:h-[520px] overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-2xl cursor-pointer group shadow-2xs`
+2. **Spesifikasi Kartu Album (Rotasi Vertikal: Foto Utama Full di Atas + 3 Thumbnail Horizontal di Bawah)**:
+   - **Card Outer**:
+     `bg-white dark:bg-gray-800 rounded-[26px] p-4 sm:p-6 border border-gray-200/80 dark:border-gray-700/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 space-y-4`
+   - **Foto Pertama Utama (Hero Photo - Full Width di Atas)**:
+     - Mengambil lebar penuh kartu dengan rasio layar lebar sinematik:
+       `relative w-full overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-[20px] aspect-[16/9] sm:aspect-[2.2/1] cursor-pointer group`
      - Gambar: `w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 ease-out`.
      - Hover overlay: Tombol halus transparan *"Buka Foto Penuh"* untuk interaksi visual yang jelas.
-   - **3 Thumbnail Kecil Bertumpuk VERTIKAL ke Bawah (di KANAN)**:
-     - Mengambil porsi samping kanan sejajar persis dengan foto kiri (`md:col-span-4 flex flex-row md:flex-col gap-2.5 sm:gap-3.5 h-28 sm:h-36 md:h-[480px] lg:h-[520px]`):
-     - Pada layar desktop/tablet (`md:`), 3 thumbnail **wajib tersusun bertingkat vertikal ke bawah (`md:flex-col`)**, bukan berjajar ke samping, sehingga pas dan sejajar penuh dengan foto besar di kiri.
-     - Setiap thumbnail: `flex-1 min-w-0 min-h-0 relative w-full h-full overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-2xl cursor-pointer group/thumb shadow-2xs`
+   - **3 Thumbnail Horizontal Berjejer di Bawah**:
+     - `grid grid-cols-3 gap-3 sm:gap-4`
+     - Setiap thumbnail: `relative w-full aspect-[16/10] sm:aspect-[16/9] overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-[14px] cursor-pointer group/thumb`
      - Gambar: `w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500 ease-out`.
      - Jika album memiliki lebih dari 4 foto (`$pCount > 4`), thumbnail ke-3 menampilkan badge overlay `+{{ $pCount - 4 }} Foto Lainnya`.
-   - **Meta Footer Bawah (Anti-AI Slop — Teks Metadata Sejajar Judul)**:
-     - Mengeliminasi badge/pill mengapung bertuliskan jumlah foto di pojok bawah kartu.
-     - Judul album tebal (`text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight`) berdampingan langsung dengan metadata foto halus (`· X Foto` dalam `text-xs sm:text-sm font-semibold text-gray-400 dark:text-gray-500`).
-     - Deskripsi/cerita singkat mengalir alami di bawah judul (`text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-4xl`) tanpa garis divider horizontal.
+   - **Meta Footer Bawah**:
+     - `flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 px-1 border-t border-gray-100 dark:border-gray-700/60`
+     - Kiri: Judul album tebal (`text-base sm:text-lg font-bold text-gray-900 dark:text-white`) beserta deskripsi/cerita singkat (`text-xs text-gray-500 line-clamp-2`).
+     - Kanan: Ikon bingkai kamera SVG asli + angka total foto album (`text-xs font-semibold text-gray-500 dark:text-gray-400`).
 3. **Interaktivitas Lightbox Viewer**:
    - Mengklik foto utama maupun thumbnail mana pun memicu modal Lightbox interaktif layar penuh dengan navigasi panah kiri/kanan dan pintasan keyboard (`Esc`, Panah Kanan/Kiri).
 
@@ -1150,15 +1108,6 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - `resources/views/public/photographers/show.blade.php`: Tab Paket Layanan, Portofolio, Jadwal Sesi, dan Ulasan Klien.
    - `resources/views/public/elearning/show.blade.php`: Tab Deskripsi, Lampiran, dan Catatan.
    - `resources/views/public/help/faq.blade.php`: Tab Kategori Pertanyaan FAQ.
-5. **Konsistensi Label Tab Navigasi dan Judul Seksi Konten (Exact 2-Word Matching — Anti-AI Slop)**:
-   - Judul seksi konten (`<h2>`) yang tampil saat tab diklik **WAJIB identik persis (1:1)** dengan teks label pada tombol tab di atasnya.
-   - **DILARANG KERAS** memperpanjang judul konten menjadi kalimat bertele-tele khas AI (*verbose titles*), seperti menamai tombol tab `"Paket Layanan"` (2 kata) tetapi judul seksi di bawahnya diubah menjadi *"Pilihan Paket Layanan Sesi Foto"* (5 kata).
-   - Standar 5 Tab Halaman Profil Fotografer (`/fotografer/{id}`):
-     1. Tab 1: Tombol **`Paket Layanan`** -> Judul Konten: **`Paket Layanan`**
-     2. Tab 2: Tombol **`Galeri Portofolio`** -> Judul Konten: **`Galeri Portofolio`**
-     3. Tab 3: Tombol **`Kalender Ketersediaan`** -> Judul Konten: **`Kalender Ketersediaan`**
-     4. Tab 4: Tombol **`Ulasan Klien`** -> Judul Konten: **`Ulasan Klien`**
-     5. Tab 5: Tombol **`Tanya Jawab`** -> Judul Konten: **`Tanya Jawab`**
 
 ---
 
@@ -1311,18 +1260,19 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #86: Standarisasi Fitur Tanya Jawab Sistem Universal (System-Curated Universal FAQ)
-1. **Konsep & Arsitektur Modul**:
-   - Daftar Tanya Jawab (FAQ) diatur dan dikurasi secara terpusat oleh sistem. Sistem merangkum dan menyusun pertanyaan-pertanyaan yang paling sering diajukan oleh pencari jasa (klien), mencakup alur pemesanan, keamanan pembayaran, konfirmasi jadwal, konsultasi konsep via chat, reschedule, penyerahan hasil foto, hingga penanganan kendala cuaca outdoor.
-   - **Universal & Identik untuk Seluruh Fotografer**: Daftar FAQ ini seragam dan sama untuk seluruh mitra fotografer pada etalase profil publik (`/fotografer/{id}`), sehingga seluruh profil fotografer menyajikan informasi lengkap dan bebas dari status kosong (*empty state*).
-2. **Penyajian pada Profil Publik (`/fotografer/{id}`)**:
-   - Ditempatkan sebagai Tab ke-5 **Tanya Jawab** di bawah sistem navigasi tab Rule #78 (teks horizontal dengan underline aktif amber). Counter badge tab menampilkan jumlah pertanyaan FAQ sistem secara dinamis.
-   - Menggunakan akordeon interaktif yang mulus (smooth Alpine.js accordion) dengan palet tenang (`bg-white dark:bg-gray-800 border-gray-200/80 dark:border-gray-700/80`).
-   - Menyediakan tautan langsung *"Ada pertanyaan lain? Tanya via Chat"* di pojok kanan atas untuk memfasilitasi calon klien bertanya hal-hal spesifik langsung ke fotografer terkait.
-3. **Standarisasi Icon & Tipografi Akordeon FAQ (Opsi 1: Question Mark Circle — Anti-Slop)**:
-   - Menggunakan icon standar global SaaS/Marketplace: **QuestionMarkCircle SVG** tipis berwarna amber (`w-5 h-5 text-amber-500`).
-   - Dilarang keras menggunakan badge bulat buatan bertuliskan huruf "Q" dan "A" (*anti-slop*).
-   - Jawaban akordeon disajikan secara bersih dengan indentasi natural (`pl-8`) tanpa badge huruf buatan.
+### Rule #86: Standarisasi Fitur Tanya Jawab Kustom Fotografer (Photographer Custom FAQ)
+1. **Tujuan & Arsitektur Modul**:
+   - Memfasilitasi fotografer mitra untuk mendokumentasikan pertanyaan yang paling sering ditanyakan klien (seperti estimasi waktu penyerahan hasil foto yang sudah diedit, izin lokasi/tiket wisata, penanganan cuaca buruk outdoor, ketentuan DP, dll).
+   - Mengurangi beban pertanyaan berulang pada room obrolan dan mempercepat konversi reservasi klien di etalase profil publik fotografer.
+2. **Kepatuhan Antarmuka & Standar CRUD**:
+   - **Manajemen Mitra (`/photographer/faqs`)**:
+     - Tabel daftar FAQ dengan aksi standar Rule #80: Tombol **Edit** (biru soft) dan **Hapus** (merah soft) teks murni tanpa ikon.
+     - Modal Tambah/Edit FAQ mematuhi **Rule #59**: Judul rata tengah tanpa ikon, modal tertutup saat klik luar/esc, tombol aksi di bagian bawah rata tengah maksimal 2 tombol: **Batal** di kiri (`bg-gray-100 dark:bg-gray-700`) dan **Simpan Data / Perbaharui Data** di kanan (`bg-amber-400 font-extrabold`). DILARANG menambahkan tombol silang (X) di pojok kanan atas.
+     - Formulir mematuhi **Rule #73**: Urutan (angka) dan Status (dropdown aktif/nonaktif) dalam grid 2-kolom horizontal, sedangkan pertanyaan (teks) dan jawaban (textarea `rows="4"`) menempati baris penuh.
+3. **Penyajian pada Profil Publik (`/fotografer/{id}`)**:
+   - Ditempatkan sebagai Tab ke-5 **Tanya Jawab** di bawah sistem navigasi tab Rule #78 (garis bawah kuning `border-b-2 border-amber-400` teks murni).
+   - Menggunakan akordeon interaktif yang mulus (smooth Alpine.js accordion) dengan palet muted tenang (`bg-gray-50/70 border-gray-200/80 dark:bg-gray-800/50 dark:border-gray-700/80`).
+   - Dilengkapi fallback state ramah jika fotografer belum menambahkan FAQ dengan tombol CTA *"Tanya via Chat"* yang langsung membuka room konsultasi.
 
 ---
 
@@ -1466,79 +1416,124 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
      - Jika pengguna bukan berstatus role Klien (misal Admin atau Fotografer): *"Fitur ini khusus untuk akun Klien."* (warna amber/peringatan).
      - Jika belum login: dialihkan langsung ke halaman masuk (*login redirect*).
    - **DILARANG KERAS** membiarkan tombol tertekan secara pasif tanpa feedback visual atau menyembunyikan error HTTP di dalam console secara diam-diam (*silent catch*).
-4. **Wajib Toast Notification & Larangan Banner Alert Statis Permanen (Anti-AI Slop)**:
-   - Tindakan menyimpan maupun menghapus fotografer favorit pada halaman daftar favorit (`/client/favorites`) maupun halaman profil/katalog **WAJIB menggunakan Toast Notification mengambang** (*floating toast*) yang memiliki animasi progress line menyusut dan menghilang secara otomatis (*auto-dismiss* dalam kurun waktu 4.5 detik).
-   - **DILARANG KERAS** menampilkan kotak/banner alert statis permanen (`@if(session('success')) <div class="p-4 rounded-2xl bg-emerald-50...">...</div> @endif`) di dalam body halaman daftar favorit maupun galeri yang terus menempel dan mengotori antarmuka pengguna setelah aksi penghapusan selesai.
-   - Penghapusan item favorit pada kartu di halaman `/client/favorites` diproses secara asinkron (*AJAX / fetch*) dengan animasi fade-out Alpine.js, memicu event `show-toast`, dan melakukan auto-refresh bersih ketika item terakhir dihapus untuk menampilkan empty state tanpa jejak banner statis.
-   - Seluruh kartu fotografer pada halaman favorit wajib bebas dari garis divider (`0 border-t / border-b`) pada seksi tombol aksi sesuai prinsip Anti-AI Slop.
-5. **Larangan Badge Pill Kapsul pada Header Halaman Favorit (Anti-AI Slop)**:
-   - Judul utama `<h1>Fotografer Favorit Saya</h1>` pada `/client/favorites` **DILARANG memakai badge pill kapsul berwarna** (seperti `[ 1 Disimpan ]`). Judul wajib tampil bersih murni sesuai standar tipografi halaman klien lainnya.
-6. **Standarisasi Kartu Baris Horizontal Halaman Favorit (Horizontal Row Cards - Upwork / HoneyBook Style)**:
-   - Sesuai standar industri marketplace layanan jasa dan konvensi platform, halaman `/client/favorites` menggunakan tata letak kartu baris horizontal (`space-y-4 sm:space-y-5`, `flex flex-col md:flex-row items-start md:items-center justify-between gap-6`). Tata letak ini menjamin kartu tetap terlihat proporsional, solid, dan berwibawa memenuhi layar tanpa ada kekosongan janggal meskipun klien baru menyimpan 1 fotografer.
-   - **Struktur Tiga Komponen Kartu**:
-     1. **Sisi Kiri**: Cover foto portofolio format landscape kompak (`w-full md:w-60 h-48 md:h-44 rounded-2xl overflow-hidden shrink-0 relative`) dilengkapi tombol un-save bookmark bulat di sudut kiri atas. **DILARANG keras menempelkan badge rating bintang mengambang di atas gambar/foto**.
-     2. **Sisi Tengah**: Lokasi kota (ikon pin), baris avatar mitra + nama studio, daftar kategori spesialisasi tipografi murni (*plain text comma-separated* tanpa badge pill), metrik rating bintang dan sesi selesai inline teks, serta cuplikan ringkas bio studio (max 2 baris `line-clamp-2`).
-     3. **Sisi Kanan**: Rincian tarif ("Mulai Dari Rp ... / sesi") berdampingan vertikal dengan 2 tombol aksi nyata:
-        - Tombol Utama: **`"Reservasi"`** (`bg-amber-400 hover:bg-amber-500 font-extrabold text-gray-950`). DILARANG menambahkan kata ekstra seperti *"Reservasi Sesi"*.
-        - Tombol Sekunder: **`"Chat"`** (`bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 font-bold text-gray-800 dark:text-gray-100`). DILARANG menambahkan kata ekstra seperti *"Chat Fotografer"*.
-        - Tautan Teks: **`"Lihat Profil Lengkap >"`** (tautan navigasi halus ke profil fotografer).
-   - **Anti-AI Slop & Zero Dividers**:
-     - Nol garis pemisah internal (`0 border-t / border-b / border-l`) yang membelah kartu atau membatasi seksi tombol aksi.
-     - Penamaan tombol aksi wajib murni 1 kata to the point (**`"Reservasi"`** dan **`"Chat"`**), tanpa kata bertele-tele dan **DILARANG menggunakan simbol `&` yang menduplikasi makna**.
-
-### Rule #94: Standarisasi Dropdown Paginasi Universal & Dynamic Whitelist Fallback
-1. **Pencegahan Bug Opsi Paginasi Tidak Sinkron**:
-   - Seluruh paginator universal (`partials.public.pagination` dan `partials.dashboard.pagination`) dan controller sistem menggunakan standar jumlah baris per halaman: **`10, 20, 50, 100`** dengan default **`10`**.
-   - Komponen Blade paginasi dilengkapi logika penyisipan dinamis: jika nilai `$paginator->perPage()` yang aktif dari controller tidak ada di dalam daftar default (misalnya `9` atau angka kustom lainnya), nilai tersebut **secara otomatis disisipkan dan diurutkan secara numerik ke dalam daftar dropdown**, sehingga label tombol yang sedang aktif dijamin selalu sinkron dan dapat dipilih kembali oleh pengguna tanpa memicu bug visual.
-
----
-
-### Rule #95: Standarisasi Formulir Reservasi Sesi Foto (Urutan Langkah Logis, Anti-Forced Selection & Real-Time Alpine Calculation)
-1. **Larangan Pemaksaan Paket Otomatis (Anti-Forced Package Selection)**:
-   - Ketika calon klien menekan tombol utama **"Reservasi"** dari profil fotografer atau daftar favorit tanpa membawa parameter `service_id`, controller (`BookingController@create`) **DILARANG memaksakan paket pertama secara sepihak** (`$service = $allServices->first()`).
-   - Variabel `$service` wajib bernilai `null` apabila `service_id` tidak disertakan di URL, memberikan keleluasaan penuh bagi klien untuk memilih paket yang diminati pada formulir.
-2. **Urutan 4 Seksi Formulir Kiri yang Logis & Terstruktur**:
-   - **Seksi 1 (Paling Atas)**: **Pilih Paket Layanan**. Menampilkan seluruh paket pemotretan yang disediakan fotografer dalam bentuk kartu seleksi interaktif (radio button, nama paket, tarif harga, deskripsi, dan rincian fasilitas).
-   - **Seksi 2**: **Jadwal Pelaksanaan Sesi Foto**. Pemilihan tanggal sesi foto dan jam mulai sesi.
-   - **Seksi 3**: **Lokasi Pemotretan**. Pemilihan wilayah administrasi (Provinsi, Kota/Kabupaten via AJAX dinamis) dan alamat lengkap venue acara.
-   - **Seksi 4**: **Catatan Khusus**. Catatan tema, busana, preferensi konsep, atau instruksi khusus untuk fotografer.
-3. **Reaktivitas Kolom Kanan (Ringkasan Pesanan Tanpa Reload / Zero-Reload Reactive State)**:
-   - Sebelum paket dipilih (`!selectedServiceId`): Kolom kanan menampilkan panduan ramah (*"Pilih Paket Layanan: Silakan tentukan paket layanan sesi foto pada formulir di sebelah kiri terlebih dahulu"*), total bayar Rp 0, dan tombol aksi dinonaktifkan (*disabled*).
-   - Setelah paket dipilih: Rincian paket terisi otomatis, fitur tambahan opsional (*add-ons*) sesuai paket langsung muncul, dan simulasi skema pembayaran (Bayar Penuh vs DP 30%) terkalkulasi secara instan via Alpine.js.
-4. **Kepatuhan Anti-AI Slop & Zero Dividers**:
-   - **Tanpa Breadcrumb Palsu (Rule #72)**: Menghapus custom breadcrumb navigasi palsu di atas judul halaman.
-   - **Zero Dividers (Rule #67)**: Tidak ada garis pembatas horizontal (`0 border-t / border-b`) yang membelah kartu di dalam seksi input maupun ringkasan tagihan.
-   - **Eliminasi Simbol `&` Redundan (Rule #70)**: Menggunakan tajuk ringkas **`"Ringkasan Pesanan"`** (bukan *"Ringkasan Pesanan & Tarif"*).
-   - **Tombol Brand Amber LensMatch (Rule #91)**: Menggunakan `bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-md`.
-
----
-
-### Rule #96: Standarisasi Mini Kalender Interaktif & Time-Slot Matrix Chips (Multi-Booking & Jeda Istirahat / Sesi Estafet)
-1. **Urutan Alur Alami Pemilihan Jadwal (Tanggal Dahulu $\rightarrow$ Baru Jam)**:
-   - Pemilihan slot ketersediaan waktu mutlak mengikuti alur: **Klien memilih tanggal sesi terlebih dahulu**, baru kemudian sistem mengevaluasi ketersediaan jam operasional fotografer pada tanggal tersebut.
-2. **Mini Kalender Bulan Interaktif (Seksi 2 Formulir)**:
-   - Menggunakan mini kalender bulan berjalan (Senin s/d Minggu) yang proporsional di dalam Seksi 2:
-     - Navigasi bulan menggunakan single chevron modern minimalis (`<` dan `>`) sesuai Rule #72.
-     - Tanggal lampau dan tanggal libur seharian penuh fotografer secara otomatis diabukan (*grayed out*) dengan label mikro `Libur`.
-     - Tanggal hari ini ditandai teks bersih `(Hari Ini)` tanpa bulatan dot badge (Rule #67).
-     - Tanggal aktif dapat diklik dan disorot dengan highlight amber LensMatch (`ring-2 ring-amber-400 bg-amber-400 text-gray-950 font-black`).
-3. **Time-Slot Matrix Chips (Penanganan Multi-Booking & Istirahat Siang)**:
-   - Tepat di bawah kalender mini, kandidat jam mulai sesi disajikan dalam bentuk kartu chip grid yang tenang dan terstruktur (bukan dropdown sempit).
-   - Setiap chip jam memiliki 4 status visual yang bersih dan bebas dari warna pelangi (*anti-AI slop*):
-     - **Tersedia**: Kartu putih bersih yang dapat diklik (label hijau `Tersedia`).
-     - **Terpilih**: Solid amber LensMatch (`bg-amber-400 text-gray-950 font-extrabold shadow-xs`).
-     - **Terisi**: Jika slot jam berbenturan dengan pesanan klien lain yang sudah aktif di hari tersebut (`opacity-50 border-dashed cursor-not-allowed`, label abu-abu `Terisi`).
-     - **Istirahat / Tutup**: Jika slot jam berbenturan dengan jam istirahat atau penutupan parsial fotografer (label abu-abu `Istirahat` atau `Tutup`).
-4. **Perhitungan Durasi Dinamis di Backend**:
-   - Backend (`BookingController@store`) menghitung `$bookingEnd` secara dinamis sesuai durasi paket (`+$durasi hours`), dan memeriksa benturan interval waktu (`slotStart < otherEnd && slotEnd > otherStart`) baik terhadap booking klien lain maupun terhadap jam istirahat manual fotografer.
-
-
-
 
 
 ---
 
-### Rule #97: Standarisasi Master Card Profil Fotografer & Harmonitas Warna Kartu Dalam (Anti-Gray Tint, Zero Shadow & Skala Tipografi Proporsional)
+### Rule #94: Standarisasi 100% Data Dinamis & Larangan Mutlak Data Palsu/Dummy/Fallback Statis (Zero Dummy Fallback Standard)
+1. **Latar Belakang & Masalah Data Fiktif (Anti-Fabricated Data)**:
+   - Pengguna baru (misalnya fotografer atau klien yang baru mendaftar) belum mengunggah foto profil, belum menentukan domisili operasional, belum membuat paket layanan, dan belum memiliki ulasan dari klien.
+   - Sebelumnya terjadi pelanggaran serius di mana sistem menampilkan data statis buatan / fallback fiktif:
+     - Foto avatar otomatis menampilkan foto stok wanita dari Unsplash.
+     - Wilayah operasional default menjadi `"Indonesia"`.
+     - Kategori spesialisasi default menjadi `"Semua Kategori"`.
+     - Rating otomatis menampilkan `★ 4.9` atau `★ 5.0` padahal ulasan masih 0.
+     - Harga layanan menampilkan `Mulai Rp 1.500.000` padahal belum ada paket.
+     - Formulir rekening payout terisi otomatis nama bank `'BCA'`, nomor `'1234567890'`, dan nama `'Budi Santoso'`.
+   - Hal tersebut **DILARANG KERAS SECARA MUTLAK** karena melanggar prinsip keaslian data database dinamis, menimbulkan kebingungan fatal bagi pengguna, dan merusak kredibilitas sistem marketplace.
+
+2. **Larangan Mutlak Fallback Statis (Zero Dummy Fallback Tolerance)**:
+   - **DILARANG** menggunakan URL foto pihak ketiga (Unsplash, Pexels, dsb.) sebagai fallback gambar avatar, foto sampul, maupun thumbnail ketika kolom database bernilai `null` atau kosong.
+   - **DILARANG** mengembalikan nilai rating numerik palsu (`?? 4.9`, `?? 5.0`, dsb.) pada accessor model atau view Blade untuk entitas yang belum memiliki ulasan.
+   - **DILARANG** memasang harga default fiktif (`?? 1500000`, `?? 149000`, dsb.) jika data harga layanan atau kursus belum ditentukan.
+   - **DILARANG** mengisi teks wilayah/kota default (`?? 'Indonesia'`, `?? 'Jakarta'`) jika domisili pengguna belum disetel di database.
+   - **DILARANG** memberikan nilai awal fiktif pada variabel input formulir (`'BCA'`, dsb.) atau menggunakan teks placeholder yang menyerupai data asli yang telah terisi (`placeholder="1234567890"` atau `placeholder="Budi Santoso"`). Placeholder formulir WAJIB berupa kalimat instruksi yang jelas (misalnya: `placeholder="Masukkan nomor rekening"`, `placeholder="Masukkan nama pemilik rekening"`).
+   - **DILARANG** memanipulasi grafik statistik atau metrik bulanan dengan nilai dasar fiktif (seperti `$val = $monthlyRevenue[$idx] ?? 30`). Jika tidak ada omzet, nilai wajib `0` dengan tinggi bar dasar minimum (`3%`).
+
+3. **Standarisasi Representasi Data Kosong (Empty-State Standards)**:
+   - **Avatar Pengguna / Fotografer Kosong**: Wajib merender lencana lingkaran inisial nama 2 karakter kapital sesuai **Rule #44** menggunakan komponen `<x-user-avatar>` atau kontainer inisial (`{{ strtoupper(substr($user->nama, 0, 2)) }}`).
+   - **Kotak Pratinjau / Input Upload Foto Kosong (Empty State Media Preview Standard)**: Di seluruh sistem (baik profil fotografer, kartu audit verifikasi admin, profil klien, banner lomba, maupun thumbnail materi modul), jika foto belum diunggah atau data gambar kosong, kotak preview wajib menampilkan **ikon kamera outline abu-abu simpel** (`text-gray-400 dark:text-gray-500`) di dalam kontainer bergaris putus-putus netral (`border-dashed border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800`) tanpa label teks verbal berlebih (seperti 'Kosong', 'Belum ada foto', atau inisial huruf).
+   - **Foto Sampul / Portofolio Kosong**: Menampilkan kontainer abu-abu netral dengan ikon kamera outline abu-abu simpel standar.
+   - **Wilayah Operasional Kosong**: Wajib menampilkan tanda strip `-` dengan kelas teks redup `text-gray-400 font-medium` (bukan string lokasi umum atau teks hitam tebal).
+   - **Spesialisasi Kategori Kosong**: Wajib menampilkan teks murni `Belum diatur` dengan warna redup `text-gray-400 font-medium` (bukan "Semua Kategori").
+   - **Rating Fotografer Kosong (0 Ulasan)**: Wajib menampilkan teks murni `Mitra Baru` (atau `Baru` pada kartu ringkas) tanpa simbol bintang `★`. Bintang kepuasan hanya boleh muncul jika rating numerik benar-benar dihitung dari tabel ulasan database (`avg('rating') !== null`).
+   - **Paket Layanan Kosong**: Wajib menampilkan teks murni `Belum ada paket` atau `Belum ada paket layanan` (bukan nominal harga default).
+   - **Thumbnail Kursus / Materi Kosong**: Menampilkan kontainer netral dengan ikon kamera outline abu-abu simpel standar.
+
+
+---
+
+### Rule #95: Standarisasi Alur Detail & Verifikasi Mitra Fotografer Admin (`/admin/photographers/{id}`)
+1. **Pemisahan Tegas Antara Backoffice Admin vs Etalase Universal Klien**:
+   - Modul `Manajemen Fotografer` pada panel Admin (`/admin/photographers`) adalah area operasional backoffice manajerial.
+   - **DILARANG KERAS** mengarahkan tombol aksi `Lihat` pada tabel Admin ke halaman publik klien (`/fotografer/{id}`). Halaman publik klien dirancang khusus untuk calon pemesan jasa foto (memuat tombol reservasi, chat, wishlist, dan menyembunyikan data rahasia seperti nomor rekening).
+   - Tombol `Lihat` pada tabel admin **WAJIB mengarahkan ke halaman internal Admin**: `route('admin.photographers.show', $id)` dengan layout manajerial `@extends('layouts.admin')`.
+
+2. **Cakupan Informasi Audit Administratif Satu Pintu & Keselarasan Field Profil**:
+   - Halaman detail audit `/admin/photographers/{id}` wajib menyajikan data pendaftaran fotografer secara komprehensif mengikuti **Rule #73 (Hybrid Responsive Layout)** dan **WAJIB 100% selaras dengan formulir profil fotografer**:
+     1. **Ringkasan Status & Kelengkapan Data**: Menampilkan status verifikasi (`Menunggu Verifikasi` / `Terverifikasi`), persentase pengisian profil (0 - 100%), dan daftar chip data yang belum diisi sesuai `RolePhotographer::getMissingProfileFields()`.
+     2. **1. Kontak**: `Nama Lengkap`, `Email`, `Nomor WhatsApp` (dengan tombol chat), `Instagram`.
+     3. **2. Domisili & Kategori**: `Provinsi`, `Kota / Kabupaten`, `Alamat`, `Kategori` (badge atau teks `Belum diatur`).
+     4. **3. Bio**: Konten deskripsi bio pengalaman mitra (atau teks `Belum diisi`).
+     5. **4. Foto Profil & Sampul**: Pratinjau foto profil dan foto sampul rasio 16:9. Jika belum diunggah, kotak audit wajib menampilkan ikon kamera outline abu-abu simpel (`text-gray-400 dark:text-gray-500`) di dalam kotak border dashed netral tanpa inisial huruf teks 'KE' atau kata 'Kosong'.
+     6. **5. Rekening Bank**: `Nama Bank`, `Nomor Rekening`, `Nama Pemilik Rekening` (tanpa terminologi asing "Payout" sesuai Rule #70).
+
+3. **Validasi Formulir Profil Fotografer Real-time (Alpine.js Client-Side Standard)**:
+   - Mengikuti standar UX pada `signup.blade.php`, formulir profil fotografer (`/photographer/profile`) wajib menggunakan validasi interaktif real-time dengan Alpine.js (`formData`, `touched`, `errors`) pada event `@input` dan `@blur`.
+   - Menampilkan teks error merah di bawah input (`text-rose-500 font-bold text-[11px]`) dan border input merah saat invalid.
+   - Saat submit, sistem memvalidasi seluruh field sekaligus, membatalkan submit jika ada yang tidak valid, lalu secara otomatis mengarahkan fokus (*focus*) dan menggulir (*smooth scroll*) ke field bermasalah pertama.
+
+4. **Standar Bilah Aksi Keputusan Admin & Form Pelanggaran (Bottom Action Bar - Rule #74 & Rule #91)**:
+   - Sisi Kiri: Tombol `Kembali` (abu-abu netral) dan tombol opsional `Lihat Etalase Publik` (hanya muncul jika fotografer telah selesai onboarding dan terverifikasi).
+   - Sisi Kanan:
+     - **Tombol `Hapus`**: Membuka dialog modal form penghapusan fotografer (Rule #59) yang mewajibkan admin memilih **Kategori Pelanggaran** (misal: Data Palsu, Pelanggaran Hak Cipta, Transaksi Luar Sistem, dsb.) dan menuliskan **Deskripsi Alasan Penghapusan**. Data pelanggaran ini tersimpan pada database dan tercatat permanen pada `ActivityLog`.
+     - **Tombol `Tolak Pendaftaran`** (muncul jika status belum ditolak): Membuka dialog modal untuk mengisi **Catatan Alasan Penolakan** (wajib diisi). Sistem mengubah status menjadi `ditolak`, mengirimkan notifikasi in-app ke fotografer, dan memunculkan banner peringatan merah di dashboard dan profil fotografer.
+     - **Tombol `Verifikasi Fotografer`** (muncul jika status `menunggu` atau `ditolak`): Mengubah status menjadi `terverifikasi`, mengaktifkan centang biru, membersihkan catatan penolakan lama, dan mengirimkan notifikasi sukses ke fotografer.
+     - **Tombol `Batalkan Verifikasi`** (muncul jika status `terverifikasi`): Mengembalikan status menjadi `menunggu`.
+
+5. **Alur Pengajuan Ulang Pasca Penolakan (Auto Re-apply)**:
+   - Jika pendaftaran fotografer ditolak, fotografer akan melihat banner merah di dashboard dan halaman profil yang memuat catatan admin.
+   - Begitu fotografer memperbaiki data profilnya dan menekan **Simpan Data**, sistem secara otomatis mengembalikan status menjadi `menunggu`, mencatat log aktivitas pengajuan ulang, dan mengirimkan notifikasi in-app kepada seluruh Administrator.
+
+---
+
+### Rule #96: Standarisasi Proporsi Card Media & Larangan Pemanipulasian Tinggi Seragam (Anti-Artificial Equal Height on Asymmetric Cards)
+1. **Penerapan `items-start` pada Grid Multi-Kolom Kartu Asimetris**:
+   - Pada tata letak grid kartu dasbor/audit (seperti pada halaman verifikasi `/admin/photographers/{id}` dan formulir profil mitra), baris grid **WAJIB menggunakan `items-start`**.
+   - **DILARANG KERAS** memaksakan perataan tinggi seragam (*stretch equal-height*) secara artifisial antar kartu yang memiliki kepadatan konten berbeda. Contoh: **Card 3 (Bio)** memiliki teks deskripsi ringkas, sedangkan **Card 4 (Foto Profil & Sampul)** memuat preview visual vertikal yang tinggi. Card 3 (Bio) **TIDAK BOLEH** dipaksa melar/molor dengan ruang kosong bawah hanya demi menyamakan tinggi Card 4 di sebelahnya. Biarkan Card Bio tampil natural dan ramping.
+
+2. **Tata Letak Vertikal untuk Card Media (Foto Profil & Sampul)**:
+   - Penempatan elemen media visual (Foto Profil dan Foto Sampul) di dalam Card Media **WAJIB menggunakan tata letak VERTIKAL (*stacked layout*)**, bukan horizontal berhimpitan yang membuat preview tampak gepeng (*squished*).
+   - **Foto Profil**: Menampilkan pratinjau persegi (1:1) minimal `w-24 h-24` (atau `w-28 h-28`).
+   - **Foto Sampul**: Menampilkan pratinjau lanskap proporsional rasio **16:9** yang tinggi dan jelas (minimal `h-44 sm:h-52` pada admin audit, dan `h-44 sm:h-48` pada profil fotografer), sehingga foto lanskap atau kotak kosong kamera tidak tertekan (*gepeng*).
+
+3. **Standar Ruang Bernapas Kartu Pembungkus (*Comfortable Card Padding & Height*)**:
+   - Kartu pembungkus media foto wajib memiliki padding yang lega (`p-6` atau `p-6 sm:p-7`) dan ruang vertikal yang lapang (*spacious*), menghindari kesan sumpek (*cramped*) antar elemen foto dan tombol upload/aksi.
+
+---
+
+### Rule #97: Standarisasi Pratinjau Modal (Lightbox) Interaktif pada Seluruh Input Field & Kotak Pratinjau Media Gambar (Interactive Image Field Lightbox Standard)
+1. **Prinsip Utama & Validasi Kejelasan Gambar Satu Pintu**:
+   - Setiap elemen formulir atau kartu audit yang menampilkan unggahan media visual (seperti Foto Profil, Foto Sampul, Banner Lomba, Bukti Transfer, dan sejenisnya) **WAJIB menyediakan fitur pratinjau modal (*lightbox dialog*) interaktif yang dapat diklik langsung**.
+   - Tujuannya adalah agar pengguna (Fotografer, Klien, maupun Admin Audit) dapat memeriksa keaslian, ketajaman, dan kesesuaian berkas resolusi penuh yang baru saja dipilih/diunggah sebelum menekan tombol simpan, atau memeriksa berkas yang telah tersimpan di database secara mendalam.
+
+2. **Kondisi Aktivasi Logika Interaktif (*Trigger Condition*)**:
+   - **Kondisi Aktif (Terdapat Berkas/Foto)**:
+     - Jika field telah memiliki foto (baik foto yang sudah tersimpan di database maupun file lokal baru yang dipilih via *client-side FileReader base64/data-URL*):
+       - Kotak pratinjau wajib menampilkan kursor pointer/zoom (`cursor-pointer group`).
+       - Memiliki efek interaktif saat di-hover (efek perbesaran halus `group-hover:scale-105` dan *overlay* gelap elegan dengan teks/ikon kaca pembesar `Pratinjau` atau `Klik untuk Pratinjau Foto`).
+       - Saat diklik, sistem membuka modal pratinjau resolusi tinggi di tengah layar.
+   - **Kondisi Kosong (*Empty State*)**:
+     - Jika field masih kosong (menampilkan ikon kamera outline abu-abu netral sesuai Rule #94):
+       - Kotak **DILARANG KERAS** memicu modal *lightbox* kosong.
+       - Interaksi klik diarahkan murni untuk memicu *file picker* (pemilihan file) atau tombol unggah.
+
+3. **Standar Desain, UX & Aksesibilitas Modal Lightbox**:
+   - **Latar Belakang (*Backdrop*)**: Menggunakan lapisan gelap elegan dengan blur (`bg-black/90 backdrop-blur-md`).
+   - **Kontrol Penutupan (*Dismissibility*)**:
+     - Tombol silang (*close button*) bulat di pojok kanan atas dengan kontras tinggi (`w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white`).
+     - Menutup otomatis saat tombol `Escape` ditekan (`@keydown.escape.window`).
+     - Menutup saat pengguna mengklik area luar gambar (`@click.outside`).
+   - **Proporsi Gambar**: Menampilkan gambar resolusi penuh secara proporsional tanpa distorsi (`max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none`).
+   - **Keterangan (*Caption Badge*)**: Menyertakan lencana keterangan semitransparan di bawah gambar yang memuat judul field (misal: "Foto Profil", "Foto Sampul") dan petunjuk penutupan modal.
+
+---
+
+
+
+---
+
+### Rule #99: Standarisasi Master Card Profil Fotografer & Harmonitas Warna Kartu Dalam (Anti-Gray Tint, Zero Shadow & Skala Tipografi Proporsional)
 1. **Struktur Master Card Terpadu (Unified Master Profile Card)**:
    - Profil fotografer (`/fotografer/{id}` / `resources/views/public/photographers/show.blade.php`) dibungkus oleh satu kartu induk besar (*single master card*) yang menaungi seluruh informasi profil atas (foto, biodata, spesialisasi, 6 metrik studio, tombol aksi) serta navigasi tab dan seluruh konten di bawahnya (Paket Layanan, Galeri Portofolio, Kalender Ketersediaan, Ulasan Klien, Tanya Jawab).
    - Card induk memiliki margin dan padding yang lega (`p-8 sm:p-10 lg:p-12 space-y-10 sm:space-y-12`) agar tampilan memiliki ruang napas visual yang nyaman dan berwibawa.
@@ -1562,7 +1557,9 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #98: Standarisasi Proteksi Hak Cipta & Watermark Karya Fotografer (Anti-AI Slop: Zero Badge, Zero Box & Murni Tipografi)
+---
+
+### Rule #100: Standarisasi Proteksi Hak Cipta & Watermark Karya Fotografer (Anti-AI Slop: Zero Badge, Zero Box & Murni Tipografi)
 1. **Larangan Mutlak Menempelkan Badge / Box Kapsul di Atas Foto Karya**:
    - Menempelkan elemen kotak badge atau pill kapsul mengambang dengan latar belakang gelap dan border di atas foto karya fotografi adalah karakteristik buruk (*AI slop*) yang merusak estetika karya seni fotografer dan melanggar prinsip platform (*Dilarang Keras Menempelkan Badge di Atas Gambar/Foto*).
    - Watermark hak cipta mutlak berwujud **Tipografi Murni Bersahaja (*Pure Typography*)** tanpa wadah kotak (*zero background box*), tanpa garis border kotak (*zero border*), dan tanpa pill kapsul (*zero pill badge*).
@@ -1579,7 +1576,9 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #99: Standarisasi Kartu Paket Layanan Profil Fotografer (Full-Width Spacious Card Layout & Anti-Narrow Void)
+---
+
+### Rule #101: Standarisasi Kartu Paket Layanan Profil Fotografer (Full-Width Spacious Card Layout & Anti-Narrow Void)
 1. **Pemberantasan Grid Sempit 3-Kolom yang Terasa Sesak (*Anti-Narrow Void*)**:
    - Menempatkan kartu paket layanan pemotretan ke dalam grid 3-kolom kaku (`lg:grid-cols-3`) ketika fotografer memiliki 1 atau 2 paket layanan membuat kartu terjepit di sudut sempit (~350px) dengan ruang kosong menganga sebesar 66% di sebelah kanan. Teks benefit yang panjang terpaksa terbungkus berkali-kali sehingga terlihat seperti struk belanja mini yang sesak, sempit, dan tidak profesional.
 2. **Tata Letak Kartu Utuh Membentang Penuh (*Full-Width Stacked Cards*)**:
@@ -1603,7 +1602,9 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #100: Standarisasi Header Editorial Profil Kreator (Anti-AI Slop: Eliminasi Formulir Spek Kaku 6-Box & Hierarki Typografi Human-Crafted)
+---
+
+### Rule #102: Standarisasi Header Editorial Profil Kreator (Anti-AI Slop: Eliminasi Formulir Spek Kaku 6-Box & Hierarki Typografi Human-Crafted)
 1. **Pemberantasan Formulir Spek Database Kaku (Anti-Spec Sheet)**:
    - Pola AI slop yang menyajikan identitas kreator dalam bentuk matriks 6-kotak data bertingkat (`Lokasi Studio`, `Tarif Layanan`, `Pengalaman Studio`, `Portofolio`, `Bergabung Sejak`, `Rating Ulasan`) dengan label abu-abu kecil dan angka tebal seragam dihapus total. Pola tersebut merusak citra seniman visual dan menyerupai formulir pendaftaran barang atau tabel database ERP.
 2. **Hierarki Typografi Editorial (Human-Crafted Hierarchy)**:

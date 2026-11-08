@@ -47,11 +47,17 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'photographer') {
+            $photographer = RolePhotographer::with(['province', 'city', 'categories'])->firstOrCreate(
+                ['id_user' => $user->id],
+                ['nama' => $user->nama]
+            );
+            $provinces = \Laravolt\Indonesia\Models\Province::orderBy('name', 'asc')->get();
+            $categories = \App\Models\Category::all();
+            $cities = $photographer->province_code 
+                ? \Laravolt\Indonesia\Models\City::where('province_code', $photographer->province_code)->orderBy('name', 'asc')->get()
+                : collect();
 
-            $photographer = RolePhotographer::where('id_user', $user->id)->first();
-
-            return view('photographer.profile.index', compact('user', 'photographer'));
-
+            return view('photographer.profile.index', compact('user', 'photographer', 'provinces', 'categories', 'cities'));
         }
 
 
@@ -100,9 +106,19 @@ class ProfileController extends Controller
 
             'nomor_telepon' => 'nullable|string|max:20',
 
+            'link_sosmed' => 'nullable|string|max:255',
+
+            'province_code' => 'nullable|string|max:10',
+
+            'city_code' => 'nullable|string|max:10',
+
             'alamat' => 'nullable|string|max:255',
 
-            'deskripsi_bio' => 'nullable|string|max:1000',
+            'categories' => 'nullable|array',
+
+            'categories.*' => 'exists:categories,id',
+
+            'deskripsi_bio' => 'nullable|string|max:2000',
 
             'nama_bank' => 'nullable|string|max:50',
 
@@ -146,19 +162,25 @@ class ProfileController extends Controller
 
                 $photoData = [
 
-                    'nama' => trim($request->nama),
+                    'nama' => trim($request->nama ?? ''),
 
-                    'nomor_telepon' => trim($request->nomor_telepon),
+                    'nomor_telepon' => trim($request->nomor_telepon ?? ''),
 
-                    'alamat' => trim($request->alamat),
+                    'link_sosmed' => trim($request->link_sosmed ?? ''),
 
-                    'deskripsi_bio' => trim($request->deskripsi_bio),
+                    'province_code' => $request->province_code ?: null,
 
-                    'nama_bank' => trim($request->nama_bank),
+                    'city_code' => $request->city_code ?: null,
 
-                    'nomor_rekening' => trim($request->nomor_rekening),
+                    'alamat' => trim($request->alamat ?? ''),
 
-                    'atas_nama_rekening' => trim($request->atas_nama_rekening),
+                    'deskripsi_bio' => trim($request->deskripsi_bio ?? ''),
+
+                    'nama_bank' => trim($request->nama_bank ?? ''),
+
+                    'nomor_rekening' => trim($request->nomor_rekening ?? ''),
+
+                    'atas_nama_rekening' => trim($request->atas_nama_rekening ?? ''),
 
                 ];
 
@@ -189,7 +211,43 @@ class ProfileController extends Controller
 
 
 
+                $wasRejected = ($photographer->status_verifikasi === 'ditolak');
                 $photographer->update($photoData);
+
+                if ($request->has('categories')) {
+                    $photographer->categories()->sync($request->categories);
+                }
+
+                $isComplete = $photographer->fresh(['categories'])->isProfileComplete();
+                $updatePayload = ['is_onboarded' => $isComplete];
+
+                if ($wasRejected) {
+                    $updatePayload['status_verifikasi'] = 'menunggu';
+                    $updatePayload['is_verified'] = false;
+                }
+
+                $photographer->update($updatePayload);
+
+                if ($wasRejected) {
+                    \App\Models\ActivityLog::record(
+                        'photographer_reapplied',
+                        "Mitra '{$photographer->nama}' memperbarui data profil setelah ditolak dan mengajukan verifikasi kembali.",
+                        $photographer
+                    );
+
+                    $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+                    foreach ($admins as $admin) {
+                        \App\Models\Notification::send(
+                            $admin->id,
+                            'Pengajuan Ulang Verifikasi Mitra',
+                            "Mitra fotografer '{$photographer->nama}' telah memperbarui profil dan mengajukan verifikasi kembali.",
+                            'photographer_verification',
+                            route('admin.photographers.show', $photographer->id)
+                        );
+                    }
+
+                    return redirect()->back()->with('success', 'Profil berhasil diperbarui dan diajukan kembali ke Admin untuk verifikasi!');
+                }
 
             }
 

@@ -62,10 +62,6 @@ class ContestProposalController extends Controller
             $bannerUrl = asset('storage/' . $path);
         }
 
-        if (!$bannerUrl) {
-            $bannerUrl = 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&q=80';
-        }
-
         $adminRole = DB::table('role_admins')->first();
         $adminId = $adminRole ? $adminRole->id : 1;
 

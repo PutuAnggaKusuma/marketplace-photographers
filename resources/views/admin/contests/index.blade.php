@@ -409,7 +409,7 @@
 
                             @php
 
-                                $bannerSrc = $c->banner_url ?: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80';
+                                $bannerSrc = $c->banner_url ?: null;
 
                                 
 
@@ -481,9 +481,13 @@
 
                                     <div class="flex items-start gap-3.5">
 
-                                        <div class="w-16 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs">
+                                        <div class="w-16 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs flex items-center justify-center">
 
-                                            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ $bannerSrc }}" class="w-full h-full object-cover" alt="{{ $c->judul_lomba }}">
+                                            @if($bannerSrc)
+                                                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ $bannerSrc }}" class="w-full h-full object-cover" alt="{{ $c->judul_lomba }}">
+                                            @else
+                                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.982-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.483 2.244 9.774 2 12 2c2.226 0 4.517.244 6.75.721v1.515m0 0c.982.143 1.954.317 2.916.52a6.003 6.003 0 01-5.396 4.972m2.48-5.492V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.01 6.01 0 01-4.75 0" /></svg>
+                                            @endif
 
                                         </div>
 
