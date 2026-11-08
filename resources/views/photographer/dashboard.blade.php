@@ -372,7 +372,7 @@
                 <td class="py-3.5 px-3 sm:px-4">
                   <div class="space-y-0.5">
                     <p class="font-extrabold text-gray-900 dark:text-white">{{ $client->nama ?? 'Klien LensMatch' }}</p>
-                    <span class="text-[10px] font-mono text-gray-400">#KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="text-[10px] font-mono text-gray-400">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
                   </div>
                 </td>
                 <td class="py-3.5 px-3 sm:px-4 font-bold text-gray-800 dark:text-gray-200">

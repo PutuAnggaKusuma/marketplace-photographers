@@ -6,7 +6,7 @@
 <main class="max-w-3xl mx-auto px-4 py-12 space-y-8 min-h-screen">
   <div class="space-y-2 text-center">
     <h1 class="text-3xl font-extrabold">Selesaikan Pembayaran Kontrak</h1>
-    <p class="text-xs text-gray-500">Nomor Kontrak: #CTR-2026-08129</p>
+    <p class="text-xs text-gray-500">Nomor Kontrak: CTR-2026-08129</p>
   </div>
 
   <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl space-y-6">

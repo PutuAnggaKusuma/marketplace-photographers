@@ -321,6 +321,45 @@ class PhotographerController extends Controller
             }
         }
 
+        // Sistem FAQ Cerdas — Kumpulan Pertanyaan Umum Pencari Jasa (Universal untuk Seluruh Fotografer)
+        $faqs = collect([
+            [
+                'id' => 1,
+                'pertanyaan' => 'Bagaimana alur pemesanan (booking) sesi foto di LensMatch?',
+                'jawaban' => "Pilih paket layanan yang sesuai di profil fotografer ini, pilih tanggal yang masih terbuka pada kalender ketersediaan, lalu kirimkan rincian reservasi. Fotografer akan mengonfirmasi jadwal pemotretan Anda maksimal 1x24 jam."
+            ],
+            [
+                'id' => 2,
+                'pertanyaan' => 'Bagaimana sistem pembayaran dan jaminan keamanan transaksi saya?',
+                'jawaban' => "Pembayaran dilakukan secara resmi melalui transfer bank yang diverifikasi otomatis oleh sistem. Dana pembayaran Anda diamankan oleh sistem platform LensMatch dan baru akan diteruskan ke fotografer setelah sesi pemotretan selesai dan album hasil foto Anda terima."
+            ],
+            [
+                'id' => 3,
+                'pertanyaan' => 'Kapan jadwal sesi foto saya dinyatakan resmi terkonfirmasi?',
+                'jawaban' => "Jadwal pemotretan resmi terkonfirmasi setelah fotografer menyetujui tanggal reservasi Anda dan pembayaran uang muka (DP 30%) atau pembayaran penuh berhasil terverifikasi oleh sistem."
+            ],
+            [
+                'id' => 4,
+                'pertanyaan' => 'Apakah saya bisa berdiskusi mengenai konsep atau tema pemotretan sebelum booking?',
+                'jawaban' => "Tentu saja. Anda dapat menekan tombol 'Tanya & Chat Fotografer' pada profil ini untuk mendiskusikan konsep visual, referensi moodboard, busana/wardrobe, maupun rekomendasi spot foto secara langsung dengan mitra fotografer sebelum melakukan booking."
+            ],
+            [
+                'id' => 5,
+                'pertanyaan' => 'Bagaimana jika saya perlu mengajukan jadwal ulang (reschedule) sesi foto?',
+                'jawaban' => "Anda dapat mengajukan permohonan reschedule kapan saja melalui menu 'Reservasi Saya' dengan memilih tanggal baru yang masih tersedia pada kalender fotografer. Jadwal baru akan berlaku setelah disepakati bersama oleh kedua belah pihak."
+            ],
+            [
+                'id' => 6,
+                'pertanyaan' => 'Berapa lama proses penyuntingan (retouching) dan bagaimana saya menerima hasil foto?',
+                'jawaban' => "Proses retouching umumnya memerlukan waktu 3 hingga 7 hari kerja tergantung paket layanan yang Anda pilih. Setelah selesai, fotografer akan menyerahkan tautan album Google Drive resolusi tinggi yang dapat Anda akses dan unduh langsung pada menu 'Galeri Hasil Foto Saya'."
+            ],
+            [
+                'id' => 7,
+                'pertanyaan' => 'Bagaimana jika terjadi kendala cuaca buruk pada hari pemotretan outdoor?',
+                'jawaban' => "Jika terjadi hujan lebat atau cuaca ekstrem pada lokasi outdoor, Anda dan fotografer dapat menyepakati penyesuaian jam pemotretan di hari yang sama atau penjadwalan ulang sesi (reschedule) tanpa biaya tambahan demi hasil karya terbaik."
+            ],
+        ]);
+
         return view('public.photographers.show', compact(
             'photographer', 
             'testimonials', 
@@ -329,7 +368,8 @@ class PhotographerController extends Controller
             'starCounts',
             'blockedDates',
             'bookedDates',
-            'isFavorited'
+            'isFavorited',
+            'faqs'
         ));
     }
 

@@ -365,7 +365,7 @@
               <tr class="invoice-row hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                 <!-- Kode Registrasi -->
                 <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
-                  #REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
+                  REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
                   <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
                     {{ $cr->created_at->format('d M Y, H:i') }}
                   </span>

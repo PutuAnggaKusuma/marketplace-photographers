@@ -616,7 +616,7 @@
                     class="p-6 rounded-3xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 space-y-5"
                   >
                     <div class="flex items-center justify-between pb-2">
-                      <h4 class="text-sm font-black text-gray-900 dark:text-white">Unggah Karya Foto (#{{ $userSubmissions->count() + 1 }})</h4>
+                      <h4 class="text-sm font-black text-gray-900 dark:text-white">Unggah Karya Foto Ke-{{ $userSubmissions->count() + 1 }}</h4>
                       <button type="button" @click="showUploadForm = false" class="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">Batal</button>
                     </div>
 

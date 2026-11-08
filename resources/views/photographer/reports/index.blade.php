@@ -230,7 +230,7 @@
                                             <button type="button" 
                                                     @click="openPayoutModal({{ json_encode([
                                                         'id' => $c->id,
-                                                        'contract_code' => '#KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
+                                                        'contract_code' => 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
                                                         'amount' => 'Rp ' . number_format($netPayout, 0, ',', '.'),
                                                         'bank_name' => $photographer->nama_bank,
                                                         'bank_account' => $photographer->nomor_rekening,

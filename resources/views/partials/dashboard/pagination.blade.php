@@ -90,7 +90,14 @@
                 </button>
 
                 <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 bottom-full mb-1.5 w-20 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden z-50">
-                    @foreach([10, 20, 50, 100] as $size)
+                    @php
+                        $sizes = [10, 20, 50, 100];
+                        if (!in_array($paginator->perPage(), $sizes)) {
+                            $sizes[] = (int) $paginator->perPage();
+                            sort($sizes);
+                        }
+                    @endphp
+                    @foreach($sizes as $size)
                         @php
                             $targetUrl = request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]);
                         @endphp

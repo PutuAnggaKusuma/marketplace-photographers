@@ -542,7 +542,7 @@
 
                                         'id' => $c->id,
 
-                                        'code' => '#KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
+                                        'code' => 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
 
                                         'created_at' => $c->created_at->format('d M Y, H:i'),
 
@@ -1072,7 +1072,7 @@
 
                             <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
 
-                                #REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
+                                REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
 
                                 <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
 

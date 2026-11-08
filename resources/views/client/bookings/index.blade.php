@@ -272,7 +272,7 @@
 
                     <div class="space-y-0.5">
 
-                      <span class="text-[10px] font-mono font-bold text-gray-400 block">#KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
+                      <span class="text-[10px] font-mono font-bold text-gray-400 block">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
 
                       <h4 class="font-extrabold text-gray-900 dark:text-white text-sm tracking-tight">{{ $photographer->nama ?? 'Fotografer' }}</h4>
 
@@ -632,7 +632,7 @@
 
                           <button type="button" 
 
-                                  @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; rescheduleContractCode = '#KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; rescheduleModalOpen = true;"
+                                  @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; rescheduleContractCode = 'KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; rescheduleModalOpen = true;"
 
                                   class="w-full px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
 
@@ -650,7 +650,7 @@
 
                           <button type="button" 
 
-                                  @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelContractCode = '#KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; cancelModalOpen = true;"
+                                  @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelContractCode = 'KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; cancelModalOpen = true;"
 
                                   class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
 

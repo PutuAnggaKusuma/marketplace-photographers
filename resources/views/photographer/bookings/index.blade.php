@@ -782,7 +782,7 @@
 
 
 
-                                        <span class="text-[10px] font-mono font-bold text-gray-400">#KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                        <span class="text-[10px] font-mono font-bold text-gray-400">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
 
 
 

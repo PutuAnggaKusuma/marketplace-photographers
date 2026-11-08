@@ -55,16 +55,11 @@ class WatermarkService
             $textWidth = strlen($text) * $fontWidth;
             $textHeight = $fontHeight;
 
-            $paddingX = 14;
-            $paddingY = 8;
-            $badgeWidth = $textWidth + ($paddingX * 2);
-            $badgeHeight = $textHeight + ($paddingY * 2);
+            $margin = 24;
+            $textX = $width - $textWidth - $margin;
+            $textY = $height - $textHeight - $margin;
 
-            $margin = 20;
-            $badgeX = $width - $badgeWidth - $margin;
-            $badgeY = $height - $badgeHeight - $margin;
-
-            if ($badgeX < 0 || $badgeY < 0) {
+            if ($textX < 0 || $textY < 0) {
                 imagedestroy($image);
                 return false;
             }
@@ -73,17 +68,14 @@ class WatermarkService
             imagealphablending($image, true);
             imagesavealpha($image, true);
 
-            // Buat badge semi-transparan gelap di pojok kanan bawah
-            $badgeBg = imagecolorallocatealpha($image, 17, 24, 39, 45); // Dark slate rgba with ~65% opacity
-            $badgeBorder = imagecolorallocatealpha($image, 251, 191, 36, 60); // Amber-400 accent border
-            $textColor = imagecolorallocate($image, 255, 255, 255); // White text
+            // Murni tipografi anti-AI slop (NO BADGE, NO RECTANGLE, NO BOX)
+            $shadowColor = imagecolorallocatealpha($image, 0, 0, 0, 60);
+            $textColor = imagecolorallocatealpha($image, 255, 255, 255, 30);
 
-            // Gambar rounded / rectangle badge
-            imagefilledrectangle($image, $badgeX, $badgeY, $badgeX + $badgeWidth, $badgeY + $badgeHeight, $badgeBg);
-            imagerectangle($image, $badgeX, $badgeY, $badgeX + $badgeWidth, $badgeY + $badgeHeight, $badgeBorder);
-
-            // Tulis teks watermark di dalam badge
-            imagestring($image, $fontSize, $badgeX + $paddingX, $badgeY + $paddingY, $text, $textColor);
+            // Bayangan halus 1px
+            imagestring($image, $fontSize, $textX + 1, $textY + 1, $text, $shadowColor);
+            // Teks utama watermark
+            imagestring($image, $fontSize, $textX, $textY, $text, $textColor);
 
             // Simpan gambar kembali
             switch ($mime) {

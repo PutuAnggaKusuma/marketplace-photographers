@@ -6,13 +6,6 @@
 <!-- Header Banner Section -->
 <section class="bg-gradient-to-b from-amber-50/80 via-amber-50/30 to-transparent dark:from-gray-800/80 dark:via-gray-800/30 dark:to-transparent pt-12 pb-10 border-b border-gray-100 dark:border-gray-800">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
-    <!-- Breadcrumb / Kicker -->
-    <div class="flex items-center justify-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500">
-      <a href="{{ url('/fotografer') }}" class="hover:text-amber-500 transition">Eksplorasi</a>
-      <span>/</span>
-      <span>Katalog Lengkap</span>
-    </div>
-
     <!-- Centered Main Title -->
     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight max-w-3xl mx-auto">
       Katalog Seluruh Fotografer

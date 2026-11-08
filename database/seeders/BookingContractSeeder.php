@@ -6,6 +6,7 @@ use App\Models\Contract;
 use App\Models\ContractBooking;
 use App\Models\Notification;
 use App\Models\Payment;
+use App\Models\PhotographerAvailability;
 use App\Models\PhotographerService;
 use App\Models\RoleClient;
 use App\Models\RolePhotographer;
@@ -275,6 +276,54 @@ class BookingContractSeeder extends Seeder
                 'review' => null,
                 'rating' => null,
             ],
+            // Bulan 11: Nov 2026 - Sesi Dikonfirmasi / Active (Klien: Dian & Febri, Fotografer: Budi Event Captures)
+            [
+                'client' => $clientDian,
+                'photographer' => $photoBudi,
+                'service' => $srvBudi,
+                'amount' => 2800000,
+                'created_at' => Carbon::create(2026, 11, 1, 10, 0),
+                'session_date' => Carbon::create(2026, 11, 10),
+                'location' => 'Istora Senayan, Jakarta Pusat',
+                'status' => 'confirmed',
+                'payout_status' => 'holding',
+                'drive_url' => null,
+                'catatan_fotografer' => null,
+                'review' => null,
+                'rating' => null,
+            ],
+            // Bulan 11: Nov 2026 - Sesi Dikonfirmasi / Active (Klien: PT Mahkota Event, Fotografer: Budi Event Captures)
+            [
+                'client' => $clientMahkota,
+                'photographer' => $photoBudi,
+                'service' => $srvBudi,
+                'amount' => 3500000,
+                'created_at' => Carbon::create(2026, 11, 2, 14, 0),
+                'session_date' => Carbon::create(2026, 11, 18),
+                'location' => 'JIExpo Kemayoran Hall D2, Jakarta Pusat',
+                'status' => 'confirmed',
+                'payout_status' => 'holding',
+                'drive_url' => null,
+                'catatan_fotografer' => null,
+                'review' => null,
+                'rating' => null,
+            ],
+            // Bulan 11: Nov 2026 - Sesi Dikonfirmasi / Active (Klien: Siti Rahmawati, Fotografer: Alex Visual Studio)
+            [
+                'client' => $clientSiti,
+                'photographer' => $photoAlex,
+                'service' => $srvAlex,
+                'amount' => 3500000,
+                'created_at' => Carbon::create(2026, 11, 3, 9, 0),
+                'session_date' => Carbon::create(2026, 11, 9),
+                'location' => 'Kebun Raya Bogor, Jawa Barat',
+                'status' => 'confirmed',
+                'payout_status' => 'holding',
+                'drive_url' => null,
+                'catatan_fotografer' => null,
+                'review' => null,
+                'rating' => null,
+            ],
         ];
 
         $invoiceCounter = 1;
@@ -354,13 +403,13 @@ class BookingContractSeeder extends Seeder
                 ]);
             }
 
-            // Tambahkan Notifikasi Nyata untuk User
+            // Tambahkan Notifikasi Nyata untuk User (Rule #89: Bebas Simbol #)
             if ($row['client']->user) {
                 if ($row['status'] === 'completed') {
                     Notification::create([
                         'id_user' => $row['client']->user->id,
                         'title' => 'Galeri Hasil Foto Siap Diunduh',
-                        'message' => "Fotografer {$row['photographer']->nama} telah mengunggah link galeri foto untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
+                        'message' => "Fotografer {$row['photographer']->nama} telah mengunggah link galeri foto untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
                         'type' => 'booking',
                         'is_read' => true,
                         'data' => ['url' => '/client/galleries'],
@@ -384,7 +433,7 @@ class BookingContractSeeder extends Seeder
                     Notification::create([
                         'id_user' => $row['photographer']->user->id,
                         'title' => 'Pesanan Booking Baru Masuk',
-                        'message' => "Klien {$row['client']->nama} mengajukan reservasi sesi foto baru (#KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . "). Silakan konfirmasi ketersediaan jadwal Anda.",
+                        'message' => "Klien {$row['client']->nama} mengajukan reservasi sesi foto baru (KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . "). Silakan konfirmasi ketersediaan jadwal Anda.",
                         'type' => 'booking',
                         'is_read' => false,
                         'data' => ['url' => '/photographer/bookings'],
@@ -392,6 +441,50 @@ class BookingContractSeeder extends Seeder
                     ]);
                 }
             }
+        }
+
+        // Seed Real Availability / Libur untuk Kalender Ketersediaan (Anti-AI Slop Data Riil)
+        $availabilities = [
+            // Budi Event Captures (ID 2)
+            [
+                'id_photographer' => $photoBudi->id,
+                'tanggal' => '2026-11-14',
+                'status' => 'blocked',
+                'keterangan' => 'Libur Operasional Studio & Maintenance Alat Kamera',
+            ],
+            [
+                'id_photographer' => $photoBudi->id,
+                'tanggal' => '2026-11-22',
+                'status' => 'blocked',
+                'keterangan' => 'Cuti Pribadi Akhir Pekan',
+            ],
+            // Alex Visual Studio (ID 1)
+            [
+                'id_photographer' => $photoAlex->id,
+                'tanggal' => '2026-11-20',
+                'status' => 'blocked',
+                'keterangan' => 'Workshop Fotografi Outdoor',
+            ],
+            // Clara Commercial (ID 3)
+            [
+                'id_photographer' => $photoClara->id,
+                'tanggal' => '2026-11-26',
+                'status' => 'blocked',
+                'keterangan' => 'Upgrade Lighting & Studio Renovation',
+            ],
+        ];
+
+        foreach ($availabilities as $av) {
+            PhotographerAvailability::firstOrCreate(
+                ['id_photographer' => $av['id_photographer'], 'tanggal' => $av['tanggal']],
+                [
+                    'status' => $av['status'],
+                    'keterangan' => $av['keterangan'],
+                    'created_at' => Carbon::create(2026, 11, 1),
+                    'updated_at' => Carbon::create(2026, 11, 1),
+                ]
+            );
+        }
         }
     }
 }

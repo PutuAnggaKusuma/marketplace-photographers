@@ -75,7 +75,7 @@
         @endif
 
         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
-          ID Kontrak: <span class="font-mono text-gray-900 dark:text-white font-extrabold">#KTRK-{{ str_pad($contract->id, 5, '0', STR_PAD_LEFT) }}</span>
+          ID Kontrak: <span class="font-mono text-gray-900 dark:text-white font-extrabold">KTRK-{{ str_pad($contract->id, 5, '0', STR_PAD_LEFT) }}</span>
         </span>
       </div>
 

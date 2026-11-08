@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Invoice #' . ($payment->external_id ?? ('KTRK-' . $contract->id)) . ' — LensMatch')
+@section('title', 'Invoice ' . ($payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT))) . ' — LensMatch')
 
 @section('content')
 <section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
@@ -22,7 +22,7 @@
     <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
       <a href="{{ route('client.invoices') }}" class="hover:text-amber-500 transition">Faktur Pembayaran</a>
       <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-      <span class="text-gray-900 dark:text-white font-bold">Rincian Faktur #{{ $payment->external_id ?? ('KTRK-' . $contract->id) }}</span>
+      <span class="text-gray-900 dark:text-white font-bold">Rincian Faktur {{ $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</span>
     </nav>
 
     <!-- Top Action Navigation -->
@@ -69,7 +69,7 @@
               </span>
             @endif
           </div>
-          <p class="text-xs font-mono text-gray-500 dark:text-gray-400">#{{ $payment->external_id ?? ('KTRK-' . $contract->id) }}</p>
+          <p class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">Tanggal: {{ $contract->created_at->translatedFormat('d F Y') }}</p>
         </div>
       </div>

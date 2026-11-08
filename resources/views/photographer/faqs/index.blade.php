@@ -470,7 +470,7 @@
 
 
 
-                                #{{ $faq->urutan }}
+                                {{ $faq->urutan }}
 
 
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Resmi LensMatch — {{ $activePayment->external_id ?? ('#KTRK-' . $contract->id) }}</title>
+    <title>Invoice Resmi LensMatch — {{ $activePayment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -76,7 +76,7 @@
 
             <div class="text-left sm:text-right space-y-1">
                 <h1 class="text-2xl font-black text-gray-900 tracking-tight">Invoice</h1>
-                <p class="text-xs font-mono text-gray-500">#{{ $activePayment->external_id ?? ('KTRK-' . $contract->id) }}</p>
+                <p class="text-xs font-mono text-gray-500">{{ $activePayment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</p>
                 <p class="text-xs text-gray-500">Tanggal Terbit: {{ $contract->created_at->format('d F Y, H:i') }} WIB</p>
             </div>
         </div>
@@ -232,17 +232,17 @@
             </table>
         </div>
 
-        <!-- Footer Notice & Official Document Seal -->
+        <!-- Footer Notice -->
         <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-xs text-gray-500">
             <div class="space-y-1 max-w-lg">
-                <p class="font-bold text-gray-800">Jaminan Keamanan Pembayaran:</p>
+                <p class="font-bold text-gray-800">Keterangan:</p>
                 <p class="text-[11px] leading-relaxed text-gray-500">
-                    Pembayaran diverifikasi secara otomatis oleh sistem LensMatch. Dokumen ini merupakan bukti tagihan sah dan resmi yang diterbitkan oleh sistem komputer LensMatch.
+                    Dokumen ini merupakan bukti tagihan sah yang diterbitkan secara elektronik oleh sistem LensMatch.
                 </p>
             </div>
-            <div class="shrink-0 p-3 bg-gray-50 rounded-2xl border border-gray-200 text-center font-mono text-[10px] text-gray-400">
-                <span class="font-bold text-gray-800 block text-xs">VERIFIED INVOICE</span>
-                <span>ID: {{ substr(md5($contract->id . 'lensmatch_salt'), 0, 10) }}</span>
+            <div class="text-right text-[11px] text-gray-400">
+                <p class="font-medium">LensMatch Indonesia</p>
+                <p>Dokumen Digital Resmi</p>
             </div>
         </div>
 

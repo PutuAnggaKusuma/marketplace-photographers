@@ -80,7 +80,7 @@ Academy & E-Learning
 </div>
 <div class="text-left sm:text-right space-y-1">
 <h1 class="text-2xl font-black text-gray-900 tracking-tight">Invoice</h1>
-<p class="text-xs font-mono text-gray-500">#{{ $transaction->invoice_code }}</p>
+<p class="text-xs font-mono text-gray-500">{{ $transaction->invoice_code }}</p>
 <p class="text-xs text-gray-500">Tanggal Pembelian: {{ ($transaction->paid_at ?? $transaction->created_at)->format('d F Y, H:i') }} WIB</p>
 </div>
 </div>

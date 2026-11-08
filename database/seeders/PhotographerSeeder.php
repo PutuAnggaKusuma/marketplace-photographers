@@ -115,6 +115,11 @@ class PhotographerSeeder extends Seeder
                 'deskripsi_layanan' => 'Liputan panggung musik dari soundcheck hingga main performer dengan kamera dual-body.',
             ]
         );
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Durasi Liputan Sesi Konser hingga 6 Jam (Soundcheck s/d Main Show)', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Fotografer Dual-Body Camera (Lensa Wide 16-35mm & Tele 70-200mm f/2.8)', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => '50 Foto Retouched & Color Graded Resolusi Tinggi', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Semua File Original Mentah via Google Drive Cloud Max 48 Jam', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Hak Cipta Penggunaan Komersial & Promosi Media Sosial', 'tarif_harga' => 0]);
 
         $portBudi1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $budiPhoto->id, 'judul' => 'Jakarta Live Music Festival 2025'],
@@ -124,6 +129,25 @@ class PhotographerSeeder extends Seeder
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80']);
+
+        $portBudi2 = PhotographerPortfolio::updateOrCreate(
+            ['id_photographer' => $budiPhoto->id, 'judul' => 'Nusantara Tech Summit dan Gala Dinner 2025'],
+            ['deskripsi' => 'Dokumentasi konferensi teknologi nasional dan malam apresiasi tahunan di Jakarta Convention Center.']
+        );
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80']);
+
+        $portBudi3 = PhotographerPortfolio::updateOrCreate(
+            ['id_photographer' => $budiPhoto->id, 'judul' => 'Soundwave Indie Showcase Senayan'],
+            ['deskripsi' => 'Sorotan aksi panggung intim musisi indie dan ekspresi otentik penonton di Senayan Park.']
+        );
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=800&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=800&q=80']);
 
         // 3. Clara Commercial
         $userClara = User::firstOrCreate(
@@ -159,6 +183,10 @@ class PhotographerSeeder extends Seeder
                 'deskripsi_layanan' => 'Sesi foto 15 varian produk dengan lighting studio & props pendukung.',
             ]
         );
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvClara1->id, 'nama_fitur' => 'Sesi Foto Studio / On-Location hingga 15 Varian Produk', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvClara1->id, 'nama_fitur' => 'Termasuk Lighting Studio Lengkap & Background Props Estetik', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvClara1->id, 'nama_fitur' => '30 Foto High-Resolution Siap Pakai Marketplace & Katalog', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvClara1->id, 'nama_fitur' => 'Retouching Warna & Pembersihan Noda Produk Digital', 'tarif_harga' => 0]);
 
         $portClara1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $claraPhoto->id, 'judul' => 'Culinary Product Shoot for Bu Lilik'],
@@ -203,6 +231,10 @@ class PhotographerSeeder extends Seeder
                 'deskripsi_layanan' => 'Sesi foto indoor studio 2 jam untuk keluarga & wisudawan dengan 10 foto cetak 10R.',
             ]
         );
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Sesi Studio Indoor Eksklusif Durasi 2 Jam', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Maksimal hingga 8 Anggota Keluarga', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => '10 Foto Pilihan Cetak Ukuran 10R Berkualitas Premium', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Semua File Foto Master Resolusi Penuh via Cloud Drive', 'tarif_harga' => 0]);
 
         // 5. Bali Lens Team
         $userBaliLens = User::firstOrCreate(
@@ -238,6 +270,10 @@ class PhotographerSeeder extends Seeder
                 'deskripsi_layanan' => 'Foto jalan-jalan santai 2.5 jam di spot ikonik Bali dengan proses edit warna cepat di hari yang sama.',
             ]
         );
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Sesi Foto Santai Durasi 2.5 Jam di 2 Spot Ikonik Bali', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Bebas Ganti Kostum (Maksimal 2 Pakaian)', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => '40 Foto Edit Warna Khas Liburan (Selesai dalam 24 Jam)', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Semua File Original Dikirim via Cloud Drive', 'tarif_harga' => 0]);
 
         // Mark all seeded photographers as onboarded and configure default bank info
         RolePhotographer::query()->update([

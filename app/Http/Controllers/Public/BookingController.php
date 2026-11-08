@@ -30,42 +30,71 @@ class BookingController extends Controller
 
         $allServices = $photographer->services()->with('details')->get();
 
-        $serviceId = $request->input('service_id');
+        $serviceId = $request->input('service_id', old('service_id'));
+        $service = null;
         if ($serviceId) {
             $service = $allServices->firstWhere('id', $serviceId);
-        }
-        
-        if (!isset($service) || !$service) {
-            $service = $allServices->first();
         }
 
         $provinces = Province::orderBy('name', 'asc')->get();
 
         $preselectedDate = $request->input('tanggal', date('Y-m-d', strtotime('+2 days')));
 
-        // Blocked full-day dates
-        $blockedDates = \App\Models\PhotographerAvailability::where('id_photographer', $photographer->id)
-            ->where('tanggal', '>=', date('Y-m-d'))
-            ->where(function ($q) {
-                $q->whereNull('jam_mulai')
-                  ->orWhereNull('jam_selesai')
-                  ->orWhere(function ($sub) {
-                      $sub->where('jam_mulai', '00:00:00')
-                          ->where('jam_selesai', '23:59:59');
-                  });
-            })
-            ->pluck('tanggal')
-            ->toArray();
+        // Ensure working hours are initialized
+        \App\Models\PhotographerWorkingHour::initializeDefaults($photographer->id);
+        $workingHours = \App\Models\PhotographerWorkingHour::where('id_photographer', $photographer->id)
+            ->get()
+            ->keyBy('day_of_week')
+            ->map(function ($wh) {
+                return [
+                    'day_of_week' => (int) $wh->day_of_week,
+                    'day_name' => $wh->day_name,
+                    'is_open' => (bool) $wh->is_open,
+                    'is_24_hours' => (bool) $wh->is_24_hours,
+                    'jam_buka' => substr($wh->jam_buka, 0, 5),
+                    'jam_tutup' => substr($wh->jam_tutup, 0, 5),
+                ];
+            });
 
-        // Booked full-day / active contract dates
-        $bookedDates = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
+        // Full-day and partial-day blocks
+        $availabilities = \App\Models\PhotographerAvailability::where('id_photographer', $photographer->id)
+            ->where('tanggal', '>=', date('Y-m-d'))
+            ->get()
+            ->map(function ($a) {
+                $isFullDay = !$a->jam_mulai || !$a->jam_selesai || ($a->jam_mulai == '00:00:00' && $a->jam_selesai == '23:59:59');
+                return [
+                    'tanggal' => $a->tanggal,
+                    'is_full_day' => $isFullDay,
+                    'jam_mulai' => $a->jam_mulai ? substr($a->jam_mulai, 0, 5) : null,
+                    'jam_selesai' => $a->jam_selesai ? substr($a->jam_selesai, 0, 5) : null,
+                    'keterangan' => $a->keterangan ?: 'Libur / Tutup',
+                ];
+            });
+
+        // Blocked full-day dates
+        $blockedDates = $availabilities->where('is_full_day', true)->pluck('tanggal')->values()->toArray();
+
+        // Booked sessions with times
+        $bookedSlots = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
             $q->where('id_photographer', $photographer->id)
               ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
         })->where('booking_date', '>=', date('Y-m-d'))
-          ->pluck('booking_date')
-          ->toArray();
+          ->get()
+          ->map(function ($b) {
+              $start = substr($b->jam_mulai ?: '08:00', 0, 5);
+              $end = $b->jam_selesai ? substr($b->jam_selesai, 0, 5) : null;
+              return [
+                  'date' => $b->booking_date,
+                  'jam_mulai' => $start,
+                  'jam_selesai' => $end,
+                  'durasi' => (int) $b->durasi ?: 2,
+              ];
+          });
 
-        return view('public.booking.create', compact('photographer', 'service', 'allServices', 'provinces', 'preselectedDate', 'blockedDates', 'bookedDates'));
+        // Booked dates
+        $bookedDates = $bookedSlots->pluck('date')->unique()->values()->toArray();
+
+        return view('public.booking.create', compact('photographer', 'service', 'allServices', 'provinces', 'preselectedDate', 'blockedDates', 'bookedDates', 'workingHours', 'availabilities', 'bookedSlots'));
     }
 
     /**
@@ -110,8 +139,10 @@ class BookingController extends Controller
             }
         }
 
+        $durasi = (int) $request->input('durasi', 2);
+        if ($durasi < 1) $durasi = 2;
         $bookingStart = substr($jamMulai, 0, 5);
-        $bookingEnd = date('H:i', strtotime($bookingStart . ' +4 hours'));
+        $bookingEnd = date('H:i', strtotime($bookingStart . ' +' . $durasi . ' hours'));
 
         // Validasi 1: Fotografer memblokir jadwal (seharian atau slot jam tertentu - interval overlap check)
         $blockedAvailabilities = \App\Models\PhotographerAvailability::where('id_photographer', $photographerId)
@@ -198,13 +229,13 @@ class BookingController extends Controller
             'id_contract' => $contract->id,
             'id_service' => $service->id,
             'booking_date' => $request->input('tanggal_sesi'),
-            'jam_mulai' => $request->input('jam_mulai'),
-            'jam_selesai' => date('H:i', strtotime($request->input('jam_mulai') . ' +4 hours')),
+            'jam_mulai' => $bookingStart . ':00',
+            'jam_selesai' => $bookingEnd . ':00',
             'lokasi' => $request->input('lokasi_acara'),
             'province_code' => $request->input('province_code'),
             'city_code' => $request->input('city_code'),
             'catatan_khusus' => $request->input('catatan_khusus'),
-            'durasi' => 4,
+            'durasi' => $durasi,
             'status_booking' => 'pending',
         ]);
 
