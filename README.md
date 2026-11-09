@@ -1533,7 +1533,56 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #99: Standarisasi Master Card Profil Fotografer & Harmonitas Warna Kartu Dalam (Anti-Gray Tint, Zero Shadow & Skala Tipografi Proporsional)
+### Rule #98: Standarisasi Formulir Reservasi Sesi Foto (Urutan Langkah Logis, Anti-Forced Selection & Real-Time Alpine Calculation)
+1. **Larangan Pemaksaan Paket Otomatis (Anti-Forced Package Selection)**:
+   - Ketika calon klien menekan tombol utama **"Reservasi"** dari profil fotografer atau daftar favorit tanpa membawa parameter `service_id`, controller (`BookingController@create`) **DILARANG memaksakan paket pertama secara sepihak** (`$service = $allServices->first()`).
+   - Variabel `$service` wajib bernilai `null` apabila `service_id` tidak disertakan di URL, memberikan keleluasaan penuh bagi klien untuk memilih paket yang diminati pada formulir.
+2. **Urutan 4 Seksi Formulir Kiri yang Logis & Terstruktur**:
+   - **Seksi 1 (Paling Atas)**: **Pilih Paket Layanan**. Menampilkan seluruh paket pemotretan yang disediakan fotografer dalam bentuk kartu seleksi interaktif (radio button, nama paket, tarif harga, deskripsi, dan rincian fasilitas).
+   - **Seksi 2**: **Jadwal Pelaksanaan Sesi Foto**. Pemilihan tanggal sesi foto dan jam mulai sesi.
+   - **Seksi 3**: **Lokasi Pemotretan**. Pemilihan wilayah administrasi (Provinsi, Kota/Kabupaten via AJAX dinamis) dan alamat lengkap venue acara.
+   - **Seksi 4**: **Catatan Khusus**. Catatan tema, busana, preferensi konsep, atau instruksi khusus untuk fotografer.
+3. **Reaktivitas Kolom Kanan (Ringkasan Pesanan Tanpa Reload / Zero-Reload Reactive State)**:
+   - Sebelum paket dipilih (`!selectedServiceId`): Kolom kanan menampilkan panduan ramah (*"Pilih Paket Layanan: Silakan tentukan paket layanan sesi foto pada formulir di sebelah kiri terlebih dahulu"*), total bayar Rp 0, dan tombol aksi dinonaktifkan (*disabled*).
+   - Setelah paket dipilih: Rincian paket terisi otomatis, fitur tambahan opsional (*add-ons*) sesuai paket langsung muncul, dan simulasi skema pembayaran (Bayar Penuh vs DP 30%) terkalkulasi secara instan via Alpine.js.
+4. **Kepatuhan Anti-AI Slop & Zero Dividers**:
+   - **Tanpa Breadcrumb Palsu (Rule #72)**: Menghapus custom breadcrumb navigasi palsu di atas judul halaman.
+   - **Zero Dividers (Rule #67)**: Tidak ada garis pembatas horizontal (`0 border-t / border-b`) yang membelah kartu di dalam seksi input maupun ringkasan tagihan.
+   - **Eliminasi Simbol `&` Redundan (Rule #70)**: Menggunakan tajuk ringkas **`"Ringkasan Pesanan"`** (bukan *"Ringkasan Pesanan & Tarif"*).
+   - **Tombol Brand Amber LensMatch (Rule #91)**: Menggunakan `bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-md`.
+
+---
+
+---
+
+### Rule #99: Standarisasi Mini Kalender Interaktif & Time-Slot Matrix Chips (Multi-Booking & Jeda Istirahat / Sesi Estafet)
+1. **Urutan Alur Alami Pemilihan Jadwal (Tanggal Dahulu $\rightarrow$ Baru Jam)**:
+   - Pemilihan slot ketersediaan waktu mutlak mengikuti alur: **Klien memilih tanggal sesi terlebih dahulu**, baru kemudian sistem mengevaluasi ketersediaan jam operasional fotografer pada tanggal tersebut.
+2. **Mini Kalender Bulan Interaktif (Seksi 2 Formulir)**:
+   - Menggunakan mini kalender bulan berjalan (Senin s/d Minggu) yang proporsional di dalam Seksi 2:
+     - Navigasi bulan menggunakan single chevron modern minimalis (`<` dan `>`) sesuai Rule #72.
+     - Tanggal lampau dan tanggal libur seharian penuh fotografer secara otomatis diabukan (*grayed out*) dengan label mikro `Libur`.
+     - Tanggal hari ini ditandai teks bersih `(Hari Ini)` tanpa bulatan dot badge (Rule #67).
+     - Tanggal aktif dapat diklik dan disorot dengan highlight amber LensMatch (`ring-2 ring-amber-400 bg-amber-400 text-gray-950 font-black`).
+3. **Time-Slot Matrix Chips (Penanganan Multi-Booking & Istirahat Siang)**:
+   - Tepat di bawah kalender mini, kandidat jam mulai sesi disajikan dalam bentuk kartu chip grid yang tenang dan terstruktur (bukan dropdown sempit).
+   - Setiap chip jam memiliki 4 status visual yang bersih dan bebas dari warna pelangi (*anti-AI slop*):
+     - **Tersedia**: Kartu putih bersih yang dapat diklik (label hijau `Tersedia`).
+     - **Terpilih**: Solid amber LensMatch (`bg-amber-400 text-gray-950 font-extrabold shadow-xs`).
+     - **Terisi**: Jika slot jam berbenturan dengan pesanan klien lain yang sudah aktif di hari tersebut (`opacity-50 border-dashed cursor-not-allowed`, label abu-abu `Terisi`).
+     - **Istirahat / Tutup**: Jika slot jam berbenturan dengan jam istirahat atau penutupan parsial fotografer (label abu-abu `Istirahat` atau `Tutup`).
+4. **Perhitungan Durasi Dinamis di Backend**:
+   - Backend (`BookingController@store`) menghitung `$bookingEnd` secara dinamis sesuai durasi paket (`+$durasi hours`), dan memeriksa benturan interval waktu (`slotStart < otherEnd && slotEnd > otherStart`) baik terhadap booking klien lain maupun terhadap jam istirahat manual fotografer.
+
+
+
+
+
+---
+
+---
+
+### Rule #100: Standarisasi Master Card Profil Fotografer & Harmonitas Warna Kartu Dalam (Anti-Gray Tint, Zero Shadow & Skala Tipografi Proporsional)
 1. **Struktur Master Card Terpadu (Unified Master Profile Card)**:
    - Profil fotografer (`/fotografer/{id}` / `resources/views/public/photographers/show.blade.php`) dibungkus oleh satu kartu induk besar (*single master card*) yang menaungi seluruh informasi profil atas (foto, biodata, spesialisasi, 6 metrik studio, tombol aksi) serta navigasi tab dan seluruh konten di bawahnya (Paket Layanan, Galeri Portofolio, Kalender Ketersediaan, Ulasan Klien, Tanya Jawab).
    - Card induk memiliki margin dan padding yang lega (`p-8 sm:p-10 lg:p-12 space-y-10 sm:space-y-12`) agar tampilan memiliki ruang napas visual yang nyaman dan berwibawa.
@@ -1559,7 +1608,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #100: Standarisasi Proteksi Hak Cipta & Watermark Karya Fotografer (Anti-AI Slop: Zero Badge, Zero Box & Murni Tipografi)
+### Rule #101: Standarisasi Proteksi Hak Cipta & Watermark Karya Fotografer (Anti-AI Slop: Zero Badge, Zero Box & Murni Tipografi)
 1. **Larangan Mutlak Menempelkan Badge / Box Kapsul di Atas Foto Karya**:
    - Menempelkan elemen kotak badge atau pill kapsul mengambang dengan latar belakang gelap dan border di atas foto karya fotografi adalah karakteristik buruk (*AI slop*) yang merusak estetika karya seni fotografer dan melanggar prinsip platform (*Dilarang Keras Menempelkan Badge di Atas Gambar/Foto*).
    - Watermark hak cipta mutlak berwujud **Tipografi Murni Bersahaja (*Pure Typography*)** tanpa wadah kotak (*zero background box*), tanpa garis border kotak (*zero border*), dan tanpa pill kapsul (*zero pill badge*).
@@ -1578,7 +1627,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #101: Standarisasi Kartu Paket Layanan Profil Fotografer (Full-Width Spacious Card Layout & Anti-Narrow Void)
+### Rule #102: Standarisasi Kartu Paket Layanan Profil Fotografer (Full-Width Spacious Card Layout & Anti-Narrow Void)
 1. **Pemberantasan Grid Sempit 3-Kolom yang Terasa Sesak (*Anti-Narrow Void*)**:
    - Menempatkan kartu paket layanan pemotretan ke dalam grid 3-kolom kaku (`lg:grid-cols-3`) ketika fotografer memiliki 1 atau 2 paket layanan membuat kartu terjepit di sudut sempit (~350px) dengan ruang kosong menganga sebesar 66% di sebelah kanan. Teks benefit yang panjang terpaksa terbungkus berkali-kali sehingga terlihat seperti struk belanja mini yang sesak, sempit, dan tidak profesional.
 2. **Tata Letak Kartu Utuh Membentang Penuh (*Full-Width Stacked Cards*)**:
@@ -1604,7 +1653,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #102: Standarisasi Header Editorial Profil Kreator (Anti-AI Slop: Eliminasi Formulir Spek Kaku 6-Box & Hierarki Typografi Human-Crafted)
+### Rule #103: Standarisasi Header Editorial Profil Kreator (Anti-AI Slop: Eliminasi Formulir Spek Kaku 6-Box & Hierarki Typografi Human-Crafted)
 1. **Pemberantasan Formulir Spek Database Kaku (Anti-Spec Sheet)**:
    - Pola AI slop yang menyajikan identitas kreator dalam bentuk matriks 6-kotak data bertingkat (`Lokasi Studio`, `Tarif Layanan`, `Pengalaman Studio`, `Portofolio`, `Bergabung Sejak`, `Rating Ulasan`) dengan label abu-abu kecil dan angka tebal seragam dihapus total. Pola tersebut merusak citra seniman visual dan menyerupai formulir pendaftaran barang atau tabel database ERP.
 2. **Hierarki Typografi Editorial (Human-Crafted Hierarchy)**:
