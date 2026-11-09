@@ -691,9 +691,10 @@
 
           @else
 
-            <!-- Locked Guest Comment Container (Clean & Simple Anti-AI-Slop State) -->
-            <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" 
-               class="flex items-center justify-between p-4 sm:p-5 bg-gray-50/90 dark:bg-gray-800/60 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 rounded-2xl sm:rounded-3xl transition duration-200 group cursor-pointer">
+            <!-- Locked Guest Comment Container (Clean & Simple Anti-AI-Slop State with Universal Modal Trigger) -->
+            <button type="button" 
+                    @click="handleGuestClick()" 
+                    class="w-full text-left flex items-center justify-between p-4 sm:p-5 bg-gray-50/90 dark:bg-gray-800/60 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 rounded-2xl sm:rounded-3xl transition duration-200 group cursor-pointer">
               
               <div class="flex items-center gap-3 sm:gap-3.5">
                 <div class="w-10 h-10 rounded-xl bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/40 flex items-center justify-center shrink-0 transition">
@@ -719,7 +720,7 @@
                 </span>
               </div>
 
-            </a>
+            </button>
 
           @endauth
 

@@ -26,11 +26,16 @@
             <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <span>Riwayat Pengajuan</span>
           </a>
+          <a href="{{ route('public.contests.propose.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Ajukan Lomba Foto</span>
+          </a>
+        @else
+          <button type="button" @click="openLoginModal()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Ajukan Lomba Foto</span>
+          </button>
         @endauth
-        <a href="{{ route('public.contests.propose.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-          <span>Ajukan Lomba Foto</span>
-        </a>
       </div>
     </div>
 
@@ -227,12 +232,62 @@
     </div>
 
   </div>
+
+  <!-- Universal Login Requirement Modal for Guests (Rule #6 & #59 Compliant) -->
+  <div x-show="loginModal" 
+       x-cloak 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="fixed inset-0 z-[100] overflow-y-auto" 
+       role="dialog" 
+       aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+        
+        <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
+        <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Header without Icon & Centered -->
+        <div class="text-center">
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
+        </div>
+
+        <!-- Body Text (Centered) -->
+        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center">
+          Untuk dapat mengajukan proposal penyelenggaraan kompetisi foto baru di platform LensMatch, Anda harus masuk ke akun terlebih dahulu.
+        </p>
+
+        <!-- Action Button -->
+        <div class="pt-1">
+          <a href="{{ route('login', ['redirect' => route('public.contests.propose.create')]) }}" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
+            Masuk ke Akun
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <!-- Smooth AJAX Page Fetching & Interactivity Script -->
 <script>
 function contestSectionApp() {
     return {
+        loginModal: false,
+        openLoginModal() {
+            this.loginModal = true;
+        },
+        closeLoginModal() {
+            this.loginModal = false;
+        },
         searchQuery: '{{ $search }}',
         currentStatus: '{{ $statusFilter }}',
         currentCategory: '{{ $categoryFilter ?? "all" }}',
