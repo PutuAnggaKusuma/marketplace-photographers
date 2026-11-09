@@ -204,11 +204,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md w-full">
             <div>
               <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1.5">HARGA MIN (RP)</label>
-              <input type="number" name="price_min" value="{{ $priceMin }}" placeholder="Mis. 500.000" class="w-full px-4 py-3 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              <input type="number" name="price_min" value="{{ $priceMin }}" placeholder="Contoh: 500000" class="w-full px-4 py-3 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
             <div>
               <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1.5">HARGA MAKS (RP)</label>
-              <input type="number" name="price_max" value="{{ $priceMax }}" placeholder="Mis. 5.000.000" class="w-full px-4 py-3 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+              <input type="number" name="price_max" value="{{ $priceMax }}" placeholder="Contoh: 5000000" class="w-full px-4 py-3 text-xs sm:text-sm font-bold text-gray-800 dark:text-white bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400" />
             </div>
           </div>
 

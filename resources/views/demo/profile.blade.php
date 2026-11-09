@@ -135,46 +135,46 @@
                   <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        First Name
+                        Nama Lengkap
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        Testing
+                        {{ auth()->user()->nama ?? '-' }}
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Last Name
+                        Peran Akun
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        Chowdhury
+                        {{ auth()->user()->role ?? '-' }}
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Email address
+                        Alamat Email
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        randomuser@pimjo.com
+                        {{ auth()->user()->email ?? '-' }}
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Phone
+                        Nomor Telepon
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        +09 363 398 46
+                        {{ auth()->user()->nomor_telepon ?? '-' }}
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Bio
+                        Bio Singkat
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        Team Manager
+                        {{ auth()->user()->bio ?? '-' }}
                       </p>
                     </div>
                   </div>
@@ -202,37 +202,37 @@
                   <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Country
+                        Negara
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        United States
+                        Indonesia
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        City/State
+                        Kota Domisili
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        Arizona, United States
+                        {{ auth()->user()->alamat ?? '-' }}
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        Postal Code
+                        Kode Pos
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        ERT 2489
+                        -
                       </p>
                     </div>
 
                     <div>
                       <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                        TAX ID
+                        Nomor Identitas
                       </p>
                       <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                        AS4568384
+                        -
                       </p>
                     </div>
                   </div>

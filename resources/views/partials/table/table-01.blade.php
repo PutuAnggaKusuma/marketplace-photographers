@@ -37,12 +37,11 @@
         @forelse($contractsList as $item)
           @php
             $service = $item->bookingDetail->service ?? null;
-            $serviceName = $service ? $service->nama_layanan : 'Paket Sesi Foto Eksklusif';
+            $serviceName = $service ? $service->nama_layanan : ($item->bookingDetail->service_name ?? 'Sesi Pemotretan');
             
-            $catName = 'Dokumentasi & Sesi Foto';
-            if ($item->photographer && $item->photographer->categories && $item->photographer->categories->isNotEmpty()) {
-                $catName = $item->photographer->categories->first()->nama_kategori;
-            }
+            $catName = ($item->photographer && $item->photographer->categories && $item->photographer->categories->isNotEmpty())
+                ? $item->photographer->categories->first()->nama_kategori
+                : '-';
 
             $photoImg = ($item->photographer && $item->photographer->foto) 
                 ? (str_starts_with($item->photographer->foto, 'http') ? $item->photographer->foto : asset('storage/' . $item->photographer->foto)) 
@@ -66,7 +65,7 @@
                     {{ $serviceName }}
                   </p>
                   <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
-                    Fotografer: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $item->photographer->nama ?? 'Studio' }}</span> • Klien: {{ $item->client->nama ?? 'Klien' }}
+                    Fotografer: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $item->photographer->nama ?? '-' }}</span> • Klien: {{ $item->client->nama ?? '-' }}
                   </p>
                 </div>
               </div>
