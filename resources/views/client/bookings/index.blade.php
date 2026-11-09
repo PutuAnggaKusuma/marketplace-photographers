@@ -802,7 +802,35 @@
 
         <!-- Form Alasan Pembatalan -->
 
-        <form :action="'/client/bookings/' + cancelContractId + '/cancel'" method="POST" class="mt-5 space-y-4">
+        <form :action="'/client/bookings/' + cancelContractId + '/cancel'" 
+              method="POST" 
+              class="mt-5 space-y-4"
+              x-data="{
+                form: { alasan: '' },
+                touched: { alasan: false },
+                errors: { alasan: '' },
+                validateAlasan() {
+                  if (!this.form.alasan || !this.form.alasan.trim()) {
+                    this.errors.alasan = 'Alasan pembatalan reservasi wajib diisi.';
+                    return false;
+                  }
+                  if (this.form.alasan.trim().length < 5) {
+                    this.errors.alasan = 'Alasan pembatalan minimal 5 karakter.';
+                    return false;
+                  }
+                  this.errors.alasan = '';
+                  return true;
+                },
+                submitForm(e) {
+                  this.touched.alasan = true;
+                  if (!this.validateAlasan()) {
+                    e.preventDefault();
+                    this.$refs.fieldAlasan?.focus();
+                    return false;
+                  }
+                }
+              }"
+              @submit="submitForm($event)">
 
           @csrf
 
@@ -815,18 +843,18 @@
             </label>
 
             <textarea name="alasan" 
-
+                      x-ref="fieldAlasan"
+                      x-model="form.alasan"
+                      @input="touched.alasan = true; validateAlasan()"
+                      @blur="touched.alasan = true; validateAlasan()"
                       rows="3" 
-
-                      required 
-
                       placeholder="Jelaskan alasan pembatalan reservasi Anda..."
+                      class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl outline-none focus:ring-2 transition"
+                      :class="touched.alasan && errors.alasan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"></textarea>
 
-                      class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition"></textarea>
+            <p x-show="touched.alasan && errors.alasan" x-text="errors.alasan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
-
-
 
           <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59) -->
 
@@ -940,7 +968,60 @@
 
         <!-- Form Reschedule -->
 
-        <form :action="'/client/bookings/' + rescheduleContractId + '/reschedule'" method="POST" class="mt-5 space-y-4 text-left">
+        <form :action="'/client/bookings/' + rescheduleContractId + '/reschedule'" 
+              method="POST" 
+              class="mt-5 space-y-4 text-left"
+              x-data="{
+                form: {
+                  reschedule_date: rescheduleDefaultDate || '',
+                  reschedule_reason: ''
+                },
+                touched: {
+                  reschedule_date: false,
+                  reschedule_reason: false
+                },
+                errors: {
+                  reschedule_date: '',
+                  reschedule_reason: ''
+                },
+                validateDate() {
+                  if (!this.form.reschedule_date) {
+                    this.errors.reschedule_date = 'Tanggal baru wajib dipilih.';
+                    return false;
+                  }
+                  this.errors.reschedule_date = '';
+                  return true;
+                },
+                validateReason() {
+                  if (!this.form.reschedule_reason || !this.form.reschedule_reason.trim()) {
+                    this.errors.reschedule_reason = 'Alasan perubahan jadwal wajib diisi.';
+                    return false;
+                  }
+                  if (this.form.reschedule_reason.trim().length < 5) {
+                    this.errors.reschedule_reason = 'Alasan perubahan minimal 5 karakter.';
+                    return false;
+                  }
+                  this.errors.reschedule_reason = '';
+                  return true;
+                },
+                submitForm(e) {
+                  this.touched.reschedule_date = true;
+                  this.touched.reschedule_reason = true;
+                  const validDate = this.validateDate();
+                  const validReason = this.validateReason();
+                  if (!validDate) {
+                    e.preventDefault();
+                    this.$refs.fieldDate?.focus();
+                    return false;
+                  }
+                  if (!validReason) {
+                    e.preventDefault();
+                    this.$refs.fieldReason?.focus();
+                    return false;
+                  }
+                }
+              }"
+              @submit="submitForm($event)">
 
           @csrf
 
@@ -959,16 +1040,16 @@
               </label>
 
               <input type="date" 
-
                      name="reschedule_date" 
-
+                     x-ref="fieldDate"
+                     x-model="form.reschedule_date"
+                     @input="touched.reschedule_date = true; validateDate()"
+                     @blur="touched.reschedule_date = true; validateDate()"
                      min="{{ date('Y-m-d') }}" 
+                     class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl outline-none focus:ring-2 transition"
+                     :class="touched.reschedule_date && errors.reschedule_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'">
 
-                     :value="rescheduleDefaultDate"
-
-                     required 
-
-                     class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition">
+              <p x-show="touched.reschedule_date && errors.reschedule_date" x-text="errors.reschedule_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -1049,14 +1130,16 @@
             </label>
 
             <textarea name="reschedule_reason" 
-
+                      x-ref="fieldReason"
+                      x-model="form.reschedule_reason"
+                      @input="touched.reschedule_reason = true; validateReason()"
+                      @blur="touched.reschedule_reason = true; validateReason()"
                       rows="3" 
-
-                      required 
-
                       placeholder="Jelaskan alasan perubahan jadwal (misal kendala cuaca, acara diundur, dll)..."
+                      class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl outline-none focus:ring-2 transition leading-relaxed"
+                      :class="touched.reschedule_reason && errors.reschedule_reason ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"></textarea>
 
-                      class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition leading-relaxed"></textarea>
+            <p x-show="touched.reschedule_reason && errors.reschedule_reason" x-text="errors.reschedule_reason" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
 

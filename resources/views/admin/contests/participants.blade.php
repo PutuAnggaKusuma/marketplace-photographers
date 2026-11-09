@@ -414,7 +414,35 @@
 
 
 
-                <form :action="rejectUrl" method="POST" class="space-y-4">
+                <form :action="rejectUrl" 
+                      method="POST" 
+                      class="space-y-4"
+                      x-data="{
+                        catatan: '',
+                        touched: false,
+                        error: '',
+                        validate() {
+                            if (!this.catatan || !this.catatan.trim()) {
+                                this.error = 'Alasan penolakan wajib diisi.';
+                                return false;
+                            }
+                            if (this.catatan.trim().length < 5) {
+                                this.error = 'Alasan penolakan minimal 5 karakter.';
+                                return false;
+                            }
+                            this.error = '';
+                            return true;
+                        },
+                        submitForm(e) {
+                            this.touched = true;
+                            if (!this.validate()) {
+                                e.preventDefault();
+                                this.$refs.catatanInput?.focus();
+                                return false;
+                            }
+                        }
+                      }"
+                      @submit="submitForm($event)">
 
                     @csrf
 
@@ -422,7 +450,16 @@
 
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alasan Penolakan <span class="text-rose-500">*</span></label>
 
-                        <textarea name="catatan_admin" required rows="3" placeholder="Contoh: Berkas portofolio belum sesuai syarat ketentuan..." class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-none focus:ring-2 focus:ring-amber-500"></textarea>
+                        <textarea name="catatan_admin" 
+                                  x-ref="catatanInput"
+                                  x-model="catatan"
+                                  @input="touched = true; validate()"
+                                  @blur="touched = true; validate()"
+                                  rows="3" 
+                                  placeholder="Contoh: Berkas portofolio belum sesuai syarat ketentuan..." 
+                                  class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-none focus:ring-2 transition"
+                                  :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"></textarea>
+                        <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -430,7 +467,7 @@
 
                     <div class="flex items-center justify-center gap-3 pt-2">
 
-                        <button type="button" @click="rejectModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 transition cursor-pointer">Batal</button>
+                        <button type="button" @click="rejectModal = false; catatan = ''; error = ''; touched = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 transition cursor-pointer">Batal</button>
 
                         <button type="submit" class="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">Tolak Peserta</button>
 

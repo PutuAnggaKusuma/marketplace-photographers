@@ -349,7 +349,36 @@
 
       </div>
 
-      <form :action="'{{ url('/client/bookings') }}/' + openRevisionModal + '/request-revision'" method="POST" class="space-y-4">
+      <form :action="'{{ url('/client/bookings') }}/' + openRevisionModal + '/request-revision'" method="POST"
+            x-data="{
+              catatan: '',
+              touched: false,
+              error: '',
+              validateCatatan() {
+                if (!this.catatan || !this.catatan.trim()) {
+                  this.error = 'Rincian catatan revisi wajib diisi.';
+                  return false;
+                }
+                if (this.catatan.trim().length < 5) {
+                  this.error = 'Catatan revisi minimal 5 karakter.';
+                  return false;
+                }
+                this.error = '';
+                return true;
+              },
+              submitRevision(e) {
+                this.touched = true;
+                if (!this.validateCatatan()) {
+                  e.preventDefault();
+                  this.$refs.revisiInput?.focus();
+                  return false;
+                }
+                return true;
+              }
+            }"
+            @submit="submitRevision($event)"
+            novalidate
+            class="space-y-4">
 
         @csrf
 
@@ -357,7 +386,16 @@
 
           <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Rincian Catatan Revisi <span class="text-rose-500">*</span></label>
 
-          <textarea name="catatan_revisi" required rows="4" placeholder="Contoh: Mohon penyesuaian tone warna pada foto keluarga di luar ruangan agak sedikit terang..." class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+          <textarea name="catatan_revisi" 
+                    x-ref="revisiInput"
+                    x-model="catatan"
+                    @input="touched = true; validateCatatan()"
+                    @blur="touched = true; validateCatatan()"
+                    rows="4" 
+                    placeholder="Contoh: Mohon penyesuaian tone warna pada foto keluarga di luar ruangan agak sedikit terang..." 
+                    :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                    class="w-full px-3.5 py-2.5 text-xs rounded-xl border bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2"></textarea>
+          <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
         </div>
 

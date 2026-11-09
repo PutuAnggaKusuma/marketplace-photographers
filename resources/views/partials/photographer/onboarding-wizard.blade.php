@@ -4,119 +4,7 @@
 @endphp
 
 <!-- Onboarding Modal & Dashboard Integration Component -->
-<div x-data="{
-    open: {{ $photographer->is_onboarded ? 'false' : 'true' }},
-    step: 1,
-    provinceCode: '{{ old('province_code', $photographer->province_code) }}',
-    provinceName: '{{ $photographer->province->name ?? '' }}',
-    cityCode: '{{ old('city_code', $photographer->city_code) }}',
-    cityName: '{{ $photographer->city->name ?? '' }}',
-    cities: [],
-    loadingCities: false,
-    selectedCategories: {{ json_encode(old('categories', $photographer->categories->pluck('id')->toArray())) }},
-    bankName: '{{ old('nama_bank', $photographer->nama_bank ?? '') }}',
-    provinceDropdownOpen: false,
-    cityDropdownOpen: false,
-    bankDropdownOpen: false,
-
-    async fetchCities(pCode) {
-      if (!pCode) {
-        this.cities = [];
-        return;
-      }
-      this.loadingCities = true;
-      try {
-        const res = await fetch('/api/cities/' + pCode);
-        this.cities = await res.json();
-      } catch (err) {
-        console.error('Gagal mengambil data kota:', err);
-      } finally {
-        this.loadingCities = false;
-      }
-    },
-
-    init() {
-      if (this.provinceCode) {
-        this.fetchCities(this.provinceCode);
-      }
-      window.addEventListener('open-onboarding-modal', () => {
-        this.open = true;
-        this.step = 1;
-      });
-    },
-
-    toggleCategory(catId) {
-      const idx = this.selectedCategories.indexOf(catId);
-      if (idx > -1) {
-        this.selectedCategories.splice(idx, 1);
-      } else {
-        this.selectedCategories.push(catId);
-      }
-    },
-
-    nextStep() {
-      if (this.step === 1) {
-        if (!this.provinceCode) {
-          alert('Silakan pilih provinsi domisili operasional Anda.');
-          return;
-        }
-        if (!this.cityCode) {
-          alert('Silakan pilih kota / kabupaten domisili operasional Anda.');
-          return;
-        }
-        const alamatVal = this.$refs.alamatInput.value.trim();
-        if (!alamatVal) {
-          alert('Silakan isi alamat lengkap atau domisili operasional Anda.');
-          this.$refs.alamatInput.focus();
-          return;
-        }
-        if (this.selectedCategories.length === 0) {
-          alert('Pilih minimal 1 kategori spesialisasi foto.');
-          return;
-        }
-        this.step = 2;
-      } else if (this.step === 2) {
-        const sosmedVal = this.$refs.sosmedInput.value.trim();
-        const bioVal = this.$refs.bioInput.value.trim();
-        const layananVal = this.$refs.layananInput.value.trim();
-        const tarifVal = this.$refs.tarifInput.value.trim();
-        const descVal = this.$refs.descLayananInput.value.trim();
-
-        if (!sosmedVal) {
-          alert('Silakan isi tautan Instagram atau portofolio online Anda.');
-          this.$refs.sosmedInput.focus();
-          return;
-        }
-        if (!bioVal || bioVal.length < 15) {
-          alert('Silakan isi deskripsi bio singkat perkenalan Anda (minimal 15 karakter).');
-          this.$refs.bioInput.focus();
-          return;
-        }
-        if (!layananVal) {
-          alert('Silakan isi nama paket layanan perdana Anda.');
-          this.$refs.layananInput.focus();
-          return;
-        }
-        if (!tarifVal || Number(tarifVal) < 10000) {
-          alert('Silakan masukkan tarif harga paket yang valid (minimal Rp 10.000).');
-          this.$refs.tarifInput.focus();
-          return;
-        }
-        if (!descVal || descVal.length < 10) {
-          alert('Silakan isi deskripsi fasilitas paket layanan (minimal 10 karakter).');
-          this.$refs.descLayananInput.focus();
-          return;
-        }
-        this.step = 3;
-      }
-    },
-
-    prevStep() {
-      if (this.step > 1) {
-        this.step--;
-      }
-    }
-  }">
+<div x-data="onboardingWizardApp()">
 
   <!-- 1. Top Onboarding Warning Banner (Tampil Jika Profil Belum Lengkap) -->
   @if(!$photographer->is_onboarded)
@@ -206,7 +94,7 @@
       </div>
 
       <!-- Wizard Form Content -->
-      <form action="{{ route('photographer.onboarding.complete') }}" method="POST" class="p-6 sm:p-8 space-y-6">
+      <form action="{{ route('photographer.onboarding.complete') }}" method="POST" @submit="submitOnboardingForm($event)" novalidate class="p-6 sm:p-8 space-y-6">
         @csrf
 
         <!-- ==================== STEP 1: DOMISILI & KATEGORI SPESIALISASI ==================== -->
@@ -232,7 +120,8 @@
               <div class="relative">
                 <button type="button" 
                         @click="provinceDropdownOpen = !provinceDropdownOpen; cityDropdownOpen = false"
-                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer">
+                        :class="touched.province && errors.province ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 transition cursor-pointer">
                   <span x-text="provinceName ? provinceName : 'Pilih Provinsi Domisili'"></span>
                   <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="provinceDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -245,7 +134,7 @@
                      style="display: none;">
                   @foreach($provincesData as $prov)
                     <button type="button" 
-                            @click="provinceCode = '{{ $prov->code }}'; provinceName = '{{ addslashes($prov->name) }}'; cityCode = ''; cityName = ''; provinceDropdownOpen = false; fetchCities('{{ $prov->code }}');"
+                            @click="provinceCode = '{{ $prov->code }}'; provinceName = '{{ addslashes($prov->name) }}'; cityCode = ''; cityName = ''; provinceDropdownOpen = false; touched.province = true; validateProvince(); touched.city = true; validateCity(); fetchCities('{{ $prov->code }}');"
                             class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
                             :class="provinceCode === '{{ $prov->code }}' ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600' : ''">
                       {{ $prov->name }}
@@ -253,6 +142,7 @@
                   @endforeach
                 </div>
               </div>
+              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
             <!-- Dropdown Kota / Kabupaten -->
@@ -266,7 +156,8 @@
                 <button type="button" 
                         @click="if(provinceCode) { cityDropdownOpen = !cityDropdownOpen; provinceDropdownOpen = false; }"
                         :disabled="!provinceCode || loadingCities"
-                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                        :class="touched.city && errors.city ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                   <span x-text="loadingCities ? 'Memuat daftar kota...' : (cityName ? cityName : (provinceCode ? 'Pilih Kota / Kabupaten' : 'Pilih provinsi terlebih dahulu'))"></span>
                   <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="cityDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -279,7 +170,7 @@
                      style="display: none;">
                   <template x-for="c in cities" :key="c.code">
                     <button type="button" 
-                            @click="cityCode = c.code; cityName = c.name; cityDropdownOpen = false"
+                            @click="cityCode = c.code; cityName = c.name; cityDropdownOpen = false; touched.city = true; validateCity();"
                             class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
                             :class="cityCode === c.code ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600' : ''"
                             x-text="c.name">
@@ -287,6 +178,7 @@
                   </template>
                 </div>
               </div>
+              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
           </div>
 
@@ -297,10 +189,14 @@
             </label>
             <textarea name="alamat" 
                       x-ref="alamatInput" 
+                      x-model="form.alamat"
+                      @input="touched.alamat = true; validateAlamat()"
+                      @blur="touched.alamat = true; validateAlamat()"
                       rows="3" 
-                      required 
                       placeholder="Contoh: Jl. Sunset Road No. 88, Kuta, Bali (Mencakup area pemotretan Bali Selatan, Canggu, dan Ubud)"
-                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium leading-relaxed">{{ old('alamat', $photographer->alamat) }}</textarea>
+                      :class="touched.alamat && errors.alamat ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
+            <p x-show="touched.alamat && errors.alamat" x-text="errors.alamat" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <!-- Kategori Spesialisasi Foto (Pill Selection with Minimum 1 Category) -->
@@ -333,6 +229,7 @@
             <template x-for="catId in selectedCategories" :key="catId">
               <input type="hidden" name="categories[]" :value="catId">
             </template>
+            <p x-show="touched.categories && errors.categories" x-text="errors.categories" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
         </div>
 
@@ -355,10 +252,13 @@
             <input type="text" 
                    name="link_sosmed" 
                    x-ref="sosmedInput"
-                   value="{{ old('link_sosmed', $photographer->link_sosmed) }}" 
-                   required 
+                   x-model="form.link_sosmed"
+                   @input="touched.link_sosmed = true; validateSosmed()"
+                   @blur="touched.link_sosmed = true; validateSosmed()"
                    placeholder="https://instagram.com/studioanda atau https://portofolioanda.com" 
-                   class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
+                   :class="touched.link_sosmed && errors.link_sosmed ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                   class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
+            <p x-show="touched.link_sosmed && errors.link_sosmed" x-text="errors.link_sosmed" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <!-- Bio Singkat Perkenalan -->
@@ -368,10 +268,14 @@
             </label>
             <textarea name="deskripsi_bio" 
                       x-ref="bioInput"
+                      x-model="form.deskripsi_bio"
+                      @input="touched.deskripsi_bio = true; validateBio()"
+                      @blur="touched.deskripsi_bio = true; validateBio()"
                       rows="3" 
-                      required 
                       placeholder="Ceritakan gaya fotografi Anda, pengalaman, atau konsep pemotretan yang menjadi keunggulan Anda..."
-                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium leading-relaxed">{{ old('deskripsi_bio', $photographer->deskripsi_bio) }}</textarea>
+                      :class="touched.deskripsi_bio && errors.deskripsi_bio ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
+            <p x-show="touched.deskripsi_bio && errors.deskripsi_bio" x-text="errors.deskripsi_bio" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <!-- Paket Layanan Perdana (Card Box) -->
@@ -392,9 +296,13 @@
                 <input type="text" 
                        name="nama_layanan" 
                        x-ref="layananInput"
-                       required 
+                       x-model="form.nama_layanan"
+                       @input="touched.nama_layanan = true; validateLayanan()"
+                       @blur="touched.nama_layanan = true; validateLayanan()"
                        placeholder="Contoh: Paket Sesi Personal Portrait / Wisuda" 
-                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
+                       :class="touched.nama_layanan && errors.nama_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
+                <p x-show="touched.nama_layanan && errors.nama_layanan" x-text="errors.nama_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
 
               <div class="space-y-1.5">
@@ -404,11 +312,15 @@
                 <input type="number" 
                        name="tarif_harga" 
                        x-ref="tarifInput"
+                       x-model="form.tarif_harga"
+                       @input="touched.tarif_harga = true; validateTarif()"
+                       @blur="touched.tarif_harga = true; validateTarif()"
                        min="10000" 
                        step="10000"
-                       required 
                        placeholder="Masukkan nominal tarif paket (min. 10000)" 
-                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
+                       :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
+                <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
             </div>
 
@@ -419,10 +331,14 @@
               </label>
               <textarea name="deskripsi_layanan" 
                         x-ref="descLayananInput"
+                        x-model="form.deskripsi_layanan"
+                        @input="touched.deskripsi_layanan = true; validateDescLayanan()"
+                        @blur="touched.deskripsi_layanan = true; validateDescLayanan()"
                         rows="3" 
-                        required 
                         placeholder="Contoh: Sesi pemotretan 2 jam, 30 foto high-res edited, seluruh file raw dikirimkan via Google Drive dalam 3 hari kerja."
-                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium leading-relaxed"></textarea>
+                        :class="touched.deskripsi_layanan && errors.deskripsi_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
+              <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
           </div>
         </div>
@@ -450,7 +366,8 @@
               <div class="relative">
                 <button type="button" 
                         @click="bankDropdownOpen = !bankDropdownOpen"
-                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer">
+                        :class="touched.bank && errors.bank ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 transition cursor-pointer">
                   <span x-text="bankName ? bankName : 'Pilih Bank'"></span>
                   <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="bankDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -463,7 +380,7 @@
                      style="display: none;">
                   @foreach(['BCA', 'Mandiri', 'BRI', 'BNI', 'CIMB Niaga', 'Bank Syariah Indonesia (BSI)', 'Permata Bank', 'Bank Jago'] as $b)
                     <button type="button" 
-                            @click="bankName = '{{ $b }}'; bankDropdownOpen = false"
+                            @click="bankName = '{{ $b }}'; bankDropdownOpen = false; touched.bank = true; validateBank();"
                             class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
                             :class="bankName === '{{ $b }}' ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-600' : ''">
                       {{ $b }}
@@ -471,6 +388,7 @@
                   @endforeach
                 </div>
               </div>
+              <p x-show="touched.bank && errors.bank" x-text="errors.bank" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
             <!-- Nomor Rekening -->
@@ -478,12 +396,19 @@
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Nomor Rekening <span class="text-rose-500">*</span>
               </label>
-              <input type="text" 
+              <input type="tel" 
+                     inputmode="numeric"
+                     pattern="[0-9]*"
                      name="nomor_rekening" 
-                     value="{{ old('nomor_rekening', $photographer->nomor_rekening) }}" 
-                     required 
-                     placeholder="Masukkan nomor rekening bank" 
-                     class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
+                     x-ref="rekeningInput"
+                     x-model="form.nomor_rekening"
+                     @keypress="if(!/[0-9]/.test($event.key)) $event.preventDefault()"
+                     @input="form.nomor_rekening = form.nomor_rekening.replace(/[^0-9]/g, ''); touched.nomor_rekening = true; validateRekening()"
+                     @blur="touched.nomor_rekening = true; validateRekening()"
+                     placeholder="Contoh: 1234567890" 
+                     :class="touched.nomor_rekening && errors.nomor_rekening ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                     class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
+              <p x-show="touched.nomor_rekening && errors.nomor_rekening" x-text="errors.nomor_rekening" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
             <!-- Atas Nama Rekening -->
@@ -493,10 +418,14 @@
               </label>
               <input type="text" 
                      name="atas_nama_rekening" 
-                     value="{{ old('atas_nama_rekening', $photographer->atas_nama_rekening) }}" 
-                     required 
+                     x-ref="atasNamaInput"
+                     x-model="form.atas_nama_rekening"
+                     @input="touched.atas_nama_rekening = true; validateAtasNama()"
+                     @blur="touched.atas_nama_rekening = true; validateAtasNama()"
                      placeholder="Sesuai buku tabungan" 
-                     class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
+                     :class="touched.atas_nama_rekening && errors.atas_nama_rekening ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                     class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
+              <p x-show="touched.atas_nama_rekening && errors.atas_nama_rekening" x-text="errors.atas_nama_rekening" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
           </div>
 
@@ -577,3 +506,308 @@
 
 </div>
 
+
+<script>
+function onboardingWizardApp() {
+  return {
+    open: {{ $photographer->is_onboarded ? 'false' : 'true' }},
+    step: 1,
+    provinceCode: '{{ old('province_code', $photographer->province_code) }}',
+    provinceName: '{{ addslashes($photographer->province->name ?? '') }}',
+    cityCode: '{{ old('city_code', $photographer->city_code) }}',
+    cityName: '{{ addslashes($photographer->city->name ?? '') }}',
+    cities: [],
+    loadingCities: false,
+    selectedCategories: {{ json_encode(old('categories', $photographer->categories->pluck('id')->toArray())) }},
+    bankName: '{{ old('nama_bank', $photographer->nama_bank ?? '') }}',
+    provinceDropdownOpen: false,
+    cityDropdownOpen: false,
+    bankDropdownOpen: false,
+
+    form: {
+      alamat: '{{ addslashes(old('alamat', $photographer->alamat ?? '')) }}',
+      link_sosmed: '{{ addslashes(old('link_sosmed', $photographer->link_sosmed ?? '')) }}',
+      deskripsi_bio: '{{ addslashes(old('deskripsi_bio', $photographer->deskripsi_bio ?? '')) }}',
+      nama_layanan: '{{ addslashes(old('nama_layanan', '')) }}',
+      tarif_harga: '{{ old('tarif_harga', '') }}',
+      deskripsi_layanan: '{{ addslashes(old('deskripsi_layanan', '')) }}',
+      nomor_rekening: '{{ addslashes(old('nomor_rekening', $photographer->nomor_rekening ?? '')) }}',
+      atas_nama_rekening: '{{ addslashes(old('atas_nama_rekening', $photographer->atas_nama_rekening ?? '')) }}',
+    },
+
+    touched: {
+      province: {{ $errors->has('province_code') ? 'true' : 'false' }},
+      city: {{ $errors->has('city_code') ? 'true' : 'false' }},
+      alamat: {{ $errors->has('alamat') ? 'true' : 'false' }},
+      categories: {{ $errors->has('categories') ? 'true' : 'false' }},
+      link_sosmed: {{ $errors->has('link_sosmed') ? 'true' : 'false' }},
+      deskripsi_bio: {{ $errors->has('deskripsi_bio') ? 'true' : 'false' }},
+      nama_layanan: {{ $errors->has('nama_layanan') ? 'true' : 'false' }},
+      tarif_harga: {{ $errors->has('tarif_harga') ? 'true' : 'false' }},
+      deskripsi_layanan: {{ $errors->has('deskripsi_layanan') ? 'true' : 'false' }},
+      bank: {{ $errors->has('nama_bank') ? 'true' : 'false' }},
+      nomor_rekening: {{ $errors->has('nomor_rekening') ? 'true' : 'false' }},
+      atas_nama_rekening: {{ $errors->has('atas_nama_rekening') ? 'true' : 'false' }},
+    },
+
+    errors: {
+      province: '{{ $errors->first('province_code') ?: '' }}',
+      city: '{{ $errors->first('city_code') ?: '' }}',
+      alamat: '{{ $errors->first('alamat') ?: '' }}',
+      categories: '{{ $errors->first('categories') ?: '' }}',
+      link_sosmed: '{{ $errors->first('link_sosmed') ?: '' }}',
+      deskripsi_bio: '{{ $errors->first('deskripsi_bio') ?: '' }}',
+      nama_layanan: '{{ $errors->first('nama_layanan') ?: '' }}',
+      tarif_harga: '{{ $errors->first('tarif_harga') ?: '' }}',
+      deskripsi_layanan: '{{ $errors->first('deskripsi_layanan') ?: '' }}',
+      bank: '{{ $errors->first('nama_bank') ?: '' }}',
+      nomor_rekening: '{{ $errors->first('nomor_rekening') ?: '' }}',
+      atas_nama_rekening: '{{ $errors->first('atas_nama_rekening') ?: '' }}',
+    },
+
+    async fetchCities(pCode) {
+      if (!pCode) {
+        this.cities = [];
+        return;
+      }
+      this.loadingCities = true;
+      try {
+        const res = await fetch('/api/cities/' + pCode);
+        this.cities = await res.json();
+      } catch (err) {
+        console.error('Gagal mengambil data kota:', err);
+      } finally {
+        this.loadingCities = false;
+      }
+    },
+
+    init() {
+      if (this.provinceCode) {
+        this.fetchCities(this.provinceCode);
+      }
+      window.addEventListener('open-onboarding-modal', () => {
+        this.open = true;
+        this.step = 1;
+      });
+    },
+
+    toggleCategory(catId) {
+      const idx = this.selectedCategories.indexOf(catId);
+      if (idx > -1) {
+        this.selectedCategories.splice(idx, 1);
+      } else {
+        this.selectedCategories.push(catId);
+      }
+      this.touched.categories = true;
+      this.validateCategories();
+    },
+
+    validateProvince() {
+      if (!this.provinceCode) {
+        this.errors.province = 'Silakan pilih provinsi domisili operasional.';
+        return false;
+      }
+      this.errors.province = '';
+      return true;
+    },
+
+    validateCity() {
+      if (!this.cityCode) {
+        this.errors.city = 'Silakan pilih kota / kabupaten domisili operasional.';
+        return false;
+      }
+      this.errors.city = '';
+      return true;
+    },
+
+    validateAlamat() {
+      if (!this.form.alamat || !this.form.alamat.trim()) {
+        this.errors.alamat = 'Alamat domisili operasional wajib diisi.';
+        return false;
+      }
+      if (this.form.alamat.trim().length < 5) {
+        this.errors.alamat = 'Alamat minimal 5 karakter.';
+        return false;
+      }
+      this.errors.alamat = '';
+      return true;
+    },
+
+    validateCategories() {
+      if (!this.selectedCategories || this.selectedCategories.length === 0) {
+        this.errors.categories = 'Pilih minimal 1 kategori spesialisasi foto.';
+        return false;
+      }
+      this.errors.categories = '';
+      return true;
+    },
+
+    validateSosmed() {
+      if (!this.form.link_sosmed || !this.form.link_sosmed.trim()) {
+        this.errors.link_sosmed = 'Tautan Instagram atau portofolio wajib diisi.';
+        return false;
+      }
+      this.errors.link_sosmed = '';
+      return true;
+    },
+
+    validateBio() {
+      if (!this.form.deskripsi_bio || !this.form.deskripsi_bio.trim()) {
+        this.errors.deskripsi_bio = 'Deskripsi bio profil wajib diisi.';
+        return false;
+      }
+      if (this.form.deskripsi_bio.trim().length < 15) {
+        this.errors.deskripsi_bio = 'Deskripsi bio minimal 15 karakter.';
+        return false;
+      }
+      this.errors.deskripsi_bio = '';
+      return true;
+    },
+
+    validateLayanan() {
+      if (!this.form.nama_layanan || !this.form.nama_layanan.trim()) {
+        this.errors.nama_layanan = 'Nama paket layanan perdana wajib diisi.';
+        return false;
+      }
+      this.errors.nama_layanan = '';
+      return true;
+    },
+
+    validateTarif() {
+      const val = Number(this.form.tarif_harga);
+      if (!this.form.tarif_harga || isNaN(val) || val < 10000) {
+        this.errors.tarif_harga = 'Tarif paket perdana minimal Rp 10.000.';
+        return false;
+      }
+      this.errors.tarif_harga = '';
+      return true;
+    },
+
+    validateDescLayanan() {
+      if (!this.form.deskripsi_layanan || !this.form.deskripsi_layanan.trim()) {
+        this.errors.deskripsi_layanan = 'Deskripsi fasilitas paket layanan wajib diisi.';
+        return false;
+      }
+      if (this.form.deskripsi_layanan.trim().length < 10) {
+        this.errors.deskripsi_layanan = 'Deskripsi fasilitas paket minimal 10 karakter.';
+        return false;
+      }
+      this.errors.deskripsi_layanan = '';
+      return true;
+    },
+
+    validateBank() {
+      if (!this.bankName) {
+        this.errors.bank = 'Silakan pilih nama bank pencairan.';
+        return false;
+      }
+      this.errors.bank = '';
+      return true;
+    },
+
+    validateRekening() {
+      const clean = (this.form.nomor_rekening || '').replace(/[^0-9]/g, '');
+      if (!clean) {
+        this.errors.nomor_rekening = 'Nomor rekening bank wajib diisi.';
+        return false;
+      }
+      if (clean.length < 8 || clean.length > 20) {
+        this.errors.nomor_rekening = 'Nomor rekening harus terdiri dari 8-20 digit angka.';
+        return false;
+      }
+      this.errors.nomor_rekening = '';
+      return true;
+    },
+
+    validateAtasNama() {
+      if (!this.form.atas_nama_rekening || !this.form.atas_nama_rekening.trim()) {
+        this.errors.atas_nama_rekening = 'Nama pemilik rekening wajib diisi.';
+        return false;
+      }
+      if (this.form.atas_nama_rekening.trim().length < 3) {
+        this.errors.atas_nama_rekening = 'Nama pemilik rekening minimal 3 karakter.';
+        return false;
+      }
+      this.errors.atas_nama_rekening = '';
+      return true;
+    },
+
+    nextStep() {
+      if (this.step === 1) {
+        this.touched.province = true;
+        this.touched.city = true;
+        this.touched.alamat = true;
+        this.touched.categories = true;
+
+        const pValid = this.validateProvince();
+        const cValid = this.validateCity();
+        const aValid = this.validateAlamat();
+        const catValid = this.validateCategories();
+
+        if (!pValid || !cValid || !aValid || !catValid) {
+          if (!aValid && this.$refs.alamatInput) {
+            this.$refs.alamatInput.focus();
+          }
+          return;
+        }
+        this.step = 2;
+      } else if (this.step === 2) {
+        this.touched.link_sosmed = true;
+        this.touched.deskripsi_bio = true;
+        this.touched.nama_layanan = true;
+        this.touched.tarif_harga = true;
+        this.touched.deskripsi_layanan = true;
+
+        const sValid = this.validateSosmed();
+        const bValid = this.validateBio();
+        const lValid = this.validateLayanan();
+        const tValid = this.validateTarif();
+        const dValid = this.validateDescLayanan();
+
+        if (!sValid || !bValid || !lValid || !tValid || !dValid) {
+          if (!sValid && this.$refs.sosmedInput) {
+            this.$refs.sosmedInput.focus();
+          } else if (!bValid && this.$refs.bioInput) {
+            this.$refs.bioInput.focus();
+          } else if (!lValid && this.$refs.layananInput) {
+            this.$refs.layananInput.focus();
+          } else if (!tValid && this.$refs.tarifInput) {
+            this.$refs.tarifInput.focus();
+          } else if (!dValid && this.$refs.descLayananInput) {
+            this.$refs.descLayananInput.focus();
+          }
+          return;
+        }
+        this.step = 3;
+      }
+    },
+
+    prevStep() {
+      if (this.step > 1) {
+        this.step--;
+      }
+    },
+
+    submitOnboardingForm(e) {
+      this.touched.bank = true;
+      this.touched.nomor_rekening = true;
+      this.touched.atas_nama_rekening = true;
+
+      const bankValid = this.validateBank();
+      const rekValid = this.validateRekening();
+      const anValid = this.validateAtasNama();
+
+      if (!bankValid || !rekValid || !anValid) {
+        e.preventDefault();
+        if (!rekValid && this.$refs.rekeningInput) {
+          this.$refs.rekeningInput.focus();
+        } else if (!anValid && this.$refs.atasNamaInput) {
+          this.$refs.atasNamaInput.focus();
+        }
+        return false;
+      }
+      return true;
+    }
+  };
+}
+</script>

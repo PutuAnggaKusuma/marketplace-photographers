@@ -27,7 +27,7 @@
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700/80">
 
-            <form method="POST" :action="formAction" class="p-6 sm:p-7 space-y-5">
+            <form method="POST" :action="formAction" @submit="submitReviewForm($event)" novalidate class="p-6 sm:p-7 space-y-5">
                 @csrf
                 <template x-if="isEdit">
                     <input type="hidden" name="_method" value="PUT">
@@ -54,7 +54,7 @@
 
                 <!-- Star Rating Picker -->
                 <div class="text-center space-y-2 py-2">
-                    <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Pilih Kepuasan Layanan (1 - 5 Bintang)</label>
+                    <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Pilih Kepuasan Layanan (1 - 5 Bintang) <span class="text-rose-500">*</span></label>
                     <div class="flex items-center justify-center gap-2">
                         <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
                             <button type="button" 
@@ -81,6 +81,7 @@
                             <span class="text-gray-400 dark:text-gray-500 font-normal">Pilih jumlah bintang kepuasan (1 - 5)</span>
                         </template>
                     </div>
+                    <p x-show="touched.rating && errors.rating" x-text="errors.rating" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <!-- Written Testimonial Textarea -->
@@ -90,10 +91,14 @@
                     </label>
                     <textarea name="deskripsi_review" 
                               x-model="reviewText" 
+                              x-ref="reviewInput"
+                              @input="touched.reviewText = true; validateReviewText()"
+                              @blur="touched.reviewText = true; validateReviewText()"
                               rows="4" 
-                              required
                               placeholder="Bagikan pengalaman Anda mengenai kualitas foto, ketepatan waktu, dan keramahan fotografer..."
-                              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-none"></textarea>
+                              :class="touched.reviewText && errors.reviewText ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"
+                              class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none transition resize-none"></textarea>
+                    <p x-show="touched.reviewText && errors.reviewText" x-text="errors.reviewText" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <!-- Modal Actions (Always Centered, Maximum 2 Buttons, Never 3 Buttons Horizontally) -->
@@ -113,8 +118,7 @@
                     </template>
 
                     <button type="submit" 
-                            :disabled="!rating || rating < 1 || !reviewText.trim() || reviewText.length < 5"
-                            class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
+                            class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
                         <span x-text="isEdit ? 'Perbaharui Data' : 'Simpan Data'"></span>
                     </button>
                 </div>
@@ -143,6 +147,14 @@ function reviewModalApp() {
         hoverRating: 0,
         reviewText: '',
         formAction: '{{ route('client.reviews.store') }}',
+        touched: {
+            rating: false,
+            reviewText: false
+        },
+        errors: {
+            rating: '',
+            reviewText: ''
+        },
         openModal(detail) {
             if (detail) {
                 this.contractId = detail.contractId || null;
@@ -157,6 +169,8 @@ function reviewModalApp() {
                     ? `/client/reviews/${this.testimonialId}` 
                     : '{{ route('client.reviews.store') }}';
             }
+            this.touched = { rating: false, reviewText: false };
+            this.errors = { rating: '', reviewText: '' };
             this.isOpen = true;
         },
         closeModal() {
@@ -180,6 +194,46 @@ function reviewModalApp() {
         setRating(val) {
             this.rating = val;
             this.hoverRating = val;
+            this.touched.rating = true;
+            this.validateRating();
+        },
+        validateRating() {
+            if (!this.rating || this.rating < 1) {
+                this.errors.rating = 'Silakan pilih minimal 1 bintang kepuasan.';
+                return false;
+            }
+            this.errors.rating = '';
+            return true;
+        },
+        validateReviewText() {
+            if (!this.reviewText || !this.reviewText.trim()) {
+                this.errors.reviewText = 'Ulasan testimoni wajib diisi.';
+                return false;
+            }
+            if (this.reviewText.trim().length < 5) {
+                this.errors.reviewText = 'Ulasan testimoni minimal 5 karakter.';
+                return false;
+            }
+            this.errors.reviewText = '';
+            return true;
+        },
+        submitReviewForm(e) {
+            this.touched.rating = true;
+            this.touched.reviewText = true;
+
+            const isRatingValid = this.validateRating();
+            const isTextValid = this.validateReviewText();
+
+            if (!isRatingValid || !isTextValid) {
+                e.preventDefault();
+                if (!isRatingValid) {
+                    // focus rating or notify
+                } else if (!isTextValid && this.$refs.reviewInput) {
+                    this.$refs.reviewInput.focus();
+                }
+                return false;
+            }
+            return true;
         },
         getRatingLabelText(val) {
             const labels = {

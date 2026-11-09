@@ -343,56 +343,61 @@
                   </div>
                 </div>
 
-                <form action="{{ route('public.contests.register', $contest->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6 pt-3">
+                <form action="{{ route('public.contests.register', $contest->id) }}" method="POST" enctype="multipart/form-data" @submit="submitRegister($event)" novalidate class="space-y-6 pt-3">
                   @csrf
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Nama Lengkap <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="nama_lengkap" x-model="nama_lengkap" required placeholder="Nama lengkap sesuai KTP / Identitas" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="text" name="nama_lengkap" x-ref="namaInput" x-model="form.nama_lengkap" @input="touched.nama_lengkap = true; validateNama()" @blur="touched.nama_lengkap = true; validateNama()" placeholder="Nama lengkap sesuai KTP / Identitas" :class="touched.nama_lengkap && errors.nama_lengkap ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition shadow-2xs">
+                    <p x-show="touched.nama_lengkap && errors.nama_lengkap" x-text="errors.nama_lengkap" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Alamat Email Aktif <span class="text-rose-500">*</span>
                     </label>
-                    <input type="email" name="email" x-model="email" required placeholder="email@contoh.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="email" name="email" x-ref="emailInput" x-model="form.email" @input="touched.email = true; validateEmail()" @blur="touched.email = true; validateEmail()" placeholder="email@contoh.com" :class="touched.email && errors.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition shadow-2xs">
+                    <p x-show="touched.email && errors.email" x-text="errors.email" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       No. WhatsApp Aktif <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="no_wa" x-model="no_wa" required placeholder="Contoh: 08xxxxxxxxxx" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" name="no_wa" x-ref="waInput" x-model="form.no_wa" @keypress="if(!/[0-9]/.test($event.key)) $event.preventDefault()" @input="form.no_wa = form.no_wa.replace(/[^0-9]/g, ''); touched.no_wa = true; validateNoWa()" @blur="touched.no_wa = true; validateNoWa()" placeholder="Contoh: 08123456789" :class="touched.no_wa && errors.no_wa ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition shadow-2xs">
+                    <p x-show="touched.no_wa && errors.no_wa" x-text="errors.no_wa" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Asal Kota / Domisili <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="asal_kota" x-model="asal_kota" required placeholder="mis. Denpasar, Bali" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="text" name="asal_kota" x-ref="kotaInput" x-model="form.asal_kota" @input="touched.asal_kota = true; validateAsalKota()" @blur="touched.asal_kota = true; validateAsalKota()" placeholder="mis. Denpasar, Bali" :class="touched.asal_kota && errors.asal_kota ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition shadow-2xs">
+                    <p x-show="touched.asal_kota && errors.asal_kota" x-text="errors.asal_kota" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Instansi / Komunitas / Kampus
                     </label>
-                    <input type="text" name="instansi" x-model="instansi" placeholder="mis. Universitas Udayana / Umum" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="text" name="instansi" x-model="form.instansi" placeholder="mis. Universitas Udayana / Umum" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Bio Singkat / Latar Belakang Fotografi
                     </label>
-                    <textarea name="bio_singkat" x-model="bio_singkat" rows="3" placeholder="Ceritakan pengalaman singkat Anda di bidang fotografi..." class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition resize-y leading-relaxed shadow-2xs"></textarea>
+                    <textarea name="bio_singkat" x-model="form.bio_singkat" rows="3" placeholder="Ceritakan pengalaman singkat Anda di bidang fotografi..." class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition resize-y leading-relaxed shadow-2xs"></textarea>
                   </div>
 
                   <div>
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Motivasi Mengikuti Lomba <span class="text-rose-500">*</span>
                     </label>
-                    <textarea name="motivasi" rows="4" required placeholder="Tuliskan motivasi dan harapan Anda dalam mengikuti kompetisi ini..." class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition resize-y leading-relaxed shadow-2xs"></textarea>
+                    <textarea name="motivasi" x-ref="motivasiInput" x-model="form.motivasi" @input="touched.motivasi = true; validateMotivasi()" @blur="touched.motivasi = true; validateMotivasi()" rows="4" placeholder="Tuliskan motivasi dan harapan Anda dalam mengikuti kompetisi ini..." :class="touched.motivasi && errors.motivasi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed shadow-2xs"></textarea>
+                    <p x-show="touched.motivasi && errors.motivasi" x-text="errors.motivasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
                   <div x-data="{ cvFileName: null }" class="space-y-2">
@@ -414,7 +419,7 @@
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       Atau Tautan Portofolio / Instagram / Website
                     </label>
-                    <input type="url" name="portfolio_link" x-model="portfolio_link" placeholder="https://instagram.com/akun atau link GDrive" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="url" name="portfolio_link" x-model="form.portfolio_link" placeholder="https://instagram.com/akun atau link GDrive" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
                   </div>
 
                   <div class="flex items-center justify-end gap-3 pt-4">
@@ -515,18 +520,59 @@
                   <span>Bukti transfer telah diunggah dan sedang diverifikasi oleh admin. Terima kasih!</span>
                 </div>
               @else
-                <form action="{{ route('public.contests.payment', $contest->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form action="{{ route('public.contests.payment', $contest->id) }}" 
+                      method="POST" 
+                      enctype="multipart/form-data" 
+                      class="space-y-4"
+                      x-data="{
+                        transferFileName: null,
+                        touched: false,
+                        error: '',
+                        handleTransferFile(e) {
+                          const file = e.target.files[0];
+                          this.touched = true;
+                          if (!file) {
+                            this.transferFileName = null;
+                            this.error = 'File struk / bukti transfer wajib dipilih.';
+                            return false;
+                          }
+                          if (file.size > 5 * 1024 * 1024) {
+                            this.transferFileName = null;
+                            this.error = 'Ukuran file bukti transfer maksimal 5 MB.';
+                            return false;
+                          }
+                          this.transferFileName = file.name;
+                          this.error = '';
+                          return true;
+                        },
+                        submitTransfer(e) {
+                          this.touched = true;
+                          if (!this.transferFileName || this.error) {
+                            e.preventDefault();
+                            if (!this.error) this.error = 'File struk / bukti transfer wajib dipilih.';
+                            this.$refs.transferFileInput?.click();
+                            return false;
+                          }
+                        }
+                      }"
+                      @submit="submitTransfer($event)">
                   @csrf
-                  <div x-data="{ transferFileName: null }" class="space-y-2">
+                  <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
                     <div class="flex items-center gap-3">
                       <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
                         <span>Pilih File Struk Bukti</span>
-                        <input type="file" name="bukti_transfer" required accept="image/*,.pdf" class="sr-only" @change="transferFileName = $event.target.files[0]?.name">
+                        <input type="file" 
+                               name="bukti_transfer" 
+                               x-ref="transferFileInput"
+                               accept="image/*,.pdf" 
+                               class="sr-only" 
+                               @change="handleTransferFile($event)">
                       </label>
                       <span x-text="transferFileName ? transferFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
                     </div>
+                    <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                     <p class="text-[11px] text-gray-400">Format JPG, PNG, atau PDF (maks. 5MB)</p>
                   </div>
                   <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
@@ -586,12 +632,81 @@
                 <div x-data="{
                   showUploadForm: false,
                   preview: null,
+                  fileSelected: false,
+                  fileName: '',
+                  judul_karya: '',
+                  touched: {
+                    judul: false,
+                    foto: false
+                  },
+                  errors: {
+                    judul: '',
+                    foto: ''
+                  },
+                  validateJudul() {
+                    if (!this.judul_karya || !this.judul_karya.trim()) {
+                      this.errors.judul = 'Judul karya foto wajib diisi.';
+                      return false;
+                    }
+                    if (this.judul_karya.trim().length < 3) {
+                      this.errors.judul = 'Judul karya foto minimal 3 karakter.';
+                      return false;
+                    }
+                    this.errors.judul = '';
+                    return true;
+                  },
+                  validateFoto() {
+                    if (!this.fileSelected) {
+                      this.errors.foto = 'File foto karya wajib dipilih.';
+                      return false;
+                    }
+                    this.errors.foto = '';
+                    return true;
+                  },
                   handleFile(e) {
                     const file = e.target.files[0];
+                    this.touched.foto = true;
                     if (file) {
+                      if (!file.type.match(/^image\//)) {
+                        this.fileSelected = false;
+                        this.preview = null;
+                        this.errors.foto = 'File harus berupa gambar (JPG, PNG, WEBP).';
+                        return false;
+                      }
+                      if (file.size > 10 * 1024 * 1024) {
+                        this.fileSelected = false;
+                        this.preview = null;
+                        this.errors.foto = 'Ukuran file foto maksimal 10 MB.';
+                        return false;
+                      }
+                      this.fileSelected = true;
+                      this.fileName = file.name;
+                      this.errors.foto = '';
                       const reader = new FileReader();
                       reader.onload = (event) => { this.preview = event.target.result; };
                       reader.readAsDataURL(file);
+                      return true;
+                    } else {
+                      this.fileSelected = false;
+                      this.preview = null;
+                      this.errors.foto = 'File foto karya wajib dipilih.';
+                      return false;
+                    }
+                  },
+                  submitKarya(e) {
+                    this.touched.judul = true;
+                    this.touched.foto = true;
+                    const validJudul = this.validateJudul();
+                    const validFoto = this.validateFoto();
+                    if (!validJudul) {
+                      e.preventDefault();
+                      this.$refs.judulKaryaInput?.focus();
+                      return false;
+                    }
+                    if (!validFoto) {
+                      e.preventDefault();
+                      this.$refs.fotoFileInput?.click();
+                      return false;
                     }
                   }
                 }" class="space-y-4 pt-2">
@@ -625,12 +740,13 @@
                       <button type="button" @click="showUploadForm = false" class="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">Batal</button>
                     </div>
 
-                    <form action="{{ route('public.contests.submit', $contest->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <form action="{{ route('public.contests.submit', $contest->id) }}" method="POST" enctype="multipart/form-data" @submit="submitKarya($event)" novalidate class="space-y-4">
                       @csrf
 
                       <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Karya Foto <span class="text-rose-500">*</span></label>
-                        <input type="text" name="judul_karya" required placeholder="mis. Pesona Senja di Tanah Lot" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+                        <input type="text" name="judul_karya" x-ref="judulKaryaInput" x-model="judul_karya" @input="touched.judul = true; validateJudul()" @blur="touched.judul = true; validateJudul()" placeholder="mis. Pesona Senja di Tanah Lot" :class="touched.judul && errors.judul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" class="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2">
+                        <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                       </div>
 
                       <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 space-y-3">
@@ -650,8 +766,9 @@
                           <div class="flex-1 space-y-2">
                             <label class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
                               <span>Pilih File Foto Karya</span>
-                              <input type="file" name="foto_file" accept="image/*" @change="handleFile($event)" class="hidden">
+                              <input type="file" name="foto_file" x-ref="fotoFileInput" accept="image/*" @change="handleFile($event)" class="hidden">
                             </label>
+                            <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                             <p class="text-[11px] text-gray-500 dark:text-gray-400">Format gambar (JPG, PNG, WEBP maks. 10MB)</p>
                           </div>
                         </div>

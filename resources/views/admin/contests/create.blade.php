@@ -352,7 +352,8 @@
 
                         </label>
 
-                        <input type="number" name="biaya_pendaftaran" value="{{ old('biaya_pendaftaran', 0) }}" min="0" step="5000" placeholder="mis. 50000" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="number" name="biaya_pendaftaran" x-model="form.biaya_pendaftaran" @input="touched.biaya_pendaftaran = true; validateBiaya()" @blur="touched.biaya_pendaftaran = true; validateBiaya()" min="0" step="5000" placeholder="mis. 50000" :class="touched.biaya_pendaftaran && errors.biaya_pendaftaran ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                        <p x-show="touched.biaya_pendaftaran && errors.biaya_pendaftaran" x-text="errors.biaya_pendaftaran" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -404,7 +405,8 @@
 
                     </label>
 
-                    <input type="number" name="max_submissions" value="{{ old('max_submissions', 2) }}" min="1" max="10" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                    <input type="number" name="max_submissions" x-model="form.max_submissions" @input="touched.max_submissions = true; validateMaxSubmissions()" @blur="touched.max_submissions = true; validateMaxSubmissions()" min="1" max="10" :class="touched.max_submissions && errors.max_submissions ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                    <p x-show="touched.max_submissions && errors.max_submissions" x-text="errors.max_submissions" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 </div>
 
@@ -749,6 +751,8 @@ function adminContestFormApp() {
             kategori: @js(old('kategori', '')),
             penyelenggara: @js(old('penyelenggara', '')),
             hadiah: @js(old('hadiah', '')),
+            biaya_pendaftaran: @js(old('biaya_pendaftaran', 0)),
+            max_submissions: @js(old('max_submissions', 2)),
             start_date: @js(old('start_date', date('Y-m-d'))),
             end_date: @js(old('end_date', date('Y-m-d', strtotime('+30 days'))))
         },
@@ -758,6 +762,8 @@ function adminContestFormApp() {
             kategori: {{ $errors->has('kategori') ? 'true' : 'false' }},
             penyelenggara: {{ $errors->has('penyelenggara') ? 'true' : 'false' }},
             hadiah: {{ $errors->has('hadiah') ? 'true' : 'false' }},
+            biaya_pendaftaran: {{ $errors->has('biaya_pendaftaran') ? 'true' : 'false' }},
+            max_submissions: {{ $errors->has('max_submissions') ? 'true' : 'false' }},
             start_date: {{ $errors->has('start_date') ? 'true' : 'false' }},
             end_date: {{ $errors->has('end_date') ? 'true' : 'false' }}
         },
@@ -767,8 +773,30 @@ function adminContestFormApp() {
             kategori: '{{ $errors->first('kategori') ?: '' }}',
             penyelenggara: '{{ $errors->first('penyelenggara') ?: '' }}',
             hadiah: '{{ $errors->first('hadiah') ?: '' }}',
+            biaya_pendaftaran: '{{ $errors->first('biaya_pendaftaran') ?: '' }}',
+            max_submissions: '{{ $errors->first('max_submissions') ?: '' }}',
             start_date: '{{ $errors->first('start_date') ?: '' }}',
             end_date: '{{ $errors->first('end_date') ?: '' }}'
+        },
+        validateBiaya() {
+            if (this.feeType === 'paid') {
+                const val = Number(this.form.biaya_pendaftaran);
+                if (isNaN(val) || val <= 0) {
+                    this.errors.biaya_pendaftaran = 'Biaya registrasi berbayar harus lebih besar dari Rp 0.';
+                } else {
+                    this.errors.biaya_pendaftaran = '';
+                }
+            } else {
+                this.errors.biaya_pendaftaran = '';
+            }
+        },
+        validateMaxSubmissions() {
+            const val = Number(this.form.max_submissions);
+            if (!this.form.max_submissions || isNaN(val) || val < 1 || val > 10) {
+                this.errors.max_submissions = 'Maksimal karya harus antara 1 sampai 10 karya.';
+            } else {
+                this.errors.max_submissions = '';
+            }
         },
         validateJudul() {
             if (!this.form.judul_lomba || this.form.judul_lomba.trim() === '') {
@@ -840,6 +868,8 @@ function adminContestFormApp() {
             this.validatePenyelenggara();
             this.validateHadiah();
             this.validateDates();
+            this.validateBiaya();
+            this.validateMaxSubmissions();
 
             let firstInvalidRef = null;
             if (this.errors.judul_lomba) firstInvalidRef = firstInvalidRef || this.$refs.fieldJudul;

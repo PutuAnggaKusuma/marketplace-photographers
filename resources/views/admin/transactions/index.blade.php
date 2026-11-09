@@ -48,7 +48,55 @@
 
         this.refundNotes = 'Pengembalian dana (refund) transaksi disetujui Admin.';
 
+        this.refundNotesTouched = false;
+
+        this.refundNotesError = '';
+
         this.refundModalOpen = true;
+
+    },
+
+    refundNotesTouched: false,
+
+    refundNotesError: '',
+
+    validateRefundNotes() {
+
+        if (!this.refundNotes || !this.refundNotes.trim()) {
+
+            this.refundNotesError = 'Alasan refund transaksi wajib diisi.';
+
+            return false;
+
+        }
+
+        if (this.refundNotes.trim().length < 5) {
+
+            this.refundNotesError = 'Alasan refund minimal 5 karakter.';
+
+            return false;
+
+        }
+
+        this.refundNotesError = '';
+
+        return true;
+
+    },
+
+    submitRefund(e) {
+
+        this.refundNotesTouched = true;
+
+        if (!this.validateRefundNotes()) {
+
+            e.preventDefault();
+
+            this.$refs.refundNotesInput?.focus();
+
+            return false;
+
+        }
 
     },
 
@@ -1754,7 +1802,7 @@
 
 
 
-            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/refund'" method="POST" class="space-y-4">
+            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/refund'" method="POST" @submit="submitRefund($event)" novalidate class="space-y-4">
 
                 @csrf
 
@@ -1762,7 +1810,16 @@
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Alasan Refund Transaksi <span class="text-rose-500">*</span></label>
 
-                    <textarea name="refund_notes" x-model="refundNotes" required rows="2" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-400" placeholder="Alasan pembatalan dan persetujuan refund dana..."></textarea>
+                    <textarea name="refund_notes" 
+                              x-ref="refundNotesInput"
+                              x-model="refundNotes" 
+                              @input="refundNotesTouched = true; validateRefundNotes()"
+                              @blur="refundNotesTouched = true; validateRefundNotes()"
+                              rows="2" 
+                              class="w-full px-3.5 py-2.5 text-xs rounded-xl border bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white outline-none focus:ring-2 transition" 
+                              :class="refundNotesTouched && refundNotesError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-rose-400 focus:border-rose-400'"
+                              placeholder="Alasan pembatalan dan persetujuan refund dana..."></textarea>
+                    <p x-show="refundNotesTouched && refundNotesError" x-text="refundNotesError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 </div>
 

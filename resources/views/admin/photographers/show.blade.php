@@ -447,22 +447,54 @@
                 </p>
             </div>
 
-            <form action="{{ route('admin.photographers.reject', $photographer->id) }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.photographers.reject', $photographer->id) }}" 
+                  method="POST" 
+                  class="space-y-4"
+                  x-data="{
+                    catatan: {!! json_encode(old('catatan_penolakan', $photographer->catatan_penolakan ?? '')) !!},
+                    touched: false,
+                    error: '',
+                    validate() {
+                        if (!this.catatan || !this.catatan.trim()) {
+                            this.error = 'Catatan alasan penolakan wajib diisi.';
+                            return false;
+                        }
+                        if (this.catatan.trim().length < 5) {
+                            this.error = 'Catatan alasan penolakan minimal 5 karakter.';
+                            return false;
+                        }
+                        this.error = '';
+                        return true;
+                    },
+                    submitForm(e) {
+                        this.touched = true;
+                        if (!this.validate()) {
+                            e.preventDefault();
+                            this.$refs.catatanInput?.focus();
+                            return false;
+                        }
+                    }
+                  }"
+                  @submit="submitForm($event)">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                         Catatan Alasan Penolakan <span class="text-rose-500">*</span>
                     </label>
                     <textarea name="catatan_penolakan" 
+                              x-ref="catatanInput"
+                              x-model="catatan"
+                              @input="touched = true; validate()"
+                              @blur="touched = true; validate()"
                               rows="4" 
-                              required 
-                              minlength="5"
                               placeholder="Contoh: Nomor rekening tidak sesuai dengan nama pemilik, silakan perbaiki..." 
-                              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 resize-y leading-relaxed">{{ old('catatan_penolakan', $photographer->catatan_penolakan) }}</textarea>
+                              class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 resize-y leading-relaxed transition"
+                              :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-rose-500'"></textarea>
+                    <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-2">
-                    <button type="button" @click="rejectModalOpen = false" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+                    <button type="button" @click="rejectModalOpen = false; error = ''; touched = false" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>
                     <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
@@ -493,19 +525,65 @@
             <form action="{{ route('admin.photographers.destroy', $photographer->id) }}" method="POST" class="space-y-4" x-data="{
                 categoryOpen: false,
                 selectedCategory: '',
-                alasanText: ''
-            }">
+                alasanText: '',
+                touched: {
+                    category: false,
+                    alasan: false
+                },
+                errors: {
+                    category: '',
+                    alasan: ''
+                },
+                validateCategory() {
+                    if (!this.selectedCategory) {
+                        this.errors.category = 'Kategori pelanggaran wajib dipilih.';
+                        return false;
+                    }
+                    this.errors.category = '';
+                    return true;
+                },
+                validateAlasan() {
+                    if (!this.alasanText || !this.alasanText.trim()) {
+                        this.errors.alasan = 'Deskripsi alasan penghapusan wajib diisi.';
+                        return false;
+                    }
+                    if (this.alasanText.trim().length < 5) {
+                        this.errors.alasan = 'Deskripsi alasan minimal 5 karakter.';
+                        return false;
+                    }
+                    this.errors.alasan = '';
+                    return true;
+                },
+                submitForm(e) {
+                    this.touched.category = true;
+                    this.touched.alasan = true;
+                    const validCat = this.validateCategory();
+                    const validAlasan = this.validateAlasan();
+                    if (!validCat) {
+                        e.preventDefault();
+                        this.$refs.categoryBtn?.focus();
+                        return false;
+                    }
+                    if (!validAlasan) {
+                        e.preventDefault();
+                        this.$refs.alasanInput?.focus();
+                        return false;
+                    }
+                }
+            }" @submit="submitForm($event)">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                         Kategori Pelanggaran <span class="text-rose-500">*</span>
                     </label>
-                    <input type="hidden" name="kategori_penghapusan" :value="selectedCategory" required>
+                    <input type="hidden" name="kategori_penghapusan" :value="selectedCategory">
 
                     <div class="relative w-full">
                         <button @click="categoryOpen = !categoryOpen" 
+                                x-ref="categoryBtn"
                                 type="button" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs hover:border-rose-400 dark:hover:border-rose-500 cursor-pointer transition focus:ring-2 focus:ring-rose-500 text-left">
+                                class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs cursor-pointer transition focus:ring-2 focus:ring-rose-500 text-left outline-none"
+                                :class="touched.category && errors.category ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 hover:border-rose-400 dark:hover:border-rose-500'">
                             <span x-text="selectedCategory || 'Pilih Kategori Pelanggaran'" 
                                   :class="!selectedCategory ? 'text-gray-400 font-medium' : 'text-gray-900 dark:text-white font-bold'" 
                                   class="truncate"></span>
@@ -534,7 +612,7 @@
                             @endphp
                             @foreach($violations as $v)
                                 <button type="button" 
-                                        @click="selectedCategory = '{{ addslashes($v) }}'; categoryOpen = false" 
+                                        @click="selectedCategory = '{{ addslashes($v) }}'; categoryOpen = false; touched.category = true; validateCategory()" 
                                         class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
                                         :class="selectedCategory === '{{ addslashes($v) }}' ? 'bg-rose-50/80 dark:bg-rose-950/40 text-rose-600 font-extrabold' : ''">
                                     <span>{{ $v }}</span>
@@ -547,6 +625,7 @@
                             @endforeach
                         </div>
                     </div>
+                    <p x-show="touched.category && errors.category" x-text="errors.category" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <div>
@@ -554,21 +633,23 @@
                         Deskripsi Alasan Penghapusan <span class="text-rose-500">*</span>
                     </label>
                     <textarea name="alasan_penghapusan" 
+                              x-ref="alasanInput"
                               x-model="alasanText"
+                              @input="touched.alasan = true; validateAlasan()"
+                              @blur="touched.alasan = true; validateAlasan()"
                               rows="4" 
-                              required 
-                              minlength="5"
                               placeholder="Tuliskan rincian alasan penghapusan akun fotografer ini..." 
-                              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 resize-y leading-relaxed"></textarea>
+                              class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 resize-y leading-relaxed transition"
+                              :class="touched.alasan && errors.alasan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-rose-500'"></textarea>
+                    <p x-show="touched.alasan && errors.alasan" x-text="errors.alasan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 pt-2">
-                    <button type="button" @click="deleteModalOpen = false; selectedCategory = ''; alasanText = ''" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+                    <button type="button" @click="deleteModalOpen = false; selectedCategory = ''; alasanText = ''; touched.category = false; touched.alasan = false; errors.category = ''; errors.alasan = ''" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>
                     <button type="submit" 
-                            :disabled="!selectedCategory || !alasanText.trim() || alasanText.trim().length < 5"
-                            class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
+                            class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
                         Hapus Fotografer
                     </button>
                 </div>

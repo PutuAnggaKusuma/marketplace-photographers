@@ -162,7 +162,7 @@
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
-                        Rincian Benefit & Fasilitas yang Didapat Klien
+                        Rincian Benefit & Fasilitas yang Didapat Klien <span class="text-rose-500">*</span>
 
                     </label>
 
@@ -192,15 +192,19 @@
 
                                    x-model="fiturs[index]" 
 
-                                   required minlength="3" maxlength="255" placeholder="Contoh: 20 Foto Retouch & Full Color Grading" 
+                                   @input="touched.fitur = true; validateFitur()"
+                                   @blur="touched.fitur = true; validateFitur()"
 
-                                   class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                                   placeholder="Contoh: 20 Foto Retouch & Full Color Grading" 
+
+                                   class="flex-1 px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                                   :class="touched.fitur && errors.fitur ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
                             <button type="button" 
 
-                                    @click="removeFitur(index)" 
+                                    @click="removeFitur(index); touched.fitur = true; validateFitur()" 
 
-                                    class="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition shrink-0" 
+                                    class="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 transition shrink-0 cursor-pointer" 
 
                                     title="Hapus Benefit">
 
@@ -211,6 +215,8 @@
                         </div>
 
                     </template>
+
+                    <p x-show="touched.fitur && errors.fitur" x-text="errors.fitur" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 </div>
 
@@ -262,11 +268,13 @@ function serviceFormApp(initialData) {
       nama_layanan: initialData.hasErrorNama || false,
       tarif_harga: initialData.hasErrorTarif || false,
       deskripsi_layanan: initialData.hasErrorDeskripsi || false,
+      fitur: false,
     },
     errors: {
       nama_layanan: initialData.errorNama || '',
       tarif_harga: initialData.errorTarif || '',
       deskripsi_layanan: initialData.errorDeskripsi || '',
+      fitur: '',
     },
     validateNama() {
       const val = (this.form.nama_layanan || '').trim();
@@ -287,14 +295,35 @@ function serviceFormApp(initialData) {
       else if (val.length < 15) this.errors.deskripsi_layanan = 'Deskripsi paket layanan minimal 15 karakter.';
       else this.errors.deskripsi_layanan = '';
     },
+    validateFitur() {
+      if (!this.fiturs || this.fiturs.length === 0) {
+        this.errors.fitur = 'Minimal 1 benefit layanan wajib diisi.';
+        return false;
+      }
+      for (let i = 0; i < this.fiturs.length; i++) {
+        const item = (this.fiturs[i] || '').trim();
+        if (!item) {
+          this.errors.fitur = 'Benefit layanan tidak boleh kosong.';
+          return false;
+        }
+        if (item.length < 3) {
+          this.errors.fitur = 'Benefit layanan minimal 3 karakter.';
+          return false;
+        }
+      }
+      this.errors.fitur = '';
+      return true;
+    },
     submitForm(e) {
       this.touched.nama_layanan = true;
       this.touched.tarif_harga = true;
       this.touched.deskripsi_layanan = true;
+      this.touched.fitur = true;
       this.validateNama();
       this.validateTarif();
       this.validateDeskripsi();
-      if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan) {
+      this.validateFitur();
+      if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan || this.errors.fitur) {
         e.preventDefault();
         if (this.errors.nama_layanan) this.$refs.fieldNama?.focus();
         else if (this.errors.tarif_harga) this.$refs.fieldTarif?.focus();

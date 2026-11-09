@@ -28,7 +28,14 @@
 
       urutan: 1,
 
-      actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}'
+      actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
+
+      touched: {
+        judul_modul: false
+      },
+      errors: {
+        judul_modul: ''
+      }
 
     },
 
@@ -54,8 +61,92 @@
 
       is_free: '1',
 
-      actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}'
+      actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
 
+      touched: {
+        id_module: false,
+        tipe: false,
+        judul: false
+      },
+      errors: {
+        id_module: '',
+        tipe: '',
+        judul: ''
+      }
+
+    },
+
+    validateJudulModul() {
+      if (!this.moduleForm.judul_modul || !this.moduleForm.judul_modul.trim()) {
+        this.moduleForm.errors.judul_modul = 'Judul modul wajib diisi.';
+        return false;
+      }
+      if (this.moduleForm.judul_modul.trim().length < 3) {
+        this.moduleForm.errors.judul_modul = 'Judul modul minimal 3 karakter.';
+        return false;
+      }
+      this.moduleForm.errors.judul_modul = '';
+      return true;
+    },
+
+    submitModuleForm(e) {
+      this.moduleForm.touched.judul_modul = true;
+      if (!this.validateJudulModul()) {
+        e.preventDefault();
+        this.$refs.judulModulInput?.focus();
+        return false;
+      }
+      return true;
+    },
+
+    validateModule() {
+      if (!this.lessonForm.id_module) {
+        this.lessonForm.errors.id_module = 'Pilih salah satu modul materi.';
+        return false;
+      }
+      this.lessonForm.errors.id_module = '';
+      return true;
+    },
+
+    validateTipe() {
+      if (!this.lessonForm.tipe) {
+        this.lessonForm.errors.tipe = 'Pilih tipe media materi.';
+        return false;
+      }
+      this.lessonForm.errors.tipe = '';
+      return true;
+    },
+
+    validateJudulLesson() {
+      if (!this.lessonForm.judul || !this.lessonForm.judul.trim()) {
+        this.lessonForm.errors.judul = 'Judul tahapan materi wajib diisi.';
+        return false;
+      }
+      if (this.lessonForm.judul.trim().length < 3) {
+        this.lessonForm.errors.judul = 'Judul tahapan minimal 3 karakter.';
+        return false;
+      }
+      this.lessonForm.errors.judul = '';
+      return true;
+    },
+
+    submitLessonForm(e) {
+      this.lessonForm.touched.id_module = true;
+      this.lessonForm.touched.tipe = true;
+      this.lessonForm.touched.judul = true;
+
+      const mOk = this.validateModule();
+      const tOk = this.validateTipe();
+      const jOk = this.validateJudulLesson();
+
+      if (!mOk || !tOk || !jOk) {
+        e.preventDefault();
+        if (!jOk && this.$refs.judulLessonInput) {
+          this.$refs.judulLessonInput.focus();
+        }
+        return false;
+      }
+      return true;
     },
 
     openCreateModule() {
@@ -640,7 +731,7 @@
 
 
 
-      <form :action="moduleForm.actionUrl" method="POST" class="flex flex-col flex-1 overflow-hidden">
+      <form :action="moduleForm.actionUrl" method="POST" @submit="submitModuleForm($event)" novalidate class="flex flex-col flex-1 overflow-hidden">
 
         @csrf
 
@@ -650,7 +741,8 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Modul <span class="text-rose-500">*</span></label>
 
-            <input type="text" name="judul_modul" x-model="moduleForm.judul_modul" required placeholder="Contoh: Dasar Pencahayaan & Segitiga Exposure" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="text" name="judul_modul" x-ref="judulModulInput" x-model="moduleForm.judul_modul" @input="moduleForm.touched.judul_modul = true; validateJudulModul()" @blur="moduleForm.touched.judul_modul = true; validateJudulModul()" placeholder="Contoh: Dasar Pencahayaan & Segitiga Exposure" :class="moduleForm.touched.judul_modul && moduleForm.errors.judul_modul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:outline-hidden" />
+            <p x-show="moduleForm.touched.judul_modul && moduleForm.errors.judul_modul" x-text="moduleForm.errors.judul_modul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
 
@@ -726,7 +818,7 @@
 
 
 
-      <form :action="lessonForm.actionUrl" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden">
+      <form :action="lessonForm.actionUrl" method="POST" enctype="multipart/form-data" @submit="submitLessonForm($event)" novalidate class="flex flex-col flex-1 overflow-hidden">
 
         @csrf
 
@@ -796,9 +888,9 @@
 
             </div>
 
+            <p x-show="lessonForm.touched.id_module && lessonForm.errors.id_module" x-text="lessonForm.errors.id_module" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
           </div>
-
-
 
           <!-- 2. Tipe Materi (Alpine.js Custom Floating Dropdown) -->
 
@@ -860,9 +952,9 @@
 
             </div>
 
+            <p x-show="lessonForm.touched.tipe && lessonForm.errors.tipe" x-text="lessonForm.errors.tipe" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
           </div>
-
-
 
           <!-- 3. Judul Tahapan -->
 
@@ -870,7 +962,8 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Judul Tahapan <span class="text-rose-500">*</span></label>
 
-            <input type="text" name="judul" x-model="lessonForm.judul" required placeholder="Contoh: Mengatur Segitiga Exposure di Kondisi Terik" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="text" name="judul" x-ref="judulLessonInput" x-model="lessonForm.judul" @input="lessonForm.touched.judul = true; validateJudulLesson()" @blur="lessonForm.touched.judul = true; validateJudulLesson()" placeholder="Contoh: Mengatur Segitiga Exposure di Kondisi Terik" :class="lessonForm.touched.judul && lessonForm.errors.judul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:outline-hidden" />
+            <p x-show="lessonForm.touched.judul && lessonForm.errors.judul" x-text="lessonForm.errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
 

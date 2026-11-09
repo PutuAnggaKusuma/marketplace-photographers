@@ -1442,26 +1442,43 @@
 
 
 
-             <form :action="'/photographer/bookings/' + selectedContractId + '/gallery'" method="POST" class="space-y-4">
-
-
-
+             <form :action="'/photographer/bookings/' + selectedContractId + '/gallery'" method="POST"
+                       x-data="{
+                         url: '',
+                         touched: false,
+                         error: '',
+                         validateUrl() {
+                           if (!this.url || !this.url.trim()) {
+                             this.error = 'Tautan URL album foto wajib diisi.';
+                             return false;
+                           }
+                           try {
+                             new URL(this.url);
+                           } catch (_) {
+                             this.error = 'Format tautan URL tidak valid (harus diawali http:// atau https://).';
+                             return false;
+                           }
+                           this.error = '';
+                           return true;
+                         },
+                         submitGallery(e) {
+                           this.touched = true;
+                           if (!this.validateUrl()) {
+                             e.preventDefault();
+                             this.$refs.urlInput?.focus();
+                             return false;
+                           }
+                           return true;
+                         }
+                       }"
+                       @submit="submitGallery($event)"
+                       novalidate
+                       class="space-y-4">
                  @csrf
-
-
-
                  <div>
-
-
-
                      <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Tautan URL Google Drive / Cloud Gallery <span class="text-rose-500">*</span></label>
-
-
-
-                     <input type="url" name="hasil_foto_url" placeholder="https://drive.google.com/drive/folders/..." required class="w-full px-4 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none" />
-
-
-
+                     <input type="url" name="hasil_foto_url" x-ref="urlInput" x-model="url" @input="touched = true; validateUrl()" @blur="touched = true; validateUrl()" placeholder="https://drive.google.com/drive/folders/..." :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'" class="w-full px-4 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:ring-2 focus:outline-none" />
+                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                  </div>
 
 
@@ -1698,58 +1715,53 @@
 
 
 
-                <form :action="'/photographer/bookings/' + cancelContractId + '/status'" method="POST" class="mt-5 space-y-4">
-
-
-
+                <form :action="'/photographer/bookings/' + cancelContractId + '/status'" method="POST"
+                      x-data="{
+                        alasan: '',
+                        touched: false,
+                        error: '',
+                        validateAlasan() {
+                          if (!this.alasan || !this.alasan.trim()) {
+                            this.error = 'Alasan penolakan / pembatalan wajib diisi.';
+                            return false;
+                          }
+                          if (this.alasan.trim().length < 5) {
+                            this.error = 'Alasan penolakan / pembatalan minimal 5 karakter.';
+                            return false;
+                          }
+                          this.error = '';
+                          return true;
+                        },
+                        submitCancel(e) {
+                          this.touched = true;
+                          if (!this.validateAlasan()) {
+                            e.preventDefault();
+                            this.$refs.alasanInput?.focus();
+                            return false;
+                          }
+                          return true;
+                        }
+                      }"
+                      @submit="submitCancel($event)"
+                      novalidate
+                      class="mt-5 space-y-4">
                     @csrf
-
-
-
                     <input type="hidden" name="status" value="cancelled">
-
-
-
                     
-
-
-
                     <div class="text-left">
-
-
-
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
-
-
                             Alasan Penolakan / Pembatalan <span class="text-rose-500">*</span>
-
-
-
                         </label>
-
-
-
                         <textarea name="alasan" 
-
-
-
+                                  x-ref="alasanInput"
+                                  x-model="alasan"
+                                  @input="touched = true; validateAlasan()"
+                                  @blur="touched = true; validateAlasan()"
                                   rows="3" 
-
-
-
-                                  required 
-
-
-
                                   placeholder="Contoh: Jadwal bentrok dengan agenda mendesak, lokasi di luar jangkauan layanan, dll..." 
-
-
-
-                                  class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition"></textarea>
-
-
-
+                                  :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                                  class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl focus:ring-2 focus:outline-none transition"></textarea>
+                        <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                     </div>
 
 
@@ -1978,66 +1990,73 @@
 
 
 
-                <form :action="'/photographer/bookings/' + rescheduleContractId + '/reschedule'" method="POST" class="mt-5 space-y-4 text-left">
-
-
-
+                <form :action="'/photographer/bookings/' + rescheduleContractId + '/reschedule'" method="POST"
+                      x-data="{
+                        rescheduleDate: rescheduleDefaultDate,
+                        rescheduleReason: '',
+                        touched: {
+                          date: false,
+                          reason: false
+                        },
+                        errors: {
+                          date: '',
+                          reason: ''
+                        },
+                        validateDate() {
+                          if (!this.rescheduleDate) {
+                            this.errors.date = 'Tanggal baru wajib dipilih.';
+                            return false;
+                          }
+                          this.errors.date = '';
+                          return true;
+                        },
+                        validateReason() {
+                          if (!this.rescheduleReason || !this.rescheduleReason.trim()) {
+                            this.errors.reason = 'Alasan perubahan jadwal wajib diisi.';
+                            return false;
+                          }
+                          if (this.rescheduleReason.trim().length < 5) {
+                            this.errors.reason = 'Alasan perubahan jadwal minimal 5 karakter.';
+                            return false;
+                          }
+                          this.errors.reason = '';
+                          return true;
+                        },
+                        submitReschedule(e) {
+                          this.touched.date = true;
+                          this.touched.reason = true;
+                          const dOk = this.validateDate();
+                          const rOk = this.validateReason();
+                          if (!dOk || !rOk) {
+                            e.preventDefault();
+                            if (!dOk && this.$refs.rescheduleDateInput) this.$refs.rescheduleDateInput.focus();
+                            else if (!rOk && this.$refs.rescheduleReasonInput) this.$refs.rescheduleReasonInput.focus();
+                            return false;
+                          }
+                          return true;
+                        }
+                      }"
+                      @submit="submitReschedule($event)"
+                      novalidate
+                      class="mt-5 space-y-4 text-left">
                     @csrf
-
-
-
                     
-
-
-
                     <!-- Grid 2 Kolom untuk Field Pendek (Rule #73) -->
-
-
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-
-
-
                         <div>
-
-
-
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
-
-
                                 Tanggal Baru <span class="text-rose-500">*</span>
-
-
-
                             </label>
-
-
-
                             <input type="date" 
-
-
-
                                    name="reschedule_date" 
-
-
-
+                                   x-ref="rescheduleDateInput"
+                                   x-model="rescheduleDate"
+                                   @input="touched.date = true; validateDate()"
+                                   @blur="touched.date = true; validateDate()"
                                    min="{{ date('Y-m-d') }}" 
-
-
-
-                                   :value="rescheduleDefaultDate"
-
-
-
-                                   required 
-
-
-
-                                   class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition">
-
-
-
+                                   :class="touched.date && errors.date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                                   class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl focus:ring-2 focus:outline-none transition">
+                            <p x-show="touched.date && errors.date" x-text="errors.date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
 
@@ -2195,22 +2214,15 @@
 
 
                         <textarea name="reschedule_reason" 
-
-
-
+                                  x-ref="rescheduleReasonInput"
+                                  x-model="rescheduleReason"
+                                  @input="touched.reason = true; validateReason()"
+                                  @blur="touched.reason = true; validateReason()"
                                   rows="3" 
-
-
-
-                                  required 
-
-
-
                                   placeholder="Jelaskan alasan perubahan jadwal untuk klien (misal: cuaca ekstrem, kendala teknis peralatan, dll)..." 
-
-
-
-                                  class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition leading-relaxed"></textarea>
+                                  :class="touched.reason && errors.reason ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                                  class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl focus:ring-2 focus:outline-none transition leading-relaxed"></textarea>
+                        <p x-show="touched.reason && errors.reason" x-text="errors.reason" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
 
 

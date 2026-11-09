@@ -481,6 +481,30 @@
 
           reportActionUrl: '',
 
+          reportKategori: '',
+
+          reportTouched: false,
+
+          reportError: '',
+
+          validateReportKategori() {
+            if (!this.reportKategori) {
+              this.reportError = 'Silakan pilih salah satu kategori pelanggaran.';
+              return false;
+            }
+            this.reportError = '';
+            return true;
+          },
+
+          submitReport(e) {
+            this.reportTouched = true;
+            if (!this.validateReportKategori()) {
+              e.preventDefault();
+              return false;
+            }
+            return true;
+          },
+
           copyComment(text) {
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -520,6 +544,12 @@
             this.reportSnippet = snippet;
 
             this.reportActionUrl = '/forum/comment/' + id + '/report';
+
+            this.reportKategori = '';
+
+            this.reportTouched = false;
+
+            this.reportError = '';
 
             this.reportModalOpen = true;
 
@@ -643,7 +673,36 @@
 
           @auth
 
-            <form action="{{ route('public.forum.comment', $post->id) }}" method="POST" class="flex items-start gap-3.5">
+            <form action="{{ route('public.forum.comment', $post->id) }}" method="POST"
+                  x-data="{
+                    comment: '',
+                    touched: {{ $errors->has('comment') ? 'true' : 'false' }},
+                    error: '{{ $errors->first('comment') ?: '' }}',
+                    validateComment() {
+                      if (!this.comment || !this.comment.trim()) {
+                        this.error = 'Komentar tidak boleh kosong.';
+                        return false;
+                      }
+                      if (this.comment.trim().length < 3) {
+                        this.error = 'Komentar minimal 3 karakter.';
+                        return false;
+                      }
+                      this.error = '';
+                      return true;
+                    },
+                    submitComment(e) {
+                      this.touched = true;
+                      if (!this.validateComment()) {
+                        e.preventDefault();
+                        this.$refs.commentInput?.focus();
+                        return false;
+                      }
+                      return true;
+                    }
+                  }"
+                  @submit="submitComment($event)"
+                  novalidate
+                  class="flex items-start gap-3.5">
 
               @csrf
 
@@ -655,36 +714,39 @@
 
               <!-- Spacious Input Textarea Container Box -->
 
-              <div class="flex-1 relative bg-gray-50/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 rounded-3xl p-4 sm:p-5 transition focus-within:ring-2 focus-within:ring-amber-500 focus-within:bg-white dark:focus-within:bg-gray-900 min-h-[105px]">
+              <div class="flex-1 space-y-1">
+                <div class="relative bg-gray-50/80 dark:bg-gray-900/60 border rounded-3xl p-4 sm:p-5 transition focus-within:ring-2 focus-within:bg-white dark:focus-within:bg-gray-900 min-h-[105px]"
+                     :class="touched && error ? 'border-red-400 focus-within:ring-red-400 focus-within:border-red-400' : 'border-gray-200 dark:border-gray-700/80 focus-within:ring-amber-500'">
 
-                <textarea name="comment" 
+                  <textarea name="comment" 
+                            x-ref="commentInput"
+                            x-model="comment"
+                            @input="touched = true; validateComment()"
+                            @blur="touched = true; validateComment()"
+                            rows="2" 
+                            placeholder="Tulis komentar atau tanggapan Anda di sini..." 
+                            class="w-full bg-transparent border-0 outline-none resize-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 pr-12 leading-relaxed"></textarea>
 
-                          rows="2" 
+                  
 
-                          required 
+                  <!-- Proportional Yellow Send Circle Button -->
 
-                          placeholder="Tulis komentar atau tanggapan Anda di sini..." 
+                  <button type="submit" 
 
-                          class="w-full bg-transparent border-0 outline-none resize-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-0 pr-12 leading-relaxed"></textarea>
+                          class="absolute right-3.5 bottom-3.5 w-8.5 h-8.5 rounded-full bg-amber-400 hover:bg-amber-500 text-gray-900 flex items-center justify-center shadow-xs hover:scale-105 transition shrink-0 cursor-pointer" 
 
-                
+                          title="Kirim Balasan">
 
-                <!-- Proportional Yellow Send Circle Button -->
+                    <svg class="w-4 h-4 flex items-center justify-center" fill="currentColor" viewBox="0 0 24 24">
 
-                <button type="submit" 
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
 
-                        class="absolute right-3.5 bottom-3.5 w-8.5 h-8.5 rounded-full bg-amber-400 hover:bg-amber-500 text-gray-900 flex items-center justify-center shadow-xs hover:scale-105 transition shrink-0" 
+                    </svg>
 
-                        title="Kirim Balasan">
+                  </button>
 
-                  <svg class="w-4 h-4 flex items-center justify-center" fill="currentColor" viewBox="0 0 24 24">
-
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-
-                  </svg>
-
-                </button>
-
+                </div>
+                <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 pl-3"></p>
               </div>
 
             </form>
@@ -1020,12 +1082,50 @@
                     <!-- Inline Reply Form (Shown when user clicks Reply) -->
                     @auth
                       <div x-show="replyOpen" x-cloak class="mt-2.5">
-                        <form action="{{ route('public.forum.comment', $post->id) }}" method="POST" class="flex items-start gap-2.5">
+                        <form action="{{ route('public.forum.comment', $post->id) }}" method="POST"
+                              x-data="{
+                                replyComment: '',
+                                touched: false,
+                                error: '',
+                                validateReply() {
+                                  if (!this.replyComment || !this.replyComment.trim()) {
+                                    this.error = 'Balasan komentar tidak boleh kosong.';
+                                    return false;
+                                  }
+                                  if (this.replyComment.trim().length < 2) {
+                                    this.error = 'Balasan minimal 2 karakter.';
+                                    return false;
+                                  }
+                                  this.error = '';
+                                  return true;
+                                },
+                                submitReply(e) {
+                                  this.touched = true;
+                                  if (!this.validateReply()) {
+                                    e.preventDefault();
+                                    this.$refs.replyInput?.focus();
+                                    return false;
+                                  }
+                                  return true;
+                                }
+                              }"
+                              @submit="submitReply($event)"
+                              novalidate
+                              class="flex items-start gap-2.5">
                           @csrf
                           <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                           <x-user-avatar :user="auth()->user()" size="w-7 h-7 sm:w-8 sm:h-8" bg="bg-amber-400" textColor="text-gray-900" class="mt-0.5" />
                           <div class="flex-1 min-w-0">
-                            <textarea name="comment" rows="2" required placeholder="Balas komentar {{ $comment->user->nama ?? 'pengguna' }}..." class="w-full text-xs sm:text-sm p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-1 focus:ring-amber-400 focus:border-amber-400 focus:outline-none resize-none"></textarea>
+                            <textarea name="comment" 
+                                      x-ref="replyInput"
+                                      x-model="replyComment"
+                                      @input="touched = true; validateReply()"
+                                      @blur="touched = true; validateReply()"
+                                      rows="2" 
+                                      placeholder="Balas komentar {{ $comment->user->nama ?? 'pengguna' }}..." 
+                                      :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"
+                                      class="w-full text-xs sm:text-sm p-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none resize-none"></textarea>
+                            <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                             <div class="mt-1 flex items-center justify-end gap-2">
                               <button type="button" @click="replyOpen = false" class="px-2.5 py-1 text-xs font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition cursor-pointer">Batal</button>
                               <button type="submit" class="px-3 py-1 text-xs font-bold bg-amber-400 hover:bg-amber-500 text-gray-900 rounded-lg shadow-xs transition cursor-pointer">Balas</button>
@@ -1223,7 +1323,7 @@
 
                 <!-- Report Form -->
 
-                <form :action="reportActionUrl" method="POST" class="space-y-4">
+                <form :action="reportActionUrl" method="POST" @submit="submitReport($event)" novalidate class="space-y-4">
 
                   @csrf
 
@@ -1243,7 +1343,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="spam" required class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="spam" x-model="reportKategori" @change="reportKategori = 'spam'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
 
                         <span>Spam atau Promosi Tidak Relevan</span>
 
@@ -1251,7 +1351,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="harassment" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="harassment" x-model="reportKategori" @change="reportKategori = 'harassment'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
 
                         <span>Pelecehan atau Ujaran Kebencian</span>
 
@@ -1259,7 +1359,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="inappropriate" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="inappropriate" x-model="reportKategori" @change="reportKategori = 'inappropriate'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
 
                         <span>Konten Tidak Pantas atau Asusila</span>
 
@@ -1267,7 +1367,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="misinformation" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="misinformation" x-model="reportKategori" @change="reportKategori = 'misinformation'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
 
                         <span>Informasi Menyesatkan atau Penipuan</span>
 
@@ -1275,13 +1375,14 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="other" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="other" x-model="reportKategori" @change="reportKategori = 'other'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
 
                         <span>Lainnya</span>
 
                       </label>
 
                     </div>
+                    <p x-show="reportTouched && reportError" x-text="reportError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                   </div>
 

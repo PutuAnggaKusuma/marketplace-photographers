@@ -234,13 +234,65 @@
         </div>
 
         <!-- Form Unggah Bukti Transfer -->
-        <form action="{{ route('booking.pay.confirm', $contract->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4 text-left">
+        <form action="{{ route('booking.pay.confirm', $contract->id) }}" 
+              method="POST" 
+              enctype="multipart/form-data" 
+              class="space-y-4 text-left"
+              x-data="{
+                fileSelected: false,
+                fileName: '',
+                touched: false,
+                error: '',
+                handleFile(e) {
+                  const file = e.target.files[0];
+                  this.touched = true;
+                  if (!file) {
+                    this.fileSelected = false;
+                    this.fileName = '';
+                    this.error = 'Foto struk / bukti transfer wajib dipilih.';
+                    return false;
+                  }
+                  if (!file.type.match(/^image\//)) {
+                    this.fileSelected = false;
+                    this.fileName = '';
+                    this.error = 'File harus berupa gambar (JPG, PNG, WEBP).';
+                    return false;
+                  }
+                  if (file.size > 10 * 1024 * 1024) {
+                    this.fileSelected = false;
+                    this.fileName = '';
+                    this.error = 'Ukuran file foto maksimal 10 MB.';
+                    return false;
+                  }
+                  this.fileSelected = true;
+                  this.fileName = file.name;
+                  this.error = '';
+                  return true;
+                },
+                submitForm(e) {
+                  this.touched = true;
+                  if (!this.fileSelected || this.error) {
+                    e.preventDefault();
+                    if (!this.error) this.error = 'Foto struk / bukti transfer wajib dipilih.';
+                    this.$refs.fileInput?.focus();
+                    return false;
+                  }
+                }
+              }"
+              @submit="submitForm($event)">
           @csrf
           <input type="hidden" name="payment_id" value="{{ $payment?->id }}">
           
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Foto Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
-            <input type="file" name="bukti_transfer" accept="image/*" required class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
+            <input type="file" 
+                   name="bukti_transfer" 
+                   x-ref="fileInput"
+                   accept="image/*" 
+                   @change="handleFile($event)"
+                   class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer p-1.5 rounded-xl border transition"
+                   :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
+            <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 10 MB)</p>
           </div>
 

@@ -210,6 +210,8 @@
       const status = this.getSlotStatus(timeStr);
       if (status.available) {
         this.selectedTime = timeStr;
+        this.touched.time = true;
+        this.validateTime();
       }
     },
 
@@ -264,9 +266,112 @@
     get currentPayAmount() {
         return this.paymentType === 'dp' ? this.dpAmount : this.totalBill;
     },
+    provinceCode: '{{ old('province_code', '') }}',
+    cityCode: '{{ old('city_code', '') }}',
+    lokasi_acara: '{{ addslashes(old('lokasi_acara', '')) }}',
+    touched: {
+      service: {{ $errors->has('service_id') ? 'true' : 'false' }},
+      date: {{ $errors->has('tanggal_sesi') ? 'true' : 'false' }},
+      time: {{ $errors->has('jam_mulai') ? 'true' : 'false' }},
+      province: {{ $errors->has('province_code') ? 'true' : 'false' }},
+      city: {{ $errors->has('city_code') ? 'true' : 'false' }},
+      lokasi: {{ $errors->has('lokasi_acara') ? 'true' : 'false' }},
+    },
+    errors: {
+      service: '{{ $errors->first('service_id') ?: '' }}',
+      date: '{{ $errors->first('tanggal_sesi') ?: '' }}',
+      time: '{{ $errors->first('jam_mulai') ?: '' }}',
+      province: '{{ $errors->first('province_code') ?: '' }}',
+      city: '{{ $errors->first('city_code') ?: '' }}',
+      lokasi: '{{ $errors->first('lokasi_acara') ?: '' }}',
+    },
+    validateService() {
+      if (!this.selectedServiceId) {
+        this.errors.service = 'Pilih salah satu paket layanan pemotretan.';
+        return false;
+      }
+      this.errors.service = '';
+      return true;
+    },
+    validateDate() {
+      if (!this.selectedDate) {
+        this.errors.date = 'Pilih tanggal pelaksanaan sesi foto.';
+        return false;
+      }
+      this.errors.date = '';
+      return true;
+    },
+    validateTime() {
+      if (!this.selectedTime || !this.getSlotStatus(this.selectedTime).available) {
+        this.errors.time = 'Pilih jam mulai sesi pemotretan yang tersedia.';
+        return false;
+      }
+      this.errors.time = '';
+      return true;
+    },
+    validateProvince() {
+      if (!this.provinceCode) {
+        this.errors.province = 'Pilih provinsi lokasi pemotretan.';
+        return false;
+      }
+      this.errors.province = '';
+      return true;
+    },
+    validateCity() {
+      if (!this.cityCode) {
+        this.errors.city = 'Pilih kota / kabupaten lokasi pemotretan.';
+        return false;
+      }
+      this.errors.city = '';
+      return true;
+    },
+    validateLokasi() {
+      if (!this.lokasi_acara || !this.lokasi_acara.trim()) {
+        this.errors.lokasi = 'Alamat lengkap atau nama venue pemotretan wajib diisi.';
+        return false;
+      }
+      if (this.lokasi_acara.trim().length < 5) {
+        this.errors.lokasi = 'Alamat lengkap minimal 5 karakter.';
+        return false;
+      }
+      this.errors.lokasi = '';
+      return true;
+    },
+    submitBookingForm(e) {
+      this.touched.service = true;
+      this.touched.date = true;
+      this.touched.time = true;
+      this.touched.province = true;
+      this.touched.city = true;
+      this.touched.lokasi = true;
+
+      const sOk = this.validateService();
+      const dOk = this.validateDate();
+      const tOk = this.validateTime();
+      const pOk = this.validateProvince();
+      const cOk = this.validateCity();
+      const lOk = this.validateLokasi();
+
+      if (!sOk || !dOk || !tOk || !pOk || !cOk || !lOk) {
+        e.preventDefault();
+        if (!sOk) {
+          window.scrollTo({ top: 200, behavior: 'smooth' });
+        } else if (!dOk || !tOk) {
+          window.scrollTo({ top: 500, behavior: 'smooth' });
+        } else if (!pOk || !cOk) {
+          window.scrollTo({ top: 800, behavior: 'smooth' });
+        } else if (!lOk && this.$refs.lokasiInput) {
+          this.$refs.lokasiInput.focus();
+        }
+        return false;
+      }
+      return true;
+    },
     selectService(id) {
         this.selectedServiceId = id;
         this.selectedFeatures = [];
+        this.touched.service = true;
+        this.validateService();
     },
     toggleFeature(id) {
         const index = this.selectedFeatures.indexOf(id);
@@ -289,7 +394,7 @@
     </div>
 
     <!-- Booking Form Container (Spacious 2-Column Grid) -->
-    <form action="{{ route('booking.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+    <form action="{{ route('booking.store') }}" method="POST" @submit="submitBookingForm($event)" novalidate class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
       @csrf
       <input type="hidden" name="photographer_id" value="{{ $photographer->id }}">
       <input type="hidden" name="service_id" :value="selectedServiceId">
@@ -356,6 +461,7 @@
               </div>
             @endforelse
           </div>
+          <p x-show="touched.service && errors.service" x-text="errors.service" x-cloak class="text-[11px] font-bold text-red-500 mt-2"></p>
         </div>
 
         <!-- Seksi 2: Jadwal Pelaksanaan Sesi Foto (Mini Kalender & Time Slot Chips) -->
@@ -478,6 +584,7 @@
                 </template>
               </div>
             </template>
+            <p x-show="touched.time && errors.time" x-text="errors.time" x-cloak class="text-[11px] font-bold text-red-500 mt-2"></p>
           </div>
         </div>
 
@@ -507,18 +614,19 @@
 
                 <div x-show="open" @click.away="open = false" x-transition class="absolute z-50 w-full mt-1.5 max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-1">
                   @foreach($provinces as $prov)
-                    <div @click="selectedCode = '{{ $prov->code }}'; selectedText = '{{ addslashes($prov->name) }}'; open = false; fetchBookingCities('{{ $prov->code }}');" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
+                    <div @click="selectedCode = '{{ $prov->code }}'; selectedText = '{{ addslashes($prov->name) }}'; open = false; provinceCode = '{{ $prov->code }}'; touched.province = true; validateProvince(); fetchBookingCities('{{ $prov->code }}');" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
                       {{ $prov->name }}
                     </div>
                   @endforeach
                 </div>
               </div>
+              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
             <!-- City Custom Alpine Dropdown -->
             <div x-data="{ open: false, selectedCode: '', selectedText: 'Pilih Kota / Kabupaten' }">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Kota / Kabupaten <span class="text-rose-500">*</span></label>
-              <input type="hidden" name="city_code" :value="selectedCode" id="bookingCityInput">
+              <input type="hidden" name="city_code" :value="selectedCode" id="bookingCityInput" @change="cityCode = $event.target.value; selectedCode = $event.target.value; touched.city = true; validateCity()">
               
               <div class="relative">
                 <button type="button" @click="open = !open" class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition cursor-pointer">
@@ -530,13 +638,23 @@
                   <div class="px-4 py-2.5 text-xs text-gray-400 font-semibold">Pilih provinsi terlebih dahulu</div>
                 </div>
               </div>
+              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
           </div>
 
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Alamat Lengkap / Nama Venue <span class="text-rose-500">*</span></label>
-            <textarea name="lokasi_acara" rows="3" placeholder="Contoh: Pantai Melasti Kuta Selatan / Gedung Pernikahan Sasana Krida Bandung..." required class="w-full px-4 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition leading-relaxed"></textarea>
+            <textarea name="lokasi_acara" 
+                    x-ref="lokasiInput"
+                    x-model="lokasi_acara"
+                    @input="touched.lokasi = true; validateLokasi()"
+                    @blur="touched.lokasi = true; validateLokasi()"
+                    rows="3" 
+                    placeholder="Contoh: Pantai Melasti Kuta Selatan / Gedung Pernikahan Sasana Krida Bandung..." 
+                    :class="touched.lokasi && errors.lokasi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"
+                    class="w-full px-4 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:ring-2 focus:outline-none transition leading-relaxed"></textarea>
+            <p x-show="touched.lokasi && errors.lokasi" x-text="errors.lokasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
         </div>
 
@@ -760,7 +878,9 @@
   }
 
   function selectBookingCity(code, name) {
-    document.getElementById('bookingCityInput').value = code;
+    const input = document.getElementById('bookingCityInput');
+    input.value = code;
+    input.dispatchEvent(new Event('change'));
     document.getElementById('bookingCityLabel').textContent = name;
   }
 </script>

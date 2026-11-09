@@ -32,6 +32,10 @@
 
     proposalCatatanAdmin: '',
 
+    proposalCatatanAdminTouched: false,
+
+    proposalCatatanAdminError: '',
+
     
 
     // Quick Reject Modal State
@@ -44,6 +48,10 @@
 
     catatanAdmin: '',
 
+    catatanAdminTouched: false,
+
+    catatanAdminError: '',
+
 
 
     openProposalModal(contestData) {
@@ -53,6 +61,10 @@
         this.proposalRejectMode = false;
 
         this.proposalCatatanAdmin = '';
+
+        this.proposalCatatanAdminTouched = false;
+
+        this.proposalCatatanAdminError = '';
 
         this.proposalModalOpen = true;
 
@@ -66,7 +78,91 @@
 
         this.catatanAdmin = '';
 
+        this.catatanAdminTouched = false;
+
+        this.catatanAdminError = '';
+
         this.rejectModalOpen = true;
+
+    },
+
+    validateProposalCatatan() {
+
+        if (!this.proposalCatatanAdmin || !this.proposalCatatanAdmin.trim()) {
+
+            this.proposalCatatanAdminError = 'Alasan penolakan / catatan revisi wajib diisi.';
+
+            return false;
+
+        }
+
+        if (this.proposalCatatanAdmin.trim().length < 5) {
+
+            this.proposalCatatanAdminError = 'Alasan penolakan minimal 5 karakter.';
+
+            return false;
+
+        }
+
+        this.proposalCatatanAdminError = '';
+
+        return true;
+
+    },
+
+    submitProposalReject(e) {
+
+        this.proposalCatatanAdminTouched = true;
+
+        if (!this.validateProposalCatatan()) {
+
+            e.preventDefault();
+
+            this.$refs.proposalCatatanInput?.focus();
+
+            return false;
+
+        }
+
+    },
+
+    validateCatatanAdmin() {
+
+        if (!this.catatanAdmin || !this.catatanAdmin.trim()) {
+
+            this.catatanAdminError = 'Alasan penolakan / catatan revisi wajib diisi.';
+
+            return false;
+
+        }
+
+        if (this.catatanAdmin.trim().length < 5) {
+
+            this.catatanAdminError = 'Alasan penolakan minimal 5 karakter.';
+
+            return false;
+
+        }
+
+        this.catatanAdminError = '';
+
+        return true;
+
+    },
+
+    submitQuickReject(e) {
+
+        this.catatanAdminTouched = true;
+
+        if (!this.validateCatatanAdmin()) {
+
+            e.preventDefault();
+
+            this.$refs.quickCatatanInput?.focus();
+
+            return false;
+
+        }
 
     },
 
@@ -1083,7 +1179,7 @@
 
 
 
-                <form :action="currentProposal.reject_url" method="POST" class="space-y-4">
+                <form :action="currentProposal.reject_url" method="POST" @submit="submitProposalReject($event)" novalidate class="space-y-4">
 
                     @csrf
 
@@ -1096,20 +1192,17 @@
                         </label>
 
                         <textarea 
-
                             name="catatan_admin" 
-
+                            x-ref="proposalCatatanInput"
                             rows="4" 
-
-                            required 
-
                             x-model="proposalCatatanAdmin" 
-
+                            @input="proposalCatatanAdminTouched = true; validateProposalCatatan()"
+                            @blur="proposalCatatanAdminTouched = true; validateProposalCatatan()"
                             placeholder="Contoh: Rincian teknis penilaian belum dicantumkan secara lengkap atau banner visual buram. Silakan unggah banner beresolusi tinggi dan ajukan kembali." 
-
-                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 transition resize-none"
-
+                            class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-none"
+                            :class="proposalCatatanAdminTouched && proposalCatatanAdminError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-rose-500 focus:border-rose-500'"
                         ></textarea>
+                        <p x-show="proposalCatatanAdminTouched && proposalCatatanAdminError" x-text="proposalCatatanAdminError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -1120,8 +1213,7 @@
                             Kembali ke Detail
                         </button>
                         <button type="submit" 
-                                :disabled="!proposalCatatanAdmin.trim() || proposalCatatanAdmin.length < 5"
-                                class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
+                                class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
                             Konfirmasi Tolak Pengajuan
                         </button>
                     </div>
@@ -1164,7 +1256,7 @@
 
 
 
-            <form :action="rejectActionUrl" method="POST" class="space-y-4">
+            <form :action="rejectActionUrl" method="POST" @submit="submitQuickReject($event)" novalidate class="space-y-4">
 
                 @csrf
 
@@ -1177,20 +1269,17 @@
                     </label>
 
                     <textarea 
-
                         name="catatan_admin" 
-
+                        x-ref="quickCatatanInput"
                         rows="4" 
-
-                        required 
-
                         x-model="catatanAdmin" 
-
+                        @input="catatanAdminTouched = true; validateCatatanAdmin()"
+                        @blur="catatanAdminTouched = true; validateCatatanAdmin()"
                         placeholder="Contoh: Banner visual belum memenuhi rasio standar atau hadiah belum dirinci dengan jelas. Silakan perbaiki dan ajukan ulang." 
-
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 transition resize-none"
-
+                        class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-none"
+                        :class="catatanAdminTouched && catatanAdminError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-rose-500 focus:border-rose-500'"
                     ></textarea>
+                    <p x-show="catatanAdminTouched && catatanAdminError" x-text="catatanAdminError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     <span class="text-[11px] text-gray-400 block mt-1">Catatan ini akan dikirimkan dan tampil pada riwayat pengajuan user yang bersangkutan.</span>
 

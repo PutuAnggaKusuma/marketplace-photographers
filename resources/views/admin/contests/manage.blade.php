@@ -88,7 +88,63 @@
 
         };
 
+        this.participantCatatanTouched = false;
+
+        this.participantCatatanError = '';
+
         this.participantModal = true;
+
+    },
+
+    participantCatatanTouched: false,
+
+    participantCatatanError: '',
+
+    validateParticipantCatatan() {
+
+        if (this.selectedParticipant.status_pendaftaran === 'ditolak') {
+
+            if (!this.selectedParticipant.catatan_admin || !this.selectedParticipant.catatan_admin.trim()) {
+
+                this.participantCatatanError = 'Catatan / alasan penolakan wajib diisi.';
+
+                return false;
+
+            }
+
+            if (this.selectedParticipant.catatan_admin.trim().length < 5) {
+
+                this.participantCatatanError = 'Alasan penolakan minimal 5 karakter.';
+
+                return false;
+
+            }
+
+        }
+
+        this.participantCatatanError = '';
+
+        return true;
+
+    },
+
+    submitParticipantReview(e) {
+
+        if (this.selectedParticipant.status_pendaftaran === 'ditolak') {
+
+            this.participantCatatanTouched = true;
+
+            if (!this.validateParticipantCatatan()) {
+
+                e.preventDefault();
+
+                this.$refs.participantCatatanInput?.focus();
+
+                return false;
+
+            }
+
+        }
 
     },
 
@@ -1231,7 +1287,7 @@
 
             <!-- Modal Form (Unified Single Form) -->
 
-            <form :action="selectedParticipant.update_url" method="POST" class="flex flex-col flex-1 overflow-hidden">
+            <form :action="selectedParticipant.update_url" method="POST" @submit="submitParticipantReview($event)" novalidate class="flex flex-col flex-1 overflow-hidden">
 
                 @csrf
 
@@ -1594,16 +1650,15 @@
                         </label>
 
                         <textarea name="catatan_admin" 
-
+                                  x-ref="participantCatatanInput"
                                   rows="2" 
-
                                   x-model="selectedParticipant.catatan_admin"
-
-                                  :required="selectedParticipant.status_pendaftaran === 'ditolak'"
-
+                                  @input="participantCatatanTouched = true; validateParticipantCatatan()"
+                                  @blur="participantCatatanTouched = true; validateParticipantCatatan()"
                                   placeholder="Tuliskan alasan penolakan calon peserta..." 
-
-                                  class="w-full px-4 py-2.5 text-xs rounded-xl border border-rose-300 dark:border-rose-900 bg-rose-50/40 dark:bg-rose-950/20 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition resize-none leading-relaxed"></textarea>
+                                  class="w-full px-4 py-2.5 text-xs rounded-xl border bg-rose-50/40 dark:bg-rose-950/20 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition resize-none leading-relaxed"
+                                  :class="participantCatatanTouched && participantCatatanError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-rose-300 dark:border-rose-900 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500'"></textarea>
+                        <p x-show="participantCatatanTouched && participantCatatanError" x-text="participantCatatanError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
