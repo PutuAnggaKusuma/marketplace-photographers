@@ -19,157 +19,104 @@
 
 
 <div x-data="{
-
-
-
     faqModalOpen: false,
-
-
-
     isEdit: false,
-
-
-
     formAction: '{{ route('photographer.faqs.store') }}',
-
-
-
     formData: {
-
-
-
         id: null,
-
-
-
         pertanyaan: '',
-
-
-
         jawaban: '',
-
-
-
         urutan: 1,
-
-
-
         is_active: 1
-
-
-
     },
-
-
-
+    touched: {
+        pertanyaan: false,
+        jawaban: false,
+        urutan: false
+    },
+    errors: {
+        pertanyaan: '',
+        jawaban: '',
+        urutan: ''
+    },
+    validatePertanyaan() {
+        if (!this.formData.pertanyaan || this.formData.pertanyaan.trim() === '') {
+            this.errors.pertanyaan = 'Pertanyaan FAQ wajib diisi.';
+        } else if (this.formData.pertanyaan.trim().length < 5) {
+            this.errors.pertanyaan = 'Pertanyaan FAQ minimal 5 karakter.';
+        } else {
+            this.errors.pertanyaan = '';
+        }
+    },
+    validateJawaban() {
+        if (!this.formData.jawaban || this.formData.jawaban.trim() === '') {
+            this.errors.jawaban = 'Jawaban FAQ wajib diisi.';
+        } else if (this.formData.jawaban.trim().length < 10) {
+            this.errors.jawaban = 'Jawaban FAQ minimal 10 karakter.';
+        } else {
+            this.errors.jawaban = '';
+        }
+    },
+    validateUrutan() {
+        if (!this.formData.urutan || Number(this.formData.urutan) < 1) {
+            this.errors.urutan = 'Urutan tampil minimal 1.';
+        } else {
+            this.errors.urutan = '';
+        }
+    },
     openCreateModal() {
-
-
-
         this.isEdit = false;
-
-
-
         this.formAction = '{{ route('photographer.faqs.store') }}';
-
-
-
         this.formData = {
-
-
-
             id: null,
-
-
-
             pertanyaan: '',
-
-
-
             jawaban: '',
-
-
-
             urutan: {{ $faqs->count() + 1 }},
-
-
-
             is_active: 1
-
-
-
         };
-
-
-
+        this.touched = { pertanyaan: false, jawaban: false, urutan: false };
+        this.errors = { pertanyaan: '', jawaban: '', urutan: '' };
         this.faqModalOpen = true;
-
-
-
     },
-
-
-
     openEditModal(faq) {
-
-
-
         this.isEdit = true;
-
-
-
         this.formAction = '/photographer/faqs/' + faq.id + '/update';
-
-
-
         this.formData = {
-
-
-
             id: faq.id,
-
-
-
             pertanyaan: faq.pertanyaan,
-
-
-
             jawaban: faq.jawaban,
-
-
-
             urutan: faq.urutan,
-
-
-
             is_active: faq.is_active ? 1 : 0
-
-
-
         };
-
-
-
+        this.touched = { pertanyaan: false, jawaban: false, urutan: false };
+        this.errors = { pertanyaan: '', jawaban: '', urutan: '' };
         this.faqModalOpen = true;
-
-
-
     },
-
-
-
     closeModal() {
-
-
-
         this.faqModalOpen = false;
+    },
+    submitFaqForm(e) {
+        this.touched.pertanyaan = true;
+        this.touched.jawaban = true;
+        this.touched.urutan = true;
 
+        this.validatePertanyaan();
+        this.validateJawaban();
+        this.validateUrutan();
 
+        let firstInvalidRef = null;
+        if (this.errors.pertanyaan) firstInvalidRef = firstInvalidRef || this.$refs.fieldPertanyaan;
+        if (this.errors.urutan) firstInvalidRef = firstInvalidRef || this.$refs.fieldUrutan;
+        if (this.errors.jawaban) firstInvalidRef = firstInvalidRef || this.$refs.fieldJawaban;
 
+        if (this.errors.pertanyaan || this.errors.jawaban || this.errors.urutan) {
+            e.preventDefault();
+            if (firstInvalidRef) {
+                firstInvalidRef.focus();
+                firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     }
-
-
-
 }" class="space-y-6">
 
 
@@ -834,121 +781,60 @@
 
 
 
-                <form :action="formAction" method="POST" class="mt-5 space-y-4">
-
-
+                <form :action="formAction" method="POST" @submit="submitFaqForm($event)" novalidate class="mt-5 space-y-4">
 
                     @csrf
 
-
-
                     
-
-
 
                     <!-- Pertanyaan -->
 
-
-
                     <div>
-
-
 
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
 
-
-
                             Pertanyaan <span class="text-rose-500">*</span>
-
-
 
                         </label>
 
-
-
                         <input type="text" 
-
-
-
                                name="pertanyaan" 
-
-
-
+                               x-ref="fieldPertanyaan"
                                x-model="formData.pertanyaan" 
-
-
-
-                               required 
-
-
-
+                               @input="touched.pertanyaan = true; validatePertanyaan()"
+                               @blur="touched.pertanyaan = true; validatePertanyaan()"
                                placeholder="Contoh: Berapa lama estimasi waktu serah terima hasil foto?"
-
-
-
-                               class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
-
-
+                               class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.pertanyaan && errors.pertanyaan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                        <p x-show="touched.pertanyaan && errors.pertanyaan" x-text="errors.pertanyaan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
 
 
-
-
-
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-
-
 
                         <!-- Urutan Tampil -->
 
-
-
                         <div>
-
-
 
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
 
-
-
                                 Urutan Tampil <span class="text-rose-500">*</span>
-
-
 
                             </label>
 
-
-
                             <input type="number" 
-
-
-
                                    name="urutan" 
-
-
-
+                                   x-ref="fieldUrutan"
                                    x-model="formData.urutan" 
-
-
-
-                                   required 
-
-
-
+                                   @input="touched.urutan = true; validateUrutan()"
+                                   @blur="touched.urutan = true; validateUrutan()"
                                    min="1" 
-
-
-
                                    max="999"
-
-
-
-                                   class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
-
-
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                                   :class="touched.urutan && errors.urutan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                            <p x-show="touched.urutan && errors.urutan" x-text="errors.urutan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                         </div>
 
@@ -1025,26 +911,15 @@
 
 
                         <textarea name="jawaban" 
-
-
-
+                                  x-ref="fieldJawaban"
                                   x-model="formData.jawaban" 
-
-
-
-                                  required 
-
-
-
+                                  @input="touched.jawaban = true; validateJawaban()"
+                                  @blur="touched.jawaban = true; validateJawaban()"
                                   rows="4" 
-
-
-
                                   placeholder="Tuliskan jawaban yang rinci, sopan, dan mudah dipahami oleh klien..."
-
-
-
-                                  class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition resize-none"></textarea>
+                                  class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-none"
+                                  :class="touched.jawaban && errors.jawaban ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"></textarea>
+                        <p x-show="touched.jawaban && errors.jawaban" x-text="errors.jawaban" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
 
 

@@ -98,293 +98,168 @@
         
 
         <form 
-
           action="{{ route('public.contests.propose.store') }}" 
-
           method="POST" 
-
           enctype="multipart/form-data" 
-
           class="space-y-6"
-
-          x-data="{
-
-            preview: null,
-
-            handleBanner(e) {
-
-              const file = e.target.files[0];
-
-              if (file) {
-
-                const reader = new FileReader();
-
-                reader.onload = (event) => { this.preview = event.target.result; };
-
-                reader.readAsDataURL(file);
-
-              }
-
-            }
-
-          }"
-
+          x-data="proposeContestApp()"
+          @submit="submitForm($event)"
+          novalidate
         >
-
           @csrf
 
-
-
           <!-- Section 1: Informasi Dasar Lomba -->
-
           <div class="space-y-4">
-
             <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-
               1. Informasi Utama Event Lomba
-
             </h3>
 
-
-
             <div>
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                 Judul Lomba Foto <span class="text-rose-500">*</span>
-
               </label>
-
               <input 
-
                 type="text" 
-
                 name="judul_lomba" 
-
-                value="{{ old('judul_lomba') }}" 
-
+                x-ref="fieldJudul"
+                x-model="form.judul_lomba"
+                @input="touched.judul_lomba = true; validateJudul()"
+                @blur="touched.judul_lomba = true; validateJudul()"
                 required 
-
                 placeholder="mis. Bali Cultural & Heritage Photography Contest 2026" 
-
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                :class="touched.judul_lomba && errors.judul_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
               >
-
+              <p x-show="touched.judul_lomba && errors.judul_lomba" x-text="errors.judul_lomba" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
-
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                   Kategori Fotografi <span class="text-rose-500">*</span>
-
                 </label>
-
-                <div x-data="{ open: false, selectedCategory: '{{ old('kategori', '') }}' }" class="relative">
-
-                  <input type="hidden" name="kategori" :value="selectedCategory" required>
-
+                <div class="relative" x-ref="fieldKategori">
+                  <input type="hidden" name="kategori" :value="form.kategori" required>
                   <button 
-
                     type="button" 
-
-                    @click="open = !open" 
-
-                    @click.away="open = false" 
-
-                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition cursor-pointer flex items-center justify-between"
-
+                    @click="categoryDropdownOpen = !categoryDropdownOpen" 
+                    @click.away="categoryDropdownOpen = false" 
+                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition cursor-pointer flex items-center justify-between"
+                    :class="touched.kategori && errors.kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                   >
-
-                    <span x-text="selectedCategory || 'Pilih Kategori...'" :class="selectedCategory ? 'text-gray-900 dark:text-white' : 'text-gray-400 font-normal'"></span>
-
-                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-
+                    <span x-text="form.kategori || 'Pilih Kategori...'" :class="form.kategori ? 'text-gray-900 dark:text-white' : 'text-gray-400 font-normal'"></span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="categoryDropdownOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-
                     </svg>
-
                   </button>
 
-
-
                   <div 
-
-                    x-show="open" 
-
+                    x-show="categoryDropdownOpen" 
                     x-transition:enter="transition ease-out duration-150"
-
                     x-transition:enter-start="opacity-0 translate-y-1"
-
                     x-transition:enter-end="opacity-100 translate-y-0"
-
                     x-transition:leave="transition ease-in duration-100"
-
                     x-transition:leave-start="opacity-100 translate-y-0"
-
                     x-transition:leave-end="opacity-0 translate-y-1"
-
                     class="absolute left-0 right-0 mt-1.5 max-h-56 overflow-y-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-30 divide-y divide-gray-50 dark:divide-gray-700/50"
-
                     style="display: none;"
-
                   >
-
                     @php
-
                       $defaultCategories = ['Landscape & Alam', 'Street Photography', 'Portrait & Human Interest', 'Budaya & Tradisi', 'Wildlife & Satwa', 'Umum & Konseptual'];
-
                       $catList = $categories->pluck('nama_kategori')->merge($defaultCategories)->unique()->values();
-
                     @endphp
-
                     @foreach($catList as $cName)
-
                       <button 
-
                         type="button" 
-
-                        @click="selectedCategory = '{{ $cName }}'; open = false" 
-
+                        @click="form.kategori = '{{ $cName }}'; touched.kategori = true; validateKategori(); categoryDropdownOpen = false" 
                         class="w-full px-4 py-2 text-xs font-bold text-left transition flex items-center justify-between cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600"
-
-                        :class="selectedCategory === '{{ $cName }}' ? 'bg-amber-50/70 text-amber-600 font-black' : 'text-gray-700 dark:text-gray-300'"
-
+                        :class="form.kategori === '{{ $cName }}' ? 'bg-amber-50/70 text-amber-600 font-black' : 'text-gray-700 dark:text-gray-300'"
                       >
-
                         <span>{{ $cName }}</span>
-
-                        <span x-show="selectedCategory === '{{ $cName }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
-
+                        <span x-show="form.kategori === '{{ $cName }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
                       </button>
-
                     @endforeach
-
                   </div>
-
                 </div>
-
+                <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
-
-
 
               <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                   Penyelenggara / Komunitas / Brand <span class="text-rose-500">*</span>
-
                 </label>
-
                 <input 
-
                   type="text" 
-
                   name="penyelenggara" 
-
-                  value="{{ old('penyelenggara', auth()->user()->nama) }}" 
-
+                  x-ref="fieldPenyelenggara"
+                  x-model="form.penyelenggara"
+                  @input="touched.penyelenggara = true; validatePenyelenggara()"
+                  @blur="touched.penyelenggara = true; validatePenyelenggara()"
                   required 
-
                   placeholder="mis. Komunitas Fotografi Dewata / Studio Anda" 
-
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                  class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                  :class="touched.penyelenggara && errors.penyelenggara ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                 >
-
+                <p x-show="touched.penyelenggara && errors.penyelenggara" x-text="errors.penyelenggara" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
-
             </div>
-
-
 
             <div>
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                 Total Hadiah & Benefit Apresiasi <span class="text-rose-500">*</span>
-
               </label>
-
               <input 
-
                 type="text" 
-
                 name="hadiah" 
-
-                value="{{ old('hadiah') }}" 
-
+                x-ref="fieldHadiah"
+                x-model="form.hadiah"
+                @input="touched.hadiah = true; validateHadiah()"
+                @blur="touched.hadiah = true; validateHadiah()"
                 required 
-
                 placeholder="mis. Rp 15.000.000 + E-Sertifikat + Publikasi Eksklusif" 
-
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                :class="touched.hadiah && errors.hadiah ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
               >
-
+              <p x-show="touched.hadiah && errors.hadiah" x-text="errors.hadiah" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
-
-
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                   Tanggal Mulai Submisi <span class="text-rose-500">*</span>
-
                 </label>
-
                 <input 
-
                   type="date" 
-
                   name="start_date" 
-
-                  value="{{ old('start_date', date('Y-m-d')) }}" 
-
+                  x-ref="fieldStartDate"
+                  x-model="form.start_date"
+                  @input="touched.start_date = true; validateDates()"
+                  @blur="touched.start_date = true; validateDates()"
                   required 
-
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                  class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                  :class="touched.start_date && errors.start_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                 >
-
+                <p x-show="touched.start_date && errors.start_date" x-text="errors.start_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
-
-
 
               <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                   Tanggal Batas Akhir (Deadline) <span class="text-rose-500">*</span>
-
                 </label>
-
                 <input 
-
                   type="date" 
-
                   name="end_date" 
-
-                  value="{{ old('end_date', date('Y-m-d', strtotime('+30 days'))) }}" 
-
+                  x-ref="fieldEndDate"
+                  x-model="form.end_date"
+                  @input="touched.end_date = true; validateDates()"
+                  @blur="touched.end_date = true; validateDates()"
                   required 
-
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                  class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                  :class="touched.end_date && errors.end_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                 >
-
+                <p x-show="touched.end_date && errors.end_date" x-text="errors.end_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               </div>
-
             </div>
-
           </div>
 
 
@@ -484,89 +359,60 @@
 
 
           <!-- Section 3: Deskripsi & Syarat Ketentuan Dinamis -->
-
           <div class="space-y-4 pt-2">
-
             <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-
               3. Konten & Aturan Lomba
-
             </h3>
 
-
-
             <div>
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                 Deskripsi & Konsep Tema Lomba <span class="text-rose-500">*</span>
-
               </label>
-
               <textarea 
                 name="deskrpisi_lomba" 
                 rows="6" 
+                x-ref="fieldDeskripsi"
+                x-model="form.deskrpisi_lomba"
+                @input="touched.deskrpisi_lomba = true; validateDeskripsi()"
+                @blur="touched.deskrpisi_lomba = true; validateDeskripsi()"
                 required 
                 placeholder="Tuliskan latar belakang, tujuan, tema eksplorasi foto, dan sasaran peserta kompetisi ini..." 
-                class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition resize-y leading-relaxed"
-
-              >{{ old('deskrpisi_lomba') }}</textarea>
-
+                class="w-full min-h-[150px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
+                :class="touched.deskrpisi_lomba && errors.deskrpisi_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+              ></textarea>
+              <p x-show="touched.deskrpisi_lomba && errors.deskrpisi_lomba" x-text="errors.deskrpisi_lomba" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
-
-
 
             <div>
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
                 Syarat & Ketentuan Teknis Lomba <span class="text-rose-500">*</span>
-
               </label>
-
               <textarea 
-
                 name="syarat_ketentuan" 
-
                 rows="6" 
-
+                x-ref="fieldSyarat"
+                x-model="form.syarat_ketentuan"
+                @input="touched.syarat_ketentuan = true; validateSyarat()"
+                @blur="touched.syarat_ketentuan = true; validateSyarat()"
                 required 
-
                 placeholder="1. Orisinalitas karya foto dan kepemilikan hak cipta.&#10;2. Ketentuan teknis file (resolusi, format gambar, batas olah digital dasar).&#10;3. Kriteria penilaian dewan juri (storytelling, komposisi, pencahayaan).&#10;4. Mekanisme pengumuman pemenang & distribusi hadiah.&#10;5. Keputusan juri bersifat mutlak." 
-
-                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition resize-y leading-relaxed font-mono"
-
-              >{{ old('syarat_ketentuan') }}</textarea>
-
+                class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed font-mono"
+                :class="touched.syarat_ketentuan && errors.syarat_ketentuan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+              ></textarea>
               <span class="text-[11px] text-gray-400 block mt-1">Poin-poin syarat & ketentuan ini akan ditampilkan secara utuh pada halaman detail lomba.</span>
-
+              <p x-show="touched.syarat_ketentuan && errors.syarat_ketentuan" x-text="errors.syarat_ketentuan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
-
           </div>
-
-
-
-          <!-- Submit Buttons (Rule #74 Standard: Batal di samping kiri tombol kuning, rata kanan gap-3) -->
 
           <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol submit, rata kanan gap-3, Rule #41: No border-t Divider) -->
           <div class="flex items-center justify-end gap-3 pt-4">
-
             <a href="{{ route('public.contests.index') }}" class="px-5 py-2.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition text-center shadow-2xs cursor-pointer">
-
               Batal
-
             </a>
-
-
-
             <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
               Simpan Data
             </button>
-
           </div>
-
-
-
         </form>
 
 
@@ -689,19 +535,147 @@
 
         </div>
 
-
-
       </div>
 
-
-
     </div>
-
-
 
   </div>
 
 </section>
+
+<script>
+function proposeContestApp() {
+  return {
+    preview: null,
+    handleBanner(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => { this.preview = event.target.result; };
+        reader.readAsDataURL(file);
+      }
+    },
+    categoryDropdownOpen: false,
+    form: {
+      judul_lomba: {!! json_encode(old('judul_lomba', '')) !!},
+      kategori: {!! json_encode(old('kategori', '')) !!},
+      penyelenggara: {!! json_encode(old('penyelenggara', auth()->user()->nama ?? '')) !!},
+      hadiah: {!! json_encode(old('hadiah', '')) !!},
+      start_date: {!! json_encode(old('start_date', date('Y-m-d'))) !!},
+      end_date: {!! json_encode(old('end_date', date('Y-m-d', strtotime('+30 days')))) !!},
+      banner_url: {!! json_encode(old('banner_url', '')) !!},
+      deskrpisi_lomba: {!! json_encode(old('deskrpisi_lomba', '')) !!},
+      syarat_ketentuan: {!! json_encode(old('syarat_ketentuan', '')) !!},
+    },
+    touched: {
+      judul_lomba: {{ $errors->has('judul_lomba') ? 'true' : 'false' }},
+      kategori: {{ $errors->has('kategori') ? 'true' : 'false' }},
+      penyelenggara: {{ $errors->has('penyelenggara') ? 'true' : 'false' }},
+      hadiah: {{ $errors->has('hadiah') ? 'true' : 'false' }},
+      start_date: {{ $errors->has('start_date') ? 'true' : 'false' }},
+      end_date: {{ $errors->has('end_date') ? 'true' : 'false' }},
+      deskrpisi_lomba: {{ $errors->has('deskrpisi_lomba') ? 'true' : 'false' }},
+      syarat_ketentuan: {{ $errors->has('syarat_ketentuan') ? 'true' : 'false' }},
+    },
+    errors: {
+      judul_lomba: {!! json_encode($errors->first('judul_lomba') ?: '') !!},
+      kategori: {!! json_encode($errors->first('kategori') ?: '') !!},
+      penyelenggara: {!! json_encode($errors->first('penyelenggara') ?: '') !!},
+      hadiah: {!! json_encode($errors->first('hadiah') ?: '') !!},
+      start_date: {!! json_encode($errors->first('start_date') ?: '') !!},
+      end_date: {!! json_encode($errors->first('end_date') ?: '') !!},
+      deskrpisi_lomba: {!! json_encode($errors->first('deskrpisi_lomba') ?: '') !!},
+      syarat_ketentuan: {!! json_encode($errors->first('syarat_ketentuan') ?: '') !!},
+    },
+    validateJudul() {
+      const val = (this.form.judul_lomba || '').trim();
+      if (!val) this.errors.judul_lomba = 'Judul lomba foto wajib diisi.';
+      else if (val.length < 5) this.errors.judul_lomba = 'Judul lomba minimal 5 karakter.';
+      else this.errors.judul_lomba = '';
+    },
+    validateKategori() {
+      if (!this.form.kategori) this.errors.kategori = 'Kategori lomba foto wajib dipilih.';
+      else this.errors.kategori = '';
+    },
+    validatePenyelenggara() {
+      const val = (this.form.penyelenggara || '').trim();
+      if (!val) this.errors.penyelenggara = 'Penyelenggara lomba wajib diisi.';
+      else if (val.length < 3) this.errors.penyelenggara = 'Nama penyelenggara minimal 3 karakter.';
+      else this.errors.penyelenggara = '';
+    },
+    validateHadiah() {
+      const val = (this.form.hadiah || '').trim();
+      if (!val) this.errors.hadiah = 'Total hadiah & benefit wajib diisi.';
+      else this.errors.hadiah = '';
+    },
+    validateDates() {
+      if (!this.form.start_date) {
+        this.errors.start_date = 'Tanggal mulai submisi wajib diisi.';
+      } else {
+        this.errors.start_date = '';
+      }
+      if (!this.form.end_date) {
+        this.errors.end_date = 'Tanggal batas akhir wajib diisi.';
+      } else if (this.form.start_date && this.form.end_date < this.form.start_date) {
+        this.errors.end_date = 'Tanggal batas akhir tidak boleh sebelum tanggal mulai.';
+      } else {
+        this.errors.end_date = '';
+      }
+    },
+    validateDeskripsi() {
+      const val = (this.form.deskrpisi_lomba || '').trim();
+      if (!val) this.errors.deskrpisi_lomba = 'Deskripsi lomba wajib diisi.';
+      else if (val.length < 20) this.errors.deskrpisi_lomba = 'Deskripsi lomba minimal 20 karakter.';
+      else this.errors.deskrpisi_lomba = '';
+    },
+    validateSyarat() {
+      const val = (this.form.syarat_ketentuan || '').trim();
+      if (!val) this.errors.syarat_ketentuan = 'Syarat & ketentuan lomba wajib diisi.';
+      else if (val.length < 20) this.errors.syarat_ketentuan = 'Syarat & ketentuan minimal 20 karakter.';
+      else this.errors.syarat_ketentuan = '';
+    },
+    submitForm(e) {
+      this.touched.judul_lomba = true;
+      this.touched.kategori = true;
+      this.touched.penyelenggara = true;
+      this.touched.hadiah = true;
+      this.touched.start_date = true;
+      this.touched.end_date = true;
+      this.touched.deskrpisi_lomba = true;
+      this.touched.syarat_ketentuan = true;
+
+      this.validateJudul();
+      this.validateKategori();
+      this.validatePenyelenggara();
+      this.validateHadiah();
+      this.validateDates();
+      this.validateDeskripsi();
+      this.validateSyarat();
+
+      const errorKeys = Object.keys(this.errors).filter(k => !!this.errors[k]);
+      if (errorKeys.length > 0) {
+        e.preventDefault();
+        const refMap = {
+          judul_lomba: this.$refs.fieldJudul,
+          kategori: this.$refs.fieldKategori,
+          penyelenggara: this.$refs.fieldPenyelenggara,
+          hadiah: this.$refs.fieldHadiah,
+          start_date: this.$refs.fieldStartDate,
+          end_date: this.$refs.fieldEndDate,
+          deskrpisi_lomba: this.$refs.fieldDeskripsi,
+          syarat_ketentuan: this.$refs.fieldSyarat
+        };
+        const target = refMap[errorKeys[0]];
+        if (target) {
+          target.focus?.();
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return false;
+      }
+    }
+  };
+}
+</script>
 
 @endsection
 

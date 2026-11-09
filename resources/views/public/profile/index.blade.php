@@ -28,22 +28,42 @@
     @endphp
 
     <!-- Section 1: Informasi Biodata Profil (Hybrid Responsive Form Standard) -->
-    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
+    <div x-data="clientProfileApp()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
       <h2 class="text-lg font-black text-gray-900 dark:text-white">Informasi Profil</h2>
 
-      <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+      <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" @submit="submitProfile($event)" novalidate class="space-y-6">
         @csrf
 
         <!-- Horizontal Row 1: Nama Lengkap & Alamat Email -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
-            <input type="text" name="nama" value="{{ old('nama', $user->nama) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="text" 
+                   name="nama" 
+                   x-ref="fieldNama"
+                   x-model="form.nama"
+                   @input="touched.nama = true; validateNama()"
+                   @blur="touched.nama = true; validateNama()"
+                   required 
+                   placeholder="Masukkan nama lengkap"
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.nama && errors.nama ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.nama && errors.nama" x-text="errors.nama" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
-            <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="email" 
+                   name="email" 
+                   x-ref="fieldEmail"
+                   x-model="form.email"
+                   @input="touched.email = true; validateEmail()"
+                   @blur="touched.email = true; validateEmail()"
+                   required 
+                   placeholder="nama@email.com"
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.email && errors.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.email && errors.email" x-text="errors.email" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
         </div>
 
@@ -51,13 +71,25 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Nomor Telepon / WhatsApp</label>
-            <input type="text" name="nomor_telepon" value="{{ old('nomor_telepon', $photographer?->nomor_telepon ?: $client?->nomor_telepon) }}" placeholder="Masukkan nomor telepon / WhatsApp" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="tel" 
+                   name="nomor_telepon" 
+                   x-ref="fieldPhone"
+                   x-model="form.nomor_telepon"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   @keypress="if (!/[0-9]/.test($event.key)) $event.preventDefault()"
+                   @input="form.nomor_telepon = (form.nomor_telepon || '').replace(/\D/g, ''); touched.nomor_telepon = true; validatePhone()"
+                   @blur="touched.nomor_telepon = true; validatePhone()"
+                   placeholder="Contoh: 08xxxxxxxxxx" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.nomor_telepon && errors.nomor_telepon ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.nomor_telepon && errors.nomor_telepon" x-text="errors.nomor_telepon" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           @if($user->role === 'photographer')
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Alamat / Domisili Kota</label>
-              <input type="text" name="alamat" value="{{ old('alamat', $photographer?->alamat) }}" placeholder="Masukkan alamat domisili" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+              <input type="text" name="alamat" x-model="form.alamat" placeholder="Masukkan alamat domisili" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
             </div>
           @else
             <div>
@@ -71,23 +103,12 @@
           <!-- Vertical Long Field: Deskripsi Bio Fotografer -->
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Deskripsi Bio Fotografer</label>
-            <textarea name="deskripsi_bio" rows="6" placeholder="Tuliskan deskripsi lengkap mengenai pengalaman fotografi, spesialisasi, dan pendekatan artistik Anda..." class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-y focus:ring-2 focus:ring-amber-500 leading-relaxed">{{ old('deskripsi_bio', $photographer?->deskripsi_bio) }}</textarea>
+            <textarea name="deskripsi_bio" x-model="form.deskripsi_bio" rows="6" placeholder="Tuliskan deskripsi lengkap mengenai pengalaman fotografi, spesialisasi, dan pendekatan artistik Anda..." class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none resize-y focus:ring-2 focus:ring-amber-500 leading-relaxed"></textarea>
           </div>
         @endif
 
         <!-- Vertical Component: Foto Avatar Profil (Rule #97: Standarisasi Pratinjau Modal Lightbox) -->
-        <div x-data="{ 
-            preview: '{{ $avatarUrl }}', 
-            imagePreviewModalOpen: false,
-            handleFile(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => { this.preview = event.target.result; };
-                    reader.readAsDataURL(file);
-                }
-            }
-        }" class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-3">
+        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-3">
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Foto Avatar Profil
             </label>
@@ -160,27 +181,57 @@
     </div>
 
     <!-- Section 2: Keamanan & Ganti Password (Hybrid Responsive Form Standard) -->
-    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
+    <div x-data="clientPasswordApp()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-6">
       <h2 class="text-lg font-black text-gray-900 dark:text-white">Keamanan & Kata Sandi</h2>
 
-      <form action="{{ route('profile.password') }}" method="POST" class="space-y-6">
+      <form action="{{ route('profile.password') }}" method="POST" @submit="submitPassword($event)" novalidate class="space-y-6">
         @csrf
 
         <!-- Horizontal Row: 3 Password Inputs Side-by-Side -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Saat Ini <span class="text-rose-500">*</span></label>
-            <input type="password" name="current_password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="password" 
+                   name="current_password" 
+                   x-ref="fieldCurrentPassword"
+                   x-model="form.current_password"
+                   @input="touched.current_password = true; validateCurrent()"
+                   @blur="touched.current_password = true; validateCurrent()"
+                   required 
+                   placeholder="••••••••" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.current_password && errors.current_password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.current_password && errors.current_password" x-text="errors.current_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Kata Sandi Baru <span class="text-rose-500">*</span></label>
-            <input type="password" name="new_password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="password" 
+                   name="new_password" 
+                   x-ref="fieldNewPassword"
+                   x-model="form.new_password"
+                   @input="touched.new_password = true; validateNew()"
+                   @blur="touched.new_password = true; validateNew()"
+                   required 
+                   placeholder="Minimal 8 karakter" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.new_password && errors.new_password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.new_password && errors.new_password" x-text="errors.new_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span></label>
-            <input type="password" name="new_password_confirmation" required placeholder="Ulangi kata sandi baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+            <input type="password" 
+                   name="new_password_confirmation" 
+                   x-ref="fieldNewPasswordConfirmation"
+                   x-model="form.new_password_confirmation"
+                   @input="touched.new_password_confirmation = true; validateConfirmation()"
+                   @blur="touched.new_password_confirmation = true; validateConfirmation()"
+                   required 
+                   placeholder="Ulangi kata sandi baru" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.new_password_confirmation && errors.new_password_confirmation ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.new_password_confirmation && errors.new_password_confirmation" x-text="errors.new_password_confirmation" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
         </div>
 
@@ -194,4 +245,149 @@
 
   </div>
 </section>
+
+<script>
+function clientProfileApp() {
+  return {
+    preview: '{{ $avatarUrl }}',
+    imagePreviewModalOpen: false,
+    handleFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => { this.preview = event.target.result; };
+        reader.readAsDataURL(file);
+      }
+    },
+    form: {
+      nama: {!! json_encode(old('nama', $user->nama ?? '')) !!},
+      email: {!! json_encode(old('email', $user->email ?? '')) !!},
+      nomor_telepon: {!! json_encode(old('nomor_telepon', $photographer?->nomor_telepon ?: $client?->nomor_telepon ?: '')) !!},
+      alamat: {!! json_encode(old('alamat', $photographer?->alamat ?? '')) !!},
+      deskripsi_bio: {!! json_encode(old('deskripsi_bio', $photographer?->deskripsi_bio ?? '')) !!},
+    },
+    touched: {
+      nama: {{ $errors->has('nama') ? 'true' : 'false' }},
+      email: {{ $errors->has('email') ? 'true' : 'false' }},
+      nomor_telepon: {{ $errors->has('nomor_telepon') ? 'true' : 'false' }},
+    },
+    errors: {
+      nama: {!! json_encode($errors->first('nama') ?: '') !!},
+      email: {!! json_encode($errors->first('email') ?: '') !!},
+      nomor_telepon: {!! json_encode($errors->first('nomor_telepon') ?: '') !!},
+    },
+    validateNama() {
+      const val = (this.form.nama || '').trim();
+      if (!val) {
+        this.errors.nama = 'Nama lengkap wajib diisi.';
+      } else if (val.length < 3) {
+        this.errors.nama = 'Nama lengkap minimal 3 karakter.';
+      } else {
+        this.errors.nama = '';
+      }
+    },
+    validateEmail() {
+      const val = (this.form.email || '').trim();
+      if (!val) {
+        this.errors.email = 'Alamat email wajib diisi.';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        this.errors.email = 'Format alamat email tidak valid.';
+      } else {
+        this.errors.email = '';
+      }
+    },
+    validatePhone() {
+      this.form.nomor_telepon = (this.form.nomor_telepon || '').replace(/\D/g, '');
+      const raw = this.form.nomor_telepon;
+      if (raw && raw.length < 9) {
+        this.errors.nomor_telepon = 'Nomor WhatsApp minimal 9 digit angka.';
+      } else if (raw && raw.length > 20) {
+        this.errors.nomor_telepon = 'Nomor WhatsApp maksimal 20 digit angka.';
+      } else {
+        this.errors.nomor_telepon = '';
+      }
+    },
+    submitProfile(e) {
+      this.touched.nama = true;
+      this.touched.email = true;
+      this.touched.nomor_telepon = true;
+      this.validateNama();
+      this.validateEmail();
+      this.validatePhone();
+      if (this.errors.nama || this.errors.email || this.errors.nomor_telepon) {
+        e.preventDefault();
+        if (this.errors.nama) this.$refs.fieldNama?.focus();
+        else if (this.errors.email) this.$refs.fieldEmail?.focus();
+        else if (this.errors.nomor_telepon) this.$refs.fieldPhone?.focus();
+        return false;
+      }
+    }
+  };
+}
+
+function clientPasswordApp() {
+  return {
+    form: {
+      current_password: '',
+      new_password: '',
+      new_password_confirmation: ''
+    },
+    touched: {
+      current_password: {{ $errors->has('current_password') ? 'true' : 'false' }},
+      new_password: {{ $errors->has('new_password') ? 'true' : 'false' }},
+      new_password_confirmation: {{ $errors->has('new_password_confirmation') ? 'true' : 'false' }}
+    },
+    errors: {
+      current_password: {!! json_encode($errors->first('current_password') ?: '') !!},
+      new_password: {!! json_encode($errors->first('new_password') ?: '') !!},
+      new_password_confirmation: {!! json_encode($errors->first('new_password_confirmation') ?: '') !!}
+    },
+    validateCurrent() {
+      if (!this.form.current_password) {
+        this.errors.current_password = 'Kata sandi saat ini wajib diisi.';
+      } else {
+        this.errors.current_password = '';
+      }
+    },
+    validateNew() {
+      const val = this.form.new_password || '';
+      if (!val) {
+        this.errors.new_password = 'Kata sandi baru wajib diisi.';
+      } else if (val.length < 8) {
+        this.errors.new_password = 'Kata sandi baru minimal 8 karakter.';
+      } else {
+        this.errors.new_password = '';
+      }
+      if (this.touched.new_password_confirmation) {
+        this.validateConfirmation();
+      }
+    },
+    validateConfirmation() {
+      const conf = this.form.new_password_confirmation || '';
+      if (!conf) {
+        this.errors.new_password_confirmation = 'Konfirmasi kata sandi baru wajib diisi.';
+      } else if (conf !== this.form.new_password) {
+        this.errors.new_password_confirmation = 'Konfirmasi kata sandi baru tidak cocok.';
+      } else {
+        this.errors.new_password_confirmation = '';
+      }
+    },
+    submitPassword(e) {
+      this.touched.current_password = true;
+      this.touched.new_password = true;
+      this.touched.new_password_confirmation = true;
+      this.validateCurrent();
+      this.validateNew();
+      this.validateConfirmation();
+      if (this.errors.current_password || this.errors.new_password || this.errors.new_password_confirmation) {
+        e.preventDefault();
+        if (this.errors.current_password) this.$refs.fieldCurrentPassword?.focus();
+        else if (this.errors.new_password) this.$refs.fieldNewPassword?.focus();
+        else if (this.errors.new_password_confirmation) this.$refs.fieldNewPasswordConfirmation?.focus();
+        return false;
+      }
+    }
+  };
+}
+</script>
 @endsection

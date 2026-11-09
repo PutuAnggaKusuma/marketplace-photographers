@@ -47,30 +47,9 @@
     <!-- Main Vertical Form Card -->
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
+         x-data="adminContestEditApp()">
 
-         x-data="{
-
-            previewUrl: '{{ $contest->banner_url }}',
-
-            fileChosen(event) {
-
-                const file = event.target.files[0];
-
-                if (file) {
-
-                    const reader = new FileReader();
-
-                    reader.onload = (e) => { this.previewUrl = e.target.result; };
-
-                    reader.readAsDataURL(file);
-
-                }
-
-            }
-
-         }">
-
-        <form action="{{ route('admin.contests.update', $contest->id) }}" method="POST" enctype="multipart/form-data" class="space-y-7 sm:space-y-8">
+        <form action="{{ route('admin.contests.update', $contest->id) }}" method="POST" enctype="multipart/form-data" @submit="submitForm($event)" novalidate class="space-y-7 sm:space-y-8">
 
             @csrf
 
@@ -87,22 +66,15 @@
                 </label>
 
                 <input type="text" 
-
                        name="judul_lomba" 
-
-                       value="{{ old('judul_lomba', $contest->judul_lomba) }}"
-
-                       required 
-
+                       x-ref="fieldJudul"
+                       x-model="form.judul_lomba"
+                       @input="touched.judul_lomba = true; validateJudul()"
+                       @blur="touched.judul_lomba = true; validateJudul()"
                        placeholder="Contoh: LensMatch National Photography Contest: Pesona Budaya Nusantara" 
-
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('judul_lomba') border-rose-500 @enderror">
-
-                @error('judul_lomba')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1.5">{{ $message }}</p>
-
-                @enderror
+                       class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                       :class="touched.judul_lomba && errors.judul_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                <p x-show="touched.judul_lomba && errors.judul_lomba" x-text="errors.judul_lomba" x-cloak class="text-[11px] font-bold text-red-500 mt-1.5"></p>
 
             </div>
 
@@ -119,14 +91,15 @@
                 </label>
 
                 <textarea name="deskrpisi_lomba" 
-
+                          x-ref="fieldDeskripsi"
+                          x-model="form.deskrpisi_lomba"
+                          @input="touched.deskrpisi_lomba = true; validateDeskripsi()"
+                          @blur="touched.deskrpisi_lomba = true; validateDeskripsi()"
                           rows="7" 
-
-                          required 
-
                           placeholder="Tuliskan latar belakang tema kompetisi dan ruang lingkup karya..." 
-
-                          class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y leading-relaxed min-h-[160px] @error('deskrpisi_lomba') border-rose-500 @enderror">{{ old('deskrpisi_lomba', $contest->deskrpisi_lomba) }}</textarea>
+                          class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed min-h-[160px]"
+                          :class="touched.deskrpisi_lomba && errors.deskrpisi_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">{{ old('deskrpisi_lomba', $contest->deskrpisi_lomba) }}</textarea>
+                <p x-show="touched.deskrpisi_lomba && errors.deskrpisi_lomba" x-text="errors.deskrpisi_lomba" x-cloak class="text-[11px] font-bold text-red-500 mt-1.5"></p>
 
             </div>
 
@@ -145,14 +118,15 @@
                     </label>
 
                     <input type="text" 
-
                            name="kategori" 
-
-                           value="{{ old('kategori', $contest->kategori) }}"
-
-                           required 
-
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                           x-ref="fieldKategori"
+                           x-model="form.kategori"
+                           @input="touched.kategori = true; validateKategori()"
+                           @blur="touched.kategori = true; validateKategori()"
+                           placeholder="mis. Landscape, Portrait, Street, Budaya" 
+                           class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                           :class="touched.kategori && errors.kategori ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                    <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1.5"></p>
 
                 </div>
 
@@ -167,14 +141,15 @@
                     </label>
 
                     <input type="text" 
-
                            name="penyelenggara" 
-
-                           value="{{ old('penyelenggara', $contest->penyelenggara) }}"
-
-                           required 
-
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                           x-ref="fieldPenyelenggara"
+                           x-model="form.penyelenggara"
+                           @input="touched.penyelenggara = true; validatePenyelenggara()"
+                           @blur="touched.penyelenggara = true; validatePenyelenggara()"
+                           placeholder="Masukkan nama pihak penyelenggara lomba"
+                           class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                           :class="touched.penyelenggara && errors.penyelenggara ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                    <p x-show="touched.penyelenggara && errors.penyelenggara" x-text="errors.penyelenggara" x-cloak class="text-[11px] font-bold text-red-500 mt-1.5"></p>
 
                 </div>
 
@@ -195,16 +170,15 @@
                     </label>
 
                     <input type="text" 
-
                            name="hadiah" 
-
-                           value="{{ old('hadiah', $contest->hadiah) }}"
-
-                           required 
-
+                           x-ref="fieldHadiah"
+                           x-model="form.hadiah"
+                           @input="touched.hadiah = true; validateHadiah()"
+                           @blur="touched.hadiah = true; validateHadiah()"
                            placeholder="mis. Rp 15.000.000 + E-Sertifikat" 
-
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('hadiah') border-rose-500 @enderror">
+                           class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                           :class="touched.hadiah && errors.hadiah ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                    <p x-show="touched.hadiah && errors.hadiah" x-text="errors.hadiah" x-cloak class="text-[11px] font-bold text-red-500 mt-1.5"></p>
 
                 </div>
 
@@ -630,7 +604,15 @@
 
                             <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1.5">Mulai Event <span class="text-rose-500">*</span></label>
 
-                            <input type="date" name="start_date" value="{{ old('start_date', $contest->start_date ? $contest->start_date->format('Y-m-d') : '') }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="date" 
+                                   name="start_date" 
+                                   x-ref="fieldStartDate"
+                                   x-model="form.start_date" 
+                                   @input="touched.start_date = true; validateDates()"
+                                   @blur="touched.start_date = true; validateDates()"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                                   :class="touched.start_date && errors.start_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                            <p x-show="touched.start_date && errors.start_date" x-text="errors.start_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                         </div>
 
@@ -638,7 +620,15 @@
 
                             <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1.5">Selesai Event <span class="text-rose-500">*</span></label>
 
-                            <input type="date" name="end_date" value="{{ old('end_date', $contest->end_date ? $contest->end_date->format('Y-m-d') : '') }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="date" 
+                                   name="end_date" 
+                                   x-ref="fieldEndDate"
+                                   x-model="form.end_date" 
+                                   @input="touched.end_date = true; validateDates()"
+                                   @blur="touched.end_date = true; validateDates()"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                                   :class="touched.end_date && errors.end_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                            <p x-show="touched.end_date && errors.end_date" x-text="errors.end_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                         </div>
 
@@ -761,8 +751,136 @@
 
     </div>
 
-
-
 </div>
 
+<script>
+function adminContestEditApp() {
+    return {
+        previewUrl: @js($contest->banner_url ?: ''),
+        fileChosen(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { this.previewUrl = e.target.result; };
+                reader.readAsDataURL(file);
+            }
+        },
+        form: {
+            judul_lomba: @js(old('judul_lomba', $contest->judul_lomba)),
+            deskrpisi_lomba: @js(old('deskrpisi_lomba', $contest->deskrpisi_lomba)),
+            kategori: @js(old('kategori', $contest->kategori)),
+            penyelenggara: @js(old('penyelenggara', $contest->penyelenggara)),
+            hadiah: @js(old('hadiah', $contest->hadiah)),
+            start_date: @js(old('start_date', $contest->start_date ? $contest->start_date->format('Y-m-d') : '')),
+            end_date: @js(old('end_date', $contest->end_date ? $contest->end_date->format('Y-m-d') : ''))
+        },
+        touched: {
+            judul_lomba: {{ $errors->has('judul_lomba') ? 'true' : 'false' }},
+            deskrpisi_lomba: {{ $errors->has('deskrpisi_lomba') ? 'true' : 'false' }},
+            kategori: {{ $errors->has('kategori') ? 'true' : 'false' }},
+            penyelenggara: {{ $errors->has('penyelenggara') ? 'true' : 'false' }},
+            hadiah: {{ $errors->has('hadiah') ? 'true' : 'false' }},
+            start_date: {{ $errors->has('start_date') ? 'true' : 'false' }},
+            end_date: {{ $errors->has('end_date') ? 'true' : 'false' }}
+        },
+        errors: {
+            judul_lomba: '{{ $errors->first('judul_lomba') ?: '' }}',
+            deskrpisi_lomba: '{{ $errors->first('deskrpisi_lomba') ?: '' }}',
+            kategori: '{{ $errors->first('kategori') ?: '' }}',
+            penyelenggara: '{{ $errors->first('penyelenggara') ?: '' }}',
+            hadiah: '{{ $errors->first('hadiah') ?: '' }}',
+            start_date: '{{ $errors->first('start_date') ?: '' }}',
+            end_date: '{{ $errors->first('end_date') ?: '' }}'
+        },
+        validateJudul() {
+            if (!this.form.judul_lomba || this.form.judul_lomba.trim() === '') {
+                this.errors.judul_lomba = 'Judul lomba wajib diisi.';
+            } else if (this.form.judul_lomba.trim().length < 5) {
+                this.errors.judul_lomba = 'Judul lomba minimal 5 karakter.';
+            } else {
+                this.errors.judul_lomba = '';
+            }
+        },
+        validateDeskripsi() {
+            if (!this.form.deskrpisi_lomba || this.form.deskrpisi_lomba.trim() === '') {
+                this.errors.deskrpisi_lomba = 'Deskripsi lomba wajib diisi.';
+            } else if (this.form.deskrpisi_lomba.trim().length < 20) {
+                this.errors.deskrpisi_lomba = 'Deskripsi lomba minimal 20 karakter.';
+            } else {
+                this.errors.deskrpisi_lomba = '';
+            }
+        },
+        validateKategori() {
+            if (!this.form.kategori || this.form.kategori.trim() === '') {
+                this.errors.kategori = 'Kategori lomba wajib diisi.';
+            } else {
+                this.errors.kategori = '';
+            }
+        },
+        validatePenyelenggara() {
+            if (!this.form.penyelenggara || this.form.penyelenggara.trim() === '') {
+                this.errors.penyelenggara = 'Nama pihak penyelenggara wajib diisi.';
+            } else if (this.form.penyelenggara.trim().length < 3) {
+                this.errors.penyelenggara = 'Nama penyelenggara minimal 3 karakter.';
+            } else {
+                this.errors.penyelenggara = '';
+            }
+        },
+        validateHadiah() {
+            if (!this.form.hadiah || this.form.hadiah.trim() === '') {
+                this.errors.hadiah = 'Total hadiah lomba wajib diisi.';
+            } else {
+                this.errors.hadiah = '';
+            }
+        },
+        validateDates() {
+            if (!this.form.start_date) {
+                this.errors.start_date = 'Tanggal mulai wajib diisi.';
+            } else {
+                this.errors.start_date = '';
+            }
+            if (!this.form.end_date) {
+                this.errors.end_date = 'Tanggal selesai wajib diisi.';
+            } else if (this.form.start_date && this.form.end_date < this.form.start_date) {
+                this.errors.end_date = 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
+            } else {
+                this.errors.end_date = '';
+            }
+        },
+        submitForm(e) {
+            this.touched.judul_lomba = true;
+            this.touched.deskrpisi_lomba = true;
+            this.touched.kategori = true;
+            this.touched.penyelenggara = true;
+            this.touched.hadiah = true;
+            this.touched.start_date = true;
+            this.touched.end_date = true;
+
+            this.validateJudul();
+            this.validateDeskripsi();
+            this.validateKategori();
+            this.validatePenyelenggara();
+            this.validateHadiah();
+            this.validateDates();
+
+            let firstInvalidRef = null;
+            if (this.errors.judul_lomba) firstInvalidRef = firstInvalidRef || this.$refs.fieldJudul;
+            if (this.errors.deskrpisi_lomba) firstInvalidRef = firstInvalidRef || this.$refs.fieldDeskripsi;
+            if (this.errors.kategori) firstInvalidRef = firstInvalidRef || this.$refs.fieldKategori;
+            if (this.errors.penyelenggara) firstInvalidRef = firstInvalidRef || this.$refs.fieldPenyelenggara;
+            if (this.errors.hadiah) firstInvalidRef = firstInvalidRef || this.$refs.fieldHadiah;
+            if (this.errors.start_date) firstInvalidRef = firstInvalidRef || this.$refs.fieldStartDate;
+            if (this.errors.end_date) firstInvalidRef = firstInvalidRef || this.$refs.fieldEndDate;
+
+            if (this.errors.judul_lomba || this.errors.deskrpisi_lomba || this.errors.kategori || this.errors.penyelenggara || this.errors.hadiah || this.errors.start_date || this.errors.end_date) {
+                e.preventDefault();
+                if (firstInvalidRef) {
+                    firstInvalidRef.focus();
+                    firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    };
+}
+</script>
 @endsection

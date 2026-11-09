@@ -469,68 +469,40 @@
 
 
           <!-- Form Element -->
-
-          <form action="{{ route('public.forum.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
-
+          <form action="{{ route('public.forum.store') }}" method="POST" enctype="multipart/form-data" @submit="submitPost($event)" novalidate class="space-y-5">
             @csrf
 
-
-
             <!-- Field 1: Judul Topik Diskusi -->
-
             <div class="space-y-1.5">
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-
                 Judul Topik Diskusi <span class="text-rose-500">*</span>
-
               </label>
-
               <input type="text" 
-
                      name="judul" 
-
+                     x-ref="fieldJudul"
+                     x-model="formData.judul"
+                     @input="touched.judul = true; validateJudul()"
+                     @blur="touched.judul = true; validateJudul()"
                      required 
-
                      maxlength="255"
-
                      placeholder="mis. Rekomendasi Lensa 85mm f/1.4 vs 50mm f/1.2 untuk Sesi Outdoor..." 
-
-                     class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-amber-500 transition shadow-xs">
-
+                     class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:ring-2 transition shadow-xs"
+                     :class="touched.judul && errors.judul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+              <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               <p class="text-[11px] text-gray-400">Tuliskan judul yang spesifik agar memudahkan fotografer lain menemukan topik Anda.</p>
-
             </div>
 
-
-
             <!-- Field 2: Kategori Topik Diskusi (Rule #11 Compliant Custom Alpine.js Dropdown) -->
-
-            <div class="space-y-1.5" x-data="{
-              categoryDropdownOpen: false,
-              selectedCategory: 'lainnya',
-              selectedCategoryLabel: 'Lainnya & Diskusi Umum',
-              categories: {
-                'teknis': 'Teknis & Pengaturan Lensa',
-                'spot_foto': 'Rekomendasi Spot Foto Outdoor',
-                'peralatan': 'Peralatan & Aksesoris Studio',
-                'lainnya': 'Lainnya & Diskusi Umum'
-              }
-            }">
-
+            <div class="space-y-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-
                 Kategori Diskusi <span class="text-rose-500">*</span>
-
               </label>
-
-              <input type="hidden" name="kategori" :value="selectedCategory" required>
-
+              <input type="hidden" name="kategori" :value="formData.kategori" required>
               <div class="relative">
-
                 <button type="button"
                         @click="categoryDropdownOpen = !categoryDropdownOpen"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer text-left">
+                        class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer text-left"
+                        :class="touched.kategori && errors.kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700'">
                   <span x-text="selectedCategoryLabel" class="truncate"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200"
                        :class="categoryDropdownOpen ? 'rotate-180 text-amber-500' : ''"
@@ -538,7 +510,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-
                 <div x-show="categoryDropdownOpen"
                      @click.away="categoryDropdownOpen = false"
                      x-transition
@@ -546,42 +517,34 @@
                      style="display: none;">
                   <template x-for="(label, key) in categories" :key="key">
                     <button type="button"
-                            @click="selectedCategory = key; selectedCategoryLabel = label; categoryDropdownOpen = false"
+                            @click="formData.kategori = key; selectedCategoryLabel = label; touched.kategori = true; validateKategori(); categoryDropdownOpen = false"
                             class="w-full px-4 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
-                            :class="selectedCategory === key ? 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-600' : ''">
+                            :class="formData.kategori === key ? 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-600' : ''">
                       <span x-text="label"></span>
                     </button>
                   </template>
                 </div>
-
               </div>
-
+              <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
-
-
             <!-- Field 3: Penjelasan & Detail Isi Diskusi -->
-
             <div class="space-y-1.5">
-
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-
                 Penjelasan & Isi Diskusi <span class="text-rose-500">*</span>
-
               </label>
-
               <textarea name="deskripsi" 
-
                         rows="5" 
-
+                        x-ref="fieldDeskripsi"
+                        x-model="formData.deskripsi"
+                        @input="touched.deskripsi = true; validateDeskripsi()"
+                        @blur="touched.deskripsi = true; validateDeskripsi()"
                         required 
-
                         placeholder="Tuliskan pertanyaan, detail permasalahan, lokasi, setting ISO/shutter speed, atau konteks pembahasan Anda secara lengkap..." 
-
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-none focus:ring-2 focus:ring-amber-500 transition shadow-xs leading-relaxed"></textarea>
-
+                        class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-none focus:ring-2 transition shadow-xs leading-relaxed"
+                        :class="touched.deskripsi && errors.deskripsi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"></textarea>
+              <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               <p class="text-[11px] text-gray-400">Uraikan detail secara jelas untuk mendapatkan respon dan solusi yang akurat.</p>
-
             </div>
 
 
@@ -832,14 +795,63 @@
 <script>
 
 function forumPostUpload() {
-
   return {
-
     photos: [],
-
     errorMsg: '',
-
     isDragging: false,
+    categoryDropdownOpen: false,
+    selectedCategoryLabel: 'Lainnya & Diskusi Umum',
+    categories: {
+      'teknis': 'Teknis & Pengaturan Lensa',
+      'spot_foto': 'Rekomendasi Spot Foto Outdoor',
+      'peralatan': 'Peralatan & Aksesoris Studio',
+      'lainnya': 'Lainnya & Diskusi Umum'
+    },
+    formData: {
+      judul: '',
+      kategori: 'lainnya',
+      deskripsi: ''
+    },
+    touched: {
+      judul: false,
+      kategori: false,
+      deskripsi: false
+    },
+    errors: {
+      judul: '',
+      kategori: '',
+      deskripsi: ''
+    },
+    validateJudul() {
+      const val = (this.formData.judul || '').trim();
+      if (!val) this.errors.judul = 'Judul topik diskusi wajib diisi.';
+      else if (val.length < 5) this.errors.judul = 'Judul minimal 5 karakter.';
+      else this.errors.judul = '';
+    },
+    validateKategori() {
+      if (!this.formData.kategori) this.errors.kategori = 'Kategori diskusi wajib dipilih.';
+      else this.errors.kategori = '';
+    },
+    validateDeskripsi() {
+      const val = (this.formData.deskripsi || '').trim();
+      if (!val) this.errors.deskripsi = 'Penjelasan & isi diskusi wajib diisi.';
+      else if (val.length < 15) this.errors.deskripsi = 'Isi diskusi minimal 15 karakter.';
+      else this.errors.deskripsi = '';
+    },
+    submitPost(e) {
+      this.touched.judul = true;
+      this.touched.kategori = true;
+      this.touched.deskripsi = true;
+      this.validateJudul();
+      this.validateKategori();
+      this.validateDeskripsi();
+      if (this.errors.judul || this.errors.kategori || this.errors.deskripsi) {
+        e.preventDefault();
+        if (this.errors.judul) this.$refs.fieldJudul?.focus();
+        else if (this.errors.deskripsi) this.$refs.fieldDeskripsi?.focus();
+        return false;
+      }
+    },
 
     handleFiles(event) {
 

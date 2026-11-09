@@ -21,6 +21,46 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-09 15:15 WITA] — Implementasi Standar Validasi Real-Time 5-Pilar Alpine.js pada Seluruh Form Input Sistem
+
+* **Modul / Fitur**:
+  - Profil Publik & Klien: Profil Pengguna & Ganti Password (`public/profile/index.blade.php`), Lupa Password (`public/auth/forgot-password.blade.php`), Reset Password (`public/auth/reset-password.blade.php`), Pengajuan Lomba Publik (`public/contests/propose.blade.php`), Modal Buat Topik Forum (`public/forum/index.blade.php`).
+  - Dashboard Fotografer: Tambah & Edit Layanan (`photographer/services/create.blade.php`, `edit.blade.php`), Tutup Jadwal/Libur (`photographer/availability/create.blade.php`), Tambah & Edit Portofolio (`photographer/portfolio/create.blade.php`, `edit.blade.php`), Modal Tambah & Edit FAQ (`photographer/faqs/index.blade.php`).
+  - Dashboard Admin: Tambah Admin/Staff (`admin/admins/create.blade.php`), Tambah & Edit Kategori (`admin/categories/create.blade.php`, `edit.blade.php`), Tambah & Edit Lomba Foto (`admin/contests/create.blade.php`, `edit.blade.php`), Tambah & Edit Materi E-Learning (`admin/elearning/create.blade.php`, `edit.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/profile/index.blade.php`
+  * `resources/views/public/auth/forgot-password.blade.php`
+  * `resources/views/public/auth/reset-password.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/public/forum/index.blade.php`
+  * `resources/views/photographer/services/create.blade.php`
+  * `resources/views/photographer/services/edit.blade.php`
+  * `resources/views/photographer/availability/create.blade.php`
+  * `resources/views/photographer/portfolio/create.blade.php`
+  * `resources/views/photographer/portfolio/edit.blade.php`
+  * `resources/views/photographer/faqs/index.blade.php`
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/categories/create.blade.php`
+  * `resources/views/admin/categories/edit.blade.php`
+  * `resources/views/admin/contests/create.blade.php`
+  * `resources/views/admin/contests/edit.blade.php`
+  * `resources/views/admin/elearning/create.blade.php`
+  * `resources/views/admin/elearning/edit.blade.php`
+* **Rincian Perubahan**:
+  1. **Penerapan Standar 5-Pilar Validasi Real-Time (Komputer B standard)**:
+     - **Pilar 1 (3-Pillar Reactive State)**: Inisialisasi reaktif `form`/`formData`, `touched` (boolean per field), dan `errors` (pesan kesalahan string) sinkron dengan session error Laravel `$errors->first(...)`.
+     - **Pilar 2 (Dual-Trigger Interactivity)**: Menghubungkan event `@input="touched.x = true; validateX()"` (live keystroke) dan `@blur="touched.x = true; validateX()"` (loss of focus) pada setiap input control.
+     - **Pilar 3 (Dynamic Visual Styling & Feedback)**: Border field berubah dinamis `:class="touched.x && errors.x ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : '...'"` disertai paragraf pesan error `<p x-show="touched.x && errors.x" x-text="errors.x" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>`.
+     - **Pilar 4 (Strict Numeric & Phone Handling)**: Pada field nomor WhatsApp / telepon menggunakan `type="tel" inputmode="numeric" pattern="[0-9]*"`, keypress filter regex `/[0-9]/`, auto-strip regex non-digit, dan verifikasi panjang 9-20 digit.
+     - **Pilar 5 (Pre-Submit Interception & Auto-Focus)**: Mengaktifkan atribut `novalidate` pada form dan event handler `@submit="submitForm($event)"` yang menandai seluruh field sebagai `touched = true`, menjalankan seluruh fungsi validator, membatalkan submit jika ada kesalahan, memfokuskan kursor pada field pertama yang error (`$refs.fieldX?.focus()`), dan melakukan smooth scrolling ke elemen terkait.
+  2. **Penegakan Rule #104 (Nullable-First Principle)**:
+     - Field opsional (seperti alamat, bio, keterangan jadwal, URL video, dsb.) tidak dipaksa memiliki validasi teks wajib, menjaga integritas data nullable di database.
+  3. **Penegakan Rule #73 & #74 (Layout Footer Form & Tombol Aksi Baku)**:
+     - Mempertahankan posisi tombol `Batal` di sebelah kiri tombol submit (`Simpan Data` / `Perbaharui Data`), diratakan ke kanan (`justify-end gap-3`) tanpa garis pembatas `border-t` (Rule #41).
+* **Hasil Pengujian & Verifikasi**:
+  * Kompilasi Seluruh View Blade: **PASS** (`php artisan view:cache` & `php artisan view:clear` 100% sukses tanpa error).
+  * Tag Balance HTML (`<div>`): **PASS** (100% div open/close seimbang di seluruh 18 file).
+
 ### [2026-11-09 13:50 WITA] — Standardisasi Universal Login Modal pada Seluruh Kasus Serupa di Sistem (Lomba Foto, E-Learning, dan Komunitas Forum)
 
 * **Modul / Fitur**: Halaman Indeks Lomba Foto (`public/contests/index.blade.php`), Detail Lomba Foto (`public/contests/show.blade.php`), Detail Kursus E-Learning (`public/elearning/show.blade.php`), dan Detail Topik Forum (`public/forum/show.blade.php`).

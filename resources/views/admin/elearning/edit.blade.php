@@ -47,22 +47,9 @@
     <!-- Main Vertical Form Card -->
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
+         x-data="elearningEditApp()">
 
-         x-data="{
-
-            previewUrl: '{{ $material->thumbnail_url ?: ($material->thumbnail ? asset('storage/' . $material->thumbnail) : '') }}',
-
-            fileChosen(event) {
-
-                const file = event.target.files[0];
-
-                if (file) this.previewUrl = URL.createObjectURL(file);
-
-            }
-
-         }">
-
-        <form action="{{ route('admin.elearning.update', $material->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form action="{{ route('admin.elearning.update', $material->id) }}" method="POST" enctype="multipart/form-data" @submit="submitForm($event)" novalidate class="space-y-5">
 
             @csrf
 
@@ -81,22 +68,15 @@
                 </label>
 
                 <input type="text" 
-
                        name="judul" 
-
-                       value="{{ old('judul', $material->judul) }}"
-
-                       required 
-
+                       x-ref="fieldJudul"
+                       x-model="form.judul"
+                       @input="touched.judul = true; validateJudul()"
+                       @blur="touched.judul = true; validateJudul()"
                        placeholder="Contoh: Menguasai Komposisi Golden Ratio dalam Fotografi Portrait Outdoor" 
-
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('judul') border-rose-500 @enderror">
-
-                @error('judul')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                       class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                       :class="touched.judul && errors.judul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -136,37 +116,34 @@
 
                 @endphp
 
-                <div class="relative w-full" x-data="{ open: false, selectedId: '{{ $selectedCatId }}', selectedName: '{{ $selectedCatName }}' }">
+                <div class="relative w-full">
 
-                    <input type="hidden" name="id_kategori" :value="selectedId" required>
+                    <input type="hidden" name="id_kategori" :value="form.id_kategori">
 
-                    <button @click="open = !open" type="button" 
+                    <button @click="catOpen = !catOpen" type="button" 
+                            x-ref="fieldKategori"
+                            class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs cursor-pointer transition outline-none"
+                            :class="touched.id_kategori && errors.id_kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'">
 
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition @error('id_kategori') border-rose-500 @enderror">
+                        <span x-text="form.selectedCatName" :class="form.id_kategori ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
 
-                        <span x-text="selectedName" :class="selectedId ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
-
-                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="catOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
 
                     </button>
 
-                    <div x-show="open" @click.away="open = false" x-transition 
-
+                    <div x-show="catOpen" @click.away="catOpen = false" x-transition 
                          class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
 
                         @foreach($categories as $cat)
 
                             <button type="button" 
-
-                                    @click="selectedId = '{{ $cat->id }}'; selectedName = '{{ addslashes($cat->nama_kategori) }}'; open = false" 
-
+                                    @click="selectCategory('{{ $cat->id }}', '{{ addslashes($cat->nama_kategori) }}')" 
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
-
-                                    :class="selectedId == '{{ $cat->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                    :class="form.id_kategori == '{{ $cat->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
 
                                 <span>{{ $cat->nama_kategori }}</span>
 
-                                <span x-show="selectedId == '{{ $cat->id }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                                <span x-show="form.id_kategori == '{{ $cat->id }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
 
                             </button>
 
@@ -176,11 +153,7 @@
 
                 </div>
 
-                @error('id_kategori')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                <p x-show="touched.id_kategori && errors.id_kategori" x-text="errors.id_kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -192,27 +165,7 @@
 
             <!-- 3. Tipe Akses & Harga Kursus (Pure Vertical Dropdown) -->
 
-            @php
-
-                $initialIsPremium = old('is_premium', $material->is_premium ? '1' : ($material->harga > 0 ? '1' : '0'));
-
-                $initialAccessName = $initialIsPremium == '1' ? 'Berbayar (Akses Kursus Berbayar)' : 'Akses Gratis (Semua Pengguna)';
-
-            @endphp
-
-            <div x-data="{ 
-
-                    openAccess: false, 
-
-                    isPremium: '{{ $initialIsPremium }}', 
-
-                    accessName: '{{ $initialAccessName }}' 
-
-                 }" 
-
-                 class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <!-- Dropdown Tipe Akses -->
 
@@ -226,13 +179,13 @@
 
                     <div class="relative w-full">
 
-                        <input type="hidden" name="is_premium" :value="isPremium">
+                        <input type="hidden" name="is_premium" :value="form.isPremium">
 
                         <button @click="openAccess = !openAccess" type="button" 
 
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
 
-                            <span x-text="accessName" class="truncate"></span>
+                            <span x-text="form.accessName" class="truncate"></span>
 
                             <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="openAccess ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
 
@@ -244,29 +197,29 @@
 
                             <button type="button" 
 
-                                    @click="isPremium = '0'; accessName = 'Akses Gratis (Semua Pengguna)'; openAccess = false" 
+                                    @click="selectAccess('0', 'Akses Gratis (Semua Pengguna)')" 
 
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40"
 
-                                    :class="isPremium === '0' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                    :class="form.isPremium === '0' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
 
                                 <span>Akses Gratis (Semua Pengguna)</span>
 
-                                <span x-show="isPremium === '0'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                                <span x-show="form.isPremium === '0'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
 
                             </button>
 
                             <button type="button" 
 
-                                    @click="isPremium = '1'; accessName = 'Berbayar (Akses Kursus Berbayar)'; openAccess = false" 
+                                    @click="selectAccess('1', 'Berbayar (Akses Kursus Berbayar)')" 
 
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
 
-                                    :class="isPremium === '1' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                    :class="form.isPremium === '1' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
 
                                 <span>Berbayar (Akses Kursus Berbayar)</span>
 
-                                <span x-show="isPremium === '1'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+                                <span x-show="form.isPremium === '1'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
 
                             </button>
 
@@ -280,7 +233,7 @@
 
                 <!-- Harga Kursus Vertikal di Bawahnya (Hanya Muncul Jika Berbayar) -->
 
-                <div x-show="isPremium === '1'" x-transition class="space-y-1.5">
+                <div x-show="form.isPremium === '1'" x-transition class="space-y-1.5">
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
@@ -289,26 +242,20 @@
                     </label>
 
                     <input type="number" 
-
                            name="harga" 
-
-                           value="{{ old('harga', $material->harga ?? 0) }}"
-
+                           x-ref="fieldHarga"
+                           x-model="form.harga"
+                           @input="touched.harga = true; validateHarga()"
+                           @blur="touched.harga = true; validateHarga()"
                            min="0"
-
                            step="1000"
-
                            placeholder="Masukkan nominal harga kursus" 
-
-                           class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('harga') border-rose-500 @enderror">
+                           class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                           :class="touched.harga && errors.harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
                     <p class="text-[11px] text-gray-400 dark:text-gray-500">Masukkan nominal angka murni tanpa titik atau koma.</p>
 
-                    @error('harga')
-
-                        <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                    @enderror
+                    <p x-show="touched.harga && errors.harga" x-text="errors.harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 </div>
 
@@ -330,7 +277,7 @@
 
                        name="video_url" 
 
-                       value="{{ old('video_url', $material->video_url) }}"
+                       x-model="form.video_url"
 
                        placeholder="https://www.youtube.com/watch?v=..." 
 
@@ -357,20 +304,16 @@
                 </label>
 
                 <textarea name="konten" 
-
+                          x-ref="fieldKonten"
+                          x-model="form.konten"
+                          @input="touched.konten = true; validateKonten()"
+                          @blur="touched.konten = true; validateKonten()"
                           rows="8" 
-
-                          required 
-
                           placeholder="Tuliskan materi pembelajaran, rincian teknis, langkah-langkah praktis, dan panduan foto selengkapnya..." 
+                          class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
+                          :class="touched.konten && errors.konten ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">{{ old('konten', $material->konten) }}</textarea>
 
-                          class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y @error('konten') border-rose-500 @enderror">{{ old('konten', $material->konten) }}</textarea>
-
-                @error('konten')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                <p x-show="touched.konten && errors.konten" x-text="errors.konten" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -451,8 +394,121 @@
 
     </div>
 
-
-
 </div>
 
+<script>
+function elearningEditApp() {
+    return {
+        previewUrl: @js($material->thumbnail_url ?: ($material->thumbnail ? asset('storage/' . $material->thumbnail) : '')),
+        fileChosen(event) {
+            const file = event.target.files[0];
+            if (file) this.previewUrl = URL.createObjectURL(file);
+        },
+        catOpen: false,
+        openAccess: false,
+        form: {
+            judul: @js(old('judul', $material->judul)),
+            id_kategori: @js(old('id_kategori', $material->id_kategori ?? '')),
+            selectedCatName: @js($selectedCatName ?? '-- Pilih Kategori Materi --'),
+            isPremium: @js(old('is_premium', $material->is_premium ? '1' : '0')),
+            accessName: @js(old('is_premium', $material->is_premium ? '1' : '0') == '1' ? 'Berbayar (Akses Kursus Berbayar)' : 'Akses Gratis (Semua Pengguna)'),
+            harga: @js(old('harga', $material->harga)),
+            video_url: @js(old('video_url', $material->video_url)),
+            konten: @js(old('konten', $material->konten))
+        },
+        touched: {
+            judul: {{ $errors->has('judul') ? 'true' : 'false' }},
+            id_kategori: {{ $errors->has('id_kategori') ? 'true' : 'false' }},
+            harga: {{ $errors->has('harga') ? 'true' : 'false' }},
+            konten: {{ $errors->has('konten') ? 'true' : 'false' }}
+        },
+        errors: {
+            judul: '{{ $errors->first('judul') ?: '' }}',
+            id_kategori: '{{ $errors->first('id_kategori') ?: '' }}',
+            harga: '{{ $errors->first('harga') ?: '' }}',
+            konten: '{{ $errors->first('konten') ?: '' }}'
+        },
+        selectCategory(id, name) {
+            this.form.id_kategori = id;
+            this.form.selectedCatName = name;
+            this.catOpen = false;
+            this.touched.id_kategori = true;
+            this.validateCategory();
+        },
+        selectAccess(premium, name) {
+            this.form.isPremium = premium;
+            this.form.accessName = name;
+            this.openAccess = false;
+            if (premium === '0') {
+                this.errors.harga = '';
+            } else if (this.touched.harga) {
+                this.validateHarga();
+            }
+        },
+        validateJudul() {
+            if (!this.form.judul || this.form.judul.trim() === '') {
+                this.errors.judul = 'Judul materi e-learning wajib diisi.';
+            } else if (this.form.judul.trim().length < 5) {
+                this.errors.judul = 'Judul materi minimal 5 karakter.';
+            } else {
+                this.errors.judul = '';
+            }
+        },
+        validateCategory() {
+            if (!this.form.id_kategori) {
+                this.errors.id_kategori = 'Kategori materi wajib dipilih.';
+            } else {
+                this.errors.id_kategori = '';
+            }
+        },
+        validateHarga() {
+            if (this.form.isPremium === '1') {
+                if (!this.form.harga || Number(this.form.harga) < 1000) {
+                    this.errors.harga = 'Harga kursus berbayar minimal Rp 1.000.';
+                } else {
+                    this.errors.harga = '';
+                }
+            } else {
+                this.errors.harga = '';
+            }
+        },
+        validateKonten() {
+            if (!this.form.konten || this.form.konten.trim() === '') {
+                this.errors.konten = 'Isi modul pembelajaran wajib diisi.';
+            } else if (this.form.konten.trim().length < 20) {
+                this.errors.konten = 'Isi modul pembelajaran minimal 20 karakter.';
+            } else {
+                this.errors.konten = '';
+            }
+        },
+        submitForm(e) {
+            this.touched.judul = true;
+            this.touched.id_kategori = true;
+            this.touched.konten = true;
+            if (this.form.isPremium === '1') {
+                this.touched.harga = true;
+                this.validateHarga();
+            }
+
+            this.validateJudul();
+            this.validateCategory();
+            this.validateKonten();
+
+            let firstInvalidRef = null;
+            if (this.errors.judul) firstInvalidRef = firstInvalidRef || this.$refs.fieldJudul;
+            if (this.errors.id_kategori) firstInvalidRef = firstInvalidRef || this.$refs.fieldKategori;
+            if (this.form.isPremium === '1' && this.errors.harga) firstInvalidRef = firstInvalidRef || this.$refs.fieldHarga;
+            if (this.errors.konten) firstInvalidRef = firstInvalidRef || this.$refs.fieldKonten;
+
+            if (this.errors.judul || this.errors.id_kategori || (this.form.isPremium === '1' && this.errors.harga) || this.errors.konten) {
+                e.preventDefault();
+                if (firstInvalidRef) {
+                    firstInvalidRef.focus();
+                    firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    };
+}
+</script>
 @endsection

@@ -49,7 +49,7 @@
       @endif
 
       <!-- Forgot Password Form -->
-      <form action="{{ route('password.email') }}" method="POST" class="space-y-5">
+      <form action="{{ route('password.email') }}" method="POST" x-data="forgotPasswordApp()" @submit="submitForm($event)" novalidate class="space-y-5">
         @csrf
 
         <div>
@@ -58,11 +58,16 @@
           </label>
           <input type="email" 
                  name="email" 
-                 value="{{ old('email') }}" 
+                 x-ref="emailInput"
+                 x-model="form.email"
+                 @input="touched.email = true; validateEmail()"
+                 @blur="touched.email = true; validateEmail()"
                  required 
                  autocomplete="email" 
                  placeholder="nama@email.com"
-                 class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" />
+                 class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"
+                 :class="touched.email && errors.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'" />
+          <p x-show="touched.email && errors.email" x-text="errors.email" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
         </div>
 
         <button type="submit" 
@@ -70,6 +75,41 @@
           Kirim Tautan Reset Kata Sandi
         </button>
       </form>
+
+      <script>
+      function forgotPasswordApp() {
+        return {
+          form: {
+            email: {!! json_encode(old('email', '')) !!}
+          },
+          touched: {
+            email: {{ $errors->has('email') ? 'true' : 'false' }}
+          },
+          errors: {
+            email: {!! json_encode($errors->first('email') ?: '') !!}
+          },
+          validateEmail() {
+            const val = (this.form.email || '').trim();
+            if (!val) {
+              this.errors.email = 'Alamat email wajib diisi.';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+              this.errors.email = 'Format alamat email tidak valid.';
+            } else {
+              this.errors.email = '';
+            }
+          },
+          submitForm(e) {
+            this.touched.email = true;
+            this.validateEmail();
+            if (this.errors.email) {
+              e.preventDefault();
+              this.$refs.emailInput?.focus();
+              return false;
+            }
+          }
+        };
+      }
+      </script>
 
       <!-- Back to Signin -->
       <div class="text-center pt-2 border-t border-gray-100 dark:border-gray-700/60">

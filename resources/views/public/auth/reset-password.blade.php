@@ -31,7 +31,7 @@
       @endif
 
       <!-- Reset Password Form -->
-      <form action="{{ route('password.update') }}" method="POST" class="space-y-4">
+      <form action="{{ route('password.update') }}" method="POST" x-data="resetPasswordApp()" @submit="submitForm($event)" novalidate class="space-y-4">
         @csrf
         <input type="hidden" name="token" value="{{ $token }}">
 
@@ -51,24 +51,52 @@
           <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
             Kata Sandi Baru <span class="text-rose-500">*</span>
           </label>
-          <input type="password" 
-                 name="password" 
-                 required 
-                 autocomplete="new-password" 
-                 placeholder="Minimal 8 karakter"
-                 class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" />
+          <div class="relative">
+            <input :type="showPass ? 'text' : 'password'" 
+                   name="password" 
+                   x-ref="passwordInput"
+                   x-model="form.password"
+                   @input="touched.password = true; validatePassword()"
+                   @blur="touched.password = true; validatePassword()"
+                   required 
+                   autocomplete="new-password" 
+                   placeholder="Minimal 8 karakter"
+                   class="w-full pl-4 pr-11 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"
+                   :class="touched.password && errors.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'" />
+            <button type="button" 
+                    @click="showPass = !showPass" 
+                    class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer">
+              <svg x-show="!showPass" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <svg x-show="showPass" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+            </button>
+          </div>
+          <p x-show="touched.password && errors.password" x-text="errors.password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
             Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span>
           </label>
-          <input type="password" 
-                 name="password_confirmation" 
-                 required 
-                 autocomplete="new-password" 
-                 placeholder="Ulangi kata sandi baru"
-                 class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition" />
+          <div class="relative">
+            <input :type="showPassConf ? 'text' : 'password'" 
+                   name="password_confirmation" 
+                   x-ref="confirmPasswordInput"
+                   x-model="form.password_confirmation"
+                   @input="touched.password_confirmation = true; validateConfirmation()"
+                   @blur="touched.password_confirmation = true; validateConfirmation()"
+                   required 
+                   autocomplete="new-password" 
+                   placeholder="Ulangi kata sandi baru"
+                   class="w-full pl-4 pr-11 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"
+                   :class="touched.password_confirmation && errors.password_confirmation ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'" />
+            <button type="button" 
+                    @click="showPassConf = !showPassConf" 
+                    class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer">
+              <svg x-show="!showPassConf" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <svg x-show="showPassConf" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+            </button>
+          </div>
+          <p x-show="touched.password_confirmation && errors.password_confirmation" x-text="errors.password_confirmation" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
         </div>
 
         <button type="submit" 
@@ -76,6 +104,62 @@
           Perbaharui Data
         </button>
       </form>
+
+      <script>
+      function resetPasswordApp() {
+        return {
+          showPass: false,
+          showPassConf: false,
+          form: {
+            password: '',
+            password_confirmation: ''
+          },
+          touched: {
+            password: {{ $errors->has('password') ? 'true' : 'false' }},
+            password_confirmation: {{ $errors->has('password_confirmation') ? 'true' : 'false' }}
+          },
+          errors: {
+            password: {!! json_encode($errors->first('password') ?: '') !!},
+            password_confirmation: {!! json_encode($errors->first('password_confirmation') ?: '') !!}
+          },
+          validatePassword() {
+            const val = this.form.password || '';
+            if (!val) {
+              this.errors.password = 'Kata sandi baru wajib diisi.';
+            } else if (val.length < 8) {
+              this.errors.password = 'Kata sandi baru minimal 8 karakter.';
+            } else {
+              this.errors.password = '';
+            }
+            if (this.touched.password_confirmation) {
+              this.validateConfirmation();
+            }
+          },
+          validateConfirmation() {
+            const conf = this.form.password_confirmation || '';
+            if (!conf) {
+              this.errors.password_confirmation = 'Konfirmasi kata sandi baru wajib diisi.';
+            } else if (conf !== this.form.password) {
+              this.errors.password_confirmation = 'Konfirmasi kata sandi baru tidak cocok.';
+            } else {
+              this.errors.password_confirmation = '';
+            }
+          },
+          submitForm(e) {
+            this.touched.password = true;
+            this.touched.password_confirmation = true;
+            this.validatePassword();
+            this.validateConfirmation();
+            if (this.errors.password || this.errors.password_confirmation) {
+              e.preventDefault();
+              if (this.errors.password) this.$refs.passwordInput?.focus();
+              else if (this.errors.password_confirmation) this.$refs.confirmPasswordInput?.focus();
+              return false;
+            }
+          }
+        };
+      }
+      </script>
 
       <!-- Back to Signin -->
       <div class="text-center pt-2 border-t border-gray-100 dark:border-gray-700/60">

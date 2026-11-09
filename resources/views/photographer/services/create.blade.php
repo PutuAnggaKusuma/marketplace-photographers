@@ -48,19 +48,22 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
 
-         x-data="{ 
-
+         x-data="serviceFormApp({
             fiturs: ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing', 'Semua File Original RAW/JPEG'],
-
-            addFitur() { this.fiturs.push(''); },
-
-            removeFitur(index) { if (this.fiturs.length > 1) this.fiturs.splice(index, 1); }
-
-         }">
+            nama_layanan: {!! json_encode(old('nama_layanan', '')) !!},
+            tarif_harga: {!! json_encode(old('tarif_harga', '')) !!},
+            deskripsi_layanan: {!! json_encode(old('deskripsi_layanan', '')) !!},
+            hasErrorNama: {{ $errors->has('nama_layanan') ? 'true' : 'false' }},
+            hasErrorTarif: {{ $errors->has('tarif_harga') ? 'true' : 'false' }},
+            hasErrorDeskripsi: {{ $errors->has('deskripsi_layanan') ? 'true' : 'false' }},
+            errorNama: {!! json_encode($errors->first('nama_layanan') ?: '') !!},
+            errorTarif: {!! json_encode($errors->first('tarif_harga') ?: '') !!},
+            errorDeskripsi: {!! json_encode($errors->first('deskripsi_layanan') ?: '') !!}
+         })">
 
         
 
-        <form action="{{ route('photographer.services.store') }}" method="POST" class="space-y-5">
+        <form action="{{ route('photographer.services.store') }}" method="POST" @submit="submitForm($event)" novalidate class="space-y-5">
 
             @csrf
 
@@ -79,22 +82,16 @@
                 </label>
 
                 <input type="text" 
-
                        name="nama_layanan" 
-
-                       value="{{ old('nama_layanan') }}"
-
+                       x-ref="fieldNama"
+                       x-model="form.nama_layanan"
+                       @input="touched.nama_layanan = true; validateNama()"
+                       @blur="touched.nama_layanan = true; validateNama()"
                        required 
-
                        minlength="3" maxlength="100" placeholder="Contoh: Paket Prewedding Romantic Sunset" 
-
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('nama_layanan') border-rose-500 @enderror">
-
-                @error('nama_layanan')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                       class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                       :class="touched.nama_layanan && errors.nama_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                <p x-show="touched.nama_layanan && errors.nama_layanan" x-text="errors.nama_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -109,28 +106,19 @@
                 </label>
 
                 <input type="number" 
-
                        name="tarif_harga" 
-
-                       value="{{ old('tarif_harga') }}"
-
+                       x-ref="fieldTarif"
+                       x-model="form.tarif_harga"
+                       @input="touched.tarif_harga = true; validateTarif()"
+                       @blur="touched.tarif_harga = true; validateTarif()"
                        required 
-
                        min="10000"
-
                        step="1000"
-
                        placeholder="Masukkan nominal tarif paket (min. 10000)" 
-
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('tarif_harga') border-rose-500 @enderror">
-
+                       class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                       :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
                 <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Masukkan nominal angka murni tanpa titik atau koma.</p>
-
-                @error('tarif_harga')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -151,16 +139,16 @@
                 </label>
 
                 <textarea name="deskripsi_layanan" 
+                          x-ref="fieldDeskripsi"
+                          x-model="form.deskripsi_layanan"
+                          @input="touched.deskripsi_layanan = true; validateDeskripsi()"
+                          @blur="touched.deskripsi_layanan = true; validateDeskripsi()"
                           rows="6" 
                           required 
                           minlength="15" maxlength="1000" placeholder="Tuliskan cakupan pemotretan, konsep lokasi, dan ketentuan umum sesi foto (minimal 15 karakter)..." 
-                          class="w-full min-h-[150px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y leading-relaxed @error('deskripsi_layanan') border-rose-500 @enderror">{{ old('deskripsi_layanan') }}</textarea>
-
-                @error('deskripsi_layanan')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                          class="w-full min-h-[150px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
+                          :class="touched.deskripsi_layanan && errors.deskripsi_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"></textarea>
+                <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -257,8 +245,65 @@
 
     </div>
 
-
-
 </div>
+
+<script>
+function serviceFormApp(initialData) {
+  return {
+    fiturs: initialData.fiturs || ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing', 'Semua File Original RAW/JPEG'],
+    addFitur() { this.fiturs.push(''); },
+    removeFitur(index) { if (this.fiturs.length > 1) this.fiturs.splice(index, 1); },
+    form: {
+      nama_layanan: initialData.nama_layanan || '',
+      tarif_harga: initialData.tarif_harga || '',
+      deskripsi_layanan: initialData.deskripsi_layanan || '',
+    },
+    touched: {
+      nama_layanan: initialData.hasErrorNama || false,
+      tarif_harga: initialData.hasErrorTarif || false,
+      deskripsi_layanan: initialData.hasErrorDeskripsi || false,
+    },
+    errors: {
+      nama_layanan: initialData.errorNama || '',
+      tarif_harga: initialData.errorTarif || '',
+      deskripsi_layanan: initialData.errorDeskripsi || '',
+    },
+    validateNama() {
+      const val = (this.form.nama_layanan || '').trim();
+      if (!val) this.errors.nama_layanan = 'Nama paket layanan wajib diisi.';
+      else if (val.length < 3) this.errors.nama_layanan = 'Nama paket layanan minimal 3 karakter.';
+      else if (val.length > 100) this.errors.nama_layanan = 'Nama paket layanan maksimal 100 karakter.';
+      else this.errors.nama_layanan = '';
+    },
+    validateTarif() {
+      const val = this.form.tarif_harga;
+      if (!val && val !== 0 && val !== '0') this.errors.tarif_harga = 'Tarif harga paket wajib diisi.';
+      else if (Number(val) < 10000) this.errors.tarif_harga = 'Tarif harga minimal Rp 10.000.';
+      else this.errors.tarif_harga = '';
+    },
+    validateDeskripsi() {
+      const val = (this.form.deskripsi_layanan || '').trim();
+      if (!val) this.errors.deskripsi_layanan = 'Deskripsi paket layanan wajib diisi.';
+      else if (val.length < 15) this.errors.deskripsi_layanan = 'Deskripsi paket layanan minimal 15 karakter.';
+      else this.errors.deskripsi_layanan = '';
+    },
+    submitForm(e) {
+      this.touched.nama_layanan = true;
+      this.touched.tarif_harga = true;
+      this.touched.deskripsi_layanan = true;
+      this.validateNama();
+      this.validateTarif();
+      this.validateDeskripsi();
+      if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan) {
+        e.preventDefault();
+        if (this.errors.nama_layanan) this.$refs.fieldNama?.focus();
+        else if (this.errors.tarif_harga) this.$refs.fieldTarif?.focus();
+        else if (this.errors.deskripsi_layanan) this.$refs.fieldDeskripsi?.focus();
+        return false;
+      }
+    }
+  };
+}
+</script>
 
 @endsection

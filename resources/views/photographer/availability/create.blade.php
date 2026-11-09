@@ -8,7 +8,7 @@
 
 @section('content')
 
-<div class="space-y-6 w-full" x-data="{ tipeBlokir: '{{ old('tipe_blokir', 'all_day') }}' }">
+<div class="space-y-6 w-full" x-data="availabilityFormApp()">
 
 
 
@@ -48,7 +48,7 @@
 
         
 
-        <form action="{{ route('photographer.availability.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('photographer.availability.store') }}" method="POST" @submit="submitForm($event)" novalidate class="space-y-6">
 
             @csrf
 
@@ -141,18 +141,14 @@
                         </label>
 
                         <input type="date" 
-
                                name="tanggal_mulai" 
-
-                               value="{{ old('tanggal_mulai', date('Y-m-d')) }}"
-
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('tanggal_mulai') border-rose-500 @enderror">
-
-                        @error('tanggal_mulai')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
+                               x-ref="fieldTanggalMulai"
+                               x-model="form.tanggal_mulai"
+                               @input="touched.tanggal_mulai = true; validateAllDay()"
+                               @blur="touched.tanggal_mulai = true; validateAllDay()"
+                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.tanggal_mulai && errors.tanggal_mulai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                        <p x-show="touched.tanggal_mulai && errors.tanggal_mulai" x-text="errors.tanggal_mulai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -167,20 +163,17 @@
                         </label>
 
                         <input type="date" 
-
                                name="tanggal_selesai" 
-
-                               value="{{ old('tanggal_selesai', date('Y-m-d')) }}"
-
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('tanggal_selesai') border-rose-500 @enderror">
+                               x-ref="fieldTanggalSelesai"
+                               x-model="form.tanggal_selesai"
+                               @input="touched.tanggal_selesai = true; validateAllDay()"
+                               @blur="touched.tanggal_selesai = true; validateAllDay()"
+                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.tanggal_selesai && errors.tanggal_selesai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
                         <p class="text-[11px] text-gray-400 mt-1">Isi tanggal yang sama jika hanya libur 1 hari.</p>
 
-                        @error('tanggal_selesai')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
+                        <p x-show="touched.tanggal_selesai && errors.tanggal_selesai" x-text="errors.tanggal_selesai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -205,18 +198,15 @@
                         </label>
 
                         <input type="date" 
-
                                name="tanggal" 
+                               x-ref="fieldTanggal"
+                               x-model="form.tanggal"
+                               @input="touched.tanggal = true; validateTanggal()"
+                               @blur="touched.tanggal = true; validateTanggal()"
+                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.tanggal && errors.tanggal ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
-                               value="{{ old('tanggal', date('Y-m-d')) }}"
-
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('tanggal') border-rose-500 @enderror">
-
-                        @error('tanggal')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
+                        <p x-show="touched.tanggal && errors.tanggal" x-text="errors.tanggal" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -231,18 +221,15 @@
                         </label>
 
                         <input type="time" 
-
                                name="jam_mulai" 
+                               x-ref="fieldJamMulai"
+                               x-model="form.jam_mulai"
+                               @input="touched.jam_mulai = true; validateJamMulai()"
+                               @blur="touched.jam_mulai = true; validateJamMulai()"
+                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.jam_mulai && errors.jam_mulai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
-                               value="{{ old('jam_mulai') }}"
-
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('jam_mulai') border-rose-500 @enderror">
-
-                        @error('jam_mulai')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
+                        <p x-show="touched.jam_mulai && errors.jam_mulai" x-text="errors.jam_mulai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -257,18 +244,15 @@
                         </label>
 
                         <input type="time" 
-
                                name="jam_selesai" 
+                               x-ref="fieldJamSelesai"
+                               x-model="form.jam_selesai"
+                               @input="touched.jam_selesai = true; validateJamSelesai()"
+                               @blur="touched.jam_selesai = true; validateJamSelesai()"
+                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                               :class="touched.jam_selesai && errors.jam_selesai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
 
-                               value="{{ old('jam_selesai') }}"
-
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('jam_selesai') border-rose-500 @enderror">
-
-                        @error('jam_selesai')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
+                        <p x-show="touched.jam_selesai && errors.jam_selesai" x-text="errors.jam_selesai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 
@@ -333,9 +317,132 @@
 
     </div>
 
-
-
 </div>
 
+<script>
+function availabilityFormApp() {
+    return {
+        tipeBlokir: @js(old('tipe_blokir', 'all_day')),
+        form: {
+            tanggal_mulai: @js(old('tanggal_mulai', date('Y-m-d'))),
+            tanggal_selesai: @js(old('tanggal_selesai', date('Y-m-d'))),
+            tanggal: @js(old('tanggal', date('Y-m-d'))),
+            jam_mulai: @js(old('jam_mulai', '')),
+            jam_selesai: @js(old('jam_selesai', ''))
+        },
+        touched: {
+            tanggal_mulai: {{ $errors->has('tanggal_mulai') ? 'true' : 'false' }},
+            tanggal_selesai: {{ $errors->has('tanggal_selesai') ? 'true' : 'false' }},
+            tanggal: {{ $errors->has('tanggal') ? 'true' : 'false' }},
+            jam_mulai: {{ $errors->has('jam_mulai') ? 'true' : 'false' }},
+            jam_selesai: {{ $errors->has('jam_selesai') ? 'true' : 'false' }}
+        },
+        errors: {
+            tanggal_mulai: '{{ $errors->first('tanggal_mulai') ?: '' }}',
+            tanggal_selesai: '{{ $errors->first('tanggal_selesai') ?: '' }}',
+            tanggal: '{{ $errors->first('tanggal') ?: '' }}',
+            jam_mulai: '{{ $errors->first('jam_mulai') ?: '' }}',
+            jam_selesai: '{{ $errors->first('jam_selesai') ?: '' }}'
+        },
+        validateTanggalMulai() {
+            if (!this.form.tanggal_mulai) {
+                this.errors.tanggal_mulai = 'Tanggal mulai wajib diisi.';
+            } else {
+                this.errors.tanggal_mulai = '';
+            }
+            if (this.touched.tanggal_selesai) {
+                this.validateTanggalSelesai();
+            }
+        },
+        validateTanggalSelesai() {
+            if (!this.form.tanggal_selesai) {
+                this.errors.tanggal_selesai = 'Tanggal selesai libur wajib diisi.';
+            } else if (this.form.tanggal_mulai && this.form.tanggal_selesai < this.form.tanggal_mulai) {
+                this.errors.tanggal_selesai = 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
+            } else {
+                this.errors.tanggal_selesai = '';
+            }
+        },
+        validateAllDay() {
+            this.validateTanggalMulai();
+            this.validateTanggalSelesai();
+        },
+        validateTanggal() {
+            if (!this.form.tanggal) {
+                this.errors.tanggal = 'Tanggal wajib diisi.';
+            } else {
+                this.errors.tanggal = '';
+            }
+        },
+        validateJamMulai() {
+            if (!this.form.jam_mulai) {
+                this.errors.jam_mulai = 'Jam mulai wajib diisi.';
+            } else {
+                this.errors.jam_mulai = '';
+            }
+            if (this.touched.jam_selesai) {
+                this.validateJamSelesai();
+            }
+        },
+        validateJamSelesai() {
+            if (!this.form.jam_selesai) {
+                this.errors.jam_selesai = 'Jam selesai wajib diisi.';
+            } else if (this.form.jam_mulai && this.form.jam_selesai <= this.form.jam_mulai) {
+                this.errors.jam_selesai = 'Jam selesai harus lebih akhir dari jam mulai.';
+            } else {
+                this.errors.jam_selesai = '';
+            }
+        },
+        submitForm(e) {
+            let hasError = false;
+            let firstInvalidRef = null;
+
+            if (this.tipeBlokir === 'all_day') {
+                this.touched.tanggal_mulai = true;
+                this.touched.tanggal_selesai = true;
+                this.validateTanggalMulai();
+                this.validateTanggalSelesai();
+
+                if (this.errors.tanggal_mulai) {
+                    hasError = true;
+                    firstInvalidRef = firstInvalidRef || this.$refs.fieldTanggalMulai;
+                }
+                if (this.errors.tanggal_selesai) {
+                    hasError = true;
+                    firstInvalidRef = firstInvalidRef || this.$refs.fieldTanggalSelesai;
+                }
+            } else {
+                this.touched.tanggal = true;
+                this.touched.jam_mulai = true;
+                this.touched.jam_selesai = true;
+                this.validateTanggal();
+                this.validateJamMulai();
+                this.validateJamSelesai();
+
+                if (this.errors.tanggal) {
+                    hasError = true;
+                    firstInvalidRef = firstInvalidRef || this.$refs.fieldTanggal;
+                }
+                if (this.errors.jam_mulai) {
+                    hasError = true;
+                    firstInvalidRef = firstInvalidRef || this.$refs.fieldJamMulai;
+                }
+                if (this.errors.jam_selesai) {
+                    hasError = true;
+                    firstInvalidRef = firstInvalidRef || this.$refs.fieldJamSelesai;
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                if (firstInvalidRef) {
+                    firstInvalidRef.focus();
+                    firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    };
+}
+</script>
 @endsection
 

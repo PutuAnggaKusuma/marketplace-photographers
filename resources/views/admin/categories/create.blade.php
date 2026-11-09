@@ -46,9 +46,10 @@
 
     <!-- Main Vertical Form Card -->
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
+         x-data="categoryFormApp()">
 
-        <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-5">
+        <form action="{{ route('admin.categories.store') }}" method="POST" @submit="submitForm($event)" novalidate class="space-y-5">
 
             @csrf
 
@@ -65,22 +66,15 @@
                 </label>
 
                 <input type="text" 
-
                        name="nama_kategori" 
-
-                       value="{{ old('nama_kategori') }}"
-
-                       required 
-
+                       x-ref="fieldNama"
+                       x-model="form.nama_kategori"
+                       @input="touched.nama_kategori = true; validateNama()"
+                       @blur="touched.nama_kategori = true; validateNama()"
                        placeholder="Contoh: Wedding & Pernikahan, Prewedding Outdoor, Commercial Product" 
-
-                       class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('nama_kategori') border-rose-500 @enderror">
-
-                @error('nama_kategori')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                       class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                       :class="touched.nama_kategori && errors.nama_kategori ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                <p x-show="touched.nama_kategori && errors.nama_kategori" x-text="errors.nama_kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -97,16 +91,15 @@
                 </label>
 
                 <textarea name="deskripsi" 
+                          x-ref="fieldDeskripsi"
+                          x-model="form.deskripsi"
+                          @input="touched.deskripsi = true; validateDeskripsi()"
+                          @blur="touched.deskripsi = true; validateDeskripsi()"
                           rows="5" 
-                          required 
                           placeholder="Jelaskan cakupan layanan, target konsumen, dan kriteria foto pada kategori ini..." 
-                          class="w-full min-h-[130px] px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y leading-relaxed @error('deskripsi') border-rose-500 @enderror">{{ old('deskripsi') }}</textarea>
-
-                @error('deskripsi')
-
-                    <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                @enderror
+                          class="w-full min-h-[130px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
+                          :class="touched.deskripsi && errors.deskripsi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">{{ old('deskripsi') }}</textarea>
+                <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
 
@@ -126,8 +119,61 @@
 
     </div>
 
-
-
 </div>
 
+<script>
+function categoryFormApp() {
+    return {
+        form: {
+            nama_kategori: @js(old('nama_kategori', '')),
+            deskripsi: @js(old('deskripsi', ''))
+        },
+        touched: {
+            nama_kategori: {{ $errors->has('nama_kategori') ? 'true' : 'false' }},
+            deskripsi: {{ $errors->has('deskripsi') ? 'true' : 'false' }}
+        },
+        errors: {
+            nama_kategori: '{{ $errors->first('nama_kategori') ?: '' }}',
+            deskripsi: '{{ $errors->first('deskripsi') ?: '' }}'
+        },
+        validateNama() {
+            if (!this.form.nama_kategori || this.form.nama_kategori.trim() === '') {
+                this.errors.nama_kategori = 'Nama kategori layanan wajib diisi.';
+            } else if (this.form.nama_kategori.trim().length < 3) {
+                this.errors.nama_kategori = 'Nama kategori minimal 3 karakter.';
+            } else {
+                this.errors.nama_kategori = '';
+            }
+        },
+        validateDeskripsi() {
+            if (!this.form.deskripsi || this.form.deskripsi.trim() === '') {
+                this.errors.deskripsi = 'Deskripsi kategori layanan wajib diisi.';
+            } else if (this.form.deskripsi.trim().length < 10) {
+                this.errors.deskripsi = 'Deskripsi kategori minimal 10 karakter.';
+            } else {
+                this.errors.deskripsi = '';
+            }
+        },
+        submitForm(e) {
+            this.touched.nama_kategori = true;
+            this.touched.deskripsi = true;
+
+            this.validateNama();
+            this.validateDeskripsi();
+
+            let firstInvalidRef = null;
+            if (this.errors.nama_kategori) firstInvalidRef = firstInvalidRef || this.$refs.fieldNama;
+            if (this.errors.deskripsi) firstInvalidRef = firstInvalidRef || this.$refs.fieldDeskripsi;
+
+            if (this.errors.nama_kategori || this.errors.deskripsi) {
+                e.preventDefault();
+                if (firstInvalidRef) {
+                    firstInvalidRef.focus();
+                    firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    };
+}
+</script>
 @endsection
