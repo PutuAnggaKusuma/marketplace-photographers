@@ -154,6 +154,11 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
    * **Status Dependensi Wilayah**: 38 Provinsi dan 514 Kota telah terverifikasi aktif di database lokal.
    * **Status Aset**: `npm run build` sukses dikompilasi (3.97s), cache tampilan (`php artisan view:clear`) telah dibersihkan.
 
+13. **Universal Pop-up Login Diperlukan pada Tombol Aksi Tamu (Rule #6 & #59)**:
+   * **Pencegahan Forced Redirect**: Mengeliminasi redirect seketika tanpa peringatan saat tamu (guest / unauthenticated) mengklik tombol **Reservasi**, **Chat**, dan **Simpan** (Bookmark) pada profil fotografer ([`resources/views/public/photographers/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/photographers/show.blade.php)) maupun katalog ([`resources/views/public/photographers/katalog.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/photographers/katalog.blade.php)).
+   * **Modal Interaktif Standar**: Menampilkan Universal Modal "Login Diperlukan" berlatar blur (`bg-gray-900/60 backdrop-blur-sm`), header terpusat tanpa ikon, tombol silang SVG murni di kanan atas, pesan kontekstual sesuai aksi yang diklik, dan tombol brand LensMatch (`bg-amber-400 font-extrabold`) yang mengarahkan ke formulir login dengan parameter `?redirect=...` ke target yang dituju.
+   * **Pengguna Terotentikasi**: Untuk pengguna yang telah login (`@auth`), ketiga tombol tetap berfungsi langsung secara normal tanpa interupsi modal.
+
 ---
 
 ## 5. Pedoman & Pantangan Mutlak untuk Pengembang / AI

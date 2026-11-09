@@ -2036,3 +2036,24 @@ Setiap entri log perubahan wajib mencantumkan:
   * Render Test: **PASS (25 Lightbox reference, 0 Syntax Error)**.
   * Vite Asset Build: **PASS (1.51s)**.
   * HTTP Endpoint: **200 OK (`http://127.0.0.1:8000/fotografer/2`)**.
+
+---
+
+### [2026-11-09] Implementasi Universal Pop-up Login Diperlukan pada Tombol Reservasi, Chat, dan Simpan
+* **File Diubah**:
+  1. `resources/views/public/photographers/show.blade.php`:
+     * Menambahkan Alpine state `loginModal`, `loginModalMessage`, `loginRedirectUrl`, `openLoginModal(msg, url)`, dan event listener `@open-login-modal.window`.
+     * Mengubah tombol **Reservasi**, **Chat**, dan **Simpan** (Bookmark):
+       - Jika pengguna telah login (`@auth`), fungsi berjalan langsung ke rute tujuan tanpa hambatan.
+       - Jika pengguna belum login (tamu / `@guest`), sistem tidak lagi me-redirect paksa secara instan, melainkan memunculkan pop-up modal "Login Diperlukan" dengan penjelasan kontekstual yang sopan dan ramah.
+     * Mengintegrasikan markup Universal Login Modal standar LensMatch (Rule #6 & #59: header tanpa ikon, tombol silang SVG di kanan atas, pesan kontekstual, dan tombol CTA `"Masuk ke Akun"` berwarna `amber-400`).
+  2. `resources/views/public/photographers/katalog.blade.php`:
+     * Menambahkan state Alpine dan modal yang sama pada etalase katalog utama.
+     * Mengubah tombol Simpan/Bookmark di setiap kartu fotografer agar memicu modal "Login Diperlukan" melalui custom event saat diklik oleh tamu.
+* **Hasil Pengujian & Verifikasi**:
+  * HTML Tag Balance `show.blade.php`: **div opens: 112, closes: 112 (Match)**.
+  * HTML Tag Balance `katalog.blade.php`: **div opens: 74, closes: 74 | section opens: 2, closes: 2 (Match)**.
+  * Blade Cache: Cleared successfully (`php artisan view:clear`).
+  * Vite Production Build: **PASS (`built in 4.60s`, Exit code 0)**.
+  * HTTP Test: **200 OK (`/fotografer/2` & `/fotografer`)**.
+

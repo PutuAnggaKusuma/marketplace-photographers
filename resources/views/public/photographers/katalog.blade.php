@@ -19,7 +19,21 @@
 </section>
 
 <!-- Filter & Catalog Section -->
-<section class="py-12 bg-white dark:bg-gray-900/50 min-h-screen">
+<section class="py-12 bg-white dark:bg-gray-900/50 min-h-screen"
+         x-data="{
+           loginModal: false,
+           loginModalMessage: '',
+           loginRedirectUrl: '',
+           openLoginModal(message, redirectUrl) {
+             this.loginModalMessage = message;
+             this.loginRedirectUrl = redirectUrl;
+             this.loginModal = true;
+           },
+           closeLoginModal() {
+             this.loginModal = false;
+           }
+         }"
+         @open-login-modal.window="openLoginModal($event.detail.message, $event.detail.redirectUrl)">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
     
     <!-- Filter Panel Container (Spacious Card Padding p-8 sm:p-9 lg:p-10) -->
@@ -290,7 +304,12 @@
                 <button type="button" 
                         @click.stop="
                           if (!{{ Auth::check() ? 'true' : 'false' }}) {
-                            window.location.href = '{{ route('login', ['redirect' => url()->full()]) }}';
+                            window.dispatchEvent(new CustomEvent('open-login-modal', {
+                              detail: {
+                                message: 'Untuk dapat menyimpan fotografer ini ke daftar favorit Anda, Anda harus masuk ke akun LensMatch terlebih dahulu.',
+                                redirectUrl: '{{ url()->full() }}'
+                              }
+                            }));
                             return;
                           }
                           if (loading) return;
@@ -480,6 +499,47 @@
           {{ $photographers->links('partials.public.pagination') }}
         </div>
       @endif
+    </div>
+
+    <!-- Universal Login Requirement Modal for Guests (Rule #6 & #59 Compliant) -->
+    <div x-show="loginModal" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-0 z-[100] overflow-y-auto" 
+         role="dialog" 
+         aria-modal="true">
+      <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+          
+          <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
+          <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+
+          <!-- Header without Icon & Centered -->
+          <div class="text-center">
+            <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
+          </div>
+
+          <!-- Body Text (Centered) -->
+          <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center" x-text="loginModalMessage">
+          </p>
+
+          <!-- Action Button -->
+          <div class="pt-1">
+            <a :href="loginRedirectUrl ? '{{ route('login') }}?redirect=' + encodeURIComponent(loginRedirectUrl) : '{{ route('login') }}'" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
+              Masuk ke Akun
+            </a>
+          </div>
+
+        </div>
+      </div>
     </div>
 
   </div>

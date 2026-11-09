@@ -37,8 +37,20 @@
          if (!this.lightboxImages.length) return;
          this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
          this.lightboxSrc = this.lightboxImages[this.lightboxIndex];
+       },
+       loginModal: false,
+       loginModalMessage: '',
+       loginRedirectUrl: '',
+       openLoginModal(message, redirectUrl) {
+         this.loginModalMessage = message;
+         this.loginRedirectUrl = redirectUrl;
+         this.loginModal = true;
+       },
+       closeLoginModal() {
+         this.loginModal = false;
        }
-     }">
+     }"
+     @open-login-modal.window="openLoginModal($event.detail.message, $event.detail.redirectUrl)">
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
 
@@ -140,25 +152,42 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-2.5 sm:gap-3">
-              <a href="{{ url('/booking/create?photographer_id=' . $photographer->id) }}" 
-                 class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs sm:text-sm text-center shadow-none transition cursor-pointer">
-                Reservasi
-              </a>
+              @auth
+                <a href="{{ url('/booking/create?photographer_id=' . $photographer->id) }}" 
+                   class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs sm:text-sm text-center shadow-none transition cursor-pointer">
+                  Reservasi
+                </a>
 
-              <a href="{{ route('chat.start', $photographer->id) }}" 
-                 class="px-4.5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-900 dark:text-white font-bold text-xs sm:text-sm text-center transition cursor-pointer inline-flex items-center justify-center gap-1.5">
-                <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span>Chat</span>
-              </a>
+                <a href="{{ route('chat.start', $photographer->id) }}" 
+                   class="px-4.5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-900 dark:text-white font-bold text-xs sm:text-sm text-center transition cursor-pointer inline-flex items-center justify-center gap-1.5">
+                  <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Chat</span>
+                </a>
+              @else
+                <button type="button" 
+                        @click="openLoginModal('Untuk dapat melakukan reservasi sesi pemotretan dengan fotografer ini, Anda harus masuk ke akun LensMatch terlebih dahulu.', '{{ url('/booking/create?photographer_id=' . $photographer->id) }}')"
+                        class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs sm:text-sm text-center shadow-none transition cursor-pointer">
+                  Reservasi
+                </button>
+
+                <button type="button" 
+                        @click="openLoginModal('Untuk dapat mengirim pesan dan mendiskusikan konsep pemotretan dengan fotografer ini, Anda harus masuk ke akun LensMatch terlebih dahulu.', '{{ route('chat.start', $photographer->id) }}')"
+                        class="px-4.5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-900 dark:text-white font-bold text-xs sm:text-sm text-center transition cursor-pointer inline-flex items-center justify-center gap-1.5">
+                  <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Chat</span>
+                </button>
+              @endauth
 
               <!-- Bookmark Favorit Icon Button (Rule #93 Compliant with Live Toast) -->
               <div x-data="{ isFavorited: {{ ($isFavorited ?? false) ? 'true' : 'false' }}, loading: false }" class="shrink-0">
                 <button type="button" 
                         @click="
                           if (!{{ Auth::check() ? 'true' : 'false' }}) {
-                            window.location.href = '{{ route('login', ['redirect' => url()->full()]) }}';
+                            openLoginModal('Untuk dapat menyimpan fotografer ini ke daftar favorit Anda, Anda harus masuk ke akun LensMatch terlebih dahulu.', '{{ url()->full() }}');
                             return;
                           }
                           if (loading) return;
@@ -951,6 +980,47 @@
         <template x-if="lightboxImages.length > 1">
           <p class="text-[11px] text-gray-400 font-mono" x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></p>
         </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universal Login Requirement Modal for Guests (Rule #6 & #59 Compliant) -->
+  <div x-show="loginModal" 
+       x-cloak 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95"
+       x-transition:enter-end="opacity-100 scale-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100"
+       x-transition:leave-end="opacity-0 scale-95"
+       class="fixed inset-0 z-[100] overflow-y-auto" 
+       role="dialog" 
+       aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+        
+        <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
+        <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+
+        <!-- Header without Icon & Centered -->
+        <div class="text-center">
+          <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Login Diperlukan</h3>
+        </div>
+
+        <!-- Body Text (Centered) -->
+        <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center" x-text="loginModalMessage">
+        </p>
+
+        <!-- Action Button -->
+        <div class="pt-1">
+          <a :href="loginRedirectUrl ? '{{ route('login') }}?redirect=' + encodeURIComponent(loginRedirectUrl) : '{{ route('login') }}'" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
+            Masuk ke Akun
+          </a>
+        </div>
+
       </div>
     </div>
   </div>
