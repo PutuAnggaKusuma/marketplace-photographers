@@ -541,7 +541,7 @@ class ClientBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
 
 
@@ -663,7 +663,7 @@ class ClientBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
 
 
@@ -775,7 +775,7 @@ class ClientBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
 
 
@@ -1003,7 +1003,7 @@ class ClientBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
 
 
@@ -1089,7 +1089,7 @@ class ClientBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         $action = $request->input('action');
 

@@ -159,6 +159,20 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
    * **Modal Interaktif Standar**: Menampilkan Universal Modal "Login Diperlukan" berlatar blur (`bg-gray-900/60 backdrop-blur-sm`), header terpusat tanpa ikon, tombol silang SVG murni di kanan atas, pesan kontekstual sesuai aksi yang diklik, dan tombol brand LensMatch (`bg-amber-400 font-extrabold`) yang mengarahkan ke formulir login dengan parameter `?redirect=...` ke target yang dituju.
    * **Pengguna Terotentikasi**: Untuk pengguna yang telah login (`@auth`), ketiga tombol tetap berfungsi langsung secara normal tanpa interupsi modal.
 
+14. **Pembersihan Total Data Statis, Hardcoded Fallback & Dinamisasi Penuh Database (Rule #15, #70, #89, #94)**:
+   * **Eliminasi Simbol Pagar `#`**: Menghapus seluruh awalan `#` pada kode kontrak di 7 controller (`TransactionController`, `ClientBookingController`, `PhotographerBookingController`, `AvailabilityController`, `ReportController`, `BookingController`, `ChatController`, `ReviewController`), distandarisasi murni menjadi format `KTRK-00001` sesuai Rule #89.
+   * **Penghapusan Dummy Kode Invoice**: Mengganti dummy `'INV-XXXXX'` dan perakitan string manual di Blade dengan accessor Eloquent resmi `$c->invoice_code` dan `$c->contract_code`.
+   * **Dinamisasi 100% Konten Frontend**:
+     - Memigrasikan 7 FAQ statis controller ke tabel database `photographer_faqs` (tersedia seeder 35 butir FAQ riil).
+     - Menghubungkan 5 foto wave hero di Beranda dengan media portofolio riil dari database.
+     - Mengubah angka counter beranda (`150+`, `35+`, `2.400+`, `4.9 / 5.0`) menjadi agregasi dinamis Eloquent (`count`, `distinct`, `avg`).
+     - Mengganti showcase foto statis Unsplash di landing page eksplorasi fotografer (`photographers/index`) dan e-learning (`elearning/index`) dengan data riil tabel database.
+   * **Penghapusan Fallback Statis Palsu (Rule #94)**:
+     - Profil fotografer: Menghapus default harga Rp 1.500.000 jika paket kosong (diganti keterangan `"Belum ada paket layanan"`), dan menghapus fallback gambar wanita Unsplash.
+     - Menghapus fallback wilayah default `'Indonesia'` pada favorit klien.
+     - Menghapus default value `149000` pada form tambah kursus admin.
+     - Menghapus fallback rating palsu `?: 5.0` pada audit ulasan admin.
+
 ---
 
 ## 5. Pedoman & Pantangan Mutlak untuk Pengembang / AI

@@ -866,7 +866,7 @@ class ChatController extends Controller
             'id_contract' => $contract->id,
         ]);
 
-        $contractCode = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         // 5. Kirim Pesan Konfirmasi di Chat
         ChatMessage::create([

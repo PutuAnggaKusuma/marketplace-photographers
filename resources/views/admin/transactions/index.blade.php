@@ -412,7 +412,7 @@
 
                             $payment = $c->payments->first();
 
-                            $invoiceCode = $payment ? $payment->external_id : 'INV-LM-' . str_pad($c->id, 4, '0', STR_PAD_LEFT);
+                            $invoiceCode = $c->invoice_code;
 
                             $feeAmount = $c->fee_marketplace > 0 ? $c->fee_marketplace : ($c->jumlah * 0.10);
 
@@ -592,7 +592,7 @@
 
                                         'catatan_fotografer' => $c->bookingDetail->catatan_fotografer ?? null,
 
-                                        'external_id' => $c->payments->first()->external_id ?? 'INV-XXXXX',
+                                        'external_id' => $c->invoice_code,
 
                                         'payment_status' => $c->payments->first()->payment_status ?? 'pending',
 

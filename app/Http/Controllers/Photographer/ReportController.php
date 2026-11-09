@@ -148,7 +148,7 @@ class ReportController extends Controller
         $feeMarketplace = $contract->jumlah * $feeRate;
         $netPayout = $contract->jumlah - $feeMarketplace;
         $formattedAmount = 'Rp ' . number_format($netPayout, 0, ',', '.');
-        $contractCode = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         $contract->update([
             'payout_requested_at' => now(),

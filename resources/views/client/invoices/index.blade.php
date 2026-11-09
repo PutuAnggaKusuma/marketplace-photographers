@@ -157,12 +157,7 @@
 
                 $payment = $c->payments->first();
                 $pStatus = $payment->payment_status ?? 'pending';
-                $rawExternal = $payment->external_id ?? null;
-                if ($rawExternal && !str_contains($rawExternal, 'XXXX')) {
-                    $invoiceCode = $rawExternal;
-                } else {
-                    $invoiceCode = 'INV-LM-' . $c->created_at->format('Y') . '-' . str_pad($c->id, 3, '0', STR_PAD_LEFT);
-                }
+                $invoiceCode = $c->invoice_code;
               @endphp
               <tr class="invoice-row hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                 

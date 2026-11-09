@@ -190,7 +190,7 @@
                         @forelse($contracts as $index => $c)
                             @php
                                 $payment = $c->payments->first();
-                                $invCode = $payment ? $payment->external_id : 'INV-LM-' . str_pad($c->id, 4, '0', STR_PAD_LEFT);
+                                $invCode = $c->invoice_code;
                                 $feeAmount = $c->fee_marketplace > 0 ? $c->fee_marketplace : ($c->jumlah * 0.10);
                                 $netPayout = $c->payout_amount > 0 ? $c->payout_amount : ($c->jumlah - $feeAmount);
                                 $isPaid = strtolower($c->status_payout) === 'paid';

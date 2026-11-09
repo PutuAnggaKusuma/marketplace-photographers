@@ -22,13 +22,15 @@ class ElearningController extends Controller
         $totalCategories = Elearning::distinct('kategori')->count();
         $totalViews = Elearning::sum('view_count');
         $totalCourses = Elearning::count();
+        $heroCourses = Elearning::take(3)->get();
 
         return view('public.elearning.index', compact(
             'elearnings', 
             'categories', 
             'totalCategories',
             'totalViews',
-            'totalCourses'
+            'totalCourses',
+            'heroCourses'
         ));
     }
 

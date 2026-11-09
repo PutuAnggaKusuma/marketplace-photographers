@@ -282,5 +282,60 @@ class PhotographerSeeder extends Seeder
             'nomor_rekening' => '8830129841',
             'atas_nama_rekening' => 'Alex Visual Studio',
         ]);
+
+        // Seed professional FAQs for each photographer in database (Rule #94 Compliant)
+        $defaultFaqs = [
+            [
+                'pertanyaan' => 'Bagaimana alur reservasi sesi foto di LensMatch?',
+                'jawaban' => 'Pilih paket layanan yang sesuai di profil fotografer ini, tentukan tanggal yang tersedia pada kalender, lalu kirimkan rincian reservasi. Fotografer akan mengonfirmasi jadwal pemotretan Anda maksimal 1x24 jam.',
+                'urutan' => 1,
+            ],
+            [
+                'pertanyaan' => 'Bagaimana sistem pembayaran dan keamanan transaksi?',
+                'jawaban' => 'Pembayaran dilakukan secara resmi melalui transfer bank yang diverifikasi otomatis oleh sistem. Dana pembayaran Anda diamankan oleh sistem platform LensMatch dan baru diteruskan ke fotografer setelah sesi pemotretan selesai.',
+                'urutan' => 2,
+            ],
+            [
+                'pertanyaan' => 'Kapan jadwal sesi foto saya dinyatakan resmi terkonfirmasi?',
+                'jawaban' => 'Jadwal pemotretan resmi terkonfirmasi setelah fotografer menyetujui tanggal reservasi Anda dan pembayaran uang muka (DP 30%) atau pembayaran penuh berhasil terverifikasi oleh sistem.',
+                'urutan' => 3,
+            ],
+            [
+                'pertanyaan' => 'Apakah saya bisa berdiskusi mengenai konsep atau tema pemotretan sebelum booking?',
+                'jawaban' => 'Tentu saja. Anda dapat menekan tombol Chat pada profil ini untuk mendiskusikan konsep visual, referensi moodboard, busana, maupun rekomendasi spot foto secara langsung sebelum melakukan pemesanan.',
+                'urutan' => 4,
+            ],
+            [
+                'pertanyaan' => 'Bagaimana jika saya perlu mengajukan jadwal ulang (reschedule) sesi foto?',
+                'jawaban' => 'Anda dapat mengajukan permohonan reschedule melalui menu Reservasi Saya dengan memilih tanggal baru yang masih tersedia pada kalender fotografer. Jadwal baru berlaku setelah disepakati kedua belah pihak.',
+                'urutan' => 5,
+            ],
+            [
+                'pertanyaan' => 'Berapa lama proses retouching dan bagaimana saya menerima hasil foto?',
+                'jawaban' => 'Proses retouching umumnya memerlukan waktu 3 hingga 7 hari kerja tergantung paket layanan. Setelah selesai, fotografer akan mengunggah tautan album resolusi tinggi yang dapat Anda akses di Galeri Hasil Foto Saya.',
+                'urutan' => 6,
+            ],
+            [
+                'pertanyaan' => 'Bagaimana jika terjadi kendala cuaca buruk pada hari pemotretan outdoor?',
+                'jawaban' => 'Jika terjadi hujan lebat atau cuaca ekstrem pada lokasi outdoor, Anda dan fotografer dapat menyepakati penyesuaian jam pemotretan di hari yang sama atau penjadwalan ulang sesi (reschedule) tanpa biaya tambahan.',
+                'urutan' => 7,
+            ],
+        ];
+
+        foreach (RolePhotographer::all() as $photo) {
+            foreach ($defaultFaqs as $faq) {
+                \App\Models\PhotographerFaq::firstOrCreate(
+                    [
+                        'id_photographer' => $photo->id,
+                        'pertanyaan' => $faq['pertanyaan']
+                    ],
+                    [
+                        'jawaban' => $faq['jawaban'],
+                        'urutan' => $faq['urutan'],
+                        'is_active' => true,
+                    ]
+                );
+            }
+        }
     }
 }

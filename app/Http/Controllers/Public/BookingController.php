@@ -252,7 +252,7 @@ class BookingController extends Controller
         // Record Activity Log
         \App\Models\ActivityLog::record(
             'booking_created',
-            "Klien {$clientProfile->nama} membuat reservasi sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'Uang Muka DP 30%' : 'Bayar Penuh') . ")",
+            "Klien {$clientProfile->nama} membuat reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'Uang Muka DP 30%' : 'Bayar Penuh') . ")",
             $contract,
             ['total_amount' => $totalAmount, 'payment_type' => $paymentType, 'jumlah_dp' => $jumlahDp, 'tanggal_sesi' => $request->input('tanggal_sesi')]
         );
@@ -377,7 +377,7 @@ class BookingController extends Controller
 
             $paidAmount = $payment ? $payment->payment_amount : $contract->jumlah;
             $formattedPaidAmount = 'Rp ' . number_format($paidAmount, 0, ',', '.');
-            $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+            $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
             $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
             foreach ($admins as $adm) {
@@ -422,7 +422,7 @@ class BookingController extends Controller
 
         $paidAmount = $payment ? $payment->payment_amount : $contract->jumlah;
         $formattedPaidAmount = 'Rp ' . number_format($paidAmount, 0, ',', '.');
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         $notifTitle = 'Pembayaran Sesi Foto Masuk ke Escrow';
         $notifDesc = "Pembayaran sebesar {$formattedPaidAmount} untuk sesi {$code} telah diterima di Rekening Bersama Escrow LensMatch.";

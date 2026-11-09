@@ -79,16 +79,24 @@
 
         </div>
 
-        <!-- Floating Card 1 (Top-Left Mini Course Card - FULL BLEED THUMBNAIL) -->
-        <div class="hidden lg:block absolute -left-4 xl:-left-8 top-6 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-6 animate-float-1">
-          <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Lighting Course" />
+        @php
+          $h0 = $heroCourses[0] ?? null;
+          $h1 = $heroCourses[1] ?? null;
+          $h2 = $heroCourses[2] ?? null;
+        @endphp
+
+        <!-- Floating Card 1 (Top-Left Mini Course Card - Dynamic Database Content) -->
+        @if($h0)
+          <div class="hidden lg:block absolute -left-4 xl:-left-8 top-6 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-6 animate-float-1">
+            <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
+              <img src="{{ $h0->thumbnail_url }}" class="w-full h-full object-cover" alt="{{ $h0->judul }}" />
+            </div>
+            <div class="p-3.5 space-y-1 text-left">
+              <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $h0->level ?? 'Pemula' }}</span>
+              <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $h0->judul }}</h4>
+            </div>
           </div>
-          <div class="p-3.5 space-y-1 text-left">
-            <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">PEMULA</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">Teknik Lighting Portrait</h4>
-          </div>
-        </div>
+        @endif
 
         <!-- Floating Card 2 (Bottom-Left Course Overview Card) -->
         <div class="hidden lg:block absolute -left-8 xl:-left-12 bottom-4 w-56 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 space-y-2.5 z-20 text-left transform -rotate-3 animate-float-2">
@@ -107,27 +115,31 @@
           </div>
         </div>
 
-        <!-- Floating Card 3 (Top-Right Mini Course Card - FULL BLEED THUMBNAIL) -->
-        <div class="hidden lg:block absolute -right-4 xl:-right-8 top-4 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform rotate-6 animate-float-3">
-          <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Color Grading Course" />
+        <!-- Floating Card 3 (Top-Right Mini Course Card - Dynamic Database Content) -->
+        @if($h1)
+          <div class="hidden lg:block absolute -right-4 xl:-right-8 top-4 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform rotate-6 animate-float-3">
+            <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
+              <img src="{{ $h1->thumbnail_url }}" class="w-full h-full object-cover" alt="{{ $h1->judul }}" />
+            </div>
+            <div class="p-3.5 space-y-1 text-left">
+              <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $h1->level ?? 'Menengah' }}</span>
+              <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $h1->judul }}</h4>
+            </div>
           </div>
-          <div class="p-3.5 space-y-1 text-left">
-            <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">MENENGAH</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">Mastering Color Grading</h4>
-          </div>
-        </div>
+        @endif
 
-        <!-- Floating Card 4 (Bottom-Right Mini Course Card - FULL BLEED THUMBNAIL) -->
-        <div class="hidden lg:block absolute -right-8 xl:-right-12 bottom-6 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-3 animate-float-1">
-          <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover" alt="Business Studio Course" />
+        <!-- Floating Card 4 (Bottom-Right Mini Course Card - Dynamic Database Content) -->
+        @if($h2)
+          <div class="hidden lg:block absolute -right-8 xl:-right-12 bottom-6 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-3 animate-float-1">
+            <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
+              <img src="{{ $h2->thumbnail_url }}" class="w-full h-full object-cover" alt="{{ $h2->judul }}" />
+            </div>
+            <div class="p-3.5 space-y-1 text-left">
+              <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $h2->level ?? 'Mahir' }}</span>
+              <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $h2->judul }}</h4>
+            </div>
           </div>
-          <div class="p-3.5 space-y-1 text-left">
-            <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">MAHIR</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">Bisnis Studio & Keuangan</h4>
-          </div>
-        </div>
+        @endif
 
       </div>
 

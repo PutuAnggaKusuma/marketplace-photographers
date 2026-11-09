@@ -219,7 +219,7 @@ class PhotographerBookingController extends Controller
 
                 'booking_confirmed',
 
-                "Fotografer {$photographer->nama} mengonfirmasi booking sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
+                "Fotografer {$photographer->nama} mengonfirmasi booking sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
 
                 $contract
 
@@ -237,7 +237,7 @@ class PhotographerBookingController extends Controller
 
                     'title' => 'Jadwal Booking Dikonfirmasi',
 
-                    'message' => "Fotografer {$photographer->nama} telah mengonfirmasi jadwal pemotretan sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
+                    'message' => "Fotografer {$photographer->nama} telah mengonfirmasi jadwal pemotretan sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
 
                     'data' => [
 
@@ -299,7 +299,7 @@ class PhotographerBookingController extends Controller
 
                 'booking_rejected',
 
-                "Fotografer {$photographer->nama} menolak/membatalkan booking sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Alasan: {$alasan}",
+                "Fotografer {$photographer->nama} menolak/membatalkan booking sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Alasan: {$alasan}",
 
                 $contract,
 
@@ -323,7 +323,7 @@ class PhotographerBookingController extends Controller
 
                     'title' => 'Jadwal Booking Dibatalkan',
 
-                    'message' => "Pesanan booking #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah ditolak / dibatalkan oleh fotografer. Alasan: {$alasan}",
+                    'message' => "Pesanan booking KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah ditolak / dibatalkan oleh fotografer. Alasan: {$alasan}",
 
                     'data' => [
 
@@ -359,7 +359,7 @@ class PhotographerBookingController extends Controller
 
                 'booking_completed',
 
-                "Fotografer {$photographer->nama} menandai sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " Selesai",
+                "Fotografer {$photographer->nama} menandai sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " Selesai",
 
                 $contract
 
@@ -453,7 +453,7 @@ class PhotographerBookingController extends Controller
 
                 'title' => 'Galeri Hasil Foto Siap Diunduh',
 
-                'message' => "Fotografer {$photographer->nama} telah mengunggah tautan galeri hasil foto untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Silakan akses dan unduh hasilnya.",
+                'message' => "Fotografer {$photographer->nama} telah mengunggah tautan galeri hasil foto untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Silakan akses dan unduh hasilnya.",
 
                 'data' => [
 
@@ -475,7 +475,7 @@ class PhotographerBookingController extends Controller
 
             'gallery_uploaded',
 
-            "Fotografer {$photographer->nama} mengunggah tautan galeri foto untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
+            "Fotografer {$photographer->nama} mengunggah tautan galeri foto untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
 
             $contract,
 
@@ -645,7 +645,7 @@ class PhotographerBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
 
 
@@ -739,7 +739,7 @@ class PhotographerBookingController extends Controller
 
 
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         $action = $request->input('action');
 
@@ -971,7 +971,7 @@ class PhotographerBookingController extends Controller
 
                 'Ulasan dari Fotografer',
 
-                "Fotografer {$photographer->nama} telah memberikan ulasan penilaian performa sesi foto untuk pesanan #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " ({$request->rating}/5 Bintang).",
+                "Fotografer {$photographer->nama} telah memberikan ulasan penilaian performa sesi foto untuk pesanan KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " ({$request->rating}/5 Bintang).",
 
                 'client_rated',
 

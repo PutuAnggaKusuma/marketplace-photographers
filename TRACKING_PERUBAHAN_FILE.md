@@ -2057,3 +2057,35 @@ Setiap entri log perubahan wajib mencantumkan:
   * Vite Production Build: **PASS (`built in 4.60s`, Exit code 0)**.
   * HTTP Test: **200 OK (`/fotografer/2` & `/fotografer`)**.
 
+---
+
+### [2026-11-09] Eliminasi Total Data Statis, Hardcoded Fallback & Standarisasi 100% Data Dinamis Database (Rule #15, #70, #89, #94)
+* **Kategori 1: Standarisasi Kode Sistem & Eliminasi Dummy Codes**:
+  * `app/Models/Contract.php` & `app/Models/Payment.php`: Menambahkan accessor resmi `contract_code` (`KTRK-00001` tanpa `#`) dan `invoice_code` (`INV-LM-YYYY-XXXX`).
+  * `app/Http/Controllers/Admin/TransactionController.php` & `resources/views/admin/transactions/index.blade.php`: Menghilangkan kode dummy fiktif `'INV-XXXXX'`, digantikan dengan `$c->invoice_code`.
+  * Seluruh Controller (`TransactionController`, `ClientBookingController`, `PhotographerBookingController`, `AvailabilityController`, `ReportController`, `BookingController`, `ChatController`, `ReviewController`): Menghapus simbol pagar `#` dari seluruh perakitan string kode kontrak (`#KTRK-` menjadi `KTRK-` sesuai Rule #89).
+  * `resources/views/client/invoices/index.blade.php`, `resources/views/photographer/reports/index.blade.php`, `export.blade.php`: Menghapus perakitan string manual di Blade, kini menggunakan accessor Eloquent `$c->invoice_code`.
+* **Kategori 2: Dinamisasi Kumpulan Konten & Dataset dari Database**:
+  * `database/seeders/PhotographerSeeder.php`: Memasukkan data seeder resmi 7 butir Tanya Jawab profesional ke tabel `photographer_faqs` untuk setiap fotografer di database.
+  * `app/Http/Controllers/Public/PhotographerController.php` & `resources/views/public/photographers/show.blade.php`: Menghapus hardcoded array 7 FAQ di controller; kini mengambil dari relasi database `$photographer->faqs()->where('is_active', true)->orderBy('urutan')->get()` lengkap dengan empty state `@forelse` jika kosong.
+  * `routes/web.php` & `resources/views/public/home.blade.php`:
+    - Menghapus 5 foto stok Unsplash statis di hero; kini mengambil media portofolio riil fotografer dari tabel `portfolio_medias`.
+    - Menghapus angka statis counter `150+`, `35+`, `2.400+`, `4.9 / 5.0`; kini dihitung secara dinamis dari database (`totalPhotographers`, `totalCities`, `totalSessions`, `avgRating`).
+  * `resources/views/public/photographers/index.blade.php` & `PhotographerController@index`:
+    - Mengganti teks statis `150+` dengan `{{ $totalPhotographers }}+`.
+    - Mengganti 4 foto statis showcase kartu dengan karya portofolio dinamis dari tabel `photographer_portfolios`.
+    - Mengganti rating statis `4.9 / 5.0` dan pesanan statis dengan nilai dinamis database.
+  * `resources/views/public/elearning/index.blade.php` & `ElearningController.php`:
+    - Mengganti 3 kartu mengambang statis Unsplash di hero dengan 3 kursus unggulan riil dari tabel `elearnings` (`$heroCourses`).
+* **Kategori 3: Penghapusan Fallback Statis Palsu**:
+  * `resources/views/public/photographers/show.blade.php`: Menghapus penetapan harga fiktif `$lowestPrice = 1500000;`. Jika layanan kosong, menampilkan teks *"Belum ada paket layanan"*. Menghapus URL fallback avatar wanita Unsplash.
+  * `resources/views/client/favorites/index.blade.php`: Menghapus fallback domisili `'Indonesia'` (diganti `-`).
+  * `resources/views/admin/elearning/create.blade.php`: Menghapus default value `149000` dan contoh angka, diganti placeholder instruksi bersih.
+  * `app/Http/Controllers/Admin/ReviewController.php`: Menghapus fallback rating palsu `?: 5.0`.
+* **Hasil Pengujian**:
+  * 10 File Blade: **100% MATCH Div Open & Close**.
+  * View Cache: **Compiled views cleared**.
+  * Vite Asset Build: **PASS (built in 2.53s)**.
+  * Endpoints: **`200 OK` on `/`, `/fotografer`, `/fotografer/katalog`, `/fotografer/2`, `/elearning`, `/elearning/katalog`, `/forum`**.
+
+

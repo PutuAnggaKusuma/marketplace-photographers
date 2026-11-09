@@ -292,13 +292,13 @@
 
                            name="harga" 
 
-                           value="{{ old('harga', 149000) }}"
+                           value="{{ old('harga') }}"
 
                            min="0"
 
                            step="1000"
 
-                           placeholder="Contoh: 149000" 
+                           placeholder="Masukkan nominal harga kursus" 
 
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('harga') border-rose-500 @enderror">
 

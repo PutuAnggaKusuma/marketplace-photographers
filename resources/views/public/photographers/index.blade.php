@@ -20,7 +20,7 @@
 
           <!-- Subtitle Description -->
           <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl leading-relaxed">
-            Bandingkan portofolio terverifikasi, transparansi paket harga, dan pesan sesi foto langsung dari 150+ fotografer profesional di seluruh kota Indonesia.
+            Bandingkan portofolio terverifikasi, transparansi paket harga, dan pesan sesi foto langsung dari {{ $totalPhotographers }}+ fotografer profesional di seluruh kota Indonesia.
           </p>
 
           <!-- Search Bar Container with Action Button (Sesuai Pasted Image 1) -->
@@ -55,60 +55,75 @@
 
         </div>
 
-        <!-- Right Column: Dynamic Floating Portfolio Moments Showcase (Clean Full Photo Edge-to-Edge) -->
+        <!-- Right Column: Dynamic Floating Portfolio Moments Showcase (100% Dynamic Database Portfolios) -->
         <div class="lg:col-span-5 relative flex items-center justify-center min-h-[420px] sm:min-h-[480px] lg:min-h-[500px]">
           
+          @php
+            $p0 = $showcasePortfolios[0] ?? null;
+            $img0 = $p0?->medias?->first()?->media ?? asset('images/avatar-default.png');
+            $title0 = $p0?->judul ?? 'Portofolio Karya';
+            $p1 = $showcasePortfolios[1] ?? null;
+            $img1 = $p1?->medias?->first()?->media ?? $img0;
+            $title1 = $p1?->judul ?? 'Portofolio Karya';
+            $p2 = $showcasePortfolios[2] ?? null;
+            $img2 = $p2?->medias?->first()?->media ?? $img0;
+            $title2 = $p2?->judul ?? 'Portofolio Karya';
+            $p3 = $showcasePortfolios[3] ?? null;
+            $img3 = $p3?->medias?->first()?->media ?? $img1;
+            $title3 = $p3?->judul ?? 'Portofolio Karya';
+          @endphp
+
           <!-- Background Organic Soft Amber Glow Backdrop -->
           <div class="absolute w-80 sm:w-[420px] h-80 sm:h-[420px] rounded-full bg-gradient-to-tr from-amber-300/40 via-amber-200/25 to-amber-100/10 blur-3xl -z-10 pointer-events-none"></div>
 
-          <!-- Card 1 (Top-Left): Prewedding • Bali (Tilted Left, Full Photo Edge-to-Edge) -->
+          <!-- Card 1 (Top-Left): Dynamic Portfolio 1 (Tilted Left, Full Photo Edge-to-Edge) -->
           <div class="absolute top-2 left-0 sm:left-2 z-10 w-44 sm:w-52 h-32 sm:h-36 rounded-2xl overflow-hidden shadow-xl transform -rotate-6 hover:rotate-0 hover:scale-105 hover:z-40 transition-all duration-300 group cursor-pointer">
-            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80" alt="Prewedding Session" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <img src="{{ $img0 }}" alt="{{ $title0 }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide">
-              Prewedding
+            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide truncate max-w-[85%]">
+              {{ $title0 }}
             </span>
           </div>
 
-          <!-- Card 2 (Top-Right): Vacation & Travel • Sumba (Tilted Right, Full Photo Edge-to-Edge) -->
+          <!-- Card 2 (Top-Right): Dynamic Portfolio 2 (Tilted Right, Full Photo Edge-to-Edge) -->
           <div class="absolute top-6 right-0 sm:right-2 z-10 w-40 sm:w-48 h-28 sm:h-32 rounded-2xl overflow-hidden shadow-xl transform rotate-6 hover:rotate-0 hover:scale-105 hover:z-40 transition-all duration-300 group cursor-pointer">
-            <img src="https://images.unsplash.com/photo-1539367628448-4bc5c9d171c8?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Vacation Session" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <img src="{{ $img1 }}" alt="{{ $title1 }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide">
-              Vacation in Bali
+            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide truncate max-w-[85%]">
+              {{ $title1 }}
             </span>
           </div>
 
-          <!-- Card 3 (Center Main Hero): Studio & Editorial Portrait (Full Photo, No Yellow Border, Prominent Center) -->
+          <!-- Card 3 (Center Main Hero): Dynamic Portfolio 3 (Full Photo, Prominent Center) -->
           <div class="relative z-20 w-52 sm:w-60 h-52 sm:h-60 rounded-3xl overflow-hidden shadow-2xl hover:scale-105 hover:z-40 transition-all duration-300 group cursor-pointer my-auto">
-            <img src="https://images.unsplash.com/photo-1768818928341-3b31b8965c6d?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Studio Portrait Session" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <img src="{{ $img2 }}" alt="{{ $title2 }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute bottom-3 left-3 right-3 text-left">
-              <span class="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide inline-block">
-                Studio & Portrait
+              <span class="px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide inline-block truncate max-w-full">
+                {{ $title2 }}
               </span>
             </div>
           </div>
 
-          <!-- Card 4 (Bottom-Right): Graduation / Wisuda • Jogja (Slight Tilt, Full Photo Edge-to-Edge) -->
+          <!-- Card 4 (Bottom-Right): Dynamic Portfolio 4 (Slight Tilt, Full Photo Edge-to-Edge) -->
           <div class="absolute bottom-2 right-1 sm:right-4 z-20 w-44 sm:w-52 h-30 sm:h-34 rounded-2xl overflow-hidden shadow-xl transform rotate-3 hover:rotate-0 hover:scale-105 hover:z-40 transition-all duration-300 group cursor-pointer">
-            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Wisuda Session" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <img src="{{ $img3 }}" alt="{{ $title3 }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide">
-              Wisuda
+            <span class="absolute bottom-2.5 left-2.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold tracking-wide truncate max-w-[85%]">
+              {{ $title3 }}
             </span>
           </div>
 
-          <!-- Floating Badge (Bottom-Left): Clean Rating & Total Pemesanan Stats -->
+          <!-- Floating Badge (Bottom-Left): Clean Rating & Total Pemesanan Stats (100% Dynamic Database Values) -->
           <div class="absolute bottom-6 left-0 sm:left-2 z-30 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 text-left transform -rotate-2 hover:rotate-0 transition duration-200">
             <div class="flex items-center gap-3">
               <div>
-                <p class="text-xs font-black text-gray-900 dark:text-white leading-tight">4.9 / 5.0</p>
+                <p class="text-xs font-black text-gray-900 dark:text-white leading-tight">{{ $avgRating }} / 5.0</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">Rata-rata Rating</p>
               </div>
               <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
               <div>
-                <p class="text-xs font-black text-gray-900 dark:text-ewhite leading-tight">2.400+</p>
+                <p class="text-xs font-black text-gray-900 dark:text-white leading-tight">{{ $totalCompletedBookings }}+</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">Total Pemesanan</p>
               </div>
             </div>

@@ -5,11 +5,8 @@
 @section('content')
 @php
   $lowestPrice = $photographer->services->whereNotNull('tarif_harga')->where('tarif_harga', '>', 0)->min('tarif_harga');
-  if (!$lowestPrice) {
-      $lowestPrice = 1500000;
-  }
   $validServices = $photographer->services->whereNotNull('tarif_harga')->where('tarif_harga', '>', 0);
-  $avatarUrl = $photographer->foto_url ?? ($photographer->foto ? (str_starts_with($photographer->foto, 'http') ? $photographer->foto : asset('storage/' . $photographer->foto)) : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80');
+  $avatarUrl = $photographer->foto_url ?? ($photographer->foto ? (str_starts_with($photographer->foto, 'http') ? $photographer->foto : asset('storage/' . $photographer->foto)) : asset('images/avatar-default.png'));
 @endphp
 
 <!-- Page Wrapper with Alpine State (Rule #66, #78, #86 Compliant) -->
@@ -143,10 +140,16 @@
             <div class="space-y-0.5">
               <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Mulai Dari</span>
               <div class="flex items-baseline gap-1">
-                <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                  Rp {{ number_format($lowestPrice, 0, ',', '.') }}
-                </span>
-                <span class="text-xs font-normal text-gray-400">/ sesi pemotretan</span>
+                @if($lowestPrice)
+                  <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    Rp {{ number_format($lowestPrice, 0, ',', '.') }}
+                  </span>
+                  <span class="text-xs font-normal text-gray-400">/ sesi pemotretan</span>
+                @else
+                  <span class="text-xs sm:text-sm font-semibold text-gray-400 dark:text-gray-500 italic">
+                    Belum ada paket layanan
+                  </span>
+                @endif
               </div>
             </div>
 
@@ -878,7 +881,7 @@
           </div>
 
           <div class="space-y-3">
-            @foreach($faqs as $faq)
+            @forelse($faqs as $faq)
               @php
                 $qId = is_array($faq) ? $faq['id'] : $faq->id;
                 $qText = is_array($faq) ? $faq['pertanyaan'] : $faq->pertanyaan;
@@ -915,7 +918,12 @@
                   </div>
                 </div>
               </div>
-            @endforeach
+            @empty
+              <div class="bg-white dark:bg-gray-800 p-8 sm:p-10 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
+                <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Tanya Jawab</h4>
+                <p class="text-xs text-gray-400">Fotografer ini belum mempublikasikan daftar pertanyaan umum.</p>
+              </div>
+            @endforelse
           </div>
         </div>
 

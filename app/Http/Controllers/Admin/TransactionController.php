@@ -127,7 +127,7 @@ class TransactionController extends Controller
 
         $data = [
             'id' => $contract->id,
-            'contract_code' => '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
+            'contract_code' => 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
             'created_at' => $contract->created_at->format('d M Y, H:i'),
             'status_contract' => $contract->status_contract,
             'status_payout' => $contract->status_payout ?? 'holding',
@@ -158,7 +158,7 @@ class TransactionController extends Controller
             'catatan_fotografer' => $contract->bookingDetail->catatan_fotografer ?? null,
             'payment_status' => $contract->payments->first()->payment_status ?? 'pending',
             'payment_type' => $contract->payments->first()->payment_type ?? 'transfer',
-            'payment_external_id' => $contract->payments->first()->external_id ?? 'INV-XXXXX',
+            'payment_external_id' => $contract->invoice_code,
             'bukti_transfer' => $contract->payments->first()->bukti_transfer ?? null,
             'cancellation_reason' => $contract->cancellation->alasan ?? null,
             'cancelled_by' => $contract->cancellation->dibatalkan_oleh ?? null,
@@ -169,7 +169,7 @@ class TransactionController extends Controller
             return response()->json(['success' => true, 'data' => $data]);
         }
 
-        return redirect()->route('admin.transactions', ['search' => '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)]);
+        return redirect()->route('admin.transactions', ['search' => 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)]);
     }
 
     /**
@@ -207,7 +207,7 @@ class TransactionController extends Controller
             ]);
         }
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         // Notifikasi ke Klien
         if ($contract->client && $contract->client->id_user) {
@@ -264,7 +264,7 @@ class TransactionController extends Controller
             ]);
         }
 
-        $code = '#KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         if ($contract->client && $contract->client->id_user) {
             \App\Models\Notification::send(
@@ -328,7 +328,7 @@ class TransactionController extends Controller
             \App\Models\Notification::send(
                 $contract->photographer->id_user,
                 'Payout Dana Berhasil Dicairkan',
-                "Dana Payout sebesar {$formattedAmount} untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dicairkan ke rekening Anda.",
+                "Dana Payout sebesar {$formattedAmount} untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dicairkan ke rekening Anda.",
                 'payout',
                 url('/photographer/reports')
             );
@@ -337,7 +337,7 @@ class TransactionController extends Controller
         // Record Activity Log
         \App\Models\ActivityLog::record(
             'payout_released',
-            "Admin mencairkan dana payout sebesar {$formattedAmount} ke fotografer {$photoName} untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
+            "Admin mencairkan dana payout sebesar {$formattedAmount} ke fotografer {$photoName} untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
             $contract,
             ['payout_amount' => $payoutAmount, 'fee_marketplace' => $feeMarketplace]
         );
@@ -395,7 +395,7 @@ class TransactionController extends Controller
             \App\Models\Notification::send(
                 $contract->client->id_user,
                 'Pengembalian Dana (Refund) Berhasil',
-                "Dana sebesar {$formattedAmount} untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah disetujui untuk dikembalikan ke akun Anda. Catatan: {$notes}",
+                "Dana sebesar {$formattedAmount} untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah disetujui untuk dikembalikan ke akun Anda. Catatan: {$notes}",
                 'refund',
                 url('/client/bookings')
             );
@@ -406,7 +406,7 @@ class TransactionController extends Controller
             \App\Models\Notification::send(
                 $contract->photographer->id_user,
                 'Pembatalan & Refund Sesi Booking',
-                "Sesi booking #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dibatalkan dan dana direfund ke klien. Catatan: {$notes}",
+                "Sesi booking KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dibatalkan dan dana direfund ke klien. Catatan: {$notes}",
                 'refund',
                 url('/photographer/bookings')
             );
@@ -415,7 +415,7 @@ class TransactionController extends Controller
         // Record Activity Log
         \App\Models\ActivityLog::record(
             'refund_processed',
-            "Admin menyetujui pengembalian dana (refund) sebesar {$formattedAmount} ke klien {$clientName} untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
+            "Admin menyetujui pengembalian dana (refund) sebesar {$formattedAmount} ke klien {$clientName} untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
             $contract,
             ['refund_amount' => $contract->jumlah, 'notes' => $notes]
         );

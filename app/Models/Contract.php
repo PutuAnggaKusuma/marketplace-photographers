@@ -79,4 +79,25 @@ class Contract extends Model
     {
         return $this->hasOne(PhotographerClientReview::class, 'id_contract');
     }
+
+    /**
+     * Standardized Contract Code (Rule #89 Compliant: clean prefix KTRK-, zero hash symbols)
+     */
+    public function getContractCodeAttribute(): string
+    {
+        return 'KTRK-' . str_pad($this->id, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Standardized Dynamic Invoice Code (Rule #94 Compliant: derived from payment external_id or dynamic DB attributes)
+     */
+    public function getInvoiceCodeAttribute(): string
+    {
+        $payment = $this->relationLoaded('payments') ? $this->payments->first() : $this->payments()->first();
+        if ($payment && !empty($payment->external_id) && !str_contains($payment->external_id, 'XXXX')) {
+            return $payment->external_id;
+        }
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+        return 'INV-LM-' . $year . '-' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+    }
 }

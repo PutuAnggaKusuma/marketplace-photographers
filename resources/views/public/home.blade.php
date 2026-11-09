@@ -92,31 +92,32 @@
       </form>
 
       <!-- 5-Photo Staggered Floating Wave Gallery (Pasted Image 1 Floating Animation) -->
+      <!-- Dynamic Wave Showcase of 5 Hero Photos from Database (Rule #94) -->
       <div class="grid grid-cols-5 gap-3.5 sm:gap-6 items-end max-w-7xl mx-auto pt-4 sm:pt-6">
         
         <!-- Image 1 (Far Left - Floating Animation 1) -->
         <div class="h-40 sm:h-56 lg:h-64 rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-1 shadow-md hover:shadow-xl">
-          <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=500&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Camera Gear" />
+          <img src="{{ $heroPhotos[0] ?? asset('images/avatar-default.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
         </div>
 
         <!-- Image 2 (Mid Left - Floating Animation 2) -->
         <div class="h-56 sm:h-76 lg:h-[330px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-2 shadow-md hover:shadow-xl">
-          <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=500&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Landscape Photo" />
+          <img src="{{ $heroPhotos[1] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
         </div>
 
         <!-- Image 3 (Center - TALLEST HIGHLIGHT - Floating Animation 3) -->
         <div class="h-72 sm:h-96 lg:h-[400px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-3 shadow-lg hover:shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Photographer Lens" />
+          <img src="{{ $heroPhotos[2] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
         </div>
 
         <!-- Image 4 (Mid Right - Floating Animation 4) -->
         <div class="h-60 sm:h-80 lg:h-[350px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-4 shadow-md hover:shadow-xl">
-          <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=500&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Editorial Photoshoot" />
+          <img src="{{ $heroPhotos[3] ?? ($heroPhotos[1] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
         </div>
 
         <!-- Image 5 (Far Right - Floating Animation 5) -->
         <div class="h-40 sm:h-56 lg:h-64 rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-5 shadow-md hover:shadow-xl">
-          <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=500&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Romantic Moment" />
+          <img src="{{ $heroPhotos[4] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
         </div>
 
       </div>
@@ -124,29 +125,29 @@
     </div>
   </section>
 
-  <!-- 2. TRUST STATS STRIP (Clean Hairline Counter Bar with Spacious Padding) -->
+  <!-- 2. TRUST STATS STRIP (Clean Hairline Counter Bar with Spacious Padding - 100% Dynamic Database Values) -->
   <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal-on-scroll">
     <div class="py-12 sm:py-16 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center items-center">
       
       <div class="space-y-1">
-        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">150+</p>
+        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPhotographers }}+</p>
         <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fotografer Terverifikasi</p>
       </div>
 
       <div class="space-y-1 lg:border-l lg:border-gray-200/80 lg:dark:border-gray-800 lg:pl-6">
-        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">35+</p>
+        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalCities }}+</p>
         <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kota Layanan Indonesia</p>
       </div>
 
       <div class="space-y-1 lg:border-l lg:border-gray-200/80 lg:dark:border-gray-800 lg:pl-6">
-        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">2.400+</p>
+        <p class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSessions }}+</p>
         <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sesi Foto Sukses</p>
       </div>
 
       <div class="space-y-1 lg:border-l lg:border-gray-200/80 lg:dark:border-gray-800 lg:pl-6">
         <div class="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-          <span class="text-3xl sm:text-4xl font-black tracking-tight">4.9 / 5.0</span>
+          <span class="text-3xl sm:text-4xl font-black tracking-tight">{{ $avgRating }} / 5.0</span>
         </div>
         <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating Kepuasan Klien</p>
       </div>

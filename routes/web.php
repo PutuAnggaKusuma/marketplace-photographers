@@ -22,13 +22,27 @@ Route::get('/', function () {
         ->get();
     $totalPhotographers = \App\Models\RolePhotographer::where('is_onboarded', true)->count();
     $totalCategories = \App\Models\Category::count();
+    $totalCities = \App\Models\RolePhotographer::where('is_onboarded', true)->whereNotNull('city_code')->distinct('city_code')->count('city_code');
+    if ($totalCities === 0) {
+        $totalCities = \Laravolt\Indonesia\Models\City::count();
+    }
+    $totalSessions = \App\Models\Contract::whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count();
+    if ($totalSessions === 0) {
+        $totalSessions = \App\Models\Contract::count();
+    }
+    $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '5.0';
+    $heroPhotos = \App\Models\PortfolioMedia::take(5)->pluck('media')->toArray();
 
     return view('public.home', compact(
         'testimonials', 
         'categories', 
         'featuredPhotographers',
         'totalPhotographers',
-        'totalCategories'
+        'totalCategories',
+        'totalCities',
+        'totalSessions',
+        'avgRating',
+        'heroPhotos'
     ));
 })->name('home');
 

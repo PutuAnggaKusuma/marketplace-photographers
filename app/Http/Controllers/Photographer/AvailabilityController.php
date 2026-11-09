@@ -152,7 +152,7 @@ class AvailabilityController extends Controller
             $bDate = $c->bookingDetail->booking_date;
             $dow = (int) Carbon::parse($bDate)->dayOfWeekIso; // 1 = Senin, ..., 7 = Minggu
             $bJamMulai = substr($c->bookingDetail->jam_mulai, 0, 5);
-            $code = '#KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT);
+            $code = 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT);
             $clientName = $c->client->nama ?? 'Klien';
 
             $newDayConfig = $daysInput[$dow] ?? null;
@@ -239,7 +239,7 @@ class AvailabilityController extends Controller
                 ->first();
 
             if ($conflict) {
-                $code = '#KTRK-' . str_pad($conflict->id, 5, '0', STR_PAD_LEFT);
+                $code = 'KTRK-' . str_pad($conflict->id, 5, '0', STR_PAD_LEFT);
                 $clientName = $conflict->client->nama ?? 'Klien';
                 $slotTime = substr($conflict->bookingDetail->jam_mulai, 0, 5) . ' - ' . substr($conflict->bookingDetail->jam_selesai, 0, 5);
                 return redirect()->back()->withInput()->with('error', "Gagal menutup slot jam: Terdapat pesanan aktif ({$code}) dari klien {$clientName} pada jam {$slotTime} WIB. Anda harus mengajukan Jadwal Ulang (Reschedule) terlebih dahulu sebelum dapat menutup jadwal ini.");
@@ -285,7 +285,7 @@ class AvailabilityController extends Controller
                     ->first();
 
                 if ($conflict) {
-                    $code = '#KTRK-' . str_pad($conflict->id, 5, '0', STR_PAD_LEFT);
+                    $code = 'KTRK-' . str_pad($conflict->id, 5, '0', STR_PAD_LEFT);
                     $clientName = $conflict->client->nama ?? 'Klien';
                     $formattedDate = date('d M Y', strtotime($curDate));
                     return redirect()->back()->withInput()->with('error', "Gagal menutup tanggal libur: Terdapat pesanan aktif ({$code}) dari klien {$clientName} pada tanggal {$formattedDate}. Anda harus mengajukan Jadwal Ulang (Reschedule) terlebih dahulu sebelum dapat menandai tanggal ini sebagai libur.");

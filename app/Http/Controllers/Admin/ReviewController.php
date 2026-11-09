@@ -45,7 +45,7 @@ class ReviewController extends Controller
         $reviews = $query->paginate($perPage)->withQueryString();
 
         $totalReviews = Testimonial::count();
-        $avgRating = number_format(Testimonial::avg('rating') ?: 5.0, 1);
+        $avgRating = $totalReviews > 0 ? number_format(Testimonial::avg('rating'), 1) : '0.0';
         $fiveStarReviews = Testimonial::where('rating', 5)->count();
         $hiddenReviews = Testimonial::where('is_hidden', true)->count();
 

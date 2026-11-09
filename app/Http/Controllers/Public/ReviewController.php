@@ -72,7 +72,7 @@ class ReviewController extends Controller
                 'id_user' => $contract->photographer->id_user,
                 'type' => 'new_review',
                 'title' => 'Ulasan Baru Diterima',
-                'message' => "Klien {$client->nama} memberikan ulasan ({$request->rating}/5 bintang) untuk sesi #KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
+                'message' => "Klien {$client->nama} memberikan ulasan ({$request->rating}/5 bintang) untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
                 'data' => [
                     'contract_id' => $contract->id,
                     'url' => route('photographer.reports'),
