@@ -21,6 +21,42 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-09 13:50 WITA] — Standardisasi Universal Login Modal pada Seluruh Kasus Serupa di Sistem (Lomba Foto, E-Learning, dan Komunitas Forum)
+
+* **Modul / Fitur**: Halaman Indeks Lomba Foto (`public/contests/index.blade.php`), Detail Lomba Foto (`public/contests/show.blade.php`), Detail Kursus E-Learning (`public/elearning/show.blade.php`), dan Detail Topik Forum (`public/forum/show.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/contests/index.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/public/elearning/show.blade.php`
+  * `resources/views/public/forum/show.blade.php`
+
+* **Rincian Perubahan**:
+  1. **Tombol "Ajukan Lomba Foto" pada Indeks Lomba (`contests/index.blade.php`)**:
+     - Mengganti tautan langsung `<a>` dengan tombol interaktif bertaut modal login untuk tamu (`@guest`).
+     - Mencegah *forced redirect* mendadak oleh middleware `auth` Laravel saat tamu mengklik tombol tersebut.
+     - Membuka Universal Login Requirement Modal dengan tombol CTA yang mengarahkan ke halaman login dengan redirect otomatis ke form pengajuan lomba (`public.contests.propose.create`).
+  2. **Tombol "Selesaikan Materi" & "Beli Akses Kursus" pada Detail E-Learning (`elearning/show.blade.php`)**:
+     - Mengeliminasi script `window.location.href = ...` pada fungsi `completeCurrentLesson()` untuk tamu, digantikan pemanggilan `openLoginModal()`.
+     - Menyediakan Universal Modal Login pada tombol "Beli Akses Kursus" pada modul berbayar yang terkunci (*locked lesson*).
+  3. **Kotak Pendaftaran Calon Peserta Lomba (`contests/show.blade.php`)**:
+     - Mengubah tautan login statis menjadi tombol interaktif "Daftar Lomba Foto Ini" yang memicu Universal Modal Login terpusat di layar yang sama.
+  4. **Kotak Balasan Komentar Forum (`forum/show.blade.php`)**:
+     - Mengubah tautan langsung login pada container komentar tamu menjadi pemicu modal `handleGuestClick()`, selaras dengan tombol interaksi Like, Dislike, Balas, dan Lapor.
+
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #6 (Modal Dialog Backdrop & Sizing).
+  * Rule #59 (Standarisasi Modal Dialog Form & Aksi).
+  * Rule #70 (Anti-AI Slop: Micro-Typography & Simplicity).
+  * Rule #89 (Zero Hash `#` Prefix in System Identifiers).
+
+* **Hasil Pengujian & Verifikasi**:
+  * Kompilasi View Blade: **PASS** (`php artisan view:clear`).
+  * Tag Balance (`<div>`): **100% PASS** di keempat file view yang diperbarui.
+  * Status Rute HTTP: **PASS** (Semua endpoint publik merespons 200 OK).
+  * Git Commit: `b3595db` pada branch `development-2`.
+
+---
+
 ### [2026-11-09 13:28 WITA] — Standardisasi Universal Login Modal pada Tombol Reservasi, Chat, dan Simpan Profil Fotografer serta Pembersihan Residu Data Statis
 
 * **Modul / Fitur**: Halaman Profil Publik Fotografer (`public/photographers/show.blade.php`), Katalog Fotografer (`public/photographers/katalog.blade.php`), Partial Tabel Kontrak (`partials/table/table-01.blade.php`), dan Demo Profile (`demo/profile.blade.php`).

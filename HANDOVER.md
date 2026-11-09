@@ -182,6 +182,11 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
    * **Universal Login Modal pada Tombol Aksi Profil Fotografer**: Tombol **Reservasi**, **Chat**, dan **Simpan** (Bookmark Favorit) pada [`public/photographers/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/photographers/show.blade.php) menggunakan event dispatch decoupled Alpine.js `$dispatch('open-login-modal', ...)` yang memunculkan pop-up modal instruksi login tanpa redirect langsung ke `/login`.
    * **Audit Lengkap Kode Front-End**: Audit regex komprehensif mengonfirmasi **0** data lorem ipsum, **0** nama buatan asing, **0** nomor telepon statis, **0** tanggal statis, **0** kode invoice palsu, **0** rating fiktif, dan **0** URL eksternal Unsplash pada seluruh file Blade.
 
+17. **Standardisasi Universal Modal Tamu di Seluruh Fitur Platform (Commit `b3595db`)**:
+   * **Lomba Foto**: Tombol *"Ajukan Lomba Foto"* pada [`contests/index.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/contests/index.blade.php) dan *"Daftar Lomba Foto Ini"* pada [`contests/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/contests/show.blade.php) untuk pengguna tamu kini menampilkan Universal Login Requirement Modal sebelum diarahkan ke halaman login.
+   * **E-Learning**: Tombol *"Selesaikan Materi"* dan *"Beli Akses Kursus"* pada [`elearning/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/elearning/show.blade.php) memicu Universal Modal Login terpadu.
+   * **Forum Komunitas**: Box input komentar tamu pada [`forum/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/forum/show.blade.php) memicu modal login yang selaras dengan aksi interaksi komunitas lainnya.
+
 ---
 
 ## 5. Pedoman & Pantangan Mutlak untuk Pengembang / AI
