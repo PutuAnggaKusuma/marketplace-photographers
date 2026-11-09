@@ -178,6 +178,10 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
    * **Pembersihan Residu Template Mockup**: Komponen modal template bawaan Pimjo (`Testing Chowdhury`, `randomuser@pimjo.com`, data alamat US) dan mockup `payment/index` dibersihkan total dan dihubungkan ke data nyata atau empty state jujur.
    * **Seeder Compliance**: Seluruh kode `#KTRK-` pada `ActivityLogSeeder` dibersihkan menjadi `KTRK-` murni tanpa tanda `#`.
 
+16. **Finalisasi Universal Modal Tamu & Eliminasi Tuntas Seluruh Data Statis (Commit `5987a3b`)**:
+   * **Universal Login Modal pada Tombol Aksi Profil Fotografer**: Tombol **Reservasi**, **Chat**, dan **Simpan** (Bookmark Favorit) pada [`public/photographers/show.blade.php`](file:///c:/Portofolio/LARAVEL/Marketplace%20Fotographers/marketplace_photographers/resources/views/public/photographers/show.blade.php) menggunakan event dispatch decoupled Alpine.js `$dispatch('open-login-modal', ...)` yang memunculkan pop-up modal instruksi login tanpa redirect langsung ke `/login`.
+   * **Audit Lengkap Kode Front-End**: Audit regex komprehensif mengonfirmasi **0** data lorem ipsum, **0** nama buatan asing, **0** nomor telepon statis, **0** tanggal statis, **0** kode invoice palsu, **0** rating fiktif, dan **0** URL eksternal Unsplash pada seluruh file Blade.
+
 ---
 
 ## 5. Pedoman & Pantangan Mutlak untuk Pengembang / AI

@@ -21,6 +21,41 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-09 13:28 WITA] — Standardisasi Universal Login Modal pada Tombol Reservasi, Chat, dan Simpan Profil Fotografer serta Pembersihan Residu Data Statis
+
+* **Modul / Fitur**: Halaman Profil Publik Fotografer (`public/photographers/show.blade.php`), Katalog Fotografer (`public/photographers/katalog.blade.php`), Partial Tabel Kontrak (`partials/table/table-01.blade.php`), dan Demo Profile (`demo/profile.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+  * `resources/views/partials/table/table-01.blade.php`
+  * `resources/views/demo/profile.blade.php`
+
+* **Rincian Perubahan**:
+  1. **Standardisasi Universal Login Modal pada Tombol Aksi Tamu**:
+     - Memastikan tombol **Reservasi**, **Chat**, dan **Simpan/Favorit (Bookmark)** pada profil fotografer saat diklik oleh pengguna non-login (tamu) tidak langsung melakukan redirect paksa ke halaman `/login`.
+     - Menggunakan mekanisme decoupled event dispatch Alpine.js `$dispatch('open-login-modal', { message: '...', redirectUrl: '...' })` yang memunculkan pop-up modal instruksi ramah pengguna (*Universal Login Requirement Modal*) sesuai standar Rule #6, #59, dan #93.
+     - Menyediakan tombol CTA **Masuk ke Akun** pada pop-up modal dengan parameter redirect otomatis kembali ke halaman/tindakan sebelumnya setelah berhasil masuk.
+  2. **Pembersihan Residu Data Statis & Penegakan Standar Data Nullable (Rule #104)**:
+     - Merapikan placeholder input angka pada katalog fotografer (`Contoh: 500000`).
+     - Membersihkan fallback statis teks demo pada `table-01.blade.php` menjadi null-safe dynamic data dari database (`-`).
+     - Mengeliminasi data dummy mockup template kit luar negeri (`randomuser@pimjo.com`, `Testing Chowdhury`, `Arizona`) pada `demo/profile.blade.php`.
+
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #6 (Modal Dialog Backdrop & Sizing).
+  * Rule #59 (Standarisasi Modal Dialog Form & Aksi).
+  * Rule #70 (Anti-AI Slop: Micro-Typography & Simplicity).
+  * Rule #89 (Zero Hash `#` Prefix in System Identifiers).
+  * Rule #93 (Live Toast & Favorite State Management).
+  * Rule #104 (Standar Penanganan Data Nullable-First & Larangan Rekayasa Fallback Fiktif).
+
+* **Hasil Pengujian & Verifikasi**:
+  * Kompilasi View Blade: **PASS** (`php artisan view:clear`).
+  * Tag Balance (`<div>`): **100% PASS** (113 open / 113 close).
+  * Status Rute HTTP: **PASS** (`/fotografer/1` -> 200 OK, `/fotografer/katalog` -> 200 OK).
+  * Git Commit: `5987a3b` pada branch `development-2`.
+
+---
+
 ### [2026-11-07 14:05 WITA] — Perbaikan Dropdown Kategori Pelanggaran Modal Hapus Mengikuti Standar Rule #11 & Rule #46 (Alpine.js Custom Floating Dropdown)
 
 * **Modul / Fitur**: Modal Hapus Fotografer pada Tabel Manajemen Fotografer (`admin/photographers/index.blade.php`) & Detail Audit (`admin/photographers/show.blade.php`)
