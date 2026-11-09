@@ -12,7 +12,7 @@
     $sessionIso = $urgentSession->session_date_time->toISOString();
 
     if ($role === 'photographer') {
-        $counterpartName = $contract->client->nama ?? 'Klien LensMatch';
+        $counterpartName = $contract->client->nama ?? ($contract->client->user->nama ?? 'Klien');
         $counterpartRole = 'Klien Pemesan';
         $counterpartPhone = $contract->client->nomor_telepon ?? ($contract->client->user->nomor_telepon ?? null);
         $counterpartAvatar = $contract->client->user->avatar ?? null;

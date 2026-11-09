@@ -1667,3 +1667,21 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - Tarif harga awal (`Mulai Dari Rp ... / sesi pemotretan`) disatukan berdampingan secara seimbang di baris bawah dengan tombol aksi utama: `Reservasi` (amber brand), `Chat` (tombol netral berikon), dan `Bookmark Favorit`.
 4. **Proporsi Foto Potret Alami**:
    - Foto potret menggunakan rasio potret ideal **4:5** (`w-full sm:w-[280px] lg:w-[320px] aspect-[4/5] rounded-3xl object-cover border border-gray-200 dark:border-gray-700 shadow-none`), tidak lagi ditarik melar secara artifisial dengan CSS `self-stretch`.
+
+---
+
+### Rule #104: Standar Penanganan Data Nullable (Sebagian Besar Data Boleh Kosong & Larangan Keras Rekayasa Data Fallback Fiktif)
+1. **Prinsip Utama Ketersediaan Data (Data Boleh Kosong / Nullable)**:
+   - Sebagian besar data di sistem LensMatch diperbolehkan kosong (*nullable*). Tidak semua entitas pengguna atau mitra memiliki nomor telepon, kota domisili, tautan sosial media, ulasan, atau foto profil sejak awal pendaftaran.
+   - Sistem wajib menangani data kosong dengan aman (*null-safe*) tanpa menyebabkan error, dan **DILARANG KERAS** memaksakan nilai rekaan/palsu hanya untuk mengisi kekosongan tampilan.
+2. **Larangan Keras Mengarang Nilai Fallback Fiktif**:
+   - **Dilarang keras** mengarang nama fiktif seperti `'Client LensMatch'`, `'Admin LensMatch'`, `'Instruktur LensMatch'`, atau sejenisnya jika nama asli tidak ada. Jika nama pengguna kosong, gunakan fallback netral berbasis akun (misalnya `auth()->user()->nama ?? auth()->user()->email` atau `'Pengguna Komunitas'`).
+   - **Dilarang keras** mengarang lokasi default seperti `'Indonesia'` atau `'Wilayah'` jika kota/provinsi belum diisi. Tampilkan tanda hubung (`-`).
+   - **Dilarang keras** menyuntikkan nomor telepon dummy (seperti `'08123456789'` atau `'081234567890'`) ke database atau placeholder formulir.
+   - **Dilarang keras** memaksakan rating agregat `'5.0'` atau sejenisnya jika sistem belum memiliki data ulasan di database. Jika belum ada ulasan, tampilkan tanda hubung (`-`) atau keterangan jujur (*"Belum ada ulasan"*).
+3. **Standar Formulir Input Bersih (Zero Pre-Filled Fictitious Defaults)**:
+   - Pada halaman pembuatan data baru (*create form*), seluruh input wajib berawal kosong (`value="{{ old('field') }}"`), bukan terisi otomatis teks fiktif (seperti `'Landscape & Alam'`, `'LensMatch Official'`, `'Rp 15.000.000'`, `'BCA'`, atau jam `'15:00'`).
+   - Placeholder input wajib bersifat instruksional (misalnya `placeholder="Masukkan nama lengkap"`, `placeholder="Contoh: 08xxxxxxxxxx"`), dilarang mensimulasikan data dummy yang tampak nyata.
+4. **Pembersihan Residu Template Mockup**:
+   - Seluruh kode statis bawaan template (seperti mockup `randomuser@pimjo.com`, `Testing Chowdhury`, nomor kontrak statis `CTR-2026-08129`, atau harga hardcoded) wajib dibersihkan total dari basis kode produksi.
+

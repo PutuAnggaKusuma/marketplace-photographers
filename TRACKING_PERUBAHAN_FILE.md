@@ -2088,4 +2088,43 @@ Setiap entri log perubahan wajib mencantumkan:
   * Vite Asset Build: **PASS (built in 2.53s)**.
   * Endpoints: **`200 OK` on `/`, `/fotografer`, `/fotografer/katalog`, `/fotografer/2`, `/elearning`, `/elearning/katalog`, `/forum`**.
 
+### [2026-11-09] Penetapan Standar Baru Rule #104: Penanganan Data Kosong (Nullable-First) & Pembersihan Menyeluruh Data Statis Front-End
+* **Rule #104 Ditambahkan ke `README.md`**:
+  * Menetapkan prinsip arsitektur bahwa sebagian besar data di platform LensMatch diperbolehkan kosong (*nullable*). Dilarang keras mengarang nilai fallback fiktif. Jika data kosong, tampilkan tanda hubung (`-`), placeholder instruksional kosong, atau empty state yang jujur.
+* **Pembersihan Residu Template Mockup Bawaan**:
+  * `resources/views/partials/profile/profile-info-modal.blade.php`: Menghapus seluruh data statis template Pimjo (`Testing Chowdhury`, `randomuser@pimjo.com`, `+09 363 398 46`, link Facebook PimjoHQ) dan menggantinya dengan binding dinamis `auth()->user()`.
+  * `resources/views/partials/profile/profile-address-modal.blade.php`: Menghapus data alamat statis luar negeri (`United States`, `Arizona`, `ERT 2489`, `AS4568384`) dan menggantinya dengan input bersih bernilai awal kosong.
+  * `resources/views/partials/header.blade.php`: Mengganti nama statis `Testing Chowdhury` dan email `randomuser@pimjo.com` dengan `{{ auth()->user()->nama ?? 'Pengguna' }}` dan `{{ auth()->user()->email ?? '-' }}`.
+  * `resources/views/public/payment/index.blade.php`: Menghapus mockup statis lama (`CTR-2026-08129`, `Alex Visual Studio`, `Rp 2.250.000`) dan menggantinya dengan tampilan dinamis berbasis `$contract` serta empty state informasional.
+* **Pemberantasan Nilai Default Fiktif pada Form (Zero Pre-Filled Defaults)**:
+  * `resources/views/admin/contests/create.blade.php`: Menghapus default value `Landscape & Alam`, `LensMatch Official`, `Rp 15.000.000 + E-Sertifikat`, dan `BCA`.
+  * `resources/views/admin/contests/edit.blade.php`: Menghapus fallback default `'BCA'` saat data nama bank lomba bernilai null.
+  * `resources/views/photographer/availability/create.blade.php`: Menghapus default jam mulai `15:00` dan jam selesai `20:00`.
+  * `resources/views/public/booking/create.blade.php`: Menghapus default jam mulai `14:00`, memaksa pemilihan slot jadwal ketersediaan nyata oleh pengguna.
+* **Pemberantasan Fallback String Fiktif di View & Controller**:
+  * `resources/views/photographer/reports/export.blade.php`: Menghapus fallback domisili `'Indonesia'` dan nama klien `'Klien LensMatch'`.
+  * `resources/views/public/forum/index.blade.php`: Menghapus fallback author `'Admin LensMatch'` (diganti `'Pengguna'`).
+  * `resources/views/public/elearning/invoice-print.blade.php`: Menghapus fallback `'Instruktur LensMatch'` (diganti `-`).
+  * `resources/views/client/invoices/index.blade.php`: Menghapus fallback penyelenggara lomba `'LensMatch Official'` (diganti `-`).
+  * `resources/views/public/contests/show.blade.php`: Menghapus nomor rekening fallback dummy `'8271928391'` dan nama `'PT LensMatch Indonesia'`.
+  * `app/Http/Controllers/Public/BookingController.php`: Menghapus suntikan nomor telepon dummy `'08123456789'` pada saat `firstOrCreate` profil klien baru.
+  * `app/Http/Controllers/Client/ClientBookingController.php` & `ClientFavoriteController.php`: Menghapus fallback nama dummy `'Client LensMatch'`.
+  * `app/Http/Controllers/Public/PhotographerController.php` & `routes/web.php`: Menghapus fallback rating palsu `'5.0'` saat database ulasan kosong (diganti `'-'`).
+* **Pembersihan Dummy Placeholder & URL Eksternal**:
+  * `resources/views/admin/transactions/index.blade.php`: Mengganti placeholder catatan ref transfer `TRX123456` dengan panduan instruksional.
+  * `resources/views/photographer/services/create.blade.php` & `edit.blade.php`: Mengganti `placeholder="Contoh: 3500000"` dengan `placeholder="Masukkan nominal tarif paket (min. 10000)"`.
+  * `resources/views/public/chat/index.blade.php`: Mengganti dummy placeholder `2500000` dan durasi `3` dengan placeholder instruksional.
+  * `resources/views/admin/elearning/edit.blade.php`: Mengganti placeholder `"0"` dengan `"Masukkan nominal harga kursus"`.
+  * `resources/views/partials/photographer/onboarding-wizard.blade.php`: Mengganti `placeholder="Contoh: 1234567890"` dan `placeholder="500000"` dengan placeholder instruksional.
+  * `resources/views/photographer/profile/index.blade.php`, `signin.blade.php`, `signup.blade.php`, `contests/show.blade.php`: Mengganti placeholder nomor dummy `081234567890` dengan `Contoh: 08xxxxxxxxxx`.
+  * `resources/views/public/auth/signin.blade.php` & `signup.blade.php`: Mengganti foto stok Unsplash eksternal dengan aset lokal resmi `asset('images/prewedding/prewedding-2.jpg')` dan `prewedding-holding-hands.jpg`.
+  * `resources/views/public/help/faq.blade.php`: Mengganti nomor WhatsApp fiktif `6281234567890` dengan variabel konfigurasi aplikasi `config('app.support_whatsapp')`.
+  * `database/seeders/ActivityLogSeeder.php`: Menghapus simbol pagar `#` dari 5 entri seeder `#KTRK-00001` menjadi `KTRK-00001` (Rule #89).
+* **Verifikasi Mutu & Keseimbangan Elemen**:
+  * 30 File Blade Terkait: **100% MATCH Div Open & Close (0 mismatch)**.
+  * Artisan Route List: **185 routes compiled successfully with 0 syntax errors**.
+  * Vite Asset Build: **PASS (built in 4.84s)**.
+  * HTTP Endpoint Verification: **`200 OK` across all main routes (`/`, `/fotografer`, `/katalog`, `/elearning`, `/forum`, `/lomba`, `/faq`, `/login`, `/register`)**.
+
+
 

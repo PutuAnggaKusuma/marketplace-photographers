@@ -30,7 +30,7 @@ Route::get('/', function () {
     if ($totalSessions === 0) {
         $totalSessions = \App\Models\Contract::count();
     }
-    $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '5.0';
+    $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
     $heroPhotos = \App\Models\PortfolioMedia::take(5)->pluck('media')->toArray();
 
     return view('public.home', compact(

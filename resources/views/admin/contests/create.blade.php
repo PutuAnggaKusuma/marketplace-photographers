@@ -154,7 +154,7 @@
 
                            name="kategori" 
 
-                           value="{{ old('kategori', 'Landscape & Alam') }}"
+                           value="{{ old('kategori') }}"
 
                            required 
 
@@ -178,9 +178,11 @@
 
                            name="penyelenggara" 
 
-                           value="{{ old('penyelenggara', 'LensMatch Official') }}"
+                           value="{{ old('penyelenggara') }}"
 
                            required 
+
+                           placeholder="Masukkan nama pihak penyelenggara lomba"
 
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('penyelenggara') border-rose-500 @enderror">
 
@@ -206,11 +208,11 @@
 
                            name="hadiah" 
 
-                           value="{{ old('hadiah', 'Rp 15.000.000 + E-Sertifikat') }}"
+                           value="{{ old('hadiah') }}"
 
                            required 
 
-                           placeholder="Contoh: Rp 15.000.000" 
+                           placeholder="mis. Rp 15.000.000 + E-Sertifikat" 
 
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('hadiah') border-rose-500 @enderror">
 
@@ -400,7 +402,7 @@
 
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Nama Bank</label>
 
-                        <input type="text" name="bank_name" value="{{ old('bank_name', 'BCA') }}" placeholder="mis. BCA / Mandiri" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="text" name="bank_name" value="{{ old('bank_name') }}" placeholder="mis. BCA / Mandiri" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
 
                     </div>
 
@@ -408,7 +410,7 @@
 
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Nomor Rekening</label>
 
-                        <input type="text" name="bank_account_number" value="{{ old('bank_account_number') }}" placeholder="mis. 8271928391" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="text" name="bank_account_number" value="{{ old('bank_account_number') }}" placeholder="Masukkan nomor rekening" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
 
                     </div>
 
@@ -416,7 +418,7 @@
 
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Atas Nama</label>
 
-                        <input type="text" name="bank_account_holder" value="{{ old('bank_account_holder') }}" placeholder="mis. PT LensMatch Indonesia" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <input type="text" name="bank_account_holder" value="{{ old('bank_account_holder') }}" placeholder="Masukkan nama pemilik rekening" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
 
                     </div>
 

@@ -42,7 +42,7 @@ class ClientBookingController extends Controller
 
                 ['id_user' => auth()->id()],
 
-                ['nama' => auth()->user()->nama ?? 'Client LensMatch']
+                ['nama' => auth()->user()->nama ?? null]
 
             );
 
@@ -196,7 +196,7 @@ class ClientBookingController extends Controller
 
                 ['id_user' => auth()->id()],
 
-                ['nama' => auth()->user()->nama ?? 'Client LensMatch']
+                ['nama' => auth()->user()->nama ?? null]
 
             );
 
@@ -392,7 +392,7 @@ class ClientBookingController extends Controller
 
                 ['id_user' => auth()->id()],
 
-                ['nama' => auth()->user()->nama ?? 'Client LensMatch']
+                ['nama' => auth()->user()->nama ?? null]
 
             );
 

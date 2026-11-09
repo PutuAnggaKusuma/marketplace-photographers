@@ -111,7 +111,7 @@ Status Akses Pembelajaran
 <div class="space-y-1.5 sm:text-right">
 <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">PENYEDIA KELAS</span>
 <p class="text-sm font-extrabold text-gray-900">LensMatch Academy Indonesia</p>
-<p class="text-gray-600">Instruktur: {{ $transaction->elearning->author ?? 'Instruktur LensMatch' }}</p>
+<p class="text-gray-600">Instruktur: {{ $transaction->elearning->author ?? '-' }}</p>
 <p class="text-gray-600">Sertifikasi: Sertifikat Digital Resmi Terverifikasi</p>
 </div>
 </div>

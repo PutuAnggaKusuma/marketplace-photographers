@@ -469,7 +469,7 @@
 
                   value="{{ old('banner_url') }}" 
 
-                  placeholder="https://images.unsplash.com/photo-..." 
+                  placeholder="https://..." 
 
                   class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
 

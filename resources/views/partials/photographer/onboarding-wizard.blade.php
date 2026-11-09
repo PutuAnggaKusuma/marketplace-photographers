@@ -407,7 +407,7 @@
                        min="10000" 
                        step="10000"
                        required 
-                       placeholder="500000" 
+                       placeholder="Masukkan nominal tarif paket (min. 10000)" 
                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
               </div>
             </div>
@@ -482,7 +482,7 @@
                      name="nomor_rekening" 
                      value="{{ old('nomor_rekening', $photographer->nomor_rekening) }}" 
                      required 
-                     placeholder="Contoh: 1234567890" 
+                     placeholder="Masukkan nomor rekening bank" 
                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition shadow-2xs font-medium" />
             </div>
 

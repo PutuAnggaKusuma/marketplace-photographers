@@ -80,7 +80,7 @@
 
                        required 
 
-                       placeholder="Contoh: Budi Pratama Santoso" 
+                       placeholder="Masukkan nama lengkap admin" 
 
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('nama') border-rose-500 @enderror">
 
@@ -110,7 +110,7 @@
 
                        required 
 
-                       placeholder="admin.budi@lensmatch.com" 
+                       placeholder="Masukkan alamat email admin" 
 
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('email') border-rose-500 @enderror">
 

@@ -1402,7 +1402,7 @@
 
                                    step="1000"
 
-                                   placeholder="Contoh: 2500000"
+                                   placeholder="Masukkan total tarif"
 
                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
 
@@ -1430,7 +1430,7 @@
 
                                    max="72"
 
-                                   placeholder="Contoh: 3"
+                                   placeholder="Durasi sesi"
 
                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
 

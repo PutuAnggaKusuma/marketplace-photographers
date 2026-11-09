@@ -359,7 +359,7 @@
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200 mb-2">
                       No. WhatsApp Aktif <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="no_wa" x-model="no_wa" required placeholder="08123456789" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
+                    <input type="text" name="no_wa" x-model="no_wa" required placeholder="Contoh: 08xxxxxxxxxx" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition shadow-2xs">
                   </div>
 
                   <div>
@@ -494,11 +494,11 @@
                   </div>
                   <div>
                     <span class="text-gray-400 block text-[11px]">Nomor Rekening:</span>
-                    <span class="font-black font-mono text-gray-900 dark:text-white">{{ $contest->bank_account_number ?? '8271928391' }}</span>
+                    <span class="font-black font-mono text-gray-900 dark:text-white">{{ $contest->bank_account_number ?? '-' }}</span>
                   </div>
                   <div>
                     <span class="text-gray-400 block text-[11px]">Atas Nama:</span>
-                    <span class="font-bold text-gray-900 dark:text-white">{{ $contest->bank_account_holder ?? 'PT LensMatch Indonesia' }}</span>
+                    <span class="font-bold text-gray-900 dark:text-white">{{ $contest->bank_account_holder ?? '-' }}</span>
                   </div>
                 </div>
               </div>

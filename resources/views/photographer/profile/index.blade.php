@@ -167,7 +167,7 @@
                    @keypress="if (!/[0-9]/.test($event.key)) $event.preventDefault()"
                    @input="formData.nomor_telepon = (formData.nomor_telepon || '').replace(/\D/g, ''); touched.nomor_telepon = true; validatePhone()"
                    @blur="touched.nomor_telepon = true; validatePhone()"
-                   placeholder="081234567890" 
+                   placeholder="Contoh: 08xxxxxxxxxx" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.nomor_telepon && errors.nomor_telepon ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
             <p x-show="touched.nomor_telepon && errors.nomor_telepon" x-text="errors.nomor_telepon" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>

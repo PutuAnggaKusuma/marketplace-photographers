@@ -67,7 +67,7 @@
       <h3 class="text-xl font-black text-gray-900 dark:text-white">Masih Memiliki Pertanyaan Lain?</h3>
       <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto">Tim Customer Support LensMatch siap membantu Anda 24/7 melalui layanan obrolan langsung WhatsApp atau Email.</p>
       <div class="flex items-center justify-center gap-3 pt-2">
-        <a href="https://wa.me/6281234567890" target="_blank" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
+        <a href="{{ config('app.support_whatsapp') ? 'https://wa.me/' . config('app.support_whatsapp') : route('public.forum.index') }}" target="_blank" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
           <span>Hubungi via WhatsApp</span>
         </a>
         <a href="mailto:support@lensmatch.com" class="px-5 py-2.5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2">

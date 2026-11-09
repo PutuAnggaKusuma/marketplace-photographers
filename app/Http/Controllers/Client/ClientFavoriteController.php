@@ -19,7 +19,7 @@ class ClientFavoriteController extends Controller
         $user = Auth::user();
         $clientProfile = RoleClient::firstOrCreate(
             ['id_user' => $user->id],
-            ['nama' => $user->nama ?? 'Client LensMatch']
+            ['nama' => $user->nama ?? null]
         );
 
         $perPage = (int) $request->query('per_page', 10);
@@ -61,7 +61,7 @@ class ClientFavoriteController extends Controller
 
         $clientProfile = RoleClient::firstOrCreate(
             ['id_user' => $user->id],
-            ['nama' => $user->nama ?? 'Client LensMatch']
+            ['nama' => $user->nama ?? null]
         );
 
         $existing = ClientFavorite::where('id_client', $clientProfile->id)

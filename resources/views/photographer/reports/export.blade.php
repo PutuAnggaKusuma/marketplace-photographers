@@ -106,7 +106,7 @@
                 <p class="font-extrabold text-sm text-gray-900 tracking-tight">{{ $photographer->nama }}</p>
                 <p class="text-gray-600 leading-relaxed">{{ $photographer->alamat ?? 'Alamat operasional studio tidak dicantumkan' }}</p>
                 <p class="text-gray-500 font-mono text-[11px]">
-                    {{ $photographer->city->name ?? 'Wilayah' }}, {{ $photographer->province->name ?? 'Indonesia' }} • {{ $photographer->nomor_telepon ?? '-' }}
+                    {{ $photographer->city->name ?? '-' }}{{ $photographer->province ? ', ' . $photographer->province->name : '' }} • {{ $photographer->nomor_telepon ?? '-' }}
                 </p>
             </div>
 
@@ -202,7 +202,7 @@
                                     {{ \Carbon\Carbon::parse($c->bookingDetail->booking_date ?? $c->created_at)->format('d/m/Y') }}
                                 </td>
                                 <td class="py-2.5 px-3">
-                                    <span class="font-bold text-gray-900 block">{{ $c->client->nama ?? 'Klien LensMatch' }}</span>
+                                    <span class="font-bold text-gray-900 block">{{ $c->client->nama ?? ($c->client->user->nama ?? '-') }}</span>
                                     <span class="text-[10px] text-gray-500 block truncate max-w-xs">{{ $c->bookingDetail->service->nama_layanan ?? 'Paket Layanan Fotografi' }}</span>
                                 </td>
                                 <td class="py-2.5 px-3 text-right font-mono text-gray-700 whitespace-nowrap">

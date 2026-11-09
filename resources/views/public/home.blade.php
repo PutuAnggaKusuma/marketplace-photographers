@@ -147,7 +147,7 @@
       <div class="space-y-1 lg:border-l lg:border-gray-200/80 lg:dark:border-gray-800 lg:pl-6">
         <div class="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-400">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-          <span class="text-3xl sm:text-4xl font-black tracking-tight">{{ $avgRating }} / 5.0</span>
+          <span class="text-3xl sm:text-4xl font-black tracking-tight">@if($avgRating && $avgRating !== '-') {{ $avgRating }} / 5.0 @else - @endif</span>
         </div>
         <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating Kepuasan Klien</p>
       </div>
@@ -492,7 +492,7 @@
           <span class="text-[11px] font-black text-amber-500 uppercase tracking-widest">Kemitraan Fotografer</span>
           <h2 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">Apakah Anda Fotografer Profesional?</h2>
           <p class="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-xl">
-            Bergabunglah bersama 150+ fotografer di Indonesia. Kelola jadwal ketersediaan, buat paket layanan, dan terima pesanan booking dengan jaminan keamanan pembayaran.
+            Bergabunglah bersama {{ $totalPhotographers }}+ fotografer di Indonesia. Kelola jadwal ketersediaan, buat paket layanan, dan terima pesanan booking dengan jaminan keamanan pembayaran.
           </p>
         </div>
         <a href="{{ url('/register') }}" class="inline-flex items-center gap-2.5 px-8 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold text-sm rounded-xl transition shadow-lg shrink-0">

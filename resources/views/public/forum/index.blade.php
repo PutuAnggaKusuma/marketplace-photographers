@@ -226,7 +226,9 @@
             ];
             $catBadge = $badgeLabels[$post->kategori ?? 'lainnya'] ?? 'LAINNYA';
 
-            $words = explode(' ', $post->user->nama ?? 'Admin LensMatch');
+            $authorName = $post->user->nama ?? ($post->user->email ?? 'Pengguna');
+
+            $words = explode(' ', $authorName);
 
             $inits = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
 
@@ -356,7 +358,7 @@
 
                 <div>
 
-                  <h4 class="font-extrabold text-xs sm:text-sm text-gray-900 dark:text-white line-clamp-1">{{ $post->user->nama ?? 'Admin LensMatch' }}</h4>
+                  <h4 class="font-extrabold text-xs sm:text-sm text-gray-900 dark:text-white line-clamp-1">{{ $post->user->nama ?? ($post->user->email ?? 'Pengguna') }}</h4>
 
                   <p class="text-[10px] text-gray-400 font-medium mt-0.5">{{ $post->created_at->format('Y-m-d') }} • {{ $post->created_at->format('H:i') }}</p>
 

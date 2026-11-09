@@ -658,7 +658,7 @@
                          @input="regForm.nomor_telepon = (regForm.nomor_telepon || '').replace(/\D/g, ''); regTouched.nomor_telepon = true; validateRegisterPhone()"
                          @blur="regTouched.nomor_telepon = true; validateRegisterPhone()"
                          required 
-                         placeholder="081234567890" 
+                         placeholder="Contoh: 08xxxxxxxxxx" 
                          class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                          :class="regErrors.nomor_telepon && regTouched.nomor_telepon ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
                   <p x-show="regErrors.nomor_telepon && regTouched.nomor_telepon" x-text="regErrors.nomor_telepon" x-cloak class="text-[11px] font-bold text-red-500 mt-0.5"></p>
@@ -740,7 +740,7 @@
           <!-- Visual Layer 1: Login Shape (Right Organic Cutout) -->
           <!-- In Login Mode: Bottom-Left is SOLID (No cutout). Bottom-Right has cutout. So place text on bottom-left! -->
           <div class="absolute inset-0 w-full h-full overflow-hidden bg-cover bg-center auth-visual-login"
-               style="clip-path: url(#havenix-shape-right); -webkit-clip-path: url(#havenix-shape-right); background-image: url('https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1080&q=80&auto=format&fit=crop');">
+               style="clip-path: url(#havenix-shape-right); -webkit-clip-path: url(#havenix-shape-right); background-image: url('{{ asset('images/prewedding/prewedding-2.jpg') }}');">
             <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
             <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             
@@ -755,7 +755,7 @@
           <!-- Visual Layer 2: Register Shape (Left Mirrored Organic Cutout) -->
           <!-- In Register Mode: Bottom-Right is SOLID (No cutout). Bottom-Left has cutout. So place text on bottom-right! -->
           <div class="absolute inset-0 w-full h-full overflow-hidden bg-cover bg-center auth-visual-register"
-               style="clip-path: url(#havenix-shape-left); -webkit-clip-path: url(#havenix-shape-left); background-image: url('https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?w=1080&q=80&auto=format&fit=crop');">
+               style="clip-path: url(#havenix-shape-left); -webkit-clip-path: url(#havenix-shape-left); background-image: url('{{ asset('images/prewedding/prewedding-holding-hands.jpg') }}');">
             <!-- Bottom Dark Gradient for Seamless Deep Black Blend (like Image 2) -->
             <div class="absolute inset-0 bg-gradient-to-t from-black from-15% via-black/60 via-45% to-transparent"></div>
             

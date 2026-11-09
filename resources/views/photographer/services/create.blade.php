@@ -120,7 +120,7 @@
 
                        step="1000"
 
-                       placeholder="Contoh: 3500000" 
+                       placeholder="Masukkan nominal tarif paket (min. 10000)" 
 
                        class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('tarif_harga') border-rose-500 @enderror">
 

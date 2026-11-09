@@ -378,7 +378,7 @@
 
                 <!-- Penyelenggara -->
                 <td class="py-4 px-4 sm:px-6 align-middle font-medium text-gray-700 dark:text-gray-300">
-                  {{ $cr->contest->penyelenggara ?? 'LensMatch Official' }}
+                  {{ $cr->contest->penyelenggara ?? '-' }}
                 </td>
 
                 <!-- Biaya Pendaftaran -->

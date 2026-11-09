@@ -234,7 +234,7 @@
 
                                name="jam_mulai" 
 
-                               value="{{ old('jam_mulai', '15:00') }}"
+                               value="{{ old('jam_mulai') }}"
 
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('jam_mulai') border-rose-500 @enderror">
 
@@ -260,7 +260,7 @@
 
                                name="jam_selesai" 
 
-                               value="{{ old('jam_selesai', '20:00') }}"
+                               value="{{ old('jam_selesai') }}"
 
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition @error('jam_selesai') border-rose-500 @enderror">
 

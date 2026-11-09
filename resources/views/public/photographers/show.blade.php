@@ -70,7 +70,7 @@
         
         <!-- Left: Portrait Photo (Refined 4:5 Aspect Ratio, Compact & Proportional) -->
         <div class="w-full sm:w-[200px] md:w-[220px] lg:w-[240px] aspect-[4/5] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 border border-gray-200/80 dark:border-gray-700/80 shadow-none relative">
-          <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/avatar-default.png') }}';" 
+          <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" 
                src="{{ $avatarUrl }}" 
                alt="{{ $photographer->nama }}" 
                draggable="false"
@@ -412,7 +412,7 @@
                          draggable="false"
                          oncontextmenu="return false;"
                          class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 ease-out select-none" 
-                         onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/placeholder.jpg') }}';" />
+                         onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" />
                     
                     <!-- Watermark Hak Cipta Murni Tipografi (Anti-AI Slop: Zero Badge, Zero Box) -->
                     <div class="absolute bottom-3 right-3.5 select-none pointer-events-none text-xs sm:text-sm font-semibold tracking-wider text-white/75 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] z-10">
@@ -441,7 +441,7 @@
                              draggable="false"
                              oncontextmenu="return false;"
                              class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 ease-out select-none" 
-                             onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/placeholder.jpg') }}';" />
+                             onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" />
                         
                         <!-- Watermark Hak Cipta Murni Tipografi (Anti-AI Slop: Zero Badge, Zero Box) -->
                         <div class="absolute bottom-3 right-3.5 select-none pointer-events-none text-xs sm:text-sm font-semibold tracking-wider text-white/75 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] z-10">
@@ -473,7 +473,7 @@
                                draggable="false"
                                oncontextmenu="return false;"
                                class="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500 ease-out select-none"
-                               onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'{{ asset('images/placeholder.jpg') }}';" />
+                               onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" />
 
                           <!-- Watermark Hak Cipta Halus pada Thumbnail -->
                           @if(!($loop->iteration === 3 && $pCount > 4))

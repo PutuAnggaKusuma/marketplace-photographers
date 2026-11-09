@@ -42,7 +42,7 @@ class PhotographerController extends Controller
         $totalPhotographers = RolePhotographer::count();
         $totalCategories = Category::count();
         $showcasePortfolios = PhotographerPortfolio::with(['medias', 'photographer.city', 'photographer.user'])->has('medias')->take(4)->get();
-        $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '5.0';
+        $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
         $totalCompletedBookings = \App\Models\Contract::whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count();
         if ($totalCompletedBookings === 0) {
             $totalCompletedBookings = \App\Models\Contract::count();

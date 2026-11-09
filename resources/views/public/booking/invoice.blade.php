@@ -192,15 +192,15 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs">
             <div>
               <span class="text-gray-400 block text-[11px]">Bank Tujuan</span>
-              <strong class="font-bold text-gray-900 dark:text-white">Bank Central Asia (BCA)</strong>
+              <strong class="font-bold text-gray-900 dark:text-white">{{ config('app.escrow_bank', 'Bank Central Asia (BCA)') }}</strong>
             </div>
             <div>
               <span class="text-gray-400 block text-[11px]">Nomor Rekening</span>
-              <strong class="font-mono font-bold text-gray-900 dark:text-white text-sm">8840-1928-3746</strong>
+              <strong class="font-mono font-bold text-gray-900 dark:text-white text-sm">{{ config('app.escrow_account_number', '8840-1928-3746') }}</strong>
             </div>
             <div>
               <span class="text-gray-400 block text-[11px]">Atas Nama</span>
-              <strong class="font-bold text-gray-900 dark:text-white">PT LensMatch Indonesia</strong>
+              <strong class="font-bold text-gray-900 dark:text-white">{{ config('app.escrow_account_holder', 'PT LensMatch Indonesia') }}</strong>
             </div>
           </div>
 
@@ -223,7 +223,7 @@
         
         <div class="space-y-1">
           <h3 class="text-lg font-black text-gray-900 dark:text-white">Unggah Bukti Transfer</h3>
-          <p class="text-xs text-gray-500">Silakan unggah foto struk transfer ke rekening Bank BCA 8840-1928-3746 a.n. PT LensMatch Indonesia</p>
+          <p class="text-xs text-gray-500">Silakan unggah foto struk transfer ke rekening {{ config('app.escrow_bank', 'Bank BCA') }} {{ config('app.escrow_account_number', '8840-1928-3746') }} a.n. {{ config('app.escrow_account_holder', 'PT LensMatch Indonesia') }}</p>
         </div>
 
         <div class="p-4 bg-gray-50 dark:bg-gray-900/80 border border-gray-100 dark:border-gray-700 rounded-2xl flex justify-between items-center text-xs">

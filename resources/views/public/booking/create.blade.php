@@ -24,7 +24,7 @@
     paymentType: 'full',
     sessionDuration: 2,
     selectedDate: '{{ old('tanggal_sesi', $preselectedDate ?? date('Y-m-d', strtotime('+2 days'))) }}',
-    selectedTime: '{{ old('jam_mulai', '14:00') }}',
+    selectedTime: '{{ old('jam_mulai', '') }}',
     workingHours: {{ Illuminate\Support\Js::from($workingHours ?? []) }},
     availabilities: {{ Illuminate\Support\Js::from($availabilities ?? []) }},
     bookedSlots: {{ Illuminate\Support\Js::from($bookedSlots ?? []) }},

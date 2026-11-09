@@ -395,7 +395,7 @@
               <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                 <td class="py-3.5 px-3 sm:px-4">
                   <div class="space-y-0.5">
-                    <p class="font-extrabold text-gray-900 dark:text-white">{{ $client->nama ?? 'Klien LensMatch' }}</p>
+                    <p class="font-extrabold text-gray-900 dark:text-white">{{ $client->nama ?? ($client->user->nama ?? 'Klien') }}</p>
                     <span class="text-[10px] font-mono text-gray-400">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
                   </div>
                 </td>

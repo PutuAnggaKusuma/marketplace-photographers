@@ -172,6 +172,11 @@ Dokumen ini merupakan panduan serah terima konteks (*handover context*) resmi un
      - Menghapus fallback wilayah default `'Indonesia'` pada favorit klien.
      - Menghapus default value `149000` pada form tambah kursus admin.
      - Menghapus fallback rating palsu `?: 5.0` pada audit ulasan admin.
+15. **Penetapan Standar Baru Rule #104 (Penanganan Data Nullable & Larangan Rekayasa Fallback Fiktif)**:
+   * **Prinsip Data Boleh Kosong (Nullable)**: Sebagian besar entitas data pengguna, nomor kontak, domisili, atau ulasan di sistem LensMatch diperbolehkan kosong (*nullable*). Dilarang keras mengarang nilai dummy palsu (seperti `'Client LensMatch'`, `'Admin LensMatch'`, `'Instruktur LensMatch'`, nomor dummy `'081234567890'`, atau rating rekaan `'5.0'`).
+   * **Formulir Input Bersih**: Seluruh formulir create berawal kosong (`value="{{ old('field') }}"`), tanpa nilai awal rekaan fiktif seperti `Landscape & Alam` atau `Rp 15.000.000`.
+   * **Pembersihan Residu Template Mockup**: Komponen modal template bawaan Pimjo (`Testing Chowdhury`, `randomuser@pimjo.com`, data alamat US) dan mockup `payment/index` dibersihkan total dan dihubungkan ke data nyata atau empty state jujur.
+   * **Seeder Compliance**: Seluruh kode `#KTRK-` pada `ActivityLogSeeder` dibersihkan menjadi `KTRK-` murni tanpa tanda `#`.
 
 ---
 

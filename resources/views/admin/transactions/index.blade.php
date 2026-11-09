@@ -1690,7 +1690,7 @@
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Catatan / Nomor Referensi Transfer</label>
 
-                    <textarea name="payout_notes" x-model="payoutNotes" rows="2" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Contoh: Transfer bank BCA via nomor ref TRX123456..."></textarea>
+                    <textarea name="payout_notes" x-model="payoutNotes" rows="2" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Masukkan catatan atau nomor referensi transfer bank..."></textarea>
 
                 </div>
 

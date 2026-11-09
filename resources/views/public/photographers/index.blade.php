@@ -118,7 +118,7 @@
           <div class="absolute bottom-6 left-0 sm:left-2 z-30 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 text-left transform -rotate-2 hover:rotate-0 transition duration-200">
             <div class="flex items-center gap-3">
               <div>
-                <p class="text-xs font-black text-gray-900 dark:text-white leading-tight">{{ $avgRating }} / 5.0</p>
+                <p class="text-xs font-black text-gray-900 dark:text-white leading-tight">@if($avgRating && $avgRating !== '-') {{ $avgRating }} / 5.0 @else - @endif</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 font-semibold">Rata-rata Rating</p>
               </div>
               <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
