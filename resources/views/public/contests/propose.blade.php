@@ -59,34 +59,6 @@
 
 
 
-    @if($errors->any())
-
-      <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs text-rose-800 dark:text-rose-300 font-bold space-y-1">
-
-        <div class="flex items-center gap-2 font-black">
-
-          <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-
-          <span>Terdapat beberapa data yang perlu diperbaiki:</span>
-
-        </div>
-
-        <ul class="list-disc list-inside space-y-0.5 text-rose-700 dark:text-rose-400 font-normal pl-2">
-
-          @foreach($errors->all() as $error)
-
-            <li>{{ $error }}</li>
-
-          @endforeach
-
-        </ul>
-
-      </div>
-
-    @endif
-
-
-
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
 
@@ -280,7 +252,8 @@
 
               <div class="flex flex-col sm:flex-row items-center gap-5">
 
-                <div class="relative w-full sm:w-48 h-32 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800 border-2 border-amber-400 shadow-xs shrink-0 flex items-center justify-center">
+                <div class="relative w-full sm:w-48 h-32 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800 border-2 shadow-xs shrink-0 flex items-center justify-center transition"
+                     :class="bannerError ? 'border-red-400' : 'border-amber-400'">
 
                   <template x-if="preview">
 
@@ -312,13 +285,21 @@
 
                     <span>Pilih File Banner dari Perangkat</span>
 
-                    <input type="file" name="banner_file" accept="image/*" @change="handleBanner($event)" class="hidden">
+                    <input type="file" name="banner_file" accept="image/jpeg,image/png,image/webp" @change="handleBanner($event)" class="hidden">
 
                   </label>
 
+                  <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
+                  @error('banner_file')
+
+                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+
+                  @enderror
+
                   <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
 
-                    Format gambar (JPG, JPEG, PNG, WEBP). Disarankan resolusi horizontal 16:9 (minimal 1200x675 px) maksimal 5MB.
+                    Format gambar (JPG, JPEG, PNG, WEBP). Disarankan resolusi horizontal 16:9 (minimal 1200x675 px) maksimal 5 MB.
 
                   </p>
 
@@ -349,6 +330,12 @@
                   class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
 
                 >
+
+                @error('banner_url')
+
+                  <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+
+                @enderror
 
               </div>
 
@@ -547,12 +534,17 @@
 function proposeContestApp() {
   return {
     preview: null,
+    bannerError: '',
     handleBanner(e) {
-      const file = e.target.files[0];
+      const res = window.validateUploadFiles(e.target, { maxMB: 5 });
+      if (res.hasErrors) {
+        this.bannerError = res.errorMessage;
+        return;
+      }
+      const file = res.validFiles[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => { this.preview = event.target.result; };
-        reader.readAsDataURL(file);
+        this.bannerError = '';
+        this.preview = URL.createObjectURL(file);
       }
     },
     categoryDropdownOpen: false,

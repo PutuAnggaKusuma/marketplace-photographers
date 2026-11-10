@@ -671,9 +671,47 @@
 
           <!-- Write Comment Box Container -->
 
+          @php
+            $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+          @endphp
+
           @auth
 
-            <form action="{{ route('public.forum.comment', $post->id) }}" method="POST"
+            @if($isHoldPhotographer)
+
+              <button type="button"
+                      @click="openPhotographerHoldModal('menulis komentar forum')"
+                      class="w-full text-left flex items-center justify-between p-4 sm:p-5 bg-gray-50/90 dark:bg-gray-800/60 border border-dashed border-gray-300 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 rounded-2xl sm:rounded-3xl transition duration-200 group cursor-pointer">
+
+                <div class="flex items-center gap-3 sm:gap-3.5">
+                  <div class="w-10 h-10 rounded-xl bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/40 flex items-center justify-center shrink-0 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                    </svg>
+                  </div>
+
+                  <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">
+                      Verifikasi Akun untuk Menulis Komentar
+                    </h4>
+                    <p class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
+                      Klik di sini untuk melihat status akun fotografer Anda
+                    </p>
+                  </div>
+                </div>
+
+                <div class="shrink-0 pl-2">
+                  <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-400 group-hover:bg-amber-500 text-gray-900 font-extrabold text-xs rounded-xl shadow-xs transition">
+                    <span>Lihat Status</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                  </span>
+                </div>
+
+              </button>
+
+            @else
+
+              <form action="{{ route('public.forum.comment', $post->id) }}" method="POST"
                   x-data="{
                     comment: '',
                     touched: {{ $errors->has('comment') ? 'true' : 'false' }},
@@ -750,6 +788,8 @@
               </div>
 
             </form>
+
+            @endif
 
           @else
 
@@ -892,15 +932,25 @@
 
                               <div class="py-0.5">
 
-                                <button type="button" 
+                                @if($isHoldPhotographer)
+                                  <button type="button"
+                                          @click="menuOpen = false; openPhotographerHoldModal('melaporkan komentar forum');"
+                                          class="w-full text-left px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">
 
-                                        @click="openReportModal({{ $comment->id }}, {{ json_encode($comment->user->nama ?? 'Anggota Komunitas') }}, {{ json_encode(Str::limit($comment->comment, 80)) }}); menuOpen = false;"
+                                    Laporkan Komentar
 
-                                        class="w-full text-left px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">
+                                  </button>
+                                @else
+                                  <button type="button" 
 
-                                  Laporkan Komentar
+                                          @click="openReportModal({{ $comment->id }}, {{ json_encode($comment->user->nama ?? 'Anggota Komunitas') }}, {{ json_encode(Str::limit($comment->comment, 80)) }}); menuOpen = false;"
 
-                                </button>
+                                          class="w-full text-left px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">
+
+                                    Laporkan Komentar
+
+                                  </button>
+                                @endif
 
                               </div>
 
@@ -987,61 +1037,97 @@
 
                       @auth
 
-                        <button type="button" 
+                        @if($isHoldPhotographer)
 
-                                @click="if(!liked) { 
+                          <button type="button"
+                                  @click="openPhotographerHoldModal('menyukai komentar forum')"
+                                  class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 hover:text-amber-500 transition cursor-pointer">
 
-                                  likesCount++; 
+                            <svg class="w-4 h-4 text-gray-400 hover:text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
 
-                                  liked = true; 
+                            <span x-text="likesCount"></span>
 
-                                  fetch('/forum/comment/{{ $comment->id }}/like', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); 
+                          </button>
 
-                                }" 
+                          <button type="button"
+                                  @click="openPhotographerHoldModal('memberi tanda tidak suka pada komentar forum')"
+                                  class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 hover:text-red-500 transition cursor-pointer">
 
-                                :class="liked ? 'text-amber-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-amber-500'" 
+                            <svg class="w-4 h-4 transform rotate-180 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
 
-                                class="flex items-center gap-1.5 transition">
+                            <span x-text="dislikesCount"></span>
 
-                          <svg class="w-4 h-4" :class="liked ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                          </button>
 
-                          <span x-text="likesCount"></span>
+                          <button type="button"
+                                  @click="openPhotographerHoldModal('membalas komentar forum')"
+                                  class="flex items-center gap-1.5 hover:text-amber-500 transition cursor-pointer">
 
-                        </button>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+
+                            <span>Reply</span>
+
+                          </button>
+
+                        @else
+
+                          <button type="button" 
+
+                                  @click="if(!liked) { 
+
+                                    likesCount++; 
+
+                                    liked = true; 
+
+                                    fetch('/forum/comment/{{ $comment->id }}/like', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); 
+
+                                  }" 
+
+                                  :class="liked ? 'text-amber-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-amber-500'" 
+
+                                  class="flex items-center gap-1.5 transition">
+
+                            <svg class="w-4 h-4" :class="liked ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+
+                            <span x-text="likesCount"></span>
+
+                          </button>
 
 
 
-                        <button type="button" 
+                          <button type="button" 
 
-                                @click="if(!disliked) { 
+                                  @click="if(!disliked) { 
 
-                                  dislikesCount++; 
+                                    dislikesCount++; 
 
-                                  disliked = true; 
+                                    disliked = true; 
 
-                                  fetch('/forum/comment/{{ $comment->id }}/dislike', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); 
+                                    fetch('/forum/comment/{{ $comment->id }}/dislike', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); 
 
-                                }" 
+                                  }" 
 
-                                :class="disliked ? 'text-red-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-red-500'" 
+                                  :class="disliked ? 'text-red-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-red-500'" 
 
-                                class="flex items-center gap-1.5 transition">
+                                  class="flex items-center gap-1.5 transition">
 
-                          <svg class="w-4 h-4 transform rotate-180" :class="disliked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                            <svg class="w-4 h-4 transform rotate-180" :class="disliked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
 
-                          <span x-text="dislikesCount"></span>
+                            <span x-text="dislikesCount"></span>
 
-                        </button>
+                          </button>
 
 
 
-                        <button type="button" @click="replyOpen = !replyOpen" class="flex items-center gap-1.5 hover:text-amber-500 transition cursor-pointer">
+                          <button type="button" @click="replyOpen = !replyOpen" class="flex items-center gap-1.5 hover:text-amber-500 transition cursor-pointer">
 
-                          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
 
-                          <span>Reply</span>
+                            <span>Reply</span>
 
-                        </button>
+                          </button>
+
+                        @endif
 
                       @else
 
@@ -1080,7 +1166,7 @@
 
 
                     <!-- Inline Reply Form (Shown when user clicks Reply) -->
-                    @auth
+                    @if(auth()->check() && !$isHoldPhotographer)
                       <div x-show="replyOpen" x-cloak class="mt-2.5">
                         <form action="{{ route('public.forum.comment', $post->id) }}" method="POST"
                               x-data="{
@@ -1133,7 +1219,7 @@
                           </div>
                         </form>
                       </div>
-                    @endauth
+                    @endif
 
                     @if($comment->replies && $comment->replies->count() > 0)
                       {{-- See Replies Toggle (ONLY Rendered When Comment ACTUALLY Has Child Replies) --}}
@@ -1171,7 +1257,11 @@
                                       @auth
                                         @if(auth()->id() !== $reply->id_user)
                                           <div class="py-0.5">
-                                            <button type="button" @click="openReportModal({{ $reply->id }}, {{ json_encode($reply->user->nama ?? 'Anggota Komunitas') }}, {{ json_encode(Str::limit($reply->comment, 80)) }}); rMenuOpen = false;" class="w-full text-left px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">Laporkan</button>
+                                            @if($isHoldPhotographer)
+                                              <button type="button" @click="rMenuOpen = false; openPhotographerHoldModal('melaporkan komentar forum');" class="w-full text-left px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">Laporkan</button>
+                                            @else
+                                              <button type="button" @click="openReportModal({{ $reply->id }}, {{ json_encode($reply->user->nama ?? 'Anggota Komunitas') }}, {{ json_encode(Str::limit($reply->comment, 80)) }}); rMenuOpen = false;" class="w-full text-left px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer">Laporkan</button>
+                                            @endif
                                           </div>
                                         @else
                                           <div class="py-0.5">
@@ -1199,23 +1289,41 @@
                                 <!-- Reply Action Row (Likes, Dislikes, Reply back) -->
                                 <div class="mt-1 flex items-center gap-3.5 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
                                   @auth
-                                    <button type="button" 
-                                            @click="if(!rLiked) { replyLikes++; rLiked = true; fetch('/forum/comment/{{ $reply->id }}/like', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); }" 
-                                            :class="rLiked ? 'text-amber-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-amber-500'" 
-                                            class="flex items-center gap-1 transition cursor-pointer">
-                                      <svg class="w-3.5 h-3.5" :class="rLiked ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-                                      <span x-text="replyLikes"></span>
-                                    </button>
-                                    <button type="button" 
-                                            @click="if(!rDisliked) { replyDislikes++; rDisliked = true; fetch('/forum/comment/{{ $reply->id }}/dislike', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); }" 
-                                            :class="rDisliked ? 'text-red-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-red-500'" 
-                                            class="flex items-center gap-1 transition cursor-pointer">
-                                      <svg class="w-3.5 h-3.5 transform rotate-180" :class="rDisliked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-                                      <span x-text="replyDislikes"></span>
-                                    </button>
-                                    <button type="button" @click="replyOpen = true" class="flex items-center gap-1 hover:text-amber-500 transition cursor-pointer">
-                                      <span>Reply</span>
-                                    </button>
+                                    @if($isHoldPhotographer)
+                                      <button type="button"
+                                              @click="openPhotographerHoldModal('menyukai komentar forum')"
+                                              class="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-amber-500 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 text-gray-400 hover:text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                                        <span x-text="replyLikes"></span>
+                                      </button>
+                                      <button type="button"
+                                              @click="openPhotographerHoldModal('memberi tanda tidak suka pada komentar forum')"
+                                              class="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-red-500 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 transform rotate-180 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                                        <span x-text="replyDislikes"></span>
+                                      </button>
+                                      <button type="button" @click="openPhotographerHoldModal('membalas komentar forum')" class="flex items-center gap-1 hover:text-amber-500 transition cursor-pointer">
+                                        <span>Reply</span>
+                                      </button>
+                                    @else
+                                      <button type="button" 
+                                              @click="if(!rLiked) { replyLikes++; rLiked = true; fetch('/forum/comment/{{ $reply->id }}/like', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); }" 
+                                              :class="rLiked ? 'text-amber-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-amber-500'" 
+                                              class="flex items-center gap-1 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" :class="rLiked ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                                        <span x-text="replyLikes"></span>
+                                      </button>
+                                      <button type="button" 
+                                              @click="if(!rDisliked) { replyDislikes++; rDisliked = true; fetch('/forum/comment/{{ $reply->id }}/dislike', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }); }" 
+                                              :class="rDisliked ? 'text-red-500 font-black' : 'text-gray-600 dark:text-gray-300 hover:text-red-500'" 
+                                              class="flex items-center gap-1 transition cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 transform rotate-180" :class="rDisliked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                                        <span x-text="replyDislikes"></span>
+                                      </button>
+                                      <button type="button" @click="replyOpen = true" class="flex items-center gap-1 hover:text-amber-500 transition cursor-pointer">
+                                        <span>Reply</span>
+                                      </button>
+                                    @endif
                                   @else
                                     <button type="button" @click="handleGuestClick()" class="flex items-center gap-1 hover:text-amber-500 transition cursor-pointer">
                                       <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.58 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>

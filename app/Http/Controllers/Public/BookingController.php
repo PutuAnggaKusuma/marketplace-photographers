@@ -717,7 +717,15 @@ class BookingController extends Controller
 
             $request->validate([
 
-                'bukti_transfer' => 'image|max:10240',
+                'bukti_transfer' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
+
+            ], [
+
+                'bukti_transfer.image' => 'Bukti transfer harus berupa gambar.',
+
+                'bukti_transfer.mimes' => 'Format bukti transfer harus JPG, PNG, atau WEBP.',
+
+                'bukti_transfer.max' => 'Ukuran file bukti transfer maksimal 10 MB.',
 
             ]);
 

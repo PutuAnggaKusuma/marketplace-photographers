@@ -22,26 +22,35 @@ class EnsurePhotographerVerified
         }
 
         $photographer = $user->rolePhotographer;
+        $holdState = null;
+        $message = null;
+
         if (!$photographer) {
-            return redirect()->route('photographer.profile')
-                ->with('warning', 'Silakan lengkapi profil Anda terlebih dahulu.');
+            $holdState = 'incomplete';
+            $message = 'Lengkapi profil fotografer Anda terlebih dahulu.';
+        } elseif ($photographer->status_verifikasi === 'ditolak') {
+            $holdState = 'rejected';
+            $message = 'Pendaftaran akun fotografer Anda ditolak. Perbaiki profil Anda agar dapat ditinjau ulang.';
+        } elseif (!$photographer->isProfileComplete()) {
+            $count = count($photographer->getMissingProfileFields());
+            $holdState = 'incomplete';
+            $message = "Fitur belum dapat diakses. Profil Anda masih kurang {$count} data.";
+        } elseif ($photographer->status_verifikasi !== 'terverifikasi') {
+            $holdState = 'pending';
+            $message = 'Profil Anda masih menunggu verifikasi Admin.';
         }
 
-        if (!$photographer->isProfileComplete()) {
-            $missing = $photographer->getMissingProfileFields();
-            $count = count($missing);
-            return redirect()->route('photographer.profile')
-                ->with('warning', "Fitur belum dapat diakses. Anda masih kurang {$count} data untuk melengkapi profil Anda.");
-        }
+        if ($holdState !== null) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'hold_state' => $holdState,
+                    'message' => $message,
+                    'redirect' => route('photographer.profile'),
+                ], 403);
+            }
 
-        if ($photographer->status_verifikasi === 'ditolak') {
-            return redirect()->route('photographer.profile')
-                ->with('warning', 'Pendaftaran Anda ditolak. Silakan periksa catatan penolakan dan perbaiki profil Anda.');
-        }
-
-        if ($photographer->status_verifikasi !== 'terverifikasi') {
-            return redirect()->route('photographer.profile')
-                ->with('warning', 'Profil Anda telah lengkap, namun akun Anda masih menunggu proses verifikasi Admin.');
+            return redirect()->route('photographer.profile')->with('warning', $message);
         }
 
         return $next($request);

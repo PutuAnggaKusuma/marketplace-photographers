@@ -57,6 +57,7 @@
         </main>
       </div>
     </div>
+    @include('partials.shared.file-upload-validator-js')
     @include('partials.shared.confirm-modal')
   @include('partials.shared.toast-notification')
   @include('partials.shared.dashboard-live-filter-js')

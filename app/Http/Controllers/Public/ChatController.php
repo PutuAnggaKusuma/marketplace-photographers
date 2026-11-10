@@ -537,6 +537,10 @@ class ChatController extends Controller
             'message' => ['nullable', 'string', 'max:2000'],
             'reply_to_id' => ['nullable', 'exists:chat_messages,id'],
             'attachment' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ], [
+            'attachment.file' => 'Lampiran foto tidak valid.',
+            'attachment.mimes' => 'Format lampiran foto harus JPG, PNG, atau WEBP.',
+            'attachment.max' => 'Ukuran lampiran foto maksimal 5 MB.',
         ]);
 
         if (empty(trim($request->message ?? '')) && !$request->hasFile('attachment')) {

@@ -19,20 +19,6 @@
         @endif
     </div>
 
-    <!-- Flash Messages -->
-    @if(session('success'))
-        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs text-rose-800 dark:text-rose-300 font-bold flex items-center gap-2">
-            <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
     <!-- Main Navigation Tabs (Rule #78 Compliant: Active Text Underline Standard & Counter Pill Badge) -->
     <div class="flex items-center gap-6 overflow-x-auto pb-1">
         <a href="{{ route('photographer.availability', ['tab' => 'weekly']) }}" 

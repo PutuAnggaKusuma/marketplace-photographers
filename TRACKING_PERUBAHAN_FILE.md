@@ -18,6 +18,219 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ## Riwayat Log Perubahan
 
+---
+
+### [2026-11-10 17:37 WITA] — Penyelarasan Tata Letak Halaman Verifikasi Fotografer Admin (`/admin/photographers/{id}`) dengan Form Profil Fotografer
+
+* **Modul / Fitur**:
+  - Halaman detail audit dan verifikasi mitra fotografer Admin (`resources/views/admin/photographers/show.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/photographers/show.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Versi awal memecah informasi ke dalam 5 kartu terpisah pada grid 2 kolom sehingga kartu `3. BIO` menyisakan ruang kosong panjang di bawahnya, menduplikasi tampilan data identitas dan tombol `Kembali`, memakai bingkai kuning mencolok di sekeliling foto, serta menampilkan 4 titik hijau indikator kelengkapan.
+    * Tautan Instagram berbentuk username polos (misal `kenjiro`) terhubung ke URL `https://kenjiro`, dan modal konfirmasi `Verifikasi Fotografer` memakai `type: 'info'` sehingga tombolnya berwarna merah alih-alih hijau emerald.
+  * **After**:
+    * Tata letak diselaraskan penuh mengikuti struktur kartu tunggal pada `resources/views/photographer/profile/index.blade.php` (`rounded-3xl p-6 sm:p-8 space-y-6`):
+      * Bilah status ringkas di atas kartu induk memuat progres bagian `(X/4 bagian)`, status verifikasi, tanggal daftar, persentase kelengkapan, serta daftar field yang belum diisi (tanpa 4 titik status sesuai Rule #67).
+      * Banner merah penolakan (`Pendaftaran Ditolak`) tampil tepat di atas bilah kelengkapan saat status `ditolak`, mengikuti posisi di halaman profil fotografer.
+      * **1. Kontak** (grid 2 kolom): `Nama Lengkap` (beserta info `Akun:` hanya jika nama akun berbeda), `Email`, `Nomor WhatsApp` (disertai link `Chat WhatsApp` di sisi kanan label), dan `Instagram` (URL resolver mendukung format handle `@username` / `username`).
+      * **2. Domisili & Kategori** (grid 2 kolom): `Provinsi`, `Kota / Kabupaten`, `Alamat`, dan `Kategori` (menampilkan hitungan `N dipilih` dan daftar kategori sejajar tinggi field).
+      * **3. Bio**: kontainer deskripsi lebar penuh (`min-h-[110px]`) atau teks redup `Belum diisi`.
+      * **4. Foto Profil & Sampul** (grid 2 kolom seimbang): `Foto Profil` persegi (`w-28 h-28`) di kiri dan `Foto Sampul` lanskap (`w-full h-44 sm:h-48`) di kanan dengan bingkai netral, overlay lightbox pratinjau penuh saat gambar ada, serta kotak dashed ikon kamera + teks `Belum diunggah` saat kosong (tanpa memicu lightbox).
+      * **5. Rekening Bank** (grid 3 kolom): `Nama Bank`, `Nomor Rekening` monospace, dan `Nama Pemilik Rekening`.
+    * Tombol `Lihat Etalase Publik` (kondisional jika terverifikasi dan onboarded) serta `< Kembali` berada di kanan atas judul, sedangkan tombol keputusan (`Hapus`, `Tolak Pendaftaran`, `Verifikasi Fotografer` / `Batalkan Verifikasi`) tersusun rata kanan di bagian bawah kartu induk (`Rule #74`).
+    * Perbaikan teknis: modal `Verifikasi Fotografer` memakai `type: 'success'` dan `bg-emerald-600` (`Rule #91`), modal tolak dan hapus tetap otomatis terbuka kembali bila ada error validasi server dengan `old()`, kelas Tailwind v4 non-eksisten `dark:hover:bg-gray-750` diperbaiki ke `dark:hover:bg-gray-700`, dan teks bebas kata ganda atau simbol `&` redundan (`Rule #70`).
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #22, #41, #42, #51, #59, #61, #62, #67, #70, #72, #74, #91, #94, #95, #96, #97, #104.
+* **Hasil Pengujian & Verifikasi**:
+  * Skrip uji HTTP render 5 skenario (`verify_admin_photographer_show.php`: menunggu 100%, menunggu belum lengkap + foto null + nama akun berbeda, ditolak dengan catatan, terverifikasi + onboarded, POST `verify`/`unverify`/`reject` + re-open modal error validasi + keseimbangan tag Blade 74 `<div>` & 11 `<button>`): **PASS**.
+  * `artisan view:cache` dan `artisan optimize:clear` (PHP 8.4): **PASS**.
+  * `npm run build` (Vite production bundle, built in 779ms) + verifikasi token CSS Tailwind v4 + live server `http://127.0.0.1:8000` (HTTP 200): **PASS**.
+
+---
+
+### [2026-11-10 16:58 WITA] — Visibilitas Kartu Kelengkapan Profil Fotografer Berdasarkan Status Verifikasi
+
+* **Modul / Fitur**:
+  - Indikator `Kelengkapan Profil` di halaman Kelola Profil Fotografer (`resources/views/photographer/profile/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/profile/index.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Kartu `Kelengkapan Profil` tampil permanen untuk seluruh status verifikasi fotografer, termasuk saat status sudah `terverifikasi`. Selain itu, saat status `ditolak` dengan isian 100%, label kanan kartu masih menampilkan `Menunggu verifikasi admin`.
+  * **After**:
+    * Kartu `Kelengkapan Profil` dibungkus kondisi `@if(!$isVerified)` menggunakan `$photographer->isVerified()` sehingga otomatis disembunyikan apabila akun fotografer sudah berstatus `terverifikasi`.
+    * Kartu tetap tampil untuk status di luar `terverifikasi` (`menunggu` maupun `ditolak`) dengan tiga label status langsung: `Kurang N data` jika belum 100%, `Ditolak admin` jika status `ditolak`, serta `Menunggu verifikasi admin` jika sudah lengkap menanti peninjauan admin.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #42 (Strict Scope), Rule #70 (Copywriting Ringkas tanpa simbol `&`), Rule #90 (Anti-Double UI).
+* **Hasil Pengujian & Verifikasi**:
+  * Simulasi render Blade lintas 5 skenario status DB (transaksi rollback via `verify_profile_progress_visibility.php`): **PASS** (`menunggu` belum lengkap = VISIBLE, `menunggu` 100% = VISIBLE, `ditolak` 100% = VISIBLE + `Ditolak admin`, `terverifikasi` = HIDDEN, batal verifikasi = VISIBLE).
+  * `artisan view:cache` lalu `artisan optimize:clear` (PHP 8.4): **PASS**.
+  * `npm run build`: **PASS** (built in 759ms).
+
+---
+
+### [2026-11-10 16:47 WITA] — Penyeragaman Feedback Pasca-Simpan Berbasis Toast Notification (Eliminasi Kotak Alert Inline)
+
+* **Modul / Fitur**:
+  - Penghapusan kotak alert flash inline (`session('success')`, `session('error')`, `session('warning')`, `session('info')`) serta kotak ringkasan `$errors->any()` pada 16 view di modul Fotografer, Admin, serta Publik yang sudah menggunakan layout utama bertumpu pada `partials/shared/toast-notification.blade.php`.
+* **File yang Diubah**:
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/photographer/portfolio/index.blade.php`
+  * `resources/views/photographer/services/index.blade.php`
+  * `resources/views/photographer/faqs/index.blade.php`
+  * `resources/views/admin/admins/index.blade.php`
+  * `resources/views/admin/categories/index.blade.php`
+  * `resources/views/admin/elearning/index.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/public/profile/index.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/public/contests/my-proposals.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Halaman yang mewarisi master layout (`layouts.app`, `layouts.photographer`, `layouts.admin`) memunculkan dua notifikasi sekaligus saat menyimpan data: Toast melayang di pojok kanan atas ditambah kotak alert penuh di bagian atas konten. Form tertentu juga masih memakai kotak ringkasan `$errors->any()` di atas form.
+  * **After**:
+    * Seluruh kotak alert flash inline dihapus di 16 halaman agar umpan balik simpan/ubah/hapus murni memakai `partials/shared/toast-notification.blade.php`.
+    * Kotak ringkasan `$errors->any()` dihapus pada form yang sudah memiliki validasi inline per field.
+    * Ditambahkan fallback `@error('banner_url')` inline pada `public/contests/propose.blade.php`, `@error('alamat')` serta `@error('deskripsi_bio')` pada `public/profile/index.blade.php`, serta pemicuan `@dispatch('show-toast')` saat ada error validasi server pada form modal/lipat di `photographer/faqs/index.blade.php` maupun `public/contests/show.blade.php`.
+    * Banner status permanen berbasis database (alasan penolakan profil fotografer pada `photographer/profile/index.blade.php` serta status menunggu verifikasi transfer pada `public/contests/show.blade.php`) dan halaman auth mandiri (`public/auth/*`) tetap dipertahankan.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #19 (Toast Notification Shared), Rule #42 (Strict Scope), Rule #70 (Copywriting Ringkas tanpa simbol `&`).
+* **Hasil Pengujian & Verifikasi**:
+  * Scan audit seluruh view (`audit_flash_boxes.php` + `find_all_session.php`): **PASS** (0 kotak flash duplikat tersisa di seluruh halaman ber-layout).
+  * `artisan view:cache` + `artisan optimize:clear` (PHP 8.4): **PASS**.
+  * `npm run build` (Vite production bundle): **PASS** (built in 859ms).
+
+---
+
+### [2026-11-10 16:22 WITA] — Validasi Ukuran dan Format File Real-Time Lintas Sistem (19 Input Upload)
+
+* **Modul / Fitur**:
+  - Helper JS Terpusat (`resources/views/partials/shared/file-upload-validator-js.blade.php`) dan integrasi di seluruh master layout (`layouts/app.blade.php`, `layouts/photographer.blade.php`, `layouts/admin.blade.php`).
+  - Seluruh 19 `<input type="file">` aktif di modul Fotografer, Publik/Klien, dan Admin, termasuk pembaruan pesan validasi berbahasa Indonesia pada 9 controller backend.
+* **File yang Diubah**:
+  * `resources/views/partials/shared/file-upload-validator-js.blade.php` *(File Baru)*
+  * `resources/views/layouts/app.blade.php`
+  * `resources/views/layouts/photographer.blade.php`
+  * `resources/views/layouts/admin.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/photographer/portfolio/create.blade.php`
+  * `resources/views/photographer/portfolio/edit.blade.php`
+  * `resources/views/photographer/chat/index.blade.php`
+  * `resources/views/public/profile/index.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `resources/views/public/forum/index.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/admin/contests/create.blade.php`
+  * `resources/views/admin/contests/edit.blade.php`
+  * `resources/views/admin/elearning/create.blade.php`
+  * `resources/views/admin/elearning/edit.blade.php`
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+  * `app/Http/Controllers/Photographer/PortfolioController.php`
+  * `app/Http/Controllers/Public/ContestProposalController.php`
+  * `app/Http/Controllers/Public/ContestController.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `app/Http/Controllers/Admin/ContestController.php`
+  * `app/Http/Controllers/Admin/ElearningController.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Pemilihan file melebihi batas ukuran (misalnya `foto_sampul_file` > 20 MB di profil fotografer) maupun format non-gambar tidak ditolak seketika di sisi klien. File besar tetap menempel di input, memicu loading unggahan panjang saat submit, dan berakhir dengan pesan error bahasa Inggris Laravel (`The ... must not be greater than ... kilobytes.`) di banner atas.
+  * **After**:
+    * Dibuat helper global `window.formatFileSizeMB(bytes)` dan `window.validateUploadFiles(inputOrFiles, options)` di `partials/shared/file-upload-validator-js.blade.php` serta dimuat di ketiga master layout.
+    * Input file tunggal menolak file berukuran melebihi batas (`5 MB` chat/proposal/bukti transfer lomba, `10 MB` avatar/thumbnail/poster admin/invoice/payout/CV, `20 MB` sampul profil/portofolio, `50 MB` media kurikulum) maupun format tidak sesuai langsung saat `@change`, mengosongkan nilai input (`input.value = ''`), menjaga pratinjau sebelumnya agar tidak tertimpa, memberi border merah pada kontainer, dan menampilkan pesan error inline berbahasa Indonesia persis di bawah field.
+    * Input multi-file (`foto_files[]` pada tambah/edit portofolio serta modal forum) menyaring file melalui `DataTransfer` agar file yang valid tetap masuk sedangkan file yang kebesaran/tidak valid ditolak sambil menampilkan nama file penolakan secara inline.
+    * Aturan validasi serta pesan error backend pada controller terkait diselaraskan ke bahasa Indonesia yang singkat dan konsisten (`mimes:jpeg,png,jpg,webp`, ekstensi CV `pdf,doc,docx,zip,rar`, serta batas MB sesuai frontend).
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #51, #70, #94, #95, #97, #104 (Copywriting berbahasa Indonesia ringkas, to-the-point, tanpa simbol `&` redundan maupun teks Inggris).
+* **Hasil Pengujian & Verifikasi**:
+  * Scan seluruh Blade & cek kelengkapan validasi client-side + server-side (`verify_realtime_file_validation.php`): **44/44 PASS** (seluruh 19 `<input type="file">` aktif tercover, zero pesan `"kilobytes"`).
+  * `php -l` seluruh controller termodifikasi (PHP 8.4): **PASS**.
+  * `artisan view:cache` & `artisan view:clear` (PHP 8.4): **PASS**.
+  * `npm run build` (Vite production bundle): **PASS** (built in 849ms).
+
+---
+
+### [2026-11-10 14:44 WITA] — Pemisahan Tab Data Profil dengan Ubah Kata Sandi pada Profil Fotografer
+
+* **Modul / Fitur**:
+  - Halaman Kelola Profil Fotografer (`resources/views/photographer/profile/index.blade.php`) dan Handler Pembaruan Kata Sandi (`app/Http/Controllers/Public/ProfileController.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/profile/index.blade.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Form `Kata Sandi` diletakkan tepat di bawah `5. Rekening Bank` dengan judul bernomor `6. Kata Sandi` serta tombol `Perbaharui Data` terpisah dan placeholder `••••••••`. Fotografer baru yang sudah membuat kata sandi saat pendaftaran mengira bagian ini langkah wajib ke-6 untuk melengkapi profil verifikasi, sehingga terblokir pesan `"Kata sandi saat ini wajib diisi."` saat mencoba menyimpan profil.
+  * **After**:
+    * Memisahkan halaman `Kelola Profil` menjadi dua tab horizontal (`Data Profil` | `Ubah Kata Sandi`) bergaya active text underline tanpa garis pembatas penuh.
+    * Tab `Data Profil` hanya menampilkan indikator kelengkapan profil serta bagian wajib verifikasi nomor `1` hingga `5` tanpa input kata sandi sama sekali.
+    * Tab `Ubah Kata Sandi` bersifat opsional dengan judul `Ubah Kata Sandi` (tanpa nomor `6.`), teks penjelas bahwa kata sandi sudah aktif sejak pendaftaran, placeholder instruksional `"Masukkan kata sandi saat ini"` (menggantikan `••••••••`), atribut `autocomplete`, banner alert `session('error')`, serta sinkronisasi error validasi server dengan state Alpine JS dan fallback autofill DOM.
+    * `ProfileController::updatePassword()` kini menyertakan `with('active_tab', 'password')`, `withErrors(['current_password' => ...])`, serta `with('error', ...)` agar tab `Ubah Kata Sandi` tetap terbuka otomatis setelah submit ubah kata sandi maupun ketika validasi gagal.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #20 (Visual Hierarchy & Card Spacing), Rule #22 (Anti Decorative Icon Slop), Rule #49 (Strict Scope Compliance), Rule #51 & #70 (Concise Copywriting tanpa simbol `&`), Rule #73 (Layout Card Password Horizontal 3 Kolom), Rule #76 (`Perbaharui Data`), Rule #78 (Tab Navigasi Horizontal Underline), Rule #104 (Placeholder Instruksional).
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l app/Http/Controllers/Public/ProfileController.php` (PHP 8.4): **PASS** (No syntax errors detected).
+  * `artisan view:cache` & `artisan view:clear` (PHP 8.4): **PASS** (Blade compiled & cleared cleanly).
+  * Verifikasi end-to-end (`GET /photographer/profile`, `?tab=password`, `POST /profile/update` tanpa password, `POST /profile/password` salah/kosong/valid, HTML `<div>` balance 73/73 Blade & 114/114 HTML): **PASS** (24/24 checks passed, 0 failed).
+  * `npm run build`: **PASS** (Vite bundle compiled in 931ms).
+
+---
+
+### [2026-11-10 11:45 WITA] — Implementasi Status-Aware Access Notice Modal untuk Fotografer HOLD serta Role Guard Lintas Halaman Publik
+
+* **Modul / Fitur**:
+  - Model Pengguna serta Payload Status Fotografer (`User.php`), Middleware Verifikasi Fotografer (`EnsurePhotographerVerified.php`), dan Definisi Rute Publik Terproteksi (`routes/web.php`).
+  - Komponen Shared Modal (`partials/shared/access-notice-modal.blade.php` serta integrasi di `layouts/app.blade.php`).
+  - Halaman Publik Komunitas Forum (`forum/index.blade.php`, `forum/show.blade.php`), Lomba Foto (`contests/index.blade.php`, `contests/show.blade.php`, `contests/my-proposals.blade.php`), E-Learning (`elearning/index.blade.php`, `elearning/katalog.blade.php`, `elearning/show.blade.php`), dan Profil maupun Katalog Fotografer (`photographers/show.blade.php`, `photographers/katalog.blade.php`).
+* **File yang Diubah**:
+  * `app/Models/User.php`
+  * `app/Http/Middleware/EnsurePhotographerVerified.php`
+  * `routes/web.php`
+  * `resources/views/partials/shared/access-notice-modal.blade.php` *(File Baru)*
+  * `resources/views/layouts/app.blade.php`
+  * `resources/views/public/forum/index.blade.php`
+  * `resources/views/public/forum/show.blade.php`
+  * `resources/views/public/contests/index.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/public/contests/my-proposals.blade.php`
+  * `resources/views/public/elearning/index.blade.php`
+  * `resources/views/public/elearning/katalog.blade.php`
+  * `resources/views/public/elearning/show.blade.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+* **Rincian Perubahan**:
+  1. **Deteksi Status HOLD serta Payload Popup Dinamis (`User.php`)**:
+     - **Before**: Belum ada helper terpusat untuk mengecek status HOLD fotografer dan menyusun pesan status secara seragam.
+     - **After**: Ditambahkan `isHoldPhotographer()` dan `getPhotographerHoldPopupPayload()` dengan prioritas pengecekan `ditolak` -> profil belum lengkap (`missingCount`) -> menunggu verifikasi Admin, lengkap dengan target redirect `route('photographer.profile')`.
+  2. **Hardening Middleware dan Rute Terproteksi (`EnsurePhotographerVerified.php`, `routes/web.php`)**:
+     - **Before**: Beberapa endpoint forum (like, dislike, store, comment, report, delete), lomba (daftar, bayar, submit, ajukan lomba, riwayat), dan e-learning (katalog, show, checkout, sertifikat, toggle progress) hanya dijaga `auth` atau tanpa `photographer.verified`, sehingga fotografer HOLD masih bisa menembus rute aksi. Selain itu pengecekan `!isProfileComplete()` didahulukan di atas status `ditolak` dan request AJAX masih mengembalikan redirect 302.
+     - **After**: Seluruh rute aksi Forum, Lomba, serta modul E-Learning kini wajib melewati `photographer.verified`; prioritas cek diperbaiki (`ditolak` lebih dulu daripada belum lengkap); request JSON/AJAX dari fotografer HOLD kini menerima respons HTTP `403` terstruktur (`hold_state`, `message`, `redirect`).
+  3. **Komponen Universal Access Notice Modal (`access-notice-modal.blade.php`, `layouts/app.blade.php`)**:
+     - **Before**: Fotografer HOLD yang mengklik `Reservasi`, `Chat`, atau tombol terproteksi langsung diredirect paksa ke dashboard tanpa penjelasan kontekstual di halaman saat itu.
+     - **After**: Menambahkan dialog modal global selaras desain `Login Diperlukan` (`max-w-[420px] rounded-2xl`, close `X` polos kanan atas, judul centered tanpa ikon, copy ringkas anti-AI-slop tanpa simbol `&`, serta tombol CTA penuh `bg-amber-400`). Fungsi global `openPhotographerHoldModal(actionPhrase)` menampilkan pesan kontekstual (`Profil Belum Lengkap` -> `Lengkapi Profil`, `Pendaftaran Akun Ditolak` plus catatan Admin -> `Perbaiki Profil`, `Menunggu Verifikasi` -> `Lihat Profil`) yang mengarahkan ke Menu Profil Dashboard Fotografer hanya saat CTA diklik. Fungsi `openClientOnlyModal(actionPhrase)` menampilkan modal `Khusus Akun Klien` dengan tombol `Mengerti` tanpa redirect.
+  4. **Gating Trigger Aksi Frontend Lintas Modul (`forum/*`, `contests/*`, `elearning/*`, `photographers/*`)**:
+     - **Before**: Akun fotografer HOLD masih dapat membuka modal `#newPostModal`, form komentar/balasan/lapor/like/dislike forum, form pendaftaran/unggah lomba, tautan `Mulai Belajar Gratis` / `Lihat Lebih Banyak Modul` ke `/elearning/katalog`, maupun menembak endpoint `Reservasi`, `Chat`, dan `Simpan` yang berujung redirect paksa; serta akun Fotografer terverifikasi atau Admin di profil fotografer langsung terlempar saat menekan fitur khusus Klien.
+     - **After**: Seluruh trigger aksi tersebut kini dicegat di tempat oleh `openPhotographerHoldModal(...)` bagi fotografer HOLD (termasuk menyembunyikan DOM form sensitif seperti `#newPostModal`, form komentar/reply, serta form pendaftaran/unggah karya lomba), dan `openClientOnlyModal(...)` bagi Fotografer terverifikasi serta Admin pada aksi khusus Klien (`Reservasi`, `Chat`, bookmark `Simpan`). Alur Tamu (`Login Diperlukan`) dan Klien tetap berjalan normal tanpa regresi.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #16 (Strict Role-Based Protection Middleware).
+  * Rule #19 (Terminologi Fotografer serta Arah Menu Profil Dashboard Fotografer).
+  * Rule #22 & #59 (Strict Icon Constraint, Desain Square Modal Standar, Close `X` SVG Polos, Judul Centered Tanpa Ikon).
+  * Rule #49 (Fokus Ketat Instruksi serta Nol Efek Samping ke Tamu dan Klien).
+  * Rule #51 & #70 (Anti-AI Slop Copywriting Ringkas, Tegas, Tanpa Simbol `&`).
+  * Rule #61 (Hierarki Warna Tombol CTA Amber Brand LensMatch).
+  * Rule #93 (Intersepsi Bookmark Wishlist Fotografer Berbasis Role dan Status).
+  * Rule #104 (Null-Safe Handling pada `catatan_penolakan`).
+* **Hasil Pengujian & Verifikasi**:
+  * Kompilasi Blade Templates (`php artisan view:cache` & `view:clear`): **PASS** (0 error sintaks Blade).
+  * Keseimbangan Tag HTML (`<div` vs `</div>`) pada 12 File Blade Statis maupun 10 Halaman Terender: **100% PASS** (seluruh file `diff=0`).
+  * Pengujian Fungsional End-to-End Lintas Role & Status Verifikasi via HTTP Kernel (`DB::beginTransaction` + `rollBack`): **76/76 PASS** (Kenji HOLD `incomplete`, simulasi `pending`, simulasi `rejected` dengan catatan, Fotografer `terverifikasi`, Admin, Tamu, serta Klien).
 
 ---
 

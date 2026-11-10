@@ -298,7 +298,11 @@ class TransactionController extends Controller
 
         $request->validate([
             'payout_notes' => 'nullable|string|max:500',
-            'bukti_transfer_payout' => 'nullable|image|max:10240',
+            'bukti_transfer_payout' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+        ], [
+            'bukti_transfer_payout.image' => 'Bukti transfer harus berupa gambar.',
+            'bukti_transfer_payout.mimes' => 'Format bukti transfer harus JPG, PNG, atau WEBP.',
+            'bukti_transfer_payout.max' => 'Ukuran bukti transfer maksimal 10 MB.',
         ]);
 
         $feeRate = 0.10; // 10%

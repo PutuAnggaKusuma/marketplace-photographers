@@ -136,13 +136,16 @@
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                     Tambah Foto (Opsional)
                 </label>
-                <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-200 dark:border-gray-700 text-center space-y-2">
+                <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-2 border-dashed transition text-center space-y-2"
+                     :class="uploadNotice ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'">
                     <label class="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition my-1">
                         <span>Pilih Foto Tambahan</span>
                         <input type="file" name="foto_files[]" multiple accept="image/png, image/jpeg, image/webp" @change="filesChosen" class="sr-only">
                     </label>
-                    <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Bisa memilih banyak foto sekaligus. Format: JPG, PNG, WEBP maks 20MB per file.</p>
+                    <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Bisa memilih banyak foto sekaligus. Format: JPG, PNG, WEBP maks. 20 MB per file.</p>
                 </div>
+
+                <p x-show="uploadNotice" x-text="uploadNotice" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 <!-- Preview Foto Tambahan Baru -->
                 <template x-if="previewUrls.length > 0">
@@ -188,6 +191,7 @@ function portfolioEditApp() {
         existingCount: {{ $portfolio->medias->count() }},
         newFilesCount: 0,
         previewUrls: [],
+        uploadNotice: '',
         catOpen: false,
         form: {
             judul: @js(old('judul', $portfolio->judul)),
@@ -206,7 +210,12 @@ function portfolioEditApp() {
             deskripsi: '{{ $errors->first('deskripsi') ?: '' }}'
         },
         filesChosen(event) {
-            const files = Array.from(event.target.files);
+            const res = window.validateUploadFiles(event.target, {
+                maxMB: 20,
+                multiple: true
+            });
+            this.uploadNotice = res.errorMessage;
+            const files = res.validFiles;
             this.newFilesCount = files.length;
             this.previewUrls = files.slice(0, 12).map(f => URL.createObjectURL(f));
         },

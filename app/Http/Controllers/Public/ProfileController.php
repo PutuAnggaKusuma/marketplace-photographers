@@ -100,9 +100,9 @@ class ProfileController extends Controller
 
             'foto' => 'nullable|url',
 
-            'foto_file' => 'nullable|image|max:10240',
+            'foto_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
 
-            'foto_sampul_file' => 'nullable|image|max:20480',
+            'foto_sampul_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
 
             'nomor_telepon' => 'nullable|string|max:20',
 
@@ -136,9 +136,17 @@ class ProfileController extends Controller
 
             'foto.url' => 'Format URL foto avatar tidak valid.',
 
-            'foto_file.image' => 'File avatar harus berupa gambar.',
+            'foto_file.image' => 'File foto profil harus berupa gambar.',
+
+            'foto_file.mimes' => 'Format foto profil harus JPG, PNG, atau WEBP.',
+
+            'foto_file.max' => 'Ukuran foto profil maksimal 10 MB.',
 
             'foto_sampul_file.image' => 'File foto sampul harus berupa gambar.',
+
+            'foto_sampul_file.mimes' => 'Format foto sampul harus JPG, PNG, atau WEBP.',
+
+            'foto_sampul_file.max' => 'Ukuran foto sampul maksimal 20 MB.',
 
         ]);
 
@@ -365,7 +373,10 @@ class ProfileController extends Controller
 
         if (!Hash::check($request->current_password, $user->password)) {
 
-            return redirect()->back()->with('error', 'Kata sandi saat ini yang Anda masukkan salah.');
+            return redirect()->back()
+                ->withErrors(['current_password' => 'Kata sandi saat ini yang Anda masukkan salah.'])
+                ->with('active_tab', 'password')
+                ->with('error', 'Kata sandi saat ini yang Anda masukkan salah.');
 
         }
 
@@ -379,7 +390,9 @@ class ProfileController extends Controller
 
 
 
-        return redirect()->back()->with('success', 'Kata sandi akun Anda berhasil diperbarui!');
+        return redirect()->back()
+            ->with('active_tab', 'password')
+            ->with('success', 'Kata sandi akun Anda berhasil diperbarui!');
 
     }
 

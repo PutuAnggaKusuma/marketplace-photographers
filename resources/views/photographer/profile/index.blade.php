@@ -3,35 +3,38 @@
 @section('title', 'Profil Fotografer — Dashboard')
 
 @section('content')
-<div class="space-y-6 w-full pb-10">
+@php
+  $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
+  $hasPasswordErrors = $errors->hasAny(['current_password', 'new_password', 'new_password_confirmation']);
+  $initialTab = (session('active_tab') === 'password' || request('tab') === 'password' || $hasPasswordErrors) ? 'password' : 'profile';
+@endphp
+
+<div x-data="{ activeTab: '{{ $initialTab }}' }" class="space-y-6 w-full pb-10">
 
   <!-- Header Section -->
   <div class="flex items-center justify-between">
     <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Profil</h1>
   </div>
 
-  <!-- Flash Messages -->
-  @if(session('success'))
-    <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
-      <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-      <span>{{ session('success') }}</span>
-    </div>
-  @endif
+  <!-- Tab Navigasi Horizontal (Rule #78: Active Text Underline, Tanpa Divider Panjang) -->
+  <div class="flex items-center gap-6 overflow-x-auto pb-1">
+    <button type="button"
+            @click="activeTab = 'profile'"
+            :class="activeTab === 'profile' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
+            class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0">
+      <span :class="activeTab === 'profile' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Data Profil</span>
+    </button>
 
-  @if(session('warning'))
-    <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 text-xs text-amber-800 dark:text-amber-300 font-bold flex items-center gap-2">
-      <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path></svg>
-      <span>{{ session('warning') }}</span>
-    </div>
-  @endif
+    <button type="button"
+            @click="activeTab = 'password'"
+            :class="activeTab === 'password' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
+            class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0">
+      <span :class="activeTab === 'password' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Ubah Kata Sandi</span>
+    </button>
+  </div>
 
-  @if(isset($errors) && $errors->any())
-    <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs text-rose-800 dark:text-rose-300 font-bold space-y-1">
-      @foreach($errors->all() as $err)
-        <p>• {{ $err }}</p>
-      @endforeach
-    </div>
-  @endif
+  <!-- TAB 1: Data Profil (Biodata, Domisili, Bio, Media, Rekening Bank) -->
+  <div x-show="activeTab === 'profile'" @if($initialTab !== 'profile') x-cloak @endif class="space-y-6">
 
   @if($photographer && $photographer->status_verifikasi === 'ditolak')
     <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 space-y-2">
@@ -49,7 +52,6 @@
   @endif
 
   @php
-    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag();
     $user = auth()->user();
     $rawFoto = $photographer?->foto ?: $user?->foto;
     $avatarUrl = $rawFoto ? (str_starts_with($rawFoto, 'http') ? $rawFoto : asset('storage/' . $rawFoto)) : '';
@@ -60,7 +62,7 @@
     $missingFields = $photographer?->getMissingProfileFields() ?? [];
     $missingCount = count($missingFields);
     $percentage = $photographer?->getProfileCompletionPercentage() ?? 0;
-    $isVerified = (bool) ($photographer?->is_verified ?? false);
+    $isVerified = $photographer ? $photographer->isVerified() : false;
     $isComplete = $photographer?->isProfileComplete() ?? false;
     $sectionStatus = $photographer?->getProfileSectionsStatus() ?? [
         'sections' => [],
@@ -70,39 +72,41 @@
     ];
   @endphp
 
-  <!-- Indikator Kelengkapan Profil (Gaya 3B: Dot Step Indicator - Anti AI Slop) -->
-  <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-      <div class="flex items-center gap-2">
-        <span class="font-bold text-gray-900 dark:text-white">Kelengkapan Profil</span>
-        <span class="text-gray-300 dark:text-gray-600">•</span>
-        <div class="flex items-center gap-1.5" title="{{ $sectionStatus['completed_count'] }} dari {{ $sectionStatus['total_sections'] }} bagian lengkap">
-          @foreach($sectionStatus['sections'] as $sec)
-            <span class="w-2 h-2 rounded-full inline-block {{ $sec['is_complete'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}" title="{{ $sec['name'] }}: {{ $sec['is_complete'] ? 'Lengkap' : 'Belum lengkap' }}"></span>
-          @endforeach
+  @if(!$isVerified)
+    <!-- Indikator Kelengkapan Profil (Gaya 3B: Dot Step Indicator - Anti AI Slop) -->
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-gray-900 dark:text-white">Kelengkapan Profil</span>
+          <span class="text-gray-300 dark:text-gray-600">•</span>
+          <div class="flex items-center gap-1.5" title="{{ $sectionStatus['completed_count'] }} dari {{ $sectionStatus['total_sections'] }} bagian lengkap">
+            @foreach($sectionStatus['sections'] as $sec)
+              <span class="w-2 h-2 rounded-full inline-block {{ $sec['is_complete'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}" title="{{ $sec['name'] }}: {{ $sec['is_complete'] ? 'Lengkap' : 'Belum lengkap' }}"></span>
+            @endforeach
+          </div>
+          <span class="text-gray-500 dark:text-gray-400">({{ $sectionStatus['completed_count'] }}/{{ $sectionStatus['total_sections'] }} bagian)</span>
         </div>
-        <span class="text-gray-500 dark:text-gray-400">({{ $sectionStatus['completed_count'] }}/{{ $sectionStatus['total_sections'] }} bagian)</span>
+
+        <div class="flex items-center gap-2">
+          <span class="font-black text-gray-900 dark:text-white">{{ $percentage }}%</span>
+          @if(!$isComplete)
+            <span class="text-rose-600 dark:text-rose-400 font-semibold">• Kurang {{ $missingCount }} data</span>
+          @elseif($photographer && $photographer->status_verifikasi === 'ditolak')
+            <span class="text-rose-600 dark:text-rose-400 font-bold">• Ditolak admin</span>
+          @else
+            <span class="text-amber-600 dark:text-amber-400 font-bold">• Menunggu verifikasi admin</span>
+          @endif
+        </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <span class="font-black text-gray-900 dark:text-white">{{ $percentage }}%</span>
-        @if(!$isComplete)
-          <span class="text-rose-600 dark:text-rose-400 font-semibold">• Kurang {{ $missingCount }} data</span>
-        @elseif(!$isVerified)
-          <span class="text-amber-600 dark:text-amber-400 font-bold">• Menunggu verifikasi admin</span>
-        @else
-          <span class="text-emerald-600 dark:text-emerald-400 font-bold">• Terverifikasi</span>
-        @endif
-      </div>
+      @if(!$isComplete && count($missingFields) > 0)
+        <div class="pt-2 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-400">
+          <span class="font-bold text-gray-700 dark:text-gray-300">Belum diisi:</span>
+          <span class="text-gray-500 dark:text-gray-400 ml-1 leading-relaxed">{{ implode(', ', array_values($missingFields)) }}.</span>
+        </div>
+      @endif
     </div>
-
-    @if(!$isComplete && count($missingFields) > 0)
-      <div class="pt-2 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-400">
-        <span class="font-bold text-gray-700 dark:text-gray-300">Belum diisi:</span>
-        <span class="text-gray-500 dark:text-gray-400 ml-1 leading-relaxed">{{ implode(', ', array_values($missingFields)) }}.</span>
-      </div>
-    @endif
-  </div>
+  @endif
 
   <!-- Form Profil Fotografer -->
   <div x-data="photographerProfileForm()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
@@ -378,7 +382,7 @@
               <!-- Layout Vertikal: Preview di Atas, Aksi di Bawah -->
               <div class="space-y-4">
                 <div class="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition"
-                     :class="avatarPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600'"
+                     :class="uploadErrors.foto_file ? 'border-red-400 border-dashed' : (avatarPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
                      @click="if (avatarPreview) openImagePreview(avatarPreview, 'Foto Profil')">
                   <img :src="avatarPreview" 
                        x-show="avatarPreview" 
@@ -403,9 +407,10 @@
                 <div class="space-y-2">
                   <label class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
                     <span>Upload Foto Profil</span>
-                    <input type="file" name="foto_file" accept="image/*" @change="handleAvatarFile($event)" class="hidden">
+                    <input type="file" name="foto_file" accept="image/jpeg, image/png, image/webp" @change="handleAvatarFile($event)" class="hidden">
                   </label>
-                  <p class="text-[11px] text-gray-400">JPG, PNG, WEBP maks. 10MB</p>
+                  <p x-show="uploadErrors.foto_file" x-text="uploadErrors.foto_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
+                  <p class="text-[11px] text-gray-400">JPG, PNG, WEBP maks. 10 MB</p>
                 </div>
               </div>
           </div>
@@ -422,7 +427,7 @@
               <!-- Layout Vertikal: Preview di Atas (Rasio 16:9 Tinggi & Proporsional), Aksi di Bawah -->
               <div class="space-y-4">
                 <div class="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition"
-                     :class="sampulPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600'"
+                     :class="uploadErrors.foto_sampul_file ? 'border-red-400 border-dashed' : (sampulPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
                      @click="if (sampulPreview) openImagePreview(sampulPreview, 'Foto Sampul')">
                   <img :src="sampulPreview" 
                        x-show="sampulPreview" 
@@ -449,9 +454,10 @@
                 <div class="space-y-2">
                   <label class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
                     <span>Upload Foto Sampul</span>
-                    <input type="file" name="foto_sampul_file" accept="image/*" @change="handleSampulFile($event)" class="hidden">
+                    <input type="file" name="foto_sampul_file" accept="image/jpeg, image/png, image/webp" @change="handleSampulFile($event)" class="hidden">
                   </label>
-                  <p class="text-[11px] text-gray-400">Rasio 16:9 maks. 20MB</p>
+                  <p x-show="uploadErrors.foto_sampul_file" x-text="uploadErrors.foto_sampul_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
+                  <p class="text-[11px] text-gray-400">Rasio 16:9 maks. 20 MB</p>
                 </div>
               </div>
           </div>
@@ -574,74 +580,86 @@
     </div>
   </div>
 
-  <!-- SECTION 6: Kata Sandi -->
-  <div x-data="photographerPasswordForm()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
-    <h2 class="text-sm font-black text-gray-900 dark:text-white">
-      6. Kata Sandi
-    </h2>
+  </div>
 
-    <form action="{{ route('profile.password') }}" method="POST" @submit="submitPasswordForm($event)" class="space-y-6">
-      @csrf
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-            Kata Sandi Saat Ini <span class="text-rose-500">*</span>
-          </label>
-          <input type="password" 
-                 name="current_password" 
-                 x-ref="currentPassword"
-                 x-model="passwordForm.current_password"
-                 @input="touched.current_password = true; validateCurrentPassword()"
-                 @blur="touched.current_password = true; validateCurrentPassword()"
-                 required 
-                 placeholder="••••••••" 
-                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
-                 :class="touched.current_password && errors.current_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
-          <p x-show="touched.current_password && errors.current_password" x-text="errors.current_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-            Kata Sandi Baru <span class="text-rose-500">*</span>
-          </label>
-          <input type="password" 
-                 name="new_password" 
-                 x-ref="newPassword"
-                 x-model="passwordForm.new_password"
-                 @input="touched.new_password = true; validateNewPassword()"
-                 @blur="touched.new_password = true; validateNewPassword()"
-                 required 
-                 placeholder="Minimal 8 karakter" 
-                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
-                 :class="touched.new_password && errors.new_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
-          <p x-show="touched.new_password && errors.new_password" x-text="errors.new_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-            Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span>
-          </label>
-          <input type="password" 
-                 name="new_password_confirmation" 
-                 x-ref="confirmPassword"
-                 x-model="passwordForm.new_password_confirmation"
-                 @input="touched.new_password_confirmation = true; validateConfirmation()"
-                 @blur="touched.new_password_confirmation = true; validateConfirmation()"
-                 required 
-                 placeholder="Ulangi kata sandi baru" 
-                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
-                 :class="touched.new_password_confirmation && errors.new_password_confirmation ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
-          <p x-show="touched.new_password_confirmation && errors.new_password_confirmation" x-text="errors.new_password_confirmation" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-        </div>
+  <!-- TAB 2: Ubah Kata Sandi (Opsional) -->
+  <div x-show="activeTab === 'password'" @if($initialTab !== 'password') x-cloak @endif>
+    <div x-data="photographerPasswordForm()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-sm font-black text-gray-900 dark:text-white">
+          Ubah Kata Sandi
+        </h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Kata sandi akun sudah aktif sejak pendaftaran. Isi formulir ini hanya jika ingin mengganti kata sandi.
+        </p>
       </div>
 
-      <div class="flex justify-end pt-2">
-        <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
-          Perbaharui Data
-        </button>
-      </div>
-    </form>
+      <form action="{{ route('profile.password') }}" method="POST" @submit="submitPasswordForm($event)" class="space-y-6">
+        @csrf
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              Kata Sandi Saat Ini <span class="text-rose-500">*</span>
+            </label>
+            <input type="password" 
+                   name="current_password" 
+                   x-ref="currentPassword"
+                   x-model="passwordForm.current_password"
+                   autocomplete="current-password"
+                   @input="touched.current_password = true; validateCurrentPassword()"
+                   @blur="touched.current_password = true; validateCurrentPassword()"
+                   required 
+                   placeholder="Masukkan kata sandi saat ini" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.current_password && errors.current_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.current_password && errors.current_password" x-text="errors.current_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              Kata Sandi Baru <span class="text-rose-500">*</span>
+            </label>
+            <input type="password" 
+                   name="new_password" 
+                   x-ref="newPassword"
+                   x-model="passwordForm.new_password"
+                   autocomplete="new-password"
+                   @input="touched.new_password = true; validateNewPassword()"
+                   @blur="touched.new_password = true; validateNewPassword()"
+                   required 
+                   placeholder="Minimal 8 karakter" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.new_password && errors.new_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.new_password && errors.new_password" x-text="errors.new_password" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+              Konfirmasi Kata Sandi Baru <span class="text-rose-500">*</span>
+            </label>
+            <input type="password" 
+                   name="new_password_confirmation" 
+                   x-ref="confirmPassword"
+                   x-model="passwordForm.new_password_confirmation"
+                   autocomplete="new-password"
+                   @input="touched.new_password_confirmation = true; validateConfirmation()"
+                   @blur="touched.new_password_confirmation = true; validateConfirmation()"
+                   required 
+                   placeholder="Ulangi kata sandi baru" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
+                   :class="touched.new_password_confirmation && errors.new_password_confirmation ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
+            <p x-show="touched.new_password_confirmation && errors.new_password_confirmation" x-text="errors.new_password_confirmation" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+            Perbaharui Data
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
 </div>
@@ -708,6 +726,11 @@ function photographerProfileForm() {
       nama_bank: {!! json_encode((isset($errors) ? $errors->first('nama_bank') : '') ?: '') !!},
       nomor_rekening: {!! json_encode((isset($errors) ? $errors->first('nomor_rekening') : '') ?: '') !!},
       atas_nama_rekening: {!! json_encode((isset($errors) ? $errors->first('atas_nama_rekening') : '') ?: '') !!}
+    },
+
+    uploadErrors: {
+      foto_file: {!! json_encode((isset($errors) ? $errors->first('foto_file') : '') ?: '') !!},
+      foto_sampul_file: {!! json_encode((isset($errors) ? $errors->first('foto_sampul_file') : '') ?: '') !!}
     },
 
     get selectedCategorySummary() {
@@ -891,20 +914,28 @@ function photographerProfileForm() {
     },
 
     handleAvatarFile(e) {
-      const file = e.target.files[0];
+      const result = window.validateUploadFiles(e.target, { maxMB: 10 });
+      if (result.hasErrors) {
+        this.uploadErrors.foto_file = result.errorMessage;
+        return;
+      }
+      this.uploadErrors.foto_file = '';
+      const file = result.validFiles[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => { this.avatarPreview = event.target.result; };
-        reader.readAsDataURL(file);
+        this.avatarPreview = URL.createObjectURL(file);
       }
     },
 
     handleSampulFile(e) {
-      const file = e.target.files[0];
+      const result = window.validateUploadFiles(e.target, { maxMB: 20 });
+      if (result.hasErrors) {
+        this.uploadErrors.foto_sampul_file = result.errorMessage;
+        return;
+      }
+      this.uploadErrors.foto_sampul_file = '';
+      const file = result.validFiles[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => { this.sampulPreview = event.target.result; };
-        reader.readAsDataURL(file);
+        this.sampulPreview = URL.createObjectURL(file);
       }
     },
 
@@ -973,24 +1004,31 @@ function photographerPasswordForm() {
       new_password_confirmation: ''
     },
     touched: {
-      current_password: false,
-      new_password: false,
-      new_password_confirmation: false
+      current_password: {{ (isset($errors) && $errors->has('current_password')) ? 'true' : 'false' }},
+      new_password: {{ (isset($errors) && $errors->has('new_password')) ? 'true' : 'false' }},
+      new_password_confirmation: {{ (isset($errors) && $errors->has('new_password_confirmation')) ? 'true' : 'false' }}
     },
     errors: {
-      current_password: '',
-      new_password: '',
-      new_password_confirmation: ''
+      current_password: {!! json_encode((isset($errors) ? $errors->first('current_password') : '') ?: '') !!},
+      new_password: {!! json_encode((isset($errors) ? $errors->first('new_password') : '') ?: '') !!},
+      new_password_confirmation: {!! json_encode((isset($errors) ? $errors->first('new_password_confirmation') : '') ?: '') !!}
     },
     validateCurrentPassword() {
-      if (!this.passwordForm.current_password) {
+      const val = this.passwordForm.current_password || this.$refs.currentPassword?.value || '';
+      if (val && !this.passwordForm.current_password) {
+        this.passwordForm.current_password = val;
+      }
+      if (!val) {
         this.errors.current_password = 'Kata sandi saat ini wajib diisi.';
       } else {
         this.errors.current_password = '';
       }
     },
     validateNewPassword() {
-      const val = this.passwordForm.new_password || '';
+      const val = this.passwordForm.new_password || this.$refs.newPassword?.value || '';
+      if (val && !this.passwordForm.new_password) {
+        this.passwordForm.new_password = val;
+      }
       if (!val) {
         this.errors.new_password = 'Kata sandi baru wajib diisi.';
       } else if (val.length < 8) {
@@ -1003,10 +1041,14 @@ function photographerPasswordForm() {
       }
     },
     validateConfirmation() {
-      const conf = this.passwordForm.new_password_confirmation || '';
+      const conf = this.passwordForm.new_password_confirmation || this.$refs.confirmPassword?.value || '';
+      if (conf && !this.passwordForm.new_password_confirmation) {
+        this.passwordForm.new_password_confirmation = conf;
+      }
+      const newVal = this.passwordForm.new_password || this.$refs.newPassword?.value || '';
       if (!conf) {
         this.errors.new_password_confirmation = 'Konfirmasi kata sandi baru wajib diisi.';
-      } else if (conf !== this.passwordForm.new_password) {
+      } else if (conf !== newVal) {
         this.errors.new_password_confirmation = 'Konfirmasi kata sandi baru tidak cocok.';
       } else {
         this.errors.new_password_confirmation = '';

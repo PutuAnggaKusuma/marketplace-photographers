@@ -6,18 +6,6 @@
 <section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false }">
 
-    <!-- Flash Alert Messages -->
-    @if(session('success'))
-      <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-3">
-        <span>{{ session('success') }}</span>
-      </div>
-    @endif
-    @if(session('error'))
-      <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs sm:text-sm text-rose-800 dark:text-rose-300 font-bold flex items-center gap-3">
-        <span>{{ session('error') }}</span>
-      </div>
-    @endif
-
     <!-- Breadcrumb Navigation -->
     <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
       <a href="{{ route('client.invoices') }}" class="hover:text-amber-500 transition">Faktur Pembayaran</a>
@@ -244,24 +232,19 @@
                 touched: false,
                 error: '',
                 handleFile(e) {
-                  const file = e.target.files[0];
                   this.touched = true;
+                  const res = window.validateUploadFiles(e.target, { maxMB: 10 });
+                  if (res.hasErrors) {
+                    this.fileSelected = false;
+                    this.fileName = '';
+                    this.error = res.errorMessage;
+                    return false;
+                  }
+                  const file = res.validFiles[0];
                   if (!file) {
                     this.fileSelected = false;
                     this.fileName = '';
                     this.error = 'Foto struk / bukti transfer wajib dipilih.';
-                    return false;
-                  }
-                  if (!file.type.match(/^image\//)) {
-                    this.fileSelected = false;
-                    this.fileName = '';
-                    this.error = 'File harus berupa gambar (JPG, PNG, WEBP).';
-                    return false;
-                  }
-                  if (file.size > 10 * 1024 * 1024) {
-                    this.fileSelected = false;
-                    this.fileName = '';
-                    this.error = 'Ukuran file foto maksimal 10 MB.';
                     return false;
                   }
                   this.fileSelected = true;
@@ -288,7 +271,7 @@
             <input type="file" 
                    name="bukti_transfer" 
                    x-ref="fileInput"
-                   accept="image/*" 
+                   accept="image/jpeg,image/png,image/webp" 
                    @change="handleFile($event)"
                    class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer p-1.5 rounded-xl border transition"
                    :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">

@@ -80,7 +80,9 @@
         document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
       });
     </script>
+    @include('partials.shared.file-upload-validator-js')
     @include('partials.shared.confirm-modal')
+    @include('partials.shared.access-notice-modal')
   @include('partials.shared.toast-notification')
   @include('partials.shared.ajax-pagination-engine')
 </body>

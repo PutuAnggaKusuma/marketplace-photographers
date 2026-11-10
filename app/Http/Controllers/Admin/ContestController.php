@@ -384,13 +384,21 @@ class ContestController extends Controller
 
             'status' => 'required|in:pending_review,buka,ditutup,selesai,ditolak',
 
-            'banner_file' => 'nullable|image|max:10240',
+            'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
 
             'banner_url' => 'nullable|url',
 
             'deskrpisi_lomba' => 'required|string',
 
             'syarat_ketentuan' => 'nullable|string',
+
+        ], [
+
+            'banner_file.image' => 'File poster harus berupa gambar.',
+
+            'banner_file.mimes' => 'Format poster harus JPG, PNG, atau WEBP.',
+
+            'banner_file.max' => 'Ukuran file poster maksimal 10 MB.',
 
         ]);
 
@@ -530,7 +538,7 @@ class ContestController extends Controller
 
             'status' => 'required|in:pending_review,buka,ditutup,selesai,ditolak',
 
-            'banner_file' => 'nullable|image|max:10240',
+            'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
 
             'banner_url' => 'nullable|url',
 
@@ -539,6 +547,14 @@ class ContestController extends Controller
             'syarat_ketentuan' => 'nullable|string',
 
             'catatan_admin' => 'nullable|string',
+
+        ], [
+
+            'banner_file.image' => 'File poster harus berupa gambar.',
+
+            'banner_file.mimes' => 'Format poster harus JPG, PNG, atau WEBP.',
+
+            'banner_file.max' => 'Ukuran file poster maksimal 10 MB.',
 
         ]);
 

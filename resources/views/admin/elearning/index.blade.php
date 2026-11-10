@@ -57,14 +57,6 @@
         </a>
     </div>
 
-    <!-- Flash Messages -->
-    @if(session('success'))
-        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
         <!-- Metric Stat Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- Card 1 -->

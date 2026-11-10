@@ -42,17 +42,35 @@
 
 
 
+      @php
+        $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+      @endphp
+
       <div class="flex items-center gap-3 shrink-0">
 
         @auth
 
-          <button type="button" @click="newPostModal = true" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2 cursor-pointer">
+          @if($isHoldPhotographer)
 
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <button type="button" @click="openPhotographerHoldModal('membuat topik diskusi forum')" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2 cursor-pointer">
 
-            <span>Buat Topik Forum</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
 
-          </button>
+              <span>Buat Topik Forum</span>
+
+            </button>
+
+          @else
+
+            <button type="button" @click="newPostModal = true" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition inline-flex items-center gap-2 cursor-pointer">
+
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+
+              <span>Buat Topik Forum</span>
+
+            </button>
+
+          @endif
 
         @else
 
@@ -433,7 +451,7 @@
 
 
     <!-- Modal Form Create New Discussion Post (Standard Hybrid Responsive Form Standard) -->
-
+    @if(auth()->check() && !$isHoldPhotographer)
     <div x-show="newPostModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
 
       <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" @click="newPostModal = false"></div>
@@ -603,11 +621,13 @@
 
                    :class="{
 
-                     'border-gray-400 bg-gray-100 dark:bg-gray-800': isDragging,
+                     'border-red-400 bg-red-50/40 dark:bg-red-950/20': errorMsg,
+
+                     'border-gray-400 bg-gray-100 dark:bg-gray-800': isDragging && !errorMsg,
 
                      'opacity-60 cursor-not-allowed pointer-events-none': photos.length >= 5,
 
-                     'cursor-pointer hover:border-gray-400 dark:hover:border-gray-600': photos.length < 5
+                     'cursor-pointer hover:border-gray-400 dark:hover:border-gray-600': photos.length < 5 && !errorMsg
 
                    }"
 
@@ -747,6 +767,7 @@
       </div>
 
     </div>
+    @endif
 
     <!-- Login Required Modal for Guest (Standard Clean Modal per Pasted Image 4) -->
     <div x-show="loginRequiredModal" 
@@ -881,33 +902,29 @@ function forumPostUpload() {
 
     processFiles(incoming) {
 
-      if (this.photos.length + incoming.length > 5) {
+      const availableSlots = Math.max(0, 5 - this.photos.length);
+
+      if (availableSlots === 0) {
 
         this.errorMsg = 'Maksimal 5 foto yang dapat diunggah per topik diskusi.';
 
+        return;
+
       }
 
-      const availableSlots = Math.max(0, 5 - this.photos.length);
+      const res = window.validateUploadFiles(incoming, {
 
-      const toAdd = incoming.slice(0, availableSlots);
+        maxMB: 10,
 
-      for (const file of toAdd) {
+        multiple: true,
 
-        if (!file.type.match(/^image\/(jpeg|jpg|png|webp)$/i)) {
+        maxFiles: availableSlots
 
-          this.errorMsg = 'Format file ' + file.name + ' tidak didukung. Gunakan JPG, PNG, atau WEBP.';
+      });
 
-          continue;
+      this.errorMsg = res.errorMessage;
 
-        }
-
-        if (file.size > 10 * 1024 * 1024) {
-
-          this.errorMsg = 'Ukuran file ' + file.name + ' melebihi 10MB.';
-
-          continue;
-
-        }
+      for (const file of res.validFiles) {
 
         this.photos.push({
 
@@ -917,7 +934,7 @@ function forumPostUpload() {
 
           name: file.name,
 
-          size: (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+          size: window.formatFileSizeMB(file.size)
 
         });
 

@@ -55,6 +55,8 @@
 
       media_url: '',
 
+      mediaFileName: '',
+
       durasi_menit: 5,
 
       urutan: 1,
@@ -71,7 +73,8 @@
       errors: {
         id_module: '',
         tipe: '',
-        judul: ''
+        judul: '',
+        media_file: ''
       }
 
     },
@@ -193,6 +196,36 @@
 
     },
 
+    handleLessonMediaFile(event) {
+
+      const res = window.validateUploadFiles(event.target, {
+
+        maxMB: 50,
+
+        allowedMimes: [],
+
+        allowedExts: []
+
+      });
+
+      if (res.hasErrors) {
+
+        this.lessonForm.errors.media_file = res.errorMessage;
+
+        this.lessonForm.mediaFileName = '';
+
+        return;
+
+      }
+
+      const file = res.validFiles[0];
+
+      this.lessonForm.errors.media_file = '';
+
+      this.lessonForm.mediaFileName = file ? file.name : '';
+
+    },
+
     openCreateLesson(moduleId = '') {
 
       this.lessonMode = 'create';
@@ -211,15 +244,41 @@
 
         media_url: '',
 
+        mediaFileName: '',
+
         durasi_menit: 5,
 
         urutan: {{ ($course->lessons()->max('urutan') ?? 0) + 1 }},
 
         is_free: '1',
 
-        actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}'
+        actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
+
+        touched: {
+
+          id_module: false,
+
+          tipe: false,
+
+          judul: false
+
+        },
+
+        errors: {
+
+          id_module: '',
+
+          tipe: '',
+
+          judul: '',
+
+          media_file: ''
+
+        }
 
       };
+
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
 
       this.showLessonModal = true;
 
@@ -243,15 +302,41 @@
 
         media_url: les.media_url || '',
 
+        mediaFileName: '',
+
         durasi_menit: les.durasi_menit,
 
         urutan: les.urutan,
 
         is_free: les.is_free ? '1' : '0',
 
-        actionUrl: '/admin/elearning/lessons/' + les.id + '/update'
+        actionUrl: '/admin/elearning/lessons/' + les.id + '/update',
+
+        touched: {
+
+          id_module: false,
+
+          tipe: false,
+
+          judul: false
+
+        },
+
+        errors: {
+
+          id_module: '',
+
+          tipe: '',
+
+          judul: '',
+
+          media_file: ''
+
+        }
 
       };
+
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
 
       this.showLessonModal = true;
 
@@ -989,9 +1074,17 @@
 
           <div x-show="lessonForm.tipe !== 'reading'">
 
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Upload File Media (Maks 50MB)</label>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Upload File Media (Maks. 50 MB)</label>
 
-            <input type="file" name="media_file" class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-white hover:file:bg-amber-600" />
+            <input type="file" name="media_file" x-ref="lessonMediaInput" @change="handleLessonMediaFile($event)" :class="lessonForm.errors && lessonForm.errors.media_file ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'" class="w-full px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-800 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-white hover:file:bg-amber-600 transition" />
+
+            <p x-show="lessonForm.errors && lessonForm.errors.media_file" x-text="lessonForm.errors.media_file" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
+            @error('media_file')
+
+              <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+
+            @enderror
 
           </div>
 

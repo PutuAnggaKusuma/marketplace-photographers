@@ -270,6 +270,10 @@
 
     <!-- Dynamic AJAX Container for Photographers & Pagination -->
     <div id="photographers-katalog-ajax-container" class="space-y-10 transition-opacity duration-200">
+      @php
+        $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+        $isClientUser = auth()->check() && auth()->user()->isClient();
+      @endphp
       <!-- Photographers Grid (3 Columns Desktop, 2 Columns Tablet, 1 Column Mobile) -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       @forelse($photographers as $photographer)
@@ -312,6 +316,13 @@
                             }));
                             return;
                           }
+                          @if($isHoldPhotographer)
+                            openPhotographerHoldModal('menyimpan fotografer ke favorit');
+                            return;
+                          @elseif(auth()->check() && !$isClientUser)
+                            openClientOnlyModal('simpan fotografer ke favorit');
+                            return;
+                          @endif
                           if (loading) return;
                           loading = true;
                           fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {

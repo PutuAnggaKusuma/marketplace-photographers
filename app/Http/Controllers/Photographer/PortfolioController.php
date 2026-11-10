@@ -113,8 +113,9 @@ class PortfolioController extends Controller
             'foto_files.array' => 'Format file foto harus berupa kumpulan gambar.',
             'foto_files.min' => 'Wajib mengunggah minimal 4 foto untuk membuat 1 album portofolio baru sesuai standar platform.',
             'foto_files.*.required' => 'File foto tidak boleh kosong.',
-            'foto_files.*.image' => 'Setiap file harus berupa format gambar valid (JPG, PNG, WEBP).',
-            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20MB.',
+            'foto_files.*.image' => 'Setiap file harus berupa gambar.',
+            'foto_files.*.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
+            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20 MB.',
         ]);
 
         $portfolio = PhotographerPortfolio::create([
@@ -164,8 +165,9 @@ class PortfolioController extends Controller
             'judul.min' => 'Judul album portofolio minimal 3 karakter.',
             'deskripsi.required' => 'Deskripsi portofolio wajib diisi.',
             'deskripsi.min' => 'Deskripsi portofolio minimal 15 karakter.',
-            'foto_files.*.image' => 'Setiap file harus berupa format gambar valid (JPG, PNG, WEBP).',
-            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20MB.',
+            'foto_files.*.image' => 'Setiap file harus berupa gambar.',
+            'foto_files.*.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
+            'foto_files.*.max' => 'Ukuran setiap file foto maksimal 20 MB.',
         ]);
 
         $currentCount = $portfolio->medias()->count();

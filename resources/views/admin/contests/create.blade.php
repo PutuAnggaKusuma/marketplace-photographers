@@ -676,7 +676,8 @@
 
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
 
-                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border flex items-center justify-center overflow-hidden shrink-0 shadow-xs transition"
+                         :class="bannerError ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'">
 
                         <template x-if="previewUrl">
 
@@ -706,6 +707,16 @@
                             <input type="file" name="banner_file" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="hidden">
 
                         </label>
+
+                        <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
+                        @error('banner_file')
+
+                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+
+                        @enderror
+
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10 MB.</p>
 
                         <input type="url" name="banner_url" placeholder="Atau masukkan URL banner..." value="{{ old('banner_url') }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none">
 
@@ -737,12 +748,17 @@
 function adminContestFormApp() {
     return {
         previewUrl: null,
+        bannerError: '',
         fileChosen(event) {
-            const file = event.target.files[0];
+            const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+            if (res.hasErrors) {
+                this.bannerError = res.errorMessage;
+                return;
+            }
+            const file = res.validFiles[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => { this.previewUrl = e.target.result; };
-                reader.readAsDataURL(file);
+                this.bannerError = '';
+                this.previewUrl = URL.createObjectURL(file);
             }
         },
         form: {

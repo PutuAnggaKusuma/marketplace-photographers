@@ -75,7 +75,8 @@ class ElearningController extends Controller
             'judul.required' => 'Judul materi wajib diisi.',
             'konten.required' => 'Isi modul pembelajaran wajib diisi.',
             'thumbnail.image' => 'File thumbnail harus berupa gambar.',
-            'thumbnail.max' => 'Ukuran thumbnail maksimal 10MB.',
+            'thumbnail.mimes' => 'Format thumbnail harus JPG, PNG, atau WEBP.',
+            'thumbnail.max' => 'Ukuran thumbnail maksimal 10 MB.',
         ]);
 
         $kategoriName = 'Umum';
@@ -140,7 +141,8 @@ class ElearningController extends Controller
             'judul.required' => 'Judul materi wajib diisi.',
             'konten.required' => 'Isi modul pembelajaran wajib diisi.',
             'thumbnail.image' => 'File thumbnail harus berupa gambar.',
-            'thumbnail.max' => 'Ukuran thumbnail maksimal 10MB.',
+            'thumbnail.mimes' => 'Format thumbnail harus JPG, PNG, atau WEBP.',
+            'thumbnail.max' => 'Ukuran thumbnail maksimal 10 MB.',
         ]);
 
         $kategoriName = $material->kategori ?: 'Umum';
@@ -268,6 +270,10 @@ class ElearningController extends Controller
             'urutan' => 'nullable|integer|min:1',
             'is_free' => 'nullable|in:0,1',
             'media_file' => 'nullable|file|max:51200', // max 50MB
+        ], [
+            'judul.required' => 'Judul tahapan materi wajib diisi.',
+            'media_file.file' => 'File media tidak valid.',
+            'media_file.max' => 'Ukuran file media maksimal 50 MB.',
         ]);
 
         $mediaPath = null;
@@ -320,6 +326,10 @@ class ElearningController extends Controller
             'urutan' => 'nullable|integer|min:1',
             'is_free' => 'nullable|in:0,1',
             'media_file' => 'nullable|file|max:51200',
+        ], [
+            'judul.required' => 'Judul tahapan materi wajib diisi.',
+            'media_file.file' => 'File media tidak valid.',
+            'media_file.max' => 'Ukuran file media maksimal 50 MB.',
         ]);
 
         $mediaPath = $lesson->media_path;

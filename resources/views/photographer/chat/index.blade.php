@@ -500,6 +500,16 @@
                 </button>
             </div>
 
+            <!-- Photo Attachment Inline Error Banner -->
+            <div x-show="photoAttachmentError"
+                 x-cloak
+                 class="px-4 py-2 bg-red-50 dark:bg-red-950/30 border-b border-red-200 dark:border-red-900/50 flex items-center justify-between gap-2 text-xs">
+                <p class="text-[11px] font-bold text-red-600 dark:text-red-400" x-text="photoAttachmentError"></p>
+                <button type="button"
+                        @click="photoAttachmentError = ''"
+                        class="text-[11px] font-bold text-red-500 hover:text-red-700 cursor-pointer shrink-0">Tutup</button>
+            </div>
+
             <!-- Input Form -->
             <div class="p-4">
                 <form @submit.prevent="editingMessage ? saveEditMessage() : sendMessage()" class="flex items-center gap-2 sm:gap-3">
@@ -914,6 +924,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
         selectedPhotoFile: null,
         selectedPhotoPreview: null,
         selectedPhotoName: '',
+        photoAttachmentError: '',
         imageModalOpen: false,
         modalImageUrl: '',
 
@@ -1225,26 +1236,24 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
 
         // Photo Attachment Feature
         handlePhotoSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                window.dispatchEvent(new CustomEvent('show-toast', { detail: { type: 'error', message: 'Ukuran file foto maksimal adalah 5MB' } }));
-                event.target.value = '';
+            const res = window.validateUploadFiles(event.target, { maxMB: 5 });
+            if (res.hasErrors) {
+                this.photoAttachmentError = res.errorMessage;
                 return;
             }
+            const file = res.validFiles[0];
+            if (!file) return;
+            this.photoAttachmentError = '';
             this.selectedPhotoFile = file;
             this.selectedPhotoName = file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.selectedPhotoPreview = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            this.selectedPhotoPreview = URL.createObjectURL(file);
         },
 
         cancelPhoto() {
             this.selectedPhotoFile = null;
             this.selectedPhotoPreview = null;
             this.selectedPhotoName = '';
+            this.photoAttachmentError = '';
             if (this.$refs.fileInput) this.$refs.fileInput.value = '';
         },
 

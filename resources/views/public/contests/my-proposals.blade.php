@@ -15,21 +15,23 @@
         </h1>
       </div>
 
+      @php
+        $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+      @endphp
       <div class="flex items-center gap-3 shrink-0">
-        <a href="{{ route('public.contests.propose.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-          <span>Ajukan Lomba Baru</span>
-        </a>
+        @if($isHoldPhotographer)
+          <button type="button" @click="openPhotographerHoldModal('mengajukan lomba foto')" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Ajukan Lomba Baru</span>
+          </button>
+        @else
+          <a href="{{ route('public.contests.propose.create') }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+            <span>Ajukan Lomba Baru</span>
+          </a>
+        @endif
       </div>
     </div>
-
-    <!-- Flash Messages -->
-    @if(session('success'))
-      <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
-        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-        <span>{{ session('success') }}</span>
-      </div>
-    @endif
 
     <!-- Proposals List Cards -->
     <div class="space-y-4">

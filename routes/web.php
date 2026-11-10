@@ -54,33 +54,33 @@ Route::get('/api/cities/{provinceCode}', [PhotographerController::class, 'getCit
 
 // Public E-Learning & Forum Routes
 Route::get('/elearning', [\App\Http\Controllers\Public\ElearningController::class, 'index'])->name('public.elearning.index');
-Route::get('/elearning/katalog', [\App\Http\Controllers\Public\ElearningController::class, 'katalog'])->name('public.elearning.katalog');
+Route::get('/elearning/katalog', [\App\Http\Controllers\Public\ElearningController::class, 'katalog'])->name('public.elearning.katalog')->middleware('photographer.verified');
 Route::get('/e-learning', [\App\Http\Controllers\Public\ElearningController::class, 'index']);
-Route::get('/elearning/{slug}', [\App\Http\Controllers\Public\ElearningController::class, 'show'])->name('public.elearning.show');
-Route::get('/elearning/{slug}/certificate', [\App\Http\Controllers\Public\ElearningController::class, 'certificate'])->name('public.elearning.certificate')->middleware('auth');
-Route::get('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'checkout'])->name('public.elearning.checkout');
-Route::post('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'processCheckout'])->name('public.elearning.checkout.process');
-Route::post('/elearning/{id}/toggle-progress', [\App\Http\Controllers\Public\ElearningController::class, 'toggleProgress'])->name('public.elearning.toggle-progress')->middleware('auth');
-Route::post('/elearning/lesson/{id}/toggle', [\App\Http\Controllers\Public\ElearningController::class, 'toggleLessonProgress'])->name('public.elearning.lesson.toggle')->middleware('auth');
+Route::get('/elearning/{slug}', [\App\Http\Controllers\Public\ElearningController::class, 'show'])->name('public.elearning.show')->middleware('photographer.verified');
+Route::get('/elearning/{slug}/certificate', [\App\Http\Controllers\Public\ElearningController::class, 'certificate'])->name('public.elearning.certificate')->middleware(['auth', 'photographer.verified']);
+Route::get('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'checkout'])->name('public.elearning.checkout')->middleware('photographer.verified');
+Route::post('/elearning/{slug}/checkout', [\App\Http\Controllers\Public\ElearningController::class, 'processCheckout'])->name('public.elearning.checkout.process')->middleware('photographer.verified');
+Route::post('/elearning/{id}/toggle-progress', [\App\Http\Controllers\Public\ElearningController::class, 'toggleProgress'])->name('public.elearning.toggle-progress')->middleware(['auth', 'photographer.verified']);
+Route::post('/elearning/lesson/{id}/toggle', [\App\Http\Controllers\Public\ElearningController::class, 'toggleLessonProgress'])->name('public.elearning.lesson.toggle')->middleware(['auth', 'photographer.verified']);
 
 Route::get('/forum', [\App\Http\Controllers\Public\ForumController::class, 'index'])->name('public.forum.index');
 Route::get('/forum/{id}', [\App\Http\Controllers\Public\ForumController::class, 'show'])->name('public.forum.show');
-Route::post('/forum/store', [\App\Http\Controllers\Public\ForumController::class, 'storePost'])->name('public.forum.store')->middleware('auth');
-Route::post('/forum/{id}/comment', [\App\Http\Controllers\Public\ForumController::class, 'storeComment'])->name('public.forum.comment')->middleware('auth');
-Route::post('/forum/comment/{id}/like', [\App\Http\Controllers\Public\ForumController::class, 'likeComment'])->name('public.forum.comment.like');
-Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumController::class, 'dislikeComment'])->name('public.forum.comment.dislike');
-Route::post('/forum/comment/{id}/report', [\App\Http\Controllers\Public\ForumController::class, 'reportComment'])->name('public.forum.comment.report')->middleware('auth');
-Route::post('/forum/comment/{id}/user-delete', [\App\Http\Controllers\Public\ForumController::class, 'deleteComment'])->name('public.forum.comment.delete')->middleware('auth');
+Route::post('/forum/store', [\App\Http\Controllers\Public\ForumController::class, 'storePost'])->name('public.forum.store')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/{id}/comment', [\App\Http\Controllers\Public\ForumController::class, 'storeComment'])->name('public.forum.comment')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/comment/{id}/like', [\App\Http\Controllers\Public\ForumController::class, 'likeComment'])->name('public.forum.comment.like')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumController::class, 'dislikeComment'])->name('public.forum.comment.dislike')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/comment/{id}/report', [\App\Http\Controllers\Public\ForumController::class, 'reportComment'])->name('public.forum.comment.report')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/comment/{id}/user-delete', [\App\Http\Controllers\Public\ForumController::class, 'deleteComment'])->name('public.forum.comment.delete')->middleware(['auth', 'photographer.verified']);
 
 // Public Photo Contest Routes
 Route::get('/lomba', [\App\Http\Controllers\Public\ContestController::class, 'index'])->name('public.contests.index');
 Route::get('/lomba/{id}', [\App\Http\Controllers\Public\ContestController::class, 'show'])->name('public.contests.show');
-Route::post('/lomba/{id}/register', [\App\Http\Controllers\Public\ContestController::class, 'registerParticipant'])->name('public.contests.register')->middleware('auth');
-Route::post('/lomba/{id}/payment', [\App\Http\Controllers\Public\ContestController::class, 'uploadPaymentProof'])->name('public.contests.payment')->middleware('auth');
-Route::post('/lomba/{id}/submit', [\App\Http\Controllers\Public\ContestController::class, 'submit'])->name('public.contests.submit')->middleware('auth');
-Route::get('/lomba-pengajuan/buat', [\App\Http\Controllers\Public\ContestProposalController::class, 'create'])->name('public.contests.propose.create')->middleware('auth');
-Route::post('/lomba-pengajuan/simpan', [\App\Http\Controllers\Public\ContestProposalController::class, 'store'])->name('public.contests.propose.store')->middleware('auth');
-Route::get('/lomba-pengajuan/riwayat', [\App\Http\Controllers\Public\ContestProposalController::class, 'myProposals'])->name('public.contests.propose.history')->middleware('auth');
+Route::post('/lomba/{id}/register', [\App\Http\Controllers\Public\ContestController::class, 'registerParticipant'])->name('public.contests.register')->middleware(['auth', 'photographer.verified']);
+Route::post('/lomba/{id}/payment', [\App\Http\Controllers\Public\ContestController::class, 'uploadPaymentProof'])->name('public.contests.payment')->middleware(['auth', 'photographer.verified']);
+Route::post('/lomba/{id}/submit', [\App\Http\Controllers\Public\ContestController::class, 'submit'])->name('public.contests.submit')->middleware(['auth', 'photographer.verified']);
+Route::get('/lomba-pengajuan/buat', [\App\Http\Controllers\Public\ContestProposalController::class, 'create'])->name('public.contests.propose.create')->middleware(['auth', 'photographer.verified']);
+Route::post('/lomba-pengajuan/simpan', [\App\Http\Controllers\Public\ContestProposalController::class, 'store'])->name('public.contests.propose.store')->middleware(['auth', 'photographer.verified']);
+Route::get('/lomba-pengajuan/riwayat', [\App\Http\Controllers\Public\ContestProposalController::class, 'myProposals'])->name('public.contests.propose.history')->middleware(['auth', 'photographer.verified']);
 
 /*
 |--------------------------------------------------------------------------

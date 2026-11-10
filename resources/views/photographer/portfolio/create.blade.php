@@ -123,7 +123,7 @@
 
                 <div class="space-y-3">
                     <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-2 border-dashed transition text-center"
-                         :class="touched.foto && errors.foto ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'">
+                         :class="(touched.foto && errors.foto) || uploadNotice ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'">
                         <label class="cursor-pointer inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition my-1">
                             <span>Pilih Minimal 4 Foto Portofolio</span>
                             <input type="file" 
@@ -134,7 +134,7 @@
                                    @change="filesChosen" 
                                    class="sr-only">
                         </label>
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium mt-1">Pilih minimal 4 file foto sekaligus (tahan tombol Ctrl/Cmd untuk memilih banyak file). Format: JPG, PNG, WEBP maks 20MB per file.</p>
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium mt-1">Pilih minimal 4 file foto sekaligus (tahan tombol Ctrl/Cmd untuk memilih banyak file). Format: JPG, PNG, WEBP maks. 20 MB per file.</p>
                     </div>
 
                     <!-- Multiple Preview Grid -->
@@ -149,6 +149,7 @@
                         </div>
                     </template>
                 </div>
+                <p x-show="uploadNotice" x-text="uploadNotice" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 @error('foto_files')
                     <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
@@ -180,6 +181,7 @@ function portfolioFormApp() {
     return {
         previewUrls: [],
         fileCount: 0,
+        uploadNotice: '',
         catOpen: false,
         form: {
             judul: @js(old('judul', '')),
@@ -200,7 +202,12 @@ function portfolioFormApp() {
             foto: '{{ $errors->first('foto_files') ?: '' }}'
         },
         filesChosen(event) {
-            const files = Array.from(event.target.files);
+            const res = window.validateUploadFiles(event.target, {
+                maxMB: 20,
+                multiple: true
+            });
+            this.uploadNotice = res.errorMessage;
+            const files = res.validFiles;
             this.fileCount = files.length;
             this.previewUrls = files.slice(0, 12).map(f => URL.createObjectURL(f));
             this.touched.foto = true;

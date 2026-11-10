@@ -187,14 +187,14 @@ class ContestController extends Controller
             'instansi' => 'nullable|string|max:150',
             'bio_singkat' => 'nullable|string|max:1000',
             'motivasi' => 'nullable|string|max:1000',
-            'cv_portfolio_file' => 'nullable|file|mimes:pdf,zip,rar|max:10240',
+            'cv_portfolio_file' => 'nullable|file|mimes:pdf,doc,docx,zip,rar|max:10240',
             'portfolio_link' => 'nullable|string|max:255',
         ], [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Email aktif wajib diisi.',
             'no_wa.required' => 'Nomor WhatsApp aktif wajib diisi.',
-            'cv_portfolio_file.mimes' => 'Berkas CV/Portofolio harus berupa file PDF atau arsip ZIP/RAR.',
-            'cv_portfolio_file.max' => 'Ukuran berkas CV/Portofolio maksimal 10MB.',
+            'cv_portfolio_file.mimes' => 'Berkas CV/Portofolio harus berformat PDF, DOC, DOCX, ZIP, atau RAR.',
+            'cv_portfolio_file.max' => 'Ukuran berkas CV/Portofolio maksimal 10 MB.',
         ]);
 
         $cvFilePath = null;
@@ -244,11 +244,12 @@ class ContestController extends Controller
         }
 
         $request->validate([
-            'bukti_transfer' => 'required|image|max:5120',
+            'bukti_transfer' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ], [
-            'bukti_transfer.required' => 'Silakan upload file foto struk/bukti transfer bank.',
-            'bukti_transfer.image' => 'Bukti transfer harus berupa file gambar (JPG, PNG, JPEG).',
-            'bukti_transfer.max' => 'Ukuran file bukti transfer maksimal 5MB.',
+            'bukti_transfer.required' => 'Silakan unggah file struk bukti transfer.',
+            'bukti_transfer.image' => 'Bukti transfer harus berupa gambar.',
+            'bukti_transfer.mimes' => 'Format bukti transfer harus JPG, PNG, atau WEBP.',
+            'bukti_transfer.max' => 'Ukuran file bukti transfer maksimal 5 MB.',
         ]);
 
         $path = $request->file('bukti_transfer')->store('contest_payment_proofs', 'public');
@@ -296,10 +297,13 @@ class ContestController extends Controller
         $request->validate([
             'judul_karya' => 'required|string|max:255',
             'deskripsi_karya' => 'nullable|string|max:1000',
-            'foto_file' => 'nullable|image|max:10240',
+            'foto_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'media_link' => 'nullable|string|max:500',
         ], [
             'judul_karya.required' => 'Tuliskan judul karya foto Anda.',
+            'foto_file.image' => 'File karya harus berupa gambar.',
+            'foto_file.mimes' => 'Format foto karya harus JPG, PNG, atau WEBP.',
+            'foto_file.max' => 'Ukuran foto karya maksimal 10 MB.',
         ]);
 
         $imageUrl = null;

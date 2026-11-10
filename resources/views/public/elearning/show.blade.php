@@ -7,6 +7,7 @@
   $currentModule = $currentLesson ? $currentLesson->module : null;
   $moduleLessons = $currentModule ? $currentModule->lessons : collect();
   $moduleLessonIds = $moduleLessons->pluck('id')->toArray();
+  $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
 @endphp
 
 <div 
@@ -167,6 +168,11 @@
         return;
       @endguest
 
+      @if($isHoldPhotographer)
+        openPhotographerHoldModal('menyelesaikan materi E-Learning');
+        return;
+      @endif
+
       if (this.loadingToggle || !this.activeLessonId || this.isLessonCompleted) return;
       this.loadingToggle = true;
 
@@ -271,16 +277,29 @@
 
           <!-- Download Certificate Button (Visible when 100% completed) -->
           <div x-show="coursePercentage >= 100" x-cloak class="pt-1">
-            <a 
-              href="{{ route('public.elearning.certificate', $course->slug) }}" 
-              target="_blank"
-              class="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-xs transition flex items-center justify-center gap-2 group"
-            >
-              <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-              </svg>
-              <span>Unduh Sertifikat (PDF)</span>
-            </a>
+            @if($isHoldPhotographer)
+              <button 
+                type="button"
+                @click="openPhotographerHoldModal('mengunduh sertifikat E-Learning')"
+                class="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-xs transition flex items-center justify-center gap-2 group cursor-pointer"
+              >
+                <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Unduh Sertifikat (PDF)</span>
+              </button>
+            @else
+              <a 
+                href="{{ route('public.elearning.certificate', $course->slug) }}" 
+                target="_blank"
+                class="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-xs transition flex items-center justify-center gap-2 group"
+              >
+                <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Unduh Sertifikat (PDF)</span>
+              </a>
+            @endif
           </div>
         </div>
 
@@ -494,7 +513,15 @@
                   </div>
 
                   <div class="pt-1 flex items-center justify-center">
-                    @auth
+                    @if($isHoldPhotographer)
+                      <button 
+                        type="button"
+                        @click="openPhotographerHoldModal('membeli akses kursus E-Learning')" 
+                        class="px-6 py-2.5 text-xs font-extrabold text-gray-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition cursor-pointer"
+                      >
+                        Beli Akses Kursus
+                      </button>
+                    @elseif(auth()->check())
                       <a 
                         href="{{ route('public.elearning.checkout', $course->slug) }}" 
                         class="px-6 py-2.5 text-xs font-extrabold text-gray-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition cursor-pointer"
@@ -509,7 +536,7 @@
                       >
                         Beli Akses Kursus
                       </button>
-                    @endauth
+                    @endif
                   </div>
                 </div>
               </div>
@@ -866,15 +893,27 @@
 
             @if(!$isCurrentLessonLocked && !$isMediaLesson)
               <!-- Tombol Tandai Selesai (Hanya untuk materi teks dan jika belum selesai) -->
-              <button 
-                x-show="!isLessonCompleted" 
-                x-cloak
-                type="button" 
-                @click="showCompleteConfirmModal = true" 
-                class="px-5 py-2.5 rounded-lg font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white transition inline-flex items-center gap-2 cursor-pointer shadow-xs"
-              >
-                <span>Tandai Selesai</span>
-              </button>
+              @if($isHoldPhotographer)
+                <button 
+                  x-show="!isLessonCompleted" 
+                  x-cloak
+                  type="button" 
+                  @click="openPhotographerHoldModal('menyelesaikan materi E-Learning')" 
+                  class="px-5 py-2.5 rounded-lg font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white transition inline-flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span>Tandai Selesai</span>
+                </button>
+              @else
+                <button 
+                  x-show="!isLessonCompleted" 
+                  x-cloak
+                  type="button" 
+                  @click="showCompleteConfirmModal = true" 
+                  class="px-5 py-2.5 rounded-lg font-bold text-xs bg-emerald-600 hover:bg-emerald-700 text-white transition inline-flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span>Tandai Selesai</span>
+                </button>
+              @endif
             @endif
 
             @if($nextLesson)
@@ -1028,16 +1067,29 @@
 
       <!-- Action Buttons -->
       <div class="space-y-2.5 pt-2">
-        <a 
-          href="{{ route('public.elearning.certificate', $course->slug) }}" 
-          target="_blank"
-          class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-md transition flex items-center justify-center gap-2 group"
-        >
-          <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path>
-          </svg>
-          <span>Unduh Sertifikat Kelulusan (PDF)</span>
-        </a>
+        @if($isHoldPhotographer)
+          <button 
+            type="button"
+            @click="openPhotographerHoldModal('mengunduh sertifikat E-Learning')"
+            class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-md transition flex items-center justify-center gap-2 group cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Unduh Sertifikat Kelulusan (PDF)</span>
+          </button>
+        @else
+          <a 
+            href="{{ route('public.elearning.certificate', $course->slug) }}" 
+            target="_blank"
+            class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-gray-950 font-black text-xs shadow-md transition flex items-center justify-center gap-2 group"
+          >
+            <svg class="w-4 h-4 text-gray-950 group-hover:scale-110 transition" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Unduh Sertifikat Kelulusan (PDF)</span>
+          </a>
+        @endif
 
         <button 
           type="button" 

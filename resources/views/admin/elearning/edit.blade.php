@@ -331,7 +331,8 @@
 
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
 
-                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border flex items-center justify-center overflow-hidden shrink-0 shadow-xs transition"
+                         :class="thumbnailError ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'">
 
                         <template x-if="previewUrl">
 
@@ -362,11 +363,13 @@
 
                         </label>
 
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10MB.</p>
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10 MB.</p>
 
                     </div>
 
                 </div>
+
+                <p x-show="thumbnailError" x-text="thumbnailError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 @error('thumbnail')
 
@@ -400,9 +403,18 @@
 function elearningEditApp() {
     return {
         previewUrl: @js($material->thumbnail_url ?: ($material->thumbnail ? asset('storage/' . $material->thumbnail) : '')),
+        thumbnailError: '',
         fileChosen(event) {
-            const file = event.target.files[0];
-            if (file) this.previewUrl = URL.createObjectURL(file);
+            const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+            if (res.hasErrors) {
+                this.thumbnailError = res.errorMessage;
+                return;
+            }
+            const file = res.validFiles[0];
+            if (file) {
+                this.thumbnailError = '';
+                this.previewUrl = URL.createObjectURL(file);
+            }
         },
         catOpen: false,
         openAccess: false,

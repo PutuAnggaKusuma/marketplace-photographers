@@ -81,6 +81,81 @@ class User extends Authenticatable
         return $this->role === 'client';
     }
 
+    /**
+     * Cek apakah user adalah Fotografer yang akunnya masih di-HOLD
+     * (profil belum lengkap, ditolak, atau belum diverifikasi Admin).
+     */
+    public function isHoldPhotographer(): bool
+    {
+        if (!$this->isPhotographer()) {
+            return false;
+        }
+
+        $photographer = $this->rolePhotographer;
+        if (!$photographer) {
+            return true;
+        }
+
+        return !$photographer->isFeatureUnlocked();
+    }
+
+    /**
+     * Susun payload popup akses untuk Fotografer HOLD berdasarkan status verifikasinya.
+     */
+    public function getPhotographerHoldPopupPayload(): ?array
+    {
+        if (!$this->isHoldPhotographer()) {
+            return null;
+        }
+
+        $photographer = $this->rolePhotographer;
+        $profileUrl = route('photographer.profile');
+
+        if (!$photographer) {
+            return [
+                'state' => 'incomplete',
+                'title' => 'Profil Belum Lengkap',
+                'missingCount' => 0,
+                'catatan' => null,
+                'buttonText' => 'Lengkapi Profil',
+                'redirectUrl' => $profileUrl,
+            ];
+        }
+
+        if ($photographer->status_verifikasi === 'ditolak') {
+            $catatan = trim((string) ($photographer->catatan_penolakan ?? ''));
+
+            return [
+                'state' => 'rejected',
+                'title' => 'Pendaftaran Akun Ditolak',
+                'missingCount' => 0,
+                'catatan' => $catatan !== '' ? $catatan : null,
+                'buttonText' => 'Perbaiki Profil',
+                'redirectUrl' => $profileUrl,
+            ];
+        }
+
+        if (!$photographer->isProfileComplete()) {
+            return [
+                'state' => 'incomplete',
+                'title' => 'Profil Belum Lengkap',
+                'missingCount' => count($photographer->getMissingProfileFields()),
+                'catatan' => null,
+                'buttonText' => 'Lengkapi Profil',
+                'redirectUrl' => $profileUrl,
+            ];
+        }
+
+        return [
+            'state' => 'pending',
+            'title' => 'Menunggu Verifikasi',
+            'missingCount' => 0,
+            'catatan' => null,
+            'buttonText' => 'Lihat Profil',
+            'redirectUrl' => $profileUrl,
+        ];
+    }
+
     public function isProtected(): bool
     {
         return $this->is_protected || $this->role === 'super_admin';

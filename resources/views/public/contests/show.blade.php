@@ -11,31 +11,11 @@
            loginModal: false,
            openLoginModal() { this.loginModal = true; },
            closeLoginModal() { this.loginModal = false; }
-         }">
+         }"
+         @if(isset($errors) && $errors->any())
+           x-init="$nextTick(() => $dispatch('show-toast', { type: 'error', message: {{ \Illuminate\Support\Js::from($errors->first()) }} }))"
+         @endif>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-    <!-- Flash Messages -->
-    @if(session('success'))
-      <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 text-xs text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-2">
-        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-        <span>{{ session('success') }}</span>
-      </div>
-    @endif
-
-    @if(session('info'))
-      <div class="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 text-xs text-blue-800 dark:text-blue-300 font-bold flex items-center gap-2">
-        <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        <span>{{ session('info') }}</span>
-      </div>
-    @endif
-
-    @if($errors->any())
-      <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-xs text-rose-800 dark:text-rose-300 font-bold space-y-1">
-        @foreach($errors->all() as $err)
-          <p>• {{ $err }}</p>
-        @endforeach
-      </div>
-    @endif
 
     <!-- Breadcrumb & Back Navigation -->
     <div class="space-y-2">
@@ -279,6 +259,9 @@
             </button>
           </div>
         @else
+          @php
+            $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+          @endphp
           <!-- Logged-in User States -->
           @if(!$userRegistration)
             <!-- CASE 1: Belum Mendaftar -->
@@ -312,11 +295,18 @@
                     Lengkapi data diri dan portofolio kualifikasi Anda. Data Anda akan dikurasi oleh admin sebelum pengumpulan karya dimulai.
                   </p>
                 </div>
-                <button type="button" @click="showForm = true" class="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-gray-950 font-black text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
-                  Daftar Calon Peserta
-                </button>
+                @if($isHoldPhotographer)
+                  <button type="button" @click="openPhotographerHoldModal('mendaftar sebagai peserta lomba')" class="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-gray-950 font-black text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+                    Daftar Calon Peserta
+                  </button>
+                @else
+                  <button type="button" @click="showForm = true" class="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-gray-950 font-black text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+                    Daftar Calon Peserta
+                  </button>
+                @endif
               </div>
 
+              @if(!$isHoldPhotographer)
               <!-- FORMULIR REGISTRASI CALON PESERTA (TAHAP 1) -->
               <div 
                 x-show="showForm" 
@@ -400,19 +390,20 @@
                     <p x-show="touched.motivasi && errors.motivasi" x-text="errors.motivasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
-                  <div x-data="{ cvFileName: null }" class="space-y-2">
+                  <div x-data="{ cvFileName: null, cvError: '' }" class="space-y-2">
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200">
-                      Upload Berkas CV / Portofolio (PDF/DOCX)
+                      Upload Berkas CV / Portofolio (PDF/DOCX/ZIP/RAR)
                     </label>
                     <div class="flex items-center gap-3">
                       <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
                         <span>Pilih File CV / Portofolio</span>
-                        <input type="file" name="cv_portfolio_file" accept=".pdf,.doc,.docx" class="hidden" @change="cvFileName = $event.target.files[0]?.name">
+                        <input type="file" name="cv_portfolio_file" accept=".pdf,.doc,.docx,.zip,.rar" class="hidden" @change="const res = window.validateUploadFiles($event.target, { maxMB: 10, allowedMimes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/vnd.rar'], allowedExts: ['pdf', 'doc', 'docx', 'zip', 'rar'], formatLabel: 'PDF, DOC, DOCX, ZIP, atau RAR' }); cvError = res.errorMessage; cvFileName = res.validFiles[0]?.name || null;">
                       </label>
                       <span x-text="cvFileName ? cvFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
                     </div>
-                    <p class="text-[11px] text-gray-400">Maksimal 10MB (.pdf, .doc, .docx)</p>
+                    <p x-show="cvError" x-text="cvError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                    <p class="text-[11px] text-gray-400">Maksimal 10 MB (PDF, DOC, DOCX, ZIP, RAR)</p>
                   </div>
 
                   <div>
@@ -432,6 +423,7 @@
                   </div>
                 </form>
               </div>
+              @endif
             </div>
 
           @elseif($userRegistration->status_pendaftaran === 'pending')
@@ -519,6 +511,12 @@
                   <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                   <span>Bukti transfer telah diunggah dan sedang diverifikasi oleh admin. Terima kasih!</span>
                 </div>
+              @elseif($isHoldPhotographer)
+                <div>
+                  <button type="button" @click="openPhotographerHoldModal('mengunggah bukti pembayaran lomba')" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+                    Unggah Bukti Transfer
+                  </button>
+                </div>
               @else
                 <form action="{{ route('public.contests.payment', $contest->id) }}" 
                       method="POST" 
@@ -529,16 +527,17 @@
                         touched: false,
                         error: '',
                         handleTransferFile(e) {
-                          const file = e.target.files[0];
                           this.touched = true;
+                          const res = window.validateUploadFiles(e.target, { maxMB: 5 });
+                          if (res.hasErrors) {
+                            this.transferFileName = null;
+                            this.error = res.errorMessage;
+                            return false;
+                          }
+                          const file = res.validFiles[0];
                           if (!file) {
                             this.transferFileName = null;
                             this.error = 'File struk / bukti transfer wajib dipilih.';
-                            return false;
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            this.transferFileName = null;
-                            this.error = 'Ukuran file bukti transfer maksimal 5 MB.';
                             return false;
                           }
                           this.transferFileName = file.name;
@@ -566,14 +565,14 @@
                         <input type="file" 
                                name="bukti_transfer" 
                                x-ref="transferFileInput"
-                               accept="image/*,.pdf" 
+                               accept="image/jpeg,image/png,image/webp" 
                                class="sr-only" 
                                @change="handleTransferFile($event)">
                       </label>
                       <span x-text="transferFileName ? transferFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
                     </div>
                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                    <p class="text-[11px] text-gray-400">Format JPG, PNG, atau PDF (maks. 5MB)</p>
+                    <p class="text-[11px] text-gray-400">Format gambar: JPG, PNG, WEBP (maksimal 5 MB)</p>
                   </div>
                   <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
                     Simpan Data
@@ -664,30 +663,25 @@
                     return true;
                   },
                   handleFile(e) {
-                    const file = e.target.files[0];
                     this.touched.foto = true;
+                    const res = window.validateUploadFiles(e.target, { maxMB: 10 });
+                    if (res.hasErrors) {
+                      this.fileSelected = false;
+                      this.fileName = '';
+                      this.preview = null;
+                      this.errors.foto = res.errorMessage;
+                      return false;
+                    }
+                    const file = res.validFiles[0];
                     if (file) {
-                      if (!file.type.match(/^image\//)) {
-                        this.fileSelected = false;
-                        this.preview = null;
-                        this.errors.foto = 'File harus berupa gambar (JPG, PNG, WEBP).';
-                        return false;
-                      }
-                      if (file.size > 10 * 1024 * 1024) {
-                        this.fileSelected = false;
-                        this.preview = null;
-                        this.errors.foto = 'Ukuran file foto maksimal 10 MB.';
-                        return false;
-                      }
                       this.fileSelected = true;
                       this.fileName = file.name;
                       this.errors.foto = '';
-                      const reader = new FileReader();
-                      reader.onload = (event) => { this.preview = event.target.result; };
-                      reader.readAsDataURL(file);
+                      this.preview = URL.createObjectURL(file);
                       return true;
                     } else {
                       this.fileSelected = false;
+                      this.fileName = '';
                       this.preview = null;
                       this.errors.foto = 'File foto karya wajib dipilih.';
                       return false;
@@ -718,11 +712,18 @@
                         Anda masih memiliki sisa kuota untuk mengunggah {{ ($contest->max_submissions ?? 2) - $userSubmissions->count() }} karya foto lagi.
                       </p>
                     </div>
-                    <button type="button" @click="showUploadForm = true" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
-                      Unggah Karya Foto Baru
-                    </button>
+                    @if($isHoldPhotographer)
+                      <button type="button" @click="openPhotographerHoldModal('mengunggah karya foto lomba')" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+                        Unggah Karya Foto Baru
+                      </button>
+                    @else
+                      <button type="button" @click="showUploadForm = true" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer">
+                        Unggah Karya Foto Baru
+                      </button>
+                    @endif
                   </div>
 
+                  @if(!$isHoldPhotographer)
                   <div 
                     x-show="showUploadForm" 
                     x-cloak 
@@ -766,10 +767,10 @@
                           <div class="flex-1 space-y-2">
                             <label class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
                               <span>Pilih File Foto Karya</span>
-                              <input type="file" name="foto_file" x-ref="fotoFileInput" accept="image/*" @change="handleFile($event)" class="hidden">
+                              <input type="file" name="foto_file" x-ref="fotoFileInput" accept="image/jpeg,image/png,image/webp" @change="handleFile($event)" class="hidden">
                             </label>
                             <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Format gambar (JPG, PNG, WEBP maks. 10MB)</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Format gambar (JPG, PNG, WEBP maks. 10 MB)</p>
                           </div>
                         </div>
                       </div>
@@ -796,6 +797,7 @@
                       </div>
                     </form>
                   </div>
+                  @endif
                 </div>
               @else
                 <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-center">

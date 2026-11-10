@@ -53,7 +53,9 @@ class ContestProposalController extends Controller
             'deskrpisi_lomba.min' => 'Deskripsi lomba minimal 30 karakter agar informatif.',
             'syarat_ketentuan.required' => 'Syarat & ketentuan teknis lomba wajib dicantumkan.',
             'syarat_ketentuan.min' => 'Syarat & ketentuan minimal 30 karakter.',
-            'banner_file.max' => 'Ukuran file banner maksimal 5MB.',
+            'banner_file.image' => 'File banner harus berupa gambar.',
+            'banner_file.mimes' => 'Format file banner harus JPG, PNG, atau WEBP.',
+            'banner_file.max' => 'Ukuran file banner maksimal 5 MB.',
         ]);
 
         $bannerUrl = $request->banner_url;

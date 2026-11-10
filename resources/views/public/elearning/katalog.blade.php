@@ -95,12 +95,35 @@
     <div id="elearning-katalog-ajax-container" class="transition-opacity duration-150 space-y-10">
       
       <!-- 3-Column Course Cards Grid (FULL BLEED CARDS WITH PERFECT PADDING) -->
+      @php
+        $isHoldPhotographer = auth()->check() && auth()->user()->isHoldPhotographer();
+      @endphp
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
         @forelse($elearnings as $course)
           <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group h-full overflow-hidden">
             
             <!-- Top Full-Bleed Thumbnail Image Frame -->
-            @auth
+            @if($isHoldPhotographer)
+              <div @click="openPhotographerHoldModal('mengakses materi E-Learning')"
+                   class="block relative aspect-[16/10] bg-gray-100 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700/60 overflow-hidden cursor-pointer shrink-0">
+                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'600\' viewBox=\'0 0 800 600\' fill=\'none\'%3E%3Crect width=\'800\' height=\'600\' fill=\'%23F3F4F6\'/%3E%3Cpath d=\'M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z\' stroke=\'%239CA3AF\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Ccircle cx=\'400\' cy=\'320\' r=\'30\' stroke=\'%239CA3AF\' stroke-width=\'12\'/%3E%3Cline x1=\'310\' y1=\'240\' x2=\'490\' y2=\'390\' stroke=\'%23EF4444\' stroke-width=\'10\' stroke-linecap=\'round\'/%3E%3Ctext x=\'400\' y=\'450\' font-family=\'sans-serif\' font-size=\'22\' font-weight=\'700\' fill=\'%236B7280\' text-anchor=\'middle\'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" 
+                     src="{{ $course->thumbnail_url }}" 
+                     alt="{{ $course->judul }}" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+
+                <!-- Level Badge Top-Left -->
+                <span class="absolute top-3 left-3 px-2.5 py-1 bg-amber-400 text-gray-900 text-[10px] font-black rounded-lg shadow-xs uppercase tracking-wider">
+                  {{ $course->level ?? 'Pemula' }}
+                </span>
+
+                <!-- Duration Badge Top-Right -->
+                <span class="absolute top-3 right-3 px-2.5 py-1 bg-gray-900/90 text-white text-[10px] font-extrabold rounded-lg shadow-xs">
+                  {{ $course->durasi ?? '30 Menit' }}
+                </span>
+              </div>
+            @elseif(auth()->check())
               <a href="{{ route('public.elearning.show', $course->slug) }}" class="block relative aspect-[16/10] bg-gray-100 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700/60 overflow-hidden shrink-0">
                 <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK||'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'600\' viewBox=\'0 0 800 600\' fill=\'none\'%3E%3Crect width=\'800\' height=\'600\' fill=\'%23F3F4F6\'/%3E%3Cpath d=\'M360 260C360 248.954 368.954 240 380 240H420C431.046 240 440 248.954 440 260V265H450C466.569 265 480 278.431 480 295V345C480 361.569 466.569 375 450 375H350C333.431 375 320 361.569 320 345V295C320 278.431 333.431 265 350 265H360V260Z\' stroke=\'%239CA3AF\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3Ccircle cx=\'400\' cy=\'320\' r=\'30\' stroke=\'%239CA3AF\' stroke-width=\'12\'/%3E%3Cline x1=\'310\' y1=\'240\' x2=\'490\' y2=\'390\' stroke=\'%23EF4444\' stroke-width=\'10\' stroke-linecap=\'round\'/%3E%3Ctext x=\'400\' y=\'450\' font-family=\'sans-serif\' font-size=\'22\' font-weight=\'700\' fill=\'%236B7280\' text-anchor=\'middle\'%3EGambar Tidak Dapat Dimuat%3C/text%3E%3C/svg%3E';" 
                      src="{{ $course->thumbnail_url }}" 
@@ -146,7 +169,7 @@
                   {{ $course->durasi ?? '30 Menit' }}
                 </span>
               </div>
-            @endauth
+            @endif
 
             <!-- Card Body Container (Spacious Inner Padding p-6 sm:p-7) -->
             <div class="p-6 sm:p-7 flex flex-col justify-between flex-1 space-y-4">
@@ -155,7 +178,15 @@
                   {{ $course->kategori }}
                 </span>
                 
-                @auth
+                @if($isHoldPhotographer)
+                  <button type="button"
+                          @click="openPhotographerHoldModal('mengakses materi E-Learning')"
+                          class="text-left w-full block cursor-pointer">
+                    <h3 class="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-amber-500 transition line-clamp-2 leading-snug">
+                      {{ $course->judul }}
+                    </h3>
+                  </button>
+                @elseif(auth()->check())
                   <a href="{{ route('public.elearning.show', $course->slug) }}" class="block">
                     <h3 class="font-bold text-base sm:text-lg text-gray-900 dark:text-white group-hover:text-amber-500 transition line-clamp-2 leading-snug">
                       {{ $course->judul }}
@@ -169,7 +200,7 @@
                       {{ $course->judul }}
                     </h3>
                   </button>
-                @endauth
+                @endif
 
                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 pt-1">
                   {{ $course->ringkasan }}
@@ -183,7 +214,14 @@
                   <span>{{ number_format($course->view_count, 0, ',', '.') }} Pembaca</span>
                 </span>
 
-                @auth
+                @if($isHoldPhotographer)
+                  <button type="button"
+                          @click="openPhotographerHoldModal('mengakses materi E-Learning')"
+                          class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs cursor-pointer">
+                    <span>Mulai Belajar</span>
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                  </button>
+                @elseif(auth()->check())
                   <a href="{{ route('public.elearning.show', $course->slug) }}" class="font-extrabold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1.5 text-xs">
                     <span>Mulai Belajar</span>
                     <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
@@ -195,7 +233,7 @@
                     <span>Mulai Belajar</span>
                     <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
                   </button>
-                @endauth
+                @endif
               </div>
             </div>
 

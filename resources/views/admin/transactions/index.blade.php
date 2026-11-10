@@ -22,6 +22,8 @@
 
     payoutNotes: '',
 
+    payoutProofError: '',
+
     refundNotes: '',
 
     openDetail(c) {
@@ -38,7 +40,19 @@
 
         this.payoutNotes = 'Pencairan dana 90% disetujui Admin.';
 
+        this.payoutProofError = '';
+
+        if (this.$refs.payoutProofInput) this.$refs.payoutProofInput.value = '';
+
         this.payoutModalOpen = true;
+
+    },
+
+    handlePayoutProofFile(event) {
+
+        const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+
+        this.payoutProofError = res.hasErrors ? res.errorMessage : '';
 
     },
 
@@ -1726,9 +1740,17 @@
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Unggah Bukti Struk Transfer Bank (Opsional)</label>
 
-                    <input type="file" name="bukti_transfer_payout" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                    <input type="file" name="bukti_transfer_payout" x-ref="payoutProofInput" accept="image/jpeg,image/png,image/webp" @change="handlePayoutProofFile($event)" :class="payoutProofError ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'" class="w-full p-1.5 rounded-xl border text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer transition">
 
-                    <p class="text-[10px] text-gray-400 mt-1">Mendukung format gambar bukti transfer (JPG, PNG, WEBP)</p>
+                    <p x-show="payoutProofError" x-text="payoutProofError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+
+                    @error('bukti_transfer_payout')
+
+                        <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+
+                    @enderror
+
+                    <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (maksimal 10 MB)</p>
 
                 </div>
 
