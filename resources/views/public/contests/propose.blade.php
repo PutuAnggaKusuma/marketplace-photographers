@@ -65,7 +65,7 @@
 
       <!-- Left Column (8 cols): Main Form -->
 
-      <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
+      <div x-data="proposeContestApp()" class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
 
         
 
@@ -74,7 +74,6 @@
           method="POST" 
           enctype="multipart/form-data" 
           class="space-y-6"
-          x-data="proposeContestApp()"
           @submit="submitForm($event)"
           novalidate
         >
@@ -97,7 +96,6 @@
                 x-model="form.judul_lomba"
                 @input="touched.judul_lomba = true; validateJudul()"
                 @blur="touched.judul_lomba = true; validateJudul()"
-                required 
                 placeholder="mis. Bali Cultural & Heritage Photography Contest 2026" 
                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                 :class="touched.judul_lomba && errors.judul_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
@@ -110,10 +108,11 @@
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                   Kategori Fotografi <span class="text-rose-500">*</span>
                 </label>
-                <div class="relative" x-ref="fieldKategori">
-                  <input type="hidden" name="kategori" :value="form.kategori" required>
+                <div class="relative">
+                  <input type="hidden" name="kategori" :value="form.kategori">
                   <button 
                     type="button" 
+                    x-ref="fieldKategori"
                     @click="categoryDropdownOpen = !categoryDropdownOpen" 
                     @click.away="categoryDropdownOpen = false" 
                     class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition cursor-pointer flex items-center justify-between"
@@ -167,7 +166,6 @@
                   x-model="form.penyelenggara"
                   @input="touched.penyelenggara = true; validatePenyelenggara()"
                   @blur="touched.penyelenggara = true; validatePenyelenggara()"
-                  required 
                   placeholder="mis. Komunitas Fotografi Dewata / Studio Anda" 
                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                   :class="touched.penyelenggara && errors.penyelenggara ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
@@ -187,7 +185,6 @@
                 x-model="form.hadiah"
                 @input="touched.hadiah = true; validateHadiah()"
                 @blur="touched.hadiah = true; validateHadiah()"
-                required 
                 placeholder="mis. Rp 15.000.000 + E-Sertifikat + Publikasi Eksklusif" 
                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                 :class="touched.hadiah && errors.hadiah ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
@@ -207,7 +204,6 @@
                   x-model="form.start_date"
                   @input="touched.start_date = true; validateDates()"
                   @blur="touched.start_date = true; validateDates()"
-                  required 
                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                   :class="touched.start_date && errors.start_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                 >
@@ -225,7 +221,6 @@
                   x-model="form.end_date"
                   @input="touched.end_date = true; validateDates()"
                   @blur="touched.end_date = true; validateDates()"
-                  required 
                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                   :class="touched.end_date && errors.end_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                 >
@@ -234,116 +229,81 @@
             </div>
           </div>
 
-
-
-          <!-- Section 2: Banner Gambar Lomba -->
-
+          <!-- Section 2: Banner Gambar Lomba (Rule #22 Pure-Text Dropzone & Rule #97 Lightbox) -->
           <div class="space-y-4 pt-2">
-
             <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-
               2. Banner Visual Event Lomba
-
             </h3>
 
-
-
-            <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 space-y-4">
-
-              <div class="flex flex-col sm:flex-row items-center gap-5">
-
-                <div class="relative w-full sm:w-48 h-32 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800 border-2 shadow-xs shrink-0 flex items-center justify-center transition"
-                     :class="bannerError ? 'border-red-400' : 'border-amber-400'">
-
-                  <template x-if="preview">
-
-                    <img :src="preview" alt="Preview Banner Lomba" class="w-full h-full object-cover">
-
-                  </template>
-
-                  <template x-if="!preview">
-
-                    <div class="text-center p-3 space-y-1 text-gray-400">
-
-                      <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>
-
-                      <span class="text-[10px] block font-semibold">Preview Banner</span>
-
-                    </div>
-
-                  </template>
-
-                </div>
-
-
-
-                <div class="space-y-3 flex-1">
-
-                  <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2">
-
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
-
-                    <span>Pilih File Banner dari Perangkat</span>
-
-                    <input type="file" name="banner_file" accept="image/jpeg,image/png,image/webp" @change="handleBanner($event)" class="hidden">
-
-                  </label>
-
-                  <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-
-                  @error('banner_file')
-
-                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-
-                  @enderror
-
-                  <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-
-                    Format gambar (JPG, JPEG, PNG, WEBP). Disarankan resolusi horizontal 16:9 (minimal 1200x675 px) maksimal 5 MB.
-
-                  </p>
-
-                </div>
-
+            <div class="space-y-4">
+              <div tabindex="0"
+                   role="button"
+                   @click="$refs.bannerFileInput.click()"
+                   @keydown.enter.prevent="$refs.bannerFileInput.click()"
+                   @keydown.space.prevent="$refs.bannerFileInput.click()"
+                   @dragover.prevent="isBannerDragging = true"
+                   @dragleave.prevent="isBannerDragging = false"
+                   @drop.prevent="handleBannerDrop($event)"
+                   class="w-full min-h-[150px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                   :class="isBannerDragging
+                       ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                       : (bannerError
+                           ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                           : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                <input type="file"
+                       name="banner_file"
+                       x-ref="bannerFileInput"
+                       accept="image/jpeg,image/png,image/webp"
+                       @change="handleBanner($event)"
+                       class="sr-only">
+                <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih banner lomba</span>
+                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                </p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                  Disarankan rasio horizontal 16:9 (min. 1200x675 px). Format JPG, PNG, WEBP maksimal 5 MB.
+                </p>
               </div>
 
+              <template x-if="preview">
+                <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-sm shadow-2xs">
+                  <div @click="bannerLightboxOpen = true"
+                       class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                    <img :src="preview" alt="Preview Banner Lomba" onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                    </div>
+                  </div>
+                  <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                    <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="bannerFileName || 'Banner Lomba'"></span>
+                    <button type="button" @click="removeBanner()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                  </div>
+                </div>
+              </template>
 
+              <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              @error('banner_file')
+                <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+              @enderror
 
               <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-
                   Atau Gunakan Direct URL Gambar Banner (Opsional)
-
                 </label>
-
                 <input 
-
                   type="url" 
-
                   name="banner_url" 
-
-                  value="{{ old('banner_url') }}" 
-
+                  x-model="form.banner_url"
+                  @input="if (!bannerFileName) preview = form.banner_url || null"
                   placeholder="https://..." 
-
-                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
-
+                  class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-amber-500 transition"
                 >
-
                 @error('banner_url')
-
                   <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-
                 @enderror
-
               </div>
-
             </div>
-
           </div>
-
-
 
           <!-- Section 3: Deskripsi & Syarat Ketentuan Dinamis -->
           <div class="space-y-4 pt-2">
@@ -362,7 +322,6 @@
                 x-model="form.deskrpisi_lomba"
                 @input="touched.deskrpisi_lomba = true; validateDeskripsi()"
                 @blur="touched.deskrpisi_lomba = true; validateDeskripsi()"
-                required 
                 placeholder="Tuliskan latar belakang, tujuan, tema eksplorasi foto, dan sasaran peserta kompetisi ini..." 
                 class="w-full min-h-[150px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
                 :class="touched.deskrpisi_lomba && errors.deskrpisi_lomba ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
@@ -381,7 +340,6 @@
                 x-model="form.syarat_ketentuan"
                 @input="touched.syarat_ketentuan = true; validateSyarat()"
                 @blur="touched.syarat_ketentuan = true; validateSyarat()"
-                required 
                 placeholder="1. Orisinalitas karya foto dan kepemilikan hak cipta.&#10;2. Ketentuan teknis file (resolusi, format gambar, batas olah digital dasar).&#10;3. Kriteria penilaian dewan juri (storytelling, komposisi, pencahayaan).&#10;4. Mekanisme pengumuman pemenang & distribusi hadiah.&#10;5. Keputusan juri bersifat mutlak." 
                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed font-mono"
                 :class="touched.syarat_ketentuan && errors.syarat_ketentuan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
@@ -402,7 +360,20 @@
           </div>
         </form>
 
-
+        <!-- Lightbox Pratinjau Banner Lomba (Rule #97) -->
+        <div x-show="bannerLightboxOpen"
+             x-cloak
+             @keydown.escape.window="bannerLightboxOpen = false"
+             @click.self="bannerLightboxOpen = false"
+             class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+          <button type="button"
+                  @click="bannerLightboxOpen = false"
+                  aria-label="Tutup pratinjau"
+                  class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <img :src="preview" alt="Banner Event Lomba" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
+        </div>
 
       </div>
 
@@ -533,19 +504,51 @@
 <script>
 function proposeContestApp() {
   return {
-    preview: null,
+    preview: {!! json_encode(old('banner_url') ?: null) !!},
+    bannerFileName: '',
+    isBannerDragging: false,
+    bannerLightboxOpen: false,
     bannerError: '',
     handleBanner(e) {
-      const res = window.validateUploadFiles(e.target, { maxMB: 5 });
+      this.applyBannerFiles(e.target.files);
+    },
+    handleBannerDrop(e) {
+      this.isBannerDragging = false;
+      if (e.dataTransfer && e.dataTransfer.files) {
+        this.applyBannerFiles(e.dataTransfer.files);
+      }
+    },
+    applyBannerFiles(fileList) {
+      const incoming = Array.from(fileList || []);
+      if (incoming.length === 0) return;
+      const res = window.validateUploadFiles(incoming, { maxMB: 5 });
       if (res.hasErrors) {
         this.bannerError = res.errorMessage;
         return;
       }
       const file = res.validFiles[0];
       if (file) {
+        if (this.preview && this.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(this.preview);
+        }
+        if (typeof DataTransfer !== 'undefined' && this.$refs.bannerFileInput) {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          this.$refs.bannerFileInput.files = dt.files;
+        }
         this.bannerError = '';
+        this.bannerFileName = file.name;
         this.preview = URL.createObjectURL(file);
       }
+    },
+    removeBanner() {
+      if (this.preview && this.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(this.preview);
+      }
+      this.bannerFileName = '';
+      this.bannerError = '';
+      if (this.$refs.bannerFileInput) this.$refs.bannerFileInput.value = '';
+      this.preview = this.form.banner_url || null;
     },
     categoryDropdownOpen: false,
     form: {
@@ -601,15 +604,18 @@ function proposeContestApp() {
       else this.errors.hadiah = '';
     },
     validateDates() {
+      const todayStr = '{{ date('Y-m-d') }}';
       if (!this.form.start_date) {
         this.errors.start_date = 'Tanggal mulai submisi wajib diisi.';
+      } else if (this.form.start_date < todayStr) {
+        this.errors.start_date = 'Tanggal mulai minimal hari ini.';
       } else {
         this.errors.start_date = '';
       }
       if (!this.form.end_date) {
         this.errors.end_date = 'Tanggal batas akhir wajib diisi.';
-      } else if (this.form.start_date && this.form.end_date < this.form.start_date) {
-        this.errors.end_date = 'Tanggal batas akhir tidak boleh sebelum tanggal mulai.';
+      } else if (this.form.start_date && this.form.end_date <= this.form.start_date) {
+        this.errors.end_date = 'Tanggal batas akhir harus setelah tanggal mulai.';
       } else {
         this.errors.end_date = '';
       }
@@ -617,13 +623,13 @@ function proposeContestApp() {
     validateDeskripsi() {
       const val = (this.form.deskrpisi_lomba || '').trim();
       if (!val) this.errors.deskrpisi_lomba = 'Deskripsi lomba wajib diisi.';
-      else if (val.length < 20) this.errors.deskrpisi_lomba = 'Deskripsi lomba minimal 20 karakter.';
+      else if (val.length < 30) this.errors.deskrpisi_lomba = 'Deskripsi lomba minimal 30 karakter.';
       else this.errors.deskrpisi_lomba = '';
     },
     validateSyarat() {
       const val = (this.form.syarat_ketentuan || '').trim();
       if (!val) this.errors.syarat_ketentuan = 'Syarat & ketentuan lomba wajib diisi.';
-      else if (val.length < 20) this.errors.syarat_ketentuan = 'Syarat & ketentuan minimal 20 karakter.';
+      else if (val.length < 30) this.errors.syarat_ketentuan = 'Syarat & ketentuan minimal 30 karakter.';
       else this.errors.syarat_ketentuan = '';
     },
     submitForm(e) {

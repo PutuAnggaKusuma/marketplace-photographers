@@ -62,7 +62,6 @@
                  x-model="form.email"
                  @input="touched.email = true; validateEmail()"
                  @blur="touched.email = true; validateEmail()"
-                 required 
                  autocomplete="email" 
                  placeholder="nama@email.com"
                  class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"

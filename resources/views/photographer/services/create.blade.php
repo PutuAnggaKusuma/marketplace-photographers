@@ -44,22 +44,21 @@
 
 
 
+    @php
+        $initialFiturs = old('fitur');
+        if (!is_array($initialFiturs) || count($initialFiturs) === 0) {
+            $initialFiturs = ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing', 'Semua File Original RAW/JPEG'];
+        } else {
+            $initialFiturs = array_values($initialFiturs);
+        }
+        $fiturError = $errors->first('fitur') ?: ($errors->first('fitur.*') ?: '');
+    @endphp
+
     <!-- Main Vertical Form Card (Rule #23 & Rule #22) -->
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8"
 
-         x-data="serviceFormApp({
-            fiturs: ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing', 'Semua File Original RAW/JPEG'],
-            nama_layanan: {!! json_encode(old('nama_layanan', '')) !!},
-            tarif_harga: {!! json_encode(old('tarif_harga', '')) !!},
-            deskripsi_layanan: {!! json_encode(old('deskripsi_layanan', '')) !!},
-            hasErrorNama: {{ $errors->has('nama_layanan') ? 'true' : 'false' }},
-            hasErrorTarif: {{ $errors->has('tarif_harga') ? 'true' : 'false' }},
-            hasErrorDeskripsi: {{ $errors->has('deskripsi_layanan') ? 'true' : 'false' }},
-            errorNama: {!! json_encode($errors->first('nama_layanan') ?: '') !!},
-            errorTarif: {!! json_encode($errors->first('tarif_harga') ?: '') !!},
-            errorDeskripsi: {!! json_encode($errors->first('deskripsi_layanan') ?: '') !!}
-         })">
+         x-data="serviceFormApp()">
 
         
 
@@ -87,8 +86,7 @@
                        x-model="form.nama_layanan"
                        @input="touched.nama_layanan = true; validateNama()"
                        @blur="touched.nama_layanan = true; validateNama()"
-                       required 
-                       minlength="3" maxlength="100" placeholder="Contoh: Paket Prewedding Romantic Sunset" 
+                       maxlength="100" placeholder="Contoh: Paket Prewedding Romantic Sunset" 
                        class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                        :class="touched.nama_layanan && errors.nama_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
                 <p x-show="touched.nama_layanan && errors.nama_layanan" x-text="errors.nama_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
@@ -111,8 +109,6 @@
                        x-model="form.tarif_harga"
                        @input="touched.tarif_harga = true; validateTarif()"
                        @blur="touched.tarif_harga = true; validateTarif()"
-                       required 
-                       min="10000"
                        step="1000"
                        placeholder="Masukkan nominal tarif paket (min. 10000)" 
                        class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
@@ -144,8 +140,7 @@
                           @input="touched.deskripsi_layanan = true; validateDeskripsi()"
                           @blur="touched.deskripsi_layanan = true; validateDeskripsi()"
                           rows="6" 
-                          required 
-                          minlength="15" maxlength="1000" placeholder="Tuliskan cakupan pemotretan, konsep lokasi, dan ketentuan umum sesi foto (minimal 15 karakter)..." 
+                          maxlength="1000" placeholder="Tuliskan cakupan pemotretan, konsep lokasi, dan ketentuan umum sesi foto (minimal 15 karakter)..." 
                           class="w-full min-h-[150px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
                           :class="touched.deskripsi_layanan && errors.deskripsi_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"></textarea>
                 <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
@@ -158,7 +153,7 @@
 
             <div>
 
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex flex-col items-start gap-1.5 mb-2.5">
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
@@ -170,7 +165,7 @@
 
                             @click="addFitur()" 
 
-                            class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 flex items-center gap-1 transition mr-12">
+                            class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 flex items-center gap-1 transition cursor-pointer">
 
                         <span>+ Tambah Benefit</span>
 
@@ -254,27 +249,27 @@
 </div>
 
 <script>
-function serviceFormApp(initialData) {
+function serviceFormApp() {
   return {
-    fiturs: initialData.fiturs || ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing', 'Semua File Original RAW/JPEG'],
+    fiturs: @js($initialFiturs),
     addFitur() { this.fiturs.push(''); },
     removeFitur(index) { if (this.fiturs.length > 1) this.fiturs.splice(index, 1); },
     form: {
-      nama_layanan: initialData.nama_layanan || '',
-      tarif_harga: initialData.tarif_harga || '',
-      deskripsi_layanan: initialData.deskripsi_layanan || '',
+      nama_layanan: @js(old('nama_layanan', '')),
+      tarif_harga: @js(old('tarif_harga', '')),
+      deskripsi_layanan: @js(old('deskripsi_layanan', '')),
     },
     touched: {
-      nama_layanan: initialData.hasErrorNama || false,
-      tarif_harga: initialData.hasErrorTarif || false,
-      deskripsi_layanan: initialData.hasErrorDeskripsi || false,
-      fitur: false,
+      nama_layanan: {{ $errors->has('nama_layanan') ? 'true' : 'false' }},
+      tarif_harga: {{ $errors->has('tarif_harga') ? 'true' : 'false' }},
+      deskripsi_layanan: {{ $errors->has('deskripsi_layanan') ? 'true' : 'false' }},
+      fitur: {{ ($errors->has('fitur') || $errors->has('fitur.*')) ? 'true' : 'false' }},
     },
     errors: {
-      nama_layanan: initialData.errorNama || '',
-      tarif_harga: initialData.errorTarif || '',
-      deskripsi_layanan: initialData.errorDeskripsi || '',
-      fitur: '',
+      nama_layanan: @js($errors->first('nama_layanan') ?: ''),
+      tarif_harga: @js($errors->first('tarif_harga') ?: ''),
+      deskripsi_layanan: @js($errors->first('deskripsi_layanan') ?: ''),
+      fitur: @js($fiturError),
     },
     validateNama() {
       const val = (this.form.nama_layanan || '').trim();
@@ -325,9 +320,18 @@ function serviceFormApp(initialData) {
       this.validateFitur();
       if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan || this.errors.fitur) {
         e.preventDefault();
-        if (this.errors.nama_layanan) this.$refs.fieldNama?.focus();
-        else if (this.errors.tarif_harga) this.$refs.fieldTarif?.focus();
-        else if (this.errors.deskripsi_layanan) this.$refs.fieldDeskripsi?.focus();
+        let targetEl = null;
+        if (this.errors.nama_layanan) targetEl = this.$refs.fieldNama;
+        else if (this.errors.tarif_harga) targetEl = this.$refs.fieldTarif;
+        else if (this.errors.deskripsi_layanan) targetEl = this.$refs.fieldDeskripsi;
+        else if (this.errors.fitur) {
+          const inputs = Array.from(this.$el.querySelectorAll('input[name="fitur[]"]'));
+          targetEl = inputs.find(el => !(el.value || '').trim() || (el.value || '').trim().length < 3) || inputs[0];
+        }
+        if (targetEl) {
+          targetEl.focus?.();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return false;
       }
     }

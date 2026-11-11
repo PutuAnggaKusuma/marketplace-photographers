@@ -416,6 +416,7 @@
 
                 <form :action="rejectUrl" 
                       method="POST" 
+                      novalidate
                       class="space-y-4"
                       x-data="{
                         catatan: '',

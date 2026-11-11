@@ -208,7 +208,49 @@
 
         };
 
+        this.submissionStatusTouched = false;
+
+        this.submissionStatusError = '';
+
         this.submissionModal = true;
+
+    },
+
+    submissionStatusTouched: false,
+
+    submissionStatusError: '',
+
+    validateSubmissionStatus() {
+
+        if (!this.selectedSubmission.status_submission) {
+
+            this.submissionStatusError = 'Status penetapan karya wajib dipilih.';
+
+            return false;
+
+        }
+
+        this.submissionStatusError = '';
+
+        return true;
+
+    },
+
+    submitSubmissionReview(e) {
+
+        this.submissionStatusTouched = true;
+
+        if (!this.validateSubmissionStatus()) {
+
+            e.preventDefault();
+
+            this.$refs.submissionStatusBtn?.focus();
+
+            this.$refs.submissionStatusBtn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            return false;
+
+        }
 
     },
 
@@ -1825,7 +1867,7 @@
 
                 <!-- Grading / Status Assignment Form (No divider line) -->
 
-                <form :action="selectedSubmission.update_url" method="POST" class="space-y-4 pt-2">
+                <form :action="selectedSubmission.update_url" method="POST" @submit="submitSubmissionReview($event)" novalidate class="space-y-4 pt-2">
 
                     @csrf
 
@@ -1896,10 +1938,10 @@
                         <div class="relative">
 
                             <button type="button" 
-
+                                    x-ref="submissionStatusBtn"
                                     @click="openModalDropdown = !openModalDropdown"
-
-                                    class="w-full flex items-center justify-between px-4 py-3 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition focus:outline-none focus:ring-2 focus:ring-amber-500/20 cursor-pointer">
+                                    class="w-full flex items-center justify-between px-4 py-3 text-xs font-bold rounded-xl border bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition focus:outline-none focus:ring-2 cursor-pointer"
+                                    :class="submissionStatusTouched && submissionStatusError ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500/20'">
 
                                 <span x-text="currentLabel"></span>
 
@@ -1914,23 +1956,16 @@
 
 
                             <div x-show="openModalDropdown" 
-
                                  @click.outside="openModalDropdown = false"
-
                                  x-transition 
-
                                  class="absolute z-50 top-full mt-1.5 left-0 w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1.5 space-y-0.5 overflow-hidden"
-
                                  style="display: none;">
 
                                 @foreach($statusModalOptions as $optVal => $optLabel)
 
                                     <button type="button" 
-
-                                            @click="selectedSubmission.status_submission = '{{ $optVal }}'; openModalDropdown = false" 
-
+                                            @click="selectedSubmission.status_submission = '{{ $optVal }}'; openModalDropdown = false; submissionStatusTouched = true; validateSubmissionStatus()" 
                                             class="w-full text-left px-3.5 py-2.5 text-xs font-bold rounded-lg text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
-
                                             :class="selectedSubmission.status_submission === '{{ $optVal }}' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 font-black' : ''">
 
                                         {{ $optLabel }}
@@ -1942,6 +1977,8 @@
                             </div>
 
                         </div>
+
+                        <p x-show="submissionStatusTouched && submissionStatusError" x-text="submissionStatusError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
 

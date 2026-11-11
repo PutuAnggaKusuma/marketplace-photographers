@@ -72,35 +72,23 @@
     ];
   @endphp
 
-  @if(!$isVerified)
-    <!-- Indikator Kelengkapan Profil (Gaya 3B: Dot Step Indicator - Anti AI Slop) -->
+  @if(!$isComplete)
+    <!-- Indikator Kelengkapan Data Profil (Pure Text - Rule #67) -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
         <div class="flex items-center gap-2">
           <span class="font-bold text-gray-900 dark:text-white">Kelengkapan Profil</span>
-          <span class="text-gray-300 dark:text-gray-600">•</span>
-          <div class="flex items-center gap-1.5" title="{{ $sectionStatus['completed_count'] }} dari {{ $sectionStatus['total_sections'] }} bagian lengkap">
-            @foreach($sectionStatus['sections'] as $sec)
-              <span class="w-2 h-2 rounded-full inline-block {{ $sec['is_complete'] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}" title="{{ $sec['name'] }}: {{ $sec['is_complete'] ? 'Lengkap' : 'Belum lengkap' }}"></span>
-            @endforeach
-          </div>
           <span class="text-gray-500 dark:text-gray-400">({{ $sectionStatus['completed_count'] }}/{{ $sectionStatus['total_sections'] }} bagian)</span>
         </div>
 
         <div class="flex items-center gap-2">
           <span class="font-black text-gray-900 dark:text-white">{{ $percentage }}%</span>
-          @if(!$isComplete)
-            <span class="text-rose-600 dark:text-rose-400 font-semibold">• Kurang {{ $missingCount }} data</span>
-          @elseif($photographer && $photographer->status_verifikasi === 'ditolak')
-            <span class="text-rose-600 dark:text-rose-400 font-bold">• Ditolak admin</span>
-          @else
-            <span class="text-amber-600 dark:text-amber-400 font-bold">• Menunggu verifikasi admin</span>
-          @endif
+          <span class="text-rose-600 dark:text-rose-400 font-semibold">Kurang {{ $missingCount }} data</span>
         </div>
       </div>
 
-      @if(!$isComplete && count($missingFields) > 0)
-        <div class="pt-2 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-400">
+      @if(count($missingFields) > 0)
+        <div class="pt-1 text-xs text-gray-600 dark:text-gray-400">
           <span class="font-bold text-gray-700 dark:text-gray-300">Belum diisi:</span>
           <span class="text-gray-500 dark:text-gray-400 ml-1 leading-relaxed">{{ implode(', ', array_values($missingFields)) }}.</span>
         </div>
@@ -111,7 +99,7 @@
   <!-- Form Profil Fotografer -->
   <div x-data="photographerProfileForm()" class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
     
-    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" @submit="submitProfileForm($event)" class="space-y-6">
+    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" @submit="submitProfileForm($event)" novalidate class="space-y-6">
       @csrf
 
       <!-- SECTION 1: Kontak -->
@@ -132,7 +120,6 @@
                    x-model="formData.nama"
                    @input="touched.nama = true; validateNama()"
                    @blur="touched.nama = true; validateNama()"
-                   required 
                    placeholder="Masukkan nama lengkap" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.nama && errors.nama ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
@@ -150,7 +137,6 @@
                    x-model="formData.email"
                    @input="touched.email = true; validateEmail()"
                    @blur="touched.email = true; validateEmail()"
-                   required 
                    placeholder="nama@email.com" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.email && errors.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
@@ -379,11 +365,11 @@
                 <span class="text-[11px] text-gray-400">Rasio 1:1 Persegi</span>
               </div>
 
-              <!-- Layout Vertikal: Preview di Atas, Aksi di Bawah -->
+              <!-- Layout Vertikal: Preview di Atas, Dropzone Pure-Text di Bawah (Rule #22, #94, #96, #97) -->
               <div class="space-y-4">
-                <div class="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition"
-                     :class="uploadErrors.foto_file ? 'border-red-400 border-dashed' : (avatarPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
-                     @click="if (avatarPreview) openImagePreview(avatarPreview, 'Foto Profil')">
+                <div class="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition cursor-pointer"
+                     :class="uploadErrors.foto_file ? 'border-red-400 border-dashed' : (avatarPreview ? 'border-amber-400 border-solid group' : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-amber-400')"
+                     @click="if (avatarPreview) openImagePreview(avatarPreview, 'Foto Profil'); else $refs.avatarInput.click();">
                   <img :src="avatarPreview" 
                        x-show="avatarPreview" 
                        x-cloak
@@ -404,13 +390,30 @@
                   </div>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
-                    <span>Upload Foto Profil</span>
-                    <input type="file" name="foto_file" accept="image/jpeg, image/png, image/webp" @change="handleAvatarFile($event)" class="hidden">
-                  </label>
+                <div class="space-y-1.5">
+                  <div x-ref="avatarDropzone"
+                       tabindex="0"
+                       role="button"
+                       @click="$refs.avatarInput.click()"
+                       @keydown.enter.prevent="$refs.avatarInput.click()"
+                       @keydown.space.prevent="$refs.avatarInput.click()"
+                       @dragover.prevent="avatarDragging = true"
+                       @dragleave.prevent="avatarDragging = false"
+                       @drop.prevent="handleAvatarDrop($event)"
+                       class="w-full min-h-[96px] px-4 py-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1 cursor-pointer transition outline-none"
+                       :class="avatarDragging
+                           ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                           : (uploadErrors.foto_file
+                               ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                    <input type="file" name="foto_file" x-ref="avatarInput" accept="image/jpeg, image/png, image/webp" @change="handleAvatarFile($event)" class="sr-only">
+                    <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                      <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto profil dari perangkat</span>
+                      <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret ke sini</span>
+                    </p>
+                    <p class="text-[11px] text-gray-400">Format JPG, PNG, WEBP maksimal 10 MB.</p>
+                  </div>
                   <p x-show="uploadErrors.foto_file" x-text="uploadErrors.foto_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
-                  <p class="text-[11px] text-gray-400">JPG, PNG, WEBP maks. 10 MB</p>
                 </div>
               </div>
           </div>
@@ -424,11 +427,11 @@
                 <span class="text-[11px] text-gray-400">Rasio Lanskap 16:9</span>
               </div>
 
-              <!-- Layout Vertikal: Preview di Atas (Rasio 16:9 Tinggi & Proporsional), Aksi di Bawah -->
+              <!-- Layout Vertikal: Preview di Atas (Rasio 16:9 Tinggi & Proporsional), Dropzone Pure-Text di Bawah -->
               <div class="space-y-4">
-                <div class="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition"
-                     :class="uploadErrors.foto_sampul_file ? 'border-red-400 border-dashed' : (sampulPreview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
-                     @click="if (sampulPreview) openImagePreview(sampulPreview, 'Foto Sampul')">
+                <div class="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition cursor-pointer"
+                     :class="uploadErrors.foto_sampul_file ? 'border-red-400 border-dashed' : (sampulPreview ? 'border-amber-400 border-solid group' : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-amber-400')"
+                     @click="if (sampulPreview) openImagePreview(sampulPreview, 'Foto Sampul'); else $refs.sampulInput.click();">
                   <img :src="sampulPreview" 
                        x-show="sampulPreview" 
                        x-cloak
@@ -451,13 +454,30 @@
                   </div>
                 </div>
                 
-                <div class="space-y-2">
-                  <label class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
-                    <span>Upload Foto Sampul</span>
-                    <input type="file" name="foto_sampul_file" accept="image/jpeg, image/png, image/webp" @change="handleSampulFile($event)" class="hidden">
-                  </label>
+                <div class="space-y-1.5">
+                  <div x-ref="sampulDropzone"
+                       tabindex="0"
+                       role="button"
+                       @click="$refs.sampulInput.click()"
+                       @keydown.enter.prevent="$refs.sampulInput.click()"
+                       @keydown.space.prevent="$refs.sampulInput.click()"
+                       @dragover.prevent="sampulDragging = true"
+                       @dragleave.prevent="sampulDragging = false"
+                       @drop.prevent="handleSampulDrop($event)"
+                       class="w-full min-h-[96px] px-4 py-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1 cursor-pointer transition outline-none"
+                       :class="sampulDragging
+                           ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                           : (uploadErrors.foto_sampul_file
+                               ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                    <input type="file" name="foto_sampul_file" x-ref="sampulInput" accept="image/jpeg, image/png, image/webp" @change="handleSampulFile($event)" class="sr-only">
+                    <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                      <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto sampul dari perangkat</span>
+                      <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret ke sini</span>
+                    </p>
+                    <p class="text-[11px] text-gray-400">Rasio 16:9 format JPG, PNG, WEBP maksimal 20 MB.</p>
+                  </div>
                   <p x-show="uploadErrors.foto_sampul_file" x-text="uploadErrors.foto_sampul_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
-                  <p class="text-[11px] text-gray-400">Rasio 16:9 maks. 20 MB</p>
                 </div>
               </div>
           </div>
@@ -594,7 +614,7 @@
         </p>
       </div>
 
-      <form action="{{ route('profile.password') }}" method="POST" @submit="submitPasswordForm($event)" class="space-y-6">
+      <form action="{{ route('profile.password') }}" method="POST" @submit="submitPasswordForm($event)" novalidate class="space-y-6">
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -609,7 +629,6 @@
                    autocomplete="current-password"
                    @input="touched.current_password = true; validateCurrentPassword()"
                    @blur="touched.current_password = true; validateCurrentPassword()"
-                   required 
                    placeholder="Masukkan kata sandi saat ini" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.current_password && errors.current_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
@@ -627,7 +646,6 @@
                    autocomplete="new-password"
                    @input="touched.new_password = true; validateNewPassword()"
                    @blur="touched.new_password = true; validateNewPassword()"
-                   required 
                    placeholder="Minimal 8 karakter" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.new_password && errors.new_password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
@@ -645,7 +663,6 @@
                    autocomplete="new-password"
                    @input="touched.new_password_confirmation = true; validateConfirmation()"
                    @blur="touched.new_password_confirmation = true; validateConfirmation()"
-                   required 
                    placeholder="Ulangi kata sandi baru" 
                    class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                    :class="touched.new_password_confirmation && errors.new_password_confirmation ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
@@ -687,6 +704,8 @@ function photographerProfileForm() {
     allCategories: {!! json_encode($categories->map(fn($c) => ['id' => $c->id, 'name' => $c->nama_kategori])) !!},
     avatarPreview: {!! json_encode($avatarUrl) !!},
     sampulPreview: {!! json_encode($sampulUrl) !!},
+    avatarDragging: false,
+    sampulDragging: false,
     imagePreviewModalOpen: false,
     imagePreviewSrc: '',
     imagePreviewTitle: '',
@@ -914,28 +933,78 @@ function photographerProfileForm() {
     },
 
     handleAvatarFile(e) {
-      const result = window.validateUploadFiles(e.target, { maxMB: 10 });
-      if (result.hasErrors) {
-        this.uploadErrors.foto_file = result.errorMessage;
-        return;
-      }
-      this.uploadErrors.foto_file = '';
-      const file = result.validFiles[0];
-      if (file) {
-        this.avatarPreview = URL.createObjectURL(file);
+      this.processAvatarFiles(e.target.files);
+    },
+
+    handleAvatarDrop(e) {
+      this.avatarDragging = false;
+      if (e.dataTransfer && e.dataTransfer.files) {
+        this.processAvatarFiles(e.dataTransfer.files);
       }
     },
 
-    handleSampulFile(e) {
-      const result = window.validateUploadFiles(e.target, { maxMB: 20 });
-      if (result.hasErrors) {
-        this.uploadErrors.foto_sampul_file = result.errorMessage;
+    processAvatarFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) return;
+      const result = window.validateUploadFiles(files, { maxMB: 10 });
+      if (result.hasErrors || result.validFiles.length === 0) {
+        this.uploadErrors.foto_file = result.errorMessage || 'Format atau ukuran foto profil tidak valid.';
+        if (this.$refs.avatarInput) this.$refs.avatarInput.value = '';
         return;
       }
-      this.uploadErrors.foto_sampul_file = '';
       const file = result.validFiles[0];
-      if (file) {
-        this.sampulPreview = URL.createObjectURL(file);
+      if (typeof DataTransfer !== 'undefined' && this.$refs.avatarInput) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        this.$refs.avatarInput.files = dt.files;
+      }
+      this.uploadErrors.foto_file = '';
+      this.avatarPreview = URL.createObjectURL(file);
+    },
+
+    handleSampulFile(e) {
+      this.processSampulFiles(e.target.files);
+    },
+
+    handleSampulDrop(e) {
+      this.sampulDragging = false;
+      if (e.dataTransfer && e.dataTransfer.files) {
+        this.processSampulFiles(e.dataTransfer.files);
+      }
+    },
+
+    processSampulFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) return;
+      const result = window.validateUploadFiles(files, { maxMB: 20 });
+      if (result.hasErrors || result.validFiles.length === 0) {
+        this.uploadErrors.foto_sampul_file = result.errorMessage || 'Format atau ukuran foto sampul tidak valid.';
+        if (this.$refs.sampulInput) this.$refs.sampulInput.value = '';
+        return;
+      }
+      const file = result.validFiles[0];
+      if (typeof DataTransfer !== 'undefined' && this.$refs.sampulInput) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        this.$refs.sampulInput.files = dt.files;
+      }
+      this.uploadErrors.foto_sampul_file = '';
+      this.sampulPreview = URL.createObjectURL(file);
+    },
+
+    validateAvatar() {
+      if (!this.avatarPreview) {
+        this.uploadErrors.foto_file = 'Foto profil wajib diunggah.';
+      } else if (this.uploadErrors.foto_file === 'Foto profil wajib diunggah.') {
+        this.uploadErrors.foto_file = '';
+      }
+    },
+
+    validateSampul() {
+      if (!this.sampulPreview) {
+        this.uploadErrors.foto_sampul_file = 'Foto sampul wajib diunggah.';
+      } else if (this.uploadErrors.foto_sampul_file === 'Foto sampul wajib diunggah.') {
+        this.uploadErrors.foto_sampul_file = '';
       }
     },
 
@@ -963,31 +1032,35 @@ function photographerProfileForm() {
       this.validateAlamat();
       this.validateCategories();
       this.validateBio();
+      this.validateAvatar();
+      this.validateSampul();
       this.validateBank();
       this.validateRekening();
       this.validateAtasNama();
 
-      const errorKeys = Object.keys(this.errors).filter(k => !!this.errors[k]);
-      if (errorKeys.length > 0) {
+      const orderedErrors = [
+        { val: this.errors.nama, ref: this.$refs.fieldNama },
+        { val: this.errors.email, ref: this.$refs.fieldEmail },
+        { val: this.errors.nomor_telepon, ref: this.$refs.fieldPhone },
+        { val: this.errors.link_sosmed, ref: this.$refs.fieldSosmed },
+        { val: this.errors.province_code, ref: this.$refs.fieldProvince },
+        { val: this.errors.city_code, ref: this.$refs.fieldCity },
+        { val: this.errors.alamat, ref: this.$refs.fieldAlamat },
+        { val: this.errors.categories, ref: this.$refs.fieldCategories },
+        { val: this.errors.deskripsi_bio, ref: this.$refs.fieldBio },
+        { val: this.uploadErrors.foto_file, ref: this.$refs.avatarDropzone },
+        { val: this.uploadErrors.foto_sampul_file, ref: this.$refs.sampulDropzone },
+        { val: this.errors.nama_bank, ref: this.$refs.fieldBank },
+        { val: this.errors.nomor_rekening, ref: this.$refs.fieldRekening },
+        { val: this.errors.atas_nama_rekening, ref: this.$refs.fieldAtasNama }
+      ];
+      const firstErr = orderedErrors.find(item => !!item.val);
+      if (firstErr) {
         e.preventDefault();
-        const firstErr = errorKeys[0];
-        const refMap = {
-          nama: this.$refs.fieldNama,
-          email: this.$refs.fieldEmail,
-          nomor_telepon: this.$refs.fieldPhone,
-          link_sosmed: this.$refs.fieldSosmed,
-          province_code: this.$refs.fieldProvince,
-          city_code: this.$refs.fieldCity,
-          alamat: this.$refs.fieldAlamat,
-          categories: this.$refs.fieldCategories,
-          deskripsi_bio: this.$refs.fieldBio,
-          nama_bank: this.$refs.fieldBank,
-          nomor_rekening: this.$refs.fieldRekening,
-          atas_nama_rekening: this.$refs.fieldAtasNama
-        };
-        const targetEl = refMap[firstErr];
+        const targetEl = firstErr.ref;
         if (targetEl) {
-          targetEl.focus?.();
+          const focusEl = targetEl.matches('input, textarea, select, button, [tabindex]') ? targetEl : (targetEl.querySelector('button, input, textarea, select') || targetEl);
+          focusEl.focus?.();
           targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return false;
@@ -1063,9 +1136,14 @@ function photographerPasswordForm() {
       this.validateConfirmation();
       if (this.errors.current_password || this.errors.new_password || this.errors.new_password_confirmation) {
         e.preventDefault();
-        if (this.errors.current_password) this.$refs.currentPassword?.focus();
-        else if (this.errors.new_password) this.$refs.newPassword?.focus();
-        else if (this.errors.new_password_confirmation) this.$refs.confirmPassword?.focus();
+        let targetEl = null;
+        if (this.errors.current_password) targetEl = this.$refs.currentPassword;
+        else if (this.errors.new_password) targetEl = this.$refs.newPassword;
+        else if (this.errors.new_password_confirmation) targetEl = this.$refs.confirmPassword;
+        if (targetEl) {
+          targetEl.focus();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return false;
       }
     }

@@ -804,6 +804,7 @@
 
         <form :action="'/client/bookings/' + cancelContractId + '/cancel'" 
               method="POST" 
+              novalidate
               class="mt-5 space-y-4"
               x-data="{
                 form: { alasan: '' },
@@ -826,6 +827,7 @@
                   if (!this.validateAlasan()) {
                     e.preventDefault();
                     this.$refs.fieldAlasan?.focus();
+                    this.$refs.fieldAlasan?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
                   }
                 }
@@ -970,6 +972,7 @@
 
         <form :action="'/client/bookings/' + rescheduleContractId + '/reschedule'" 
               method="POST" 
+              novalidate
               class="mt-5 space-y-4 text-left"
               x-data="{
                 form: {
@@ -987,6 +990,10 @@
                 validateDate() {
                   if (!this.form.reschedule_date) {
                     this.errors.reschedule_date = 'Tanggal baru wajib dipilih.';
+                    return false;
+                  }
+                  if (this.form.reschedule_date < '{{ date('Y-m-d') }}') {
+                    this.errors.reschedule_date = 'Tanggal baru minimal hari ini atau mendatang.';
                     return false;
                   }
                   this.errors.reschedule_date = '';
@@ -1012,11 +1019,13 @@
                   if (!validDate) {
                     e.preventDefault();
                     this.$refs.fieldDate?.focus();
+                    this.$refs.fieldDate?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
                   }
                   if (!validReason) {
                     e.preventDefault();
                     this.$refs.fieldReason?.focus();
+                    this.$refs.fieldReason?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
                   }
                 }
@@ -1045,7 +1054,6 @@
                      x-model="form.reschedule_date"
                      @input="touched.reschedule_date = true; validateDate()"
                      @blur="touched.reschedule_date = true; validateDate()"
-                     min="{{ date('Y-m-d') }}" 
                      class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl outline-none focus:ring-2 transition"
                      :class="touched.reschedule_date && errors.reschedule_date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'">
 

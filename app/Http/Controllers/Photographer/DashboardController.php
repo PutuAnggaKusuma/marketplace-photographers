@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Photographer;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Contract;
 use App\Models\ContractBooking;
+use App\Models\Notification;
 use App\Models\PhotographerAvailability;
 use App\Models\PhotographerPortfolio;
 use App\Models\PhotographerService;
 use App\Models\RolePhotographer;
 use App\Models\Testimonial;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravolt\Indonesia\Models\Province;
@@ -143,12 +146,14 @@ class DashboardController extends Controller
             ->with(['contract.client.user', 'service'])
             ->first();
 
-        // Data pendukung Onboarding Wizard
+        // Data pendukung Onboarding Wizard & Checklist Etalase Tahap 2
         $onboardingCategories = Category::all();
         $onboardingProvinces = Province::orderBy('name', 'asc')->get();
+        $storefrontChecklist = $photographer->getStorefrontChecklist();
 
         return view('photographer.dashboard', compact(
             'photographer',
+            'storefrontChecklist',
             'onboardingCategories',
             'onboardingProvinces',
             'urgentSession',
@@ -172,5 +177,54 @@ class DashboardController extends Controller
             'upcomingSchedules',
             'manualBlockedDays'
         ));
+    }
+
+    /**
+     * Ajukan Review Tayang Etalase ke Admin (Tahap 2).
+     */
+    public function submitStorefront(Request $request)
+    {
+        $user = Auth::user();
+        $photographer = RolePhotographer::where('id_user', $user->id)->firstOrFail();
+
+        if (!$photographer->isFeatureUnlocked()) {
+            return redirect()->back()->with('error', 'Profil fotografer harus lengkap dan diverifikasi Admin terlebih dahulu.');
+        }
+
+        if ($photographer->isStorefrontApproved() && $photographer->isStorefrontComplete()) {
+            return redirect()->back()->with('info', 'Etalase Anda sudah disetujui dan tayang di katalog publik.');
+        }
+
+        $checklist = $photographer->getStorefrontChecklist();
+        if (!$checklist['is_ready']) {
+            $missingText = implode(', ', $checklist['missing_labels']);
+            return redirect()->back()->with('error', "Lengkapi persyaratan etalase terlebih dahulu: {$missingText}.");
+        }
+
+        $photographer->update([
+            'status_etalase' => 'menunggu',
+            'catatan_penolakan_etalase' => null,
+            'etalase_diajukan_at' => now(),
+        ]);
+
+        ActivityLog::record(
+            'photographer_storefront_submitted',
+            "Fotografer '{$photographer->nama}' mengajukan review tayang etalase ke Admin.",
+            $photographer,
+            ['status_etalase' => 'menunggu']
+        );
+
+        $admins = User::whereIn('role', ['super_admin', 'admin'])->get();
+        foreach ($admins as $admin) {
+            Notification::send(
+                $admin->id,
+                'Pengajuan Review Etalase Fotografer',
+                "Fotografer '{$photographer->nama}' telah melengkapi paket layanan, portofolio, dan jadwal serta mengajukan review tayang etalase.",
+                'storefront_submitted',
+                route('admin.photographers.show', ['id' => $photographer->id, 'tab' => 'storefront'])
+            );
+        }
+
+        return redirect()->back()->with('success', 'Pengajuan tayang etalase berhasil dikirim ke Admin.');
     }
 }

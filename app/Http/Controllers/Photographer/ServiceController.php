@@ -238,6 +238,12 @@ class ServiceController extends Controller
         ServiceDetail::where('id_p_service', $service->id)->delete();
         $service->delete();
 
-        return redirect()->route('photographer.services')->with('success', 'Paket layanan berhasil dihapus!');
+        $downgraded = $photographer->fresh()->syncStorefrontIntegrity();
+        $message = 'Paket layanan berhasil dihapus!';
+        if ($downgraded) {
+            $message .= ' Etalase dinonaktifkan sementara hingga minimal satu paket layanan tersedia kembali.';
+        }
+
+        return redirect()->route('photographer.services')->with('success', $message);
     }
 }

@@ -318,7 +318,7 @@
             </div>
 
             <!-- Modal Action Buttons (Centered, Max 2 Buttons - Rule #59) -->
-            <form :action="payoutData.action_url" method="POST">
+            <form :action="payoutData.action_url" method="POST" novalidate>
                 @csrf
                 <div class="flex items-center justify-center gap-3 pt-2">
                     <button type="button" 

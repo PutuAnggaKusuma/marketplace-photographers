@@ -17,12 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $testimonials = \App\Models\Testimonial::with(['client.user', 'photographer'])->latest()->take(10)->get();
     $categories = \App\Models\Category::all();
-    $featuredPhotographers = \App\Models\RolePhotographer::where('is_onboarded', true)->with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
+    $featuredPhotographers = \App\Models\RolePhotographer::published()->with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
         ->take(4)
         ->get();
-    $totalPhotographers = \App\Models\RolePhotographer::where('is_onboarded', true)->count();
+    $totalPhotographers = \App\Models\RolePhotographer::published()->count();
     $totalCategories = \App\Models\Category::count();
-    $totalCities = \App\Models\RolePhotographer::where('is_onboarded', true)->whereNotNull('city_code')->distinct('city_code')->count('city_code');
+    $totalCities = \App\Models\RolePhotographer::published()->whereNotNull('city_code')->distinct('city_code')->count('city_code');
     if ($totalCities === 0) {
         $totalCities = \Laravolt\Indonesia\Models\City::count();
     }
@@ -31,7 +31,9 @@ Route::get('/', function () {
         $totalSessions = \App\Models\Contract::count();
     }
     $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
-    $heroPhotos = \App\Models\PortfolioMedia::take(5)->pluck('media')->toArray();
+    $heroPhotos = \App\Models\PortfolioMedia::whereHas('portfolio.photographer', function ($q) {
+        $q->published();
+    })->take(5)->pluck('media')->toArray();
 
     return view('public.home', compact(
         'testimonials', 
@@ -194,6 +196,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::get('/photographers/{id}', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'show'])->name('photographers.show');
     Route::post('/photographers/{id}/verify', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'toggleVerification'])->name('photographers.verify');
     Route::post('/photographers/{id}/reject', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'reject'])->name('photographers.reject');
+    Route::post('/photographers/{id}/storefront/approve', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'approveStorefront'])->name('photographers.storefront.approve');
+    Route::post('/photographers/{id}/storefront/reject', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'rejectStorefront'])->name('photographers.storefront.reject');
+    Route::post('/photographers/{id}/storefront/revoke', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'revokeStorefront'])->name('photographers.storefront.revoke');
     Route::post('/photographers/{id}/delete', [\App\Http\Controllers\Admin\PhotographerVerificationController::class, 'destroy'])->name('photographers.destroy');
 
     // Admin Dedicated Staff & Super Admin Management Routes (Super Admin Only)
@@ -275,6 +280,7 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
 
     // Operational Features - Locked until 100% profile completed & Admin approved
     Route::middleware('photographer.verified')->group(function () {
+        Route::post('/storefront/submit', [\App\Http\Controllers\Photographer\DashboardController::class, 'submitStorefront'])->name('storefront.submit');
         Route::get('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'index'])->name('services');
         Route::get('/services/create', [\App\Http\Controllers\Photographer\ServiceController::class, 'create'])->name('services.create');
         Route::post('/services', [\App\Http\Controllers\Photographer\ServiceController::class, 'store'])->name('services.store');

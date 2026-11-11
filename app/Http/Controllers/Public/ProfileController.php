@@ -468,9 +468,13 @@ class ProfileController extends Controller
 
 
 
-        // Jika akun merupakan fotografer, alihkan langsung ke profil fotografer publik
+        // Jika akun merupakan fotografer, alihkan langsung ke profil fotografer publik hanya jika etalase tayang atau diakses pemilik/admin
 
         if ($user->role === 'photographer' && $user->rolePhotographer) {
+
+            if (!$user->rolePhotographer->isPublishedToCatalog() && (!Auth::check() || (Auth::id() !== $user->id && !in_array(Auth::user()->role, ['admin', 'super_admin'])))) {
+                abort(404, 'Etalase fotografer ini belum aktif di katalog publik.');
+            }
 
             return redirect('/fotografer/' . $user->rolePhotographer->id);
 

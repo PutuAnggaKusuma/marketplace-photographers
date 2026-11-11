@@ -479,7 +479,6 @@
                          x-model="loginForm.email"
                          @input="loginTouched.email = true; validateLoginEmail()"
                          @blur="loginTouched.email = true; validateLoginEmail()"
-                         required 
                          placeholder="nama@email.com" 
                          class="w-full px-4 py-3.5 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                          :class="loginErrors.email && loginTouched.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
@@ -498,7 +497,6 @@
                            x-model="loginForm.password"
                            @input="loginTouched.password = true; validateLoginPassword()"
                            @blur="loginTouched.password = true; validateLoginPassword()"
-                           required 
                            placeholder="••••••••••••" 
                            class="w-full pl-4 pr-11 py-3.5 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                            :class="loginErrors.password && loginTouched.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
@@ -595,7 +593,6 @@
                          x-model="regForm.nama"
                          @input="regTouched.nama = true; validateRegisterNama()"
                          @blur="regTouched.nama = true; validateRegisterNama()"
-                         required 
                          placeholder="Nama lengkap Anda" 
                          class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                          :class="regErrors.nama && regTouched.nama ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
@@ -657,7 +654,6 @@
                          @keypress="if (!/[0-9]/.test($event.key)) $event.preventDefault()"
                          @input="regForm.nomor_telepon = (regForm.nomor_telepon || '').replace(/\D/g, ''); regTouched.nomor_telepon = true; validateRegisterPhone()"
                          @blur="regTouched.nomor_telepon = true; validateRegisterPhone()"
-                         required 
                          placeholder="Contoh: 08xxxxxxxxxx" 
                          class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                          :class="regErrors.nomor_telepon && regTouched.nomor_telepon ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
@@ -675,7 +671,6 @@
                          x-model="regForm.email"
                          @input="regTouched.email = true; validateRegisterEmail()"
                          @blur="regTouched.email = true; validateRegisterEmail()"
-                         required 
                          placeholder="nama@email.com" 
                          class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                          :class="regErrors.email && regTouched.email ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />
@@ -694,7 +689,6 @@
                            x-model="regForm.password"
                            @input="regTouched.password = true; validateRegisterPassword()"
                            @blur="regTouched.password = true; validateRegisterPassword()"
-                           required 
                            placeholder="Minimal 8 karakter" 
                            class="w-full pl-4 pr-11 py-3 text-xs sm:text-sm rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium"
                            :class="regErrors.password && regTouched.password ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 focus:ring-amber-400 focus:border-amber-400'" />

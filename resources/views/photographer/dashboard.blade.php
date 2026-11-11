@@ -23,6 +23,7 @@
 
   @php
     $curPhotographer = auth()->user()->rolePhotographer;
+    $storefrontChecklist = $storefrontChecklist ?? $photographer->getStorefrontChecklist();
   @endphp
   @if($curPhotographer && $curPhotographer->status_verifikasi === 'ditolak')
     <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -41,6 +42,120 @@
       <a href="{{ route('photographer.profile') }}" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition text-center shrink-0">
         Perbaiki Profil
       </a>
+    </div>
+  @endif
+
+  @if($photographer->isFeatureUnlocked() && !$photographer->isPublishedToCatalog())
+    <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Persiapan Tayang Etalase</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            @if($photographer->isStorefrontPending())
+              Pengajuan tayang Anda sedang ditinjau oleh Admin sebelum muncul di katalog publik.
+            @else
+              Lengkapi paket layanan, portofolio, dan jadwal agar etalase dapat diajukan tayang di katalog publik.
+            @endif
+          </p>
+        </div>
+
+        <div class="shrink-0 text-xs font-bold">
+          @if($photographer->isStorefrontPending())
+            <span class="text-amber-600 dark:text-amber-400">Menunggu Review Admin</span>
+          @elseif($photographer->isStorefrontRejected())
+            <span class="text-rose-600 dark:text-rose-400">Etalase Ditolak</span>
+          @elseif($storefrontChecklist['is_ready'])
+            <span class="text-emerald-600 dark:text-emerald-400">Siap Diajukan</span>
+          @else
+            <span class="text-gray-500 dark:text-gray-400">{{ $storefrontChecklist['completed_count'] }}/{{ $storefrontChecklist['total_count'] }} Lengkap</span>
+          @endif
+        </div>
+      </div>
+
+      @if($photographer->isStorefrontRejected())
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 space-y-1">
+          <div class="text-xs font-extrabold text-rose-800 dark:text-rose-300">
+            Pengajuan Etalase Ditolak
+          </div>
+          <p class="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
+            Catatan Admin: <span class="font-bold">{{ $photographer->catatan_penolakan_etalase ?: 'Etalase belum memenuhi syarat penayangan.' }}</span>
+          </p>
+        </div>
+      @endif
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @php
+          $stepRoutes = [
+              'services' => [
+                  'route' => route('photographer.services'),
+                  'desc' => 'Minimal 1 paket layanan aktif dengan tarif dan deskripsi.',
+                  'done_label' => 'Kelola',
+                  'todo_label' => 'Buat Paket',
+              ],
+              'portfolios' => [
+                  'route' => route('photographer.portfolio'),
+                  'desc' => 'Minimal 1 album portofolio berisi karya foto.',
+                  'done_label' => 'Kelola',
+                  'todo_label' => 'Unggah Karya',
+              ],
+              'schedule' => [
+                  'route' => route('photographer.availability', ['tab' => 'weekly']),
+                  'desc' => 'Simpan jam operasional mingguan pada menu Jadwal.',
+                  'done_label' => 'Ubah',
+                  'todo_label' => 'Atur Jadwal',
+              ],
+          ];
+        @endphp
+
+        @foreach($storefrontChecklist['items'] as $stepKey => $stepItem)
+          @php $meta = $stepRoutes[$stepKey]; @endphp
+          <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700/70 bg-gray-50/70 dark:bg-gray-900/40 flex flex-col justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold text-gray-900 dark:text-white">{{ $stepItem['label'] }}</span>
+                @if($stepItem['done'])
+                  <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Lengkap</span>
+                @else
+                  <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Belum</span>
+                @endif
+              </div>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">{{ $meta['desc'] }}</p>
+            </div>
+
+            <div>
+              <a href="{{ $meta['route'] }}" class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-500 underline underline-offset-4 decoration-amber-400 transition">
+                {{ $stepItem['done'] ? $meta['done_label'] : $meta['todo_label'] }}
+              </a>
+            </div>
+          </div>
+        @endforeach
+      </div>
+
+      @if(!$photographer->isStorefrontPending())
+        <div class="flex flex-wrap items-center justify-end gap-3 pt-1">
+          @if(!$storefrontChecklist['is_ready'])
+            <span class="text-xs text-gray-400 dark:text-gray-500">
+              Lengkapi {{ implode(', ', $storefrontChecklist['missing_labels']) }} sebelum mengajukan tayang.
+            </span>
+          @endif
+
+          <form action="{{ route('photographer.storefront.submit') }}"
+                method="POST"
+                @if($storefrontChecklist['is_ready'])
+                  data-confirm="true"
+                  data-confirm-title="Ajukan Tayang Etalase?"
+                  data-confirm-message="Admin akan meninjau paket layanan, portofolio, dan jadwal Anda sebelum profil tampil di katalog publik."
+                  data-confirm-btn="Ya, Ajukan Tayang"
+                @endif>
+            @csrf
+            <button type="submit"
+                    @if(!$storefrontChecklist['is_ready']) disabled @endif
+                    class="{{ $storefrontChecklist['is_ready'] ? 'px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer' : 'px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs rounded-xl cursor-not-allowed' }}">
+              {{ $photographer->isStorefrontRejected() ? 'Ajukan Ulang Tayang' : 'Ajukan Tayang' }}
+            </button>
+          </form>
+        </div>
+      @endif
     </div>
   @endif
 
@@ -137,10 +252,12 @@
         <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Reputasi & Metrik Keunggulan Fotografer</h2>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pantau pencapaian indikator performa akun Anda untuk meningkatkan reputasi di katalog publik.</p>
       </div>
-      <a href="{{ route('public.photographers.show', $photographer->id) }}" target="_blank" class="text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-amber-500 transition inline-flex items-center gap-1.5 shrink-0">
-        <span>Lihat Profil Publik</span>
-        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-      </a>
+      @if($photographer->isPublishedToCatalog())
+        <a href="{{ route('public.photographers.show', $photographer->id) }}" target="_blank" class="text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-amber-500 transition inline-flex items-center gap-1.5 shrink-0">
+          <span>Lihat Profil Publik</span>
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+        </a>
+      @endif
     </div>
 
     @php

@@ -42,7 +42,6 @@
           <input type="email" 
                  name="email" 
                  value="{{ old('email', $email) }}" 
-                 required 
                  readonly
                  class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-900/80 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none transition cursor-not-allowed" />
         </div>
@@ -58,7 +57,6 @@
                    x-model="form.password"
                    @input="touched.password = true; validatePassword()"
                    @blur="touched.password = true; validatePassword()"
-                   required 
                    autocomplete="new-password" 
                    placeholder="Minimal 8 karakter"
                    class="w-full pl-4 pr-11 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"
@@ -84,7 +82,6 @@
                    x-model="form.password_confirmation"
                    @input="touched.password_confirmation = true; validateConfirmation()"
                    @blur="touched.password_confirmation = true; validateConfirmation()"
-                   required 
                    autocomplete="new-password" 
                    placeholder="Ulangi kata sandi baru"
                    class="w-full pl-4 pr-11 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border transition shadow-2xs outline-none focus:ring-2"

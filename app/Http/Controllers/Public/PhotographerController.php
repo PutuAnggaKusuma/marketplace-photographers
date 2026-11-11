@@ -24,8 +24,8 @@ class PhotographerController extends Controller
         // Pure dynamic database categories with photos and descriptions
         $categories = Category::all();
         
-        // Take top 4 featured photographers (with services, portfolios, testimonials) that have completed onboarding
-        $featuredPhotographers = RolePhotographer::where('is_onboarded', true)->with([
+        // Take top 4 featured photographers published in catalog (Stage 1 + Stage 2 approved)
+        $featuredPhotographers = RolePhotographer::published()->with([
             'user', 'province', 'city', 'categories',
             'services' => function ($q) {
                 $q->whereNotNull('tarif_harga')
@@ -39,9 +39,13 @@ class PhotographerController extends Controller
             ->take(4)
             ->get();
 
-        $totalPhotographers = RolePhotographer::count();
+        $totalPhotographers = RolePhotographer::published()->count();
         $totalCategories = Category::count();
-        $showcasePortfolios = PhotographerPortfolio::with(['medias', 'photographer.city', 'photographer.user'])->has('medias')->take(4)->get();
+        $showcasePortfolios = PhotographerPortfolio::with(['medias', 'photographer.city', 'photographer.user'])
+            ->whereHas('photographer', fn($q) => $q->published())
+            ->has('medias')
+            ->take(4)
+            ->get();
         $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
         $totalCompletedBookings = \App\Models\Contract::whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count();
         if ($totalCompletedBookings === 0) {
@@ -92,7 +96,7 @@ class PhotographerController extends Controller
             $cities = City::where('province_code', $selectedProvince)->orderBy('name', 'asc')->get();
         }
 
-        $query = RolePhotographer::where('is_onboarded', true)->with([
+        $query = RolePhotographer::published()->with([
             'user', 'province', 'city', 'categories',
             'services' => function ($q) {
                 $q->whereNotNull('tarif_harga')
@@ -267,8 +271,8 @@ class PhotographerController extends Controller
             'testimonials.client.user'
         ])->findOrFail($id);
 
-        if (!$photographer->is_onboarded && (!Auth::check() || (Auth::id() !== $photographer->id_user && !in_array(Auth::user()->role, ['admin', 'super_admin'])))) {
-            abort(404, 'Profil fotografer belum aktif atau sedang dalam tahap onboarding.');
+        if (!$photographer->isPublishedToCatalog() && (!Auth::check() || (Auth::id() !== $photographer->id_user && !in_array(Auth::user()->role, ['admin', 'super_admin'])))) {
+            abort(404, 'Etalase fotografer ini belum aktif di katalog publik.');
         }
 
         $testimonials = $photographer->testimonials()->with('client.user')->orderBy('created_at', 'desc')->get();

@@ -766,8 +766,6 @@
                                    x-model="formData.urutan" 
                                    @input="touched.urutan = true; validateUrutan()"
                                    @blur="touched.urutan = true; validateUrutan()"
-                                   min="1" 
-                                   max="999"
                                    class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                                    :class="touched.urutan && errors.urutan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
                             <p x-show="touched.urutan && errors.urutan" x-text="errors.urutan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>

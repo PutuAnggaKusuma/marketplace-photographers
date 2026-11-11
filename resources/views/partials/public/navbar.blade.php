@@ -92,7 +92,7 @@
         @auth
 
           <!-- Dynamic Real-Time Notification Bell Dropdown -->
-          <div class="relative" x-data="headerNotifApp()" x-init="init()">
+          <div class="relative" x-data="headerNotifApp()">
             <button @click="notifOpen = !notifOpen" class="relative p-2 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-amber-400 dark:hover:text-amber-400 focus:outline-none transition">
               <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
@@ -183,9 +183,30 @@ function headerNotifApp() {
         unreadCount: 0,
         notifications: [],
         isMarkingAll: false,
+        _pollTimer: null,
+        _abortController: null,
+        _isUnloading: false,
+        _initialized: false,
         init() {
+            if (this._initialized) return;
+            this._initialized = true;
+
             this.fetchNotifs();
-            setInterval(() => this.fetchNotifs(), 30000);
+            this._pollTimer = setInterval(() => this.fetchNotifs(), 30000);
+
+            const stopPolling = () => {
+                this._isUnloading = true;
+                if (this._pollTimer) {
+                    clearInterval(this._pollTimer);
+                    this._pollTimer = null;
+                }
+                if (this._abortController) {
+                    this._abortController.abort();
+                    this._abortController = null;
+                }
+            };
+            window.addEventListener('beforeunload', stopPolling);
+            window.addEventListener('pagehide', stopPolling);
 
             @auth
             const listenEcho = () => {
@@ -205,8 +226,17 @@ function headerNotifApp() {
             @endauth
         },
         fetchNotifs() {
+            if (this._isUnloading) return;
+            if (this._abortController) {
+                this._abortController.abort();
+            }
+            this._abortController = new AbortController();
             fetch('{{ route("notifications.unread") }}', {
-                headers: { 'Accept': 'application/json' }
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                signal: this._abortController.signal
             })
             .then(res => res.json())
             .then(data => {
@@ -215,7 +245,10 @@ function headerNotifApp() {
                     this.notifications = data.notifications || [];
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                if (err && err.name === 'AbortError') return;
+                console.error(err);
+            });
         },
         markAllRead() {
             if (this.isMarkingAll || this.unreadCount === 0) return;

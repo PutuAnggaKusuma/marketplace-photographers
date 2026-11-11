@@ -60,9 +60,10 @@
 
         // Give Alpine a tick to close cleanly then submit
         setTimeout(() => {
+          const validBtn = btnToSubmit && formToSubmit.contains(btnToSubmit) && !btnToSubmit.disabled ? btnToSubmit : undefined;
           if (typeof formToSubmit.requestSubmit === 'function') {
             try {
-              formToSubmit.requestSubmit(btnToSubmit || undefined);
+              formToSubmit.requestSubmit(validBtn);
             } catch (err) {
               formToSubmit.submit();
             }
@@ -191,6 +192,9 @@
   function handleFormInterception(form, submitBtn, e) {
     if (!form || !form.tagName || form.tagName.toLowerCase() !== 'form') return false;
 
+    // 0. Abort immediately if a frontend validator (e.g. Alpine @submit) already prevented submission
+    if (e && e.defaultPrevented) return false;
+
     // 1. Skip GET forms (search bars, filter forms, sort dropdowns)
     if (form.method && form.method.toUpperCase() === 'GET') return false;
 
@@ -240,44 +244,46 @@
     }
 
     // ==========================================
-    // PRE-VALIDATION CHECK: Check HTML5 Validity
+    // PRE-VALIDATION CHECK: Check HTML5 Validity only when novalidate is NOT set
     // ==========================================
-    const isValid = form.checkValidity();
+    if (!form.hasAttribute('novalidate')) {
+      const isValid = form.checkValidity();
 
-    if (!isValid) {
-      // RULE: JIKA MASIH ADA INPUT TIDAK VALID / KOSONG:
-      // MODAL KONFIRMASI DILARANG MUNCUL!
-      // Kursor dan layar otomatis berpindah ke input paling atas yang error.
-      const invalidElements = form.querySelectorAll(':invalid');
-      const firstInvalid = invalidElements.length > 0 ? invalidElements[0] : null;
+      if (!isValid) {
+        // RULE: JIKA MASIH ADA INPUT TIDAK VALID / KOSONG:
+        // MODAL KONFIRMASI DILARANG MUNCUL!
+        // Kursor dan layar otomatis berpindah ke input paling atas yang error.
+        const invalidElements = form.querySelectorAll(':invalid');
+        const firstInvalid = invalidElements.length > 0 ? invalidElements[0] : null;
 
-      if (firstInvalid) {
-        // Target container jika elemen input hidden/opacity-0
-        let targetScroll = firstInvalid;
-        if (firstInvalid.offsetParent === null && firstInvalid.parentElement) {
-          targetScroll = firstInvalid.parentElement;
-        }
+        if (firstInvalid) {
+          // Target container jika elemen input hidden/opacity-0
+          let targetScroll = firstInvalid;
+          if (firstInvalid.offsetParent === null && firstInvalid.parentElement) {
+            targetScroll = firstInvalid.parentElement;
+          }
 
-        // Smooth scroll ke elemen invalid pertama
-        targetScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Smooth scroll ke elemen invalid pertama
+          targetScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        // Fokuskan elemen & tampilkan validasi UI bawaan browser
-        setTimeout(() => {
-          try {
-            firstInvalid.focus({ preventScroll: true });
-            if (typeof firstInvalid.reportValidity === 'function') {
-              firstInvalid.reportValidity();
-            } else {
+          // Fokuskan elemen & tampilkan validasi UI bawaan browser
+          setTimeout(() => {
+            try {
+              firstInvalid.focus({ preventScroll: true });
+              if (typeof firstInvalid.reportValidity === 'function') {
+                firstInvalid.reportValidity();
+              } else {
+                form.reportValidity();
+              }
+            } catch (err) {
               form.reportValidity();
             }
-          } catch (err) {
-            form.reportValidity();
-          }
-        }, 180);
-      } else {
-        form.reportValidity();
+          }, 180);
+        } else {
+          form.reportValidity();
+        }
+        return true; // Intercepted and blocked
       }
-      return true; // Intercepted and blocked
     }
 
     // =========================================================
@@ -331,24 +337,14 @@
     return true;
   }
 
-  // Intercept via submit button click (capture phase)
-  document.addEventListener('click', function(e) {
-    const submitBtn = e.target.closest('button[type="submit"], input[type="submit"]');
-    if (!submitBtn) return;
-
-    const form = submitBtn.form || submitBtn.closest('form');
-    if (!form) return;
-
-    handleFormInterception(form, submitBtn, e);
-  }, true);
-
-  // Intercept via form submit event (e.g. user presses Enter in input field)
+  // Intercept via form submit event in bubble phase (after Alpine @submit / custom handlers run)
   document.addEventListener('submit', function(e) {
+    if (e.defaultPrevented) return;
     const form = e.target;
     if (!form || !form.tagName || form.tagName.toLowerCase() !== 'form') return;
 
     const submitBtn = e.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
     handleFormInterception(form, submitBtn, e);
-  }, true);
+  }, false);
 })();
 </script>

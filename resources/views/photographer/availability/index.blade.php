@@ -46,19 +46,77 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                     Atur hari dan jam operasional rutin Anda. Calon klien hanya dapat memilih slot jam sesi foto dalam batas waktu operasional yang Anda buka.
                 </p>
+                @if(!$photographer->jadwal_dikonfirmasi)
+                    <p class="text-xs font-bold text-amber-600 dark:text-amber-400 pt-1">
+                        Klik Perbaharui Data di bawah untuk mengonfirmasi jadwal mingguan Anda sebelum mengajukan tayang.
+                    </p>
+                @endif
             </div>
 
-            <form action="{{ route('photographer.availability.update-working-hours') }}" method="POST" class="space-y-6">
+            <form action="{{ route('photographer.availability.update-working-hours') }}" method="POST" novalidate
+                  x-data="{
+                      validateRow(row) {
+                          if (!row.isOpen || row.is24h) return '';
+                          if (!row.buka) return 'Jam buka wajib diisi.';
+                          if (!row.tutup) return 'Jam tutup wajib diisi.';
+                          if (row.buka >= row.tutup) return 'Jam tutup harus lebih akhir daripada jam buka.';
+                          return '';
+                      },
+                      submitWeeklyHours(e) {
+                          let firstInvalidEl = null;
+                          const rows = this.$el.querySelectorAll('[data-working-day-row]');
+                          rows.forEach((el) => {
+                              const toggle = el.querySelector('[data-is-open]');
+                              const is24El = el.querySelector('[data-is-24h]');
+                              const bukaEl = el.querySelector('[data-jam-buka]');
+                              const tutupEl = el.querySelector('[data-jam-tutup]');
+                              const isOpen = toggle ? toggle.checked : false;
+                              const is24h = is24El ? is24El.checked : false;
+                              if (isOpen && !is24h) {
+                                  const b = bukaEl ? bukaEl.value : '';
+                                  const t = tutupEl ? tutupEl.value : '';
+                                  if (!b) firstInvalidEl = firstInvalidEl || bukaEl;
+                                  else if (!t || b >= t) firstInvalidEl = firstInvalidEl || tutupEl;
+                              }
+                          });
+                          window.dispatchEvent(new CustomEvent('validate-working-hours'));
+                          if (firstInvalidEl) {
+                              e.preventDefault();
+                              firstInvalidEl.focus();
+                              firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              return false;
+                          }
+                      }
+                  }"
+                  @submit="submitWeeklyHours($event)"
+                  class="space-y-6">
                 @csrf
 
                 <div class="space-y-4">
                     @foreach($workingHours as $wh)
                         @php
                             $dow = $wh->day_of_week;
-                            $bukaVal = substr($wh->jam_buka, 0, 5);
-                            $tutupVal = substr($wh->jam_tutup, 0, 5);
+                            $bukaVal = old("days.{$dow}.jam_buka", substr($wh->jam_buka, 0, 5));
+                            $tutupVal = old("days.{$dow}.jam_tutup", substr($wh->jam_tutup, 0, 5));
+                            $isOpenVal = old() ? !empty(old("days.{$dow}.is_open")) : (bool) $wh->is_open;
+                            $is24hVal = old() ? !empty(old("days.{$dow}.is_24_hours")) : (bool) $wh->is_24_hours;
                         @endphp
-                        <div x-data="{ isOpen: {{ $wh->is_open ? 'true' : 'false' }}, is24h: {{ $wh->is_24_hours ? 'true' : 'false' }} }" 
+                        <div data-working-day-row
+                             x-data="{
+                                 isOpen: {{ $isOpenVal ? 'true' : 'false' }},
+                                 is24h: {{ $is24hVal ? 'true' : 'false' }},
+                                 buka: @js($bukaVal),
+                                 tutup: @js($tutupVal),
+                                 touched: false,
+                                 get timeError() {
+                                     if (!this.isOpen || this.is24h) return '';
+                                     if (!this.buka) return 'Jam buka wajib diisi.';
+                                     if (!this.tutup) return 'Jam tutup wajib diisi.';
+                                     if (this.buka >= this.tutup) return 'Jam tutup harus lebih akhir daripada jam buka.';
+                                     return '';
+                                 }
+                             }"
+                             @validate-working-hours.window="touched = true"
                              class="p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4 transition hover:border-amber-400/50">
                             
                             <input type="hidden" name="days[{{ $dow }}][day_name]" value="{{ $wh->day_name }}">
@@ -66,7 +124,7 @@
                             <!-- Nama Hari & Toggle Status Operasional -->
                             <div class="flex items-center gap-4 min-w-[180px]">
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="days[{{ $dow }}][is_open]" value="1" x-model="isOpen" class="sr-only peer">
+                                    <input type="checkbox" data-is-open name="days[{{ $dow }}][is_open]" value="1" x-model="isOpen" class="sr-only peer">
                                     <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-400"></div>
                                 </label>
                                 <div>
@@ -76,19 +134,26 @@
                             </div>
 
                             <!-- Opsi 24 Jam Fleksibel vs Jam Kustom -->
-                            <div class="flex items-center gap-6" x-show="isOpen" x-transition>
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                    <input type="checkbox" name="days[{{ $dow }}][is_24_hours]" value="1" x-model="is24h" class="rounded border-gray-300 text-amber-500 focus:ring-amber-400 cursor-pointer">
-                                    <span>24 Jam / Fleksibel Kapan Saja</span>
-                                </label>
+                            <div class="flex flex-col md:items-end gap-1.5" x-show="isOpen" x-transition>
+                                <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+                                    <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        <input type="checkbox" data-is-24h name="days[{{ $dow }}][is_24_hours]" value="1" x-model="is24h" class="rounded border-gray-300 text-amber-500 focus:ring-amber-400 cursor-pointer">
+                                        <span>24 Jam / Fleksibel Kapan Saja</span>
+                                    </label>
 
-                                <!-- Time Slot Pickers (Jam Mulai - Jam Selesai) -->
-                                <div class="flex items-center gap-2" x-show="!is24h" x-transition>
-                                    <input type="time" name="days[{{ $dow }}][jam_buka]" value="{{ $bukaVal }}" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
-                                    <span class="text-xs text-gray-400 font-bold">s/d</span>
-                                    <input type="time" name="days[{{ $dow }}][jam_tutup]" value="{{ $tutupVal }}" class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:ring-amber-400 focus:outline-none">
-                                    <span class="text-[11px] text-gray-400 font-semibold">WIB</span>
+                                    <!-- Time Slot Pickers (Jam Mulai - Jam Selesai) -->
+                                    <div class="flex items-center gap-2" x-show="!is24h" x-transition>
+                                        <input type="time" data-jam-buka name="days[{{ $dow }}][jam_buka]" x-model="buka" @input="touched = true" @blur="touched = true"
+                                               :class="touched && timeError ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                                               class="px-3 py-1.5 rounded-lg border bg-white dark:bg-gray-800 text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:outline-none">
+                                        <span class="text-xs text-gray-400 font-bold">s/d</span>
+                                        <input type="time" data-jam-tutup name="days[{{ $dow }}][jam_tutup]" x-model="tutup" @input="touched = true" @blur="touched = true"
+                                               :class="touched && timeError ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
+                                               class="px-3 py-1.5 rounded-lg border bg-white dark:bg-gray-800 text-xs font-bold text-gray-800 dark:text-white focus:ring-2 focus:outline-none">
+                                        <span class="text-[11px] text-gray-400 font-semibold">WIB</span>
+                                    </div>
                                 </div>
+                                <p x-show="touched && timeError" x-text="timeError" x-cloak class="text-[11px] font-bold text-red-500"></p>
                             </div>
 
                             <!-- Teks Libur jika ditutup -->

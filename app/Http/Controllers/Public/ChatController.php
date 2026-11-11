@@ -231,11 +231,23 @@ class ChatController extends Controller
         $photographerIdParam = $request->query('photographer') ?? $request->query('photographer_id');
 
         if ($photographerIdParam) {
-            $threadByPhoto = ChatBooking::firstOrCreate([
-                'id_client' => $client->id,
-                'id_photographer' => $photographerIdParam,
-            ]);
-            $activeThreadId = $threadByPhoto->id;
+            $threadByPhoto = ChatBooking::where('id_client', $client->id)
+                ->where('id_photographer', $photographerIdParam)
+                ->first();
+
+            if (!$threadByPhoto) {
+                $targetPhotographer = RolePhotographer::find($photographerIdParam);
+                if ($targetPhotographer && $targetPhotographer->isPublishedToCatalog()) {
+                    $threadByPhoto = ChatBooking::create([
+                        'id_client' => $client->id,
+                        'id_photographer' => $photographerIdParam,
+                    ]);
+                }
+            }
+
+            if ($threadByPhoto) {
+                $activeThreadId = $threadByPhoto->id;
+            }
         } elseif ($activeThreadId) {
             // Check if activeThreadId belongs to a ChatBooking
             $exists = ChatBooking::where('id_client', $client->id)->where('id', $activeThreadId)->exists();
@@ -406,10 +418,19 @@ class ChatController extends Controller
             'alamat' => null,
         ]);
 
-        $thread = ChatBooking::firstOrCreate([
-            'id_client' => $client->id,
-            'id_photographer' => $photographer->id,
-        ]);
+        $thread = ChatBooking::where('id_client', $client->id)
+            ->where('id_photographer', $photographer->id)
+            ->first();
+
+        if (!$thread) {
+            if (!$photographer->isPublishedToCatalog()) {
+                abort(404, 'Etalase fotografer ini belum aktif di katalog publik.');
+            }
+            $thread = ChatBooking::create([
+                'id_client' => $client->id,
+                'id_photographer' => $photographer->id,
+            ]);
+        }
 
         if ($thread->messages()->count() === 0) {
             ChatMessage::create([
@@ -581,11 +602,10 @@ class ChatController extends Controller
         \Illuminate\Support\Facades\Cache::forget("chat_typing_{$thread->id}_{$user->id}");
 
         // Broadcast Real-Time via Laravel Reverb WebSocket
-        try {
-            broadcast(new \App\Events\MessageSent($msg->fresh(['sender', 'replyTo.sender']), $user))->toOthers();
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Reverb broadcast note: ' . $e->getMessage());
-        }
+        \App\Services\RealtimeBroadcastService::broadcastSafely(
+            new \App\Events\MessageSent($msg->fresh(['sender', 'replyTo.sender']), $user),
+            true
+        );
 
         if ($request->wantsJson()) {
             return response()->json([

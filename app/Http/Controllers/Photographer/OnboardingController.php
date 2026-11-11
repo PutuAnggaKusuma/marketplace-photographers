@@ -88,13 +88,13 @@ class OnboardingController extends Controller
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Selamat! Profil Fotografer Anda kini telah lengkap dan resmi tayang di etalase publik LensMatch.',
+                'message' => 'Data profil fotografer berhasil dikirim untuk verifikasi Admin.',
                 'redirect' => route('photographer.dashboard'),
             ]);
         }
 
         return redirect()->route('photographer.dashboard')
-            ->with('success', 'Selamat! Profil Fotografer Anda kini telah lengkap dan resmi tayang di etalase publik LensMatch.');
+            ->with('success', 'Data profil fotografer berhasil dikirim untuk verifikasi Admin.');
     }
 }
 

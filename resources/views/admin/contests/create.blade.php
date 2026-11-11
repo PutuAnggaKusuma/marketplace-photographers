@@ -216,7 +216,7 @@
 
                     <div class="relative w-full" x-data="{ openStatus: false, statusVal: '{{ $selectedStatus }}', statusLabel: '{{ $selectedStatusLabel }}' }">
 
-                        <input type="hidden" name="status" :value="statusVal" required>
+                        <input type="hidden" name="status" :value="statusVal">
 
                         <button @click="openStatus = !openStatus" type="button" 
 
@@ -272,15 +272,7 @@
 
             @endphp
 
-            <div class="space-y-5" x-data="{ 
-
-                    openFee: false, 
-
-                    feeType: '{{ $initialFeeType }}', 
-
-                    feeLabel: '{{ $initialFeeLabel }}' 
-
-                 }">
+            <div class="space-y-5">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
 
@@ -310,7 +302,7 @@
 
                                 <button type="button" 
 
-                                        @click="feeType = 'free'; feeLabel = 'Gratis (Free)'; openFee = false" 
+                                        @click="feeType = 'free'; feeLabel = 'Gratis (Free)'; form.biaya_pendaftaran = 0; touched.biaya_pendaftaran = false; errors.biaya_pendaftaran = ''; openFee = false" 
 
                                         class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40"
 
@@ -324,7 +316,7 @@
 
                                 <button type="button" 
 
-                                        @click="feeType = 'paid'; feeLabel = 'Berbayar (Transfer Bank Manual)'; openFee = false" 
+                                        @click="feeType = 'paid'; feeLabel = 'Berbayar (Transfer Bank Manual)'; if (touched.biaya_pendaftaran) validateBiaya(); openFee = false" 
 
                                         class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer"
 
@@ -352,7 +344,7 @@
 
                         </label>
 
-                        <input type="number" name="biaya_pendaftaran" x-model="form.biaya_pendaftaran" @input="touched.biaya_pendaftaran = true; validateBiaya()" @blur="touched.biaya_pendaftaran = true; validateBiaya()" min="0" step="5000" placeholder="mis. 50000" :class="touched.biaya_pendaftaran && errors.biaya_pendaftaran ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                        <input type="number" name="biaya_pendaftaran" x-ref="fieldBiaya" x-model="form.biaya_pendaftaran" @input="touched.biaya_pendaftaran = true; validateBiaya()" @blur="touched.biaya_pendaftaran = true; validateBiaya()" step="5000" placeholder="mis. 50000" :class="touched.biaya_pendaftaran && errors.biaya_pendaftaran ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                         <p x-show="touched.biaya_pendaftaran && errors.biaya_pendaftaran" x-text="errors.biaya_pendaftaran" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                     </div>
@@ -405,7 +397,7 @@
 
                     </label>
 
-                    <input type="number" name="max_submissions" x-model="form.max_submissions" @input="touched.max_submissions = true; validateMaxSubmissions()" @blur="touched.max_submissions = true; validateMaxSubmissions()" min="1" max="10" :class="touched.max_submissions && errors.max_submissions ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                    <input type="number" name="max_submissions" x-ref="fieldMaxSubmissions" x-model="form.max_submissions" @input="touched.max_submissions = true; validateMaxSubmissions()" @blur="touched.max_submissions = true; validateMaxSubmissions()" :class="touched.max_submissions && errors.max_submissions ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'" class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                     <p x-show="touched.max_submissions && errors.max_submissions" x-text="errors.max_submissions" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
                 </div>
@@ -666,60 +658,66 @@
 
             <!-- 9. Poster / Banner Lomba -->
 
-            <div>
+            <div class="space-y-3">
 
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
                     Poster / Banner Lomba
 
                 </label>
 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+                <div class="space-y-4">
 
-                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border flex items-center justify-center overflow-hidden shrink-0 shadow-xs transition"
-                         :class="bannerError ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'">
-
-                        <template x-if="previewUrl">
-
-                            <img :src="previewUrl" onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" class="w-full h-full object-cover">
-
-                        </template>
-
-                        <template x-if="!previewUrl">
-                            <div class="flex items-center justify-center p-3 text-gray-400 dark:text-gray-500">
-                                <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                                </svg>
-                            </div>
-                        </template>
-
+                    <div tabindex="0"
+                         role="button"
+                         @click="$refs.bannerFileInput.click()"
+                         @keydown.enter.prevent="$refs.bannerFileInput.click()"
+                         @keydown.space.prevent="$refs.bannerFileInput.click()"
+                         @dragover.prevent="isBannerDragging = true"
+                         @dragleave.prevent="isBannerDragging = false"
+                         @drop.prevent="handleBannerDrop($event)"
+                         class="w-full min-h-[150px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                         :class="isBannerDragging
+                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                             : (bannerError
+                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                 : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                        <input type="file" name="banner_file" x-ref="bannerFileInput" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="sr-only">
+                        <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih poster lomba</span>
+                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        </p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                            Format JPG, PNG, WEBP maksimal 10 MB.
+                        </p>
                     </div>
 
+                    <template x-if="previewUrl">
+                        <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-sm shadow-2xs">
+                            <div @click="bannerLightboxOpen = true" class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                                <img :src="previewUrl" onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                                </div>
+                            </div>
+                            <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="bannerFileName || 'Poster Lomba'"></span>
+                                <button type="button" @click="removeBanner()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                            </div>
+                        </div>
+                    </template>
 
+                    <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
-                    <div class="space-y-2.5 flex-1">
+                    @error('banner_file')
 
-                        <label class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition">
+                        <p class="text-[11px] text-rose-500 font-bold">{{ $message }}</p>
 
-                            <span>Upload Poster</span>
+                    @enderror
 
-                            <input type="file" name="banner_file" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="hidden">
-
-                        </label>
-
-                        <p x-show="bannerError" x-text="bannerError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-
-                        @error('banner_file')
-
-                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
-
-                        @enderror
-
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10 MB.</p>
-
-                        <input type="url" name="banner_url" placeholder="Atau masukkan URL banner..." value="{{ old('banner_url') }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none">
-
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1.5">Atau URL Banner Eksternal (Opsional)</label>
+                        <input type="url" name="banner_url" x-model="form.banner_url" @input="if (!bannerFileName) previewUrl = form.banner_url" placeholder="https://..." value="{{ old('banner_url') }}" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                     </div>
 
                 </div>
@@ -740,6 +738,21 @@
 
         </form>
 
+        <!-- Lightbox Pratinjau Poster (Rule #97) -->
+        <div x-show="bannerLightboxOpen"
+             x-cloak
+             @keydown.escape.window="bannerLightboxOpen = false"
+             @click.self="bannerLightboxOpen = false"
+             class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+            <button type="button"
+                    @click="bannerLightboxOpen = false"
+                    aria-label="Tutup pratinjau"
+                    class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <img :src="previewUrl" alt="Poster Lomba" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
+        </div>
+
     </div>
 
 </div>
@@ -747,10 +760,31 @@
 <script>
 function adminContestFormApp() {
     return {
-        previewUrl: null,
+        openFee: false,
+        feeType: @js($initialFeeType),
+        feeLabel: @js($initialFeeLabel),
+        previewUrl: @js(old('banner_url', '')),
+        bannerFileName: '',
         bannerError: '',
+        isBannerDragging: false,
+        bannerLightboxOpen: false,
         fileChosen(event) {
-            const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+            this.processBannerFiles(event.target.files);
+        },
+        handleBannerDrop(event) {
+            this.isBannerDragging = false;
+            if (event.dataTransfer && event.dataTransfer.files) {
+                const file = event.dataTransfer.files[0];
+                if (file && typeof DataTransfer !== 'undefined' && this.$refs.bannerFileInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    this.$refs.bannerFileInput.files = dt.files;
+                }
+                this.processBannerFiles(event.dataTransfer.files);
+            }
+        },
+        processBannerFiles(fileList) {
+            const res = window.validateUploadFiles(fileList, { maxMB: 10 });
             if (res.hasErrors) {
                 this.bannerError = res.errorMessage;
                 return;
@@ -758,8 +792,15 @@ function adminContestFormApp() {
             const file = res.validFiles[0];
             if (file) {
                 this.bannerError = '';
+                this.bannerFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
                 this.previewUrl = URL.createObjectURL(file);
             }
+        },
+        removeBanner() {
+            if (this.$refs.bannerFileInput) this.$refs.bannerFileInput.value = '';
+            this.bannerFileName = '';
+            this.bannerError = '';
+            this.previewUrl = this.form.banner_url || '';
         },
         form: {
             judul_lomba: @js(old('judul_lomba', '')),
@@ -769,6 +810,7 @@ function adminContestFormApp() {
             hadiah: @js(old('hadiah', '')),
             biaya_pendaftaran: @js(old('biaya_pendaftaran', 0)),
             max_submissions: @js(old('max_submissions', 2)),
+            banner_url: @js(old('banner_url', '')),
             start_date: @js(old('start_date', date('Y-m-d'))),
             end_date: @js(old('end_date', date('Y-m-d', strtotime('+30 days'))))
         },
@@ -875,6 +917,8 @@ function adminContestFormApp() {
             this.touched.kategori = true;
             this.touched.penyelenggara = true;
             this.touched.hadiah = true;
+            this.touched.biaya_pendaftaran = true;
+            this.touched.max_submissions = true;
             this.touched.start_date = true;
             this.touched.end_date = true;
 
@@ -883,9 +927,9 @@ function adminContestFormApp() {
             this.validateKategori();
             this.validatePenyelenggara();
             this.validateHadiah();
-            this.validateDates();
             this.validateBiaya();
             this.validateMaxSubmissions();
+            this.validateDates();
 
             let firstInvalidRef = null;
             if (this.errors.judul_lomba) firstInvalidRef = firstInvalidRef || this.$refs.fieldJudul;
@@ -893,10 +937,12 @@ function adminContestFormApp() {
             if (this.errors.kategori) firstInvalidRef = firstInvalidRef || this.$refs.fieldKategori;
             if (this.errors.penyelenggara) firstInvalidRef = firstInvalidRef || this.$refs.fieldPenyelenggara;
             if (this.errors.hadiah) firstInvalidRef = firstInvalidRef || this.$refs.fieldHadiah;
+            if (this.errors.biaya_pendaftaran) firstInvalidRef = firstInvalidRef || this.$refs.fieldBiaya;
+            if (this.errors.max_submissions) firstInvalidRef = firstInvalidRef || this.$refs.fieldMaxSubmissions;
             if (this.errors.start_date) firstInvalidRef = firstInvalidRef || this.$refs.fieldStartDate;
             if (this.errors.end_date) firstInvalidRef = firstInvalidRef || this.$refs.fieldEndDate;
 
-            if (this.errors.judul_lomba || this.errors.deskrpisi_lomba || this.errors.kategori || this.errors.penyelenggara || this.errors.hadiah || this.errors.start_date || this.errors.end_date) {
+            if (this.errors.judul_lomba || this.errors.deskrpisi_lomba || this.errors.kategori || this.errors.penyelenggara || this.errors.hadiah || this.errors.biaya_pendaftaran || this.errors.max_submissions || this.errors.start_date || this.errors.end_date) {
                 e.preventDefault();
                 if (firstInvalidRef) {
                     firstInvalidRef.focus();

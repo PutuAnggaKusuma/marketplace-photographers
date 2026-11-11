@@ -131,6 +131,10 @@ class AuthController extends Controller
                 'nama' => $user->nama,
                 'nomor_telepon' => $request->nomor_telepon,
                 'is_onboarded' => false,
+                'is_verified' => false,
+                'status_verifikasi' => 'menunggu',
+                'status_etalase' => 'belum_diajukan',
+                'jadwal_dikonfirmasi' => false,
             ]);
         } elseif ($user->role === 'client') {
             RoleClient::create([

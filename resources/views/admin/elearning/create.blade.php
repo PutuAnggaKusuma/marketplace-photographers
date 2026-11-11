@@ -247,7 +247,6 @@
                            x-model="form.harga"
                            @input="touched.harga = true; validateHarga()"
                            @blur="touched.harga = true; validateHarga()"
-                           min="0"
                            step="1000"
                            placeholder="Masukkan nominal harga kursus" 
                            class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
@@ -321,51 +320,54 @@
 
             <!-- 5. Foto Thumbnail Modul -->
 
-            <div>
+            <div class="space-y-3">
 
-                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
                     Cover Banner / Gambar Thumbnail Modul (Opsional)
 
                 </label>
 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div class="space-y-4">
 
-                    <div class="w-48 h-28 rounded-2xl bg-gray-100 dark:bg-gray-700 border flex items-center justify-center overflow-hidden shrink-0 shadow-xs transition"
-                         :class="thumbnailError ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'">
+                    <div tabindex="0"
+                         role="button"
+                         @click="$refs.thumbFileInput.click()"
+                         @keydown.enter.prevent="$refs.thumbFileInput.click()"
+                         @keydown.space.prevent="$refs.thumbFileInput.click()"
+                         @dragover.prevent="isThumbDragging = true"
+                         @dragleave.prevent="isThumbDragging = false"
+                         @drop.prevent="handleThumbDrop($event)"
+                         class="w-full min-h-[150px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                         :class="isThumbDragging
+                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                             : (thumbnailError
+                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                 : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                        <input type="file" name="thumbnail" x-ref="thumbFileInput" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="sr-only">
+                        <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih gambar thumbnail</span>
+                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        </p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                            Format JPG, PNG, WEBP maksimal 10 MB.
+                        </p>
+                    </div>
 
-                        <template x-if="previewUrl">
-
-                            <img :src="previewUrl" class="w-full h-full object-cover">
-
-                        </template>
-
-                        <template x-if="!previewUrl">
-                            <div class="flex items-center justify-center p-3 text-gray-400 dark:text-gray-500">
-                                <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                                </svg>
+                    <template x-if="previewUrl">
+                        <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-sm shadow-2xs">
+                            <div @click="thumbLightboxOpen = true" class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                                <img :src="previewUrl" alt="Preview Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                                </div>
                             </div>
-                        </template>
-
-                    </div>
-
-
-
-                    <div class="space-y-2">
-
-                        <label class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition">
-
-                            <span>Upload Thumbnail</span>
-
-                            <input type="file" name="thumbnail" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="hidden">
-
-                        </label>
-
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format: JPG, PNG, WEBP. Maksimal 10 MB.</p>
-
-                    </div>
+                            <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="thumbFileName || 'Thumbnail Modul'"></span>
+                                <button type="button" @click="removeThumb()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                            </div>
+                        </div>
+                    </template>
 
                 </div>
 
@@ -395,6 +397,21 @@
 
         </form>
 
+        <!-- Lightbox Pratinjau Thumbnail (Rule #97) -->
+        <div x-show="thumbLightboxOpen"
+             x-cloak
+             @keydown.escape.window="thumbLightboxOpen = false"
+             @click.self="thumbLightboxOpen = false"
+             class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+            <button type="button"
+                    @click="thumbLightboxOpen = false"
+                    aria-label="Tutup pratinjau"
+                    class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <img :src="previewUrl" alt="Preview Thumbnail" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
+        </div>
+
     </div>
 
 </div>
@@ -403,9 +420,27 @@
 function elearningFormApp() {
     return {
         previewUrl: null,
+        thumbFileName: '',
         thumbnailError: '',
+        isThumbDragging: false,
+        thumbLightboxOpen: false,
         fileChosen(event) {
-            const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+            this.processThumbFiles(event.target.files);
+        },
+        handleThumbDrop(event) {
+            this.isThumbDragging = false;
+            if (event.dataTransfer && event.dataTransfer.files) {
+                const file = event.dataTransfer.files[0];
+                if (file && typeof DataTransfer !== 'undefined' && this.$refs.thumbFileInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    this.$refs.thumbFileInput.files = dt.files;
+                }
+                this.processThumbFiles(event.dataTransfer.files);
+            }
+        },
+        processThumbFiles(fileList) {
+            const res = window.validateUploadFiles(fileList, { maxMB: 10 });
             if (res.hasErrors) {
                 this.thumbnailError = res.errorMessage;
                 return;
@@ -413,8 +448,15 @@ function elearningFormApp() {
             const file = res.validFiles[0];
             if (file) {
                 this.thumbnailError = '';
+                this.thumbFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
                 this.previewUrl = URL.createObjectURL(file);
             }
+        },
+        removeThumb() {
+            if (this.$refs.thumbFileInput) this.$refs.thumbFileInput.value = '';
+            this.thumbFileName = '';
+            this.thumbnailError = '';
+            this.previewUrl = null;
         },
         catOpen: false,
         openAccess: false,

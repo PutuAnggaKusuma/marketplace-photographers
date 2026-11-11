@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\PhotographerPortfolio;
 use App\Models\PhotographerService;
+use App\Models\PhotographerWorkingHour;
 use App\Models\PortfolioMedia;
 use App\Models\RolePhotographer;
 use App\Models\ServiceDetail;
@@ -52,6 +53,7 @@ class PhotographerSeeder extends Seeder
                 'nomor_telepon' => '081234567890',
                 'link_sosmed' => 'https://instagram.com/alexvisual',
                 'foto' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+                'foto_sampul' => 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
                 'alamat' => 'Jl. Sunset Road No. 88, Kuta, Bali',
                 'province_code' => $provBali ? $provBali->code : '51',
                 'city_code' => $cityDenpasar ? $cityDenpasar->code : '5171',
@@ -100,6 +102,7 @@ class PhotographerSeeder extends Seeder
                 'nomor_telepon' => '082198765432',
                 'link_sosmed' => 'https://instagram.com/budievent',
                 'foto' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+                'foto_sampul' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80',
                 'alamat' => 'Jl. Kemang Raya No. 12, Jakarta Selatan',
                 'province_code' => $provJakarta ? $provJakarta->code : '31',
                 'city_code' => $cityJaksel ? $cityJaksel->code : '3174',
@@ -168,6 +171,7 @@ class PhotographerSeeder extends Seeder
                 'nomor_telepon' => '085712345678',
                 'link_sosmed' => 'https://instagram.com/claracommercial',
                 'foto' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
+                'foto_sampul' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
                 'alamat' => 'Jl. Riau No. 45, Bandung, Jawa Barat',
                 'province_code' => $provJabar ? $provJabar->code : '32',
                 'city_code' => $cityBandung ? $cityBandung->code : '3273',
@@ -216,6 +220,7 @@ class PhotographerSeeder extends Seeder
                 'nomor_telepon' => '087812349988',
                 'link_sosmed' => 'https://instagram.com/dewaportrait',
                 'foto' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
+                'foto_sampul' => 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80',
                 'alamat' => 'Jl. Kaliurang Km 5.5, Yogyakarta',
                 'province_code' => $provYogya ? $provYogya->code : '34',
                 'city_code' => $cityYogya ? $cityYogya->code : '3471',
@@ -236,6 +241,15 @@ class PhotographerSeeder extends Seeder
         ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => '10 Foto Pilihan Cetak Ukuran 10R Berkualitas Premium', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Semua File Foto Master Resolusi Penuh via Cloud Drive', 'tarif_harga' => 0]);
 
+        $portDewa1 = PhotographerPortfolio::updateOrCreate(
+            ['id_photographer' => $dewaPhoto->id, 'judul' => 'Portrait Wisuda & Keluarga Taman Sari'],
+            ['deskripsi' => 'Dokumentasi potret wisuda dan keluarga di Yogyakarta dengan pencahayaan alami dan komposisi klasik.']
+        );
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1768818928341-3b31b8965c6d?q=80&w=1200&auto=format&fit=crop']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=1200&q=80']);
+
         // 5. Bali Lens Team
         $userBaliLens = User::firstOrCreate(
             ['email' => 'balilens@lensmatch.com'],
@@ -255,6 +269,7 @@ class PhotographerSeeder extends Seeder
                 'nomor_telepon' => '081399887766',
                 'link_sosmed' => 'https://instagram.com/balilens',
                 'foto' => 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80',
+                'foto_sampul' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80',
                 'alamat' => 'Jl. Pantai Sanur No. 22, Denpasar, Bali',
                 'province_code' => $provBali ? $provBali->code : '51',
                 'city_code' => $cityDenpasar ? $cityDenpasar->code : '5171',
@@ -275,13 +290,31 @@ class PhotographerSeeder extends Seeder
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => '40 Foto Edit Warna Khas Liburan (Selesai dalam 24 Jam)', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Semua File Original Dikirim via Cloud Drive', 'tarif_harga' => 0]);
 
-        // Mark all seeded photographers as onboarded and configure default bank info
-        RolePhotographer::query()->update([
-            'is_onboarded' => true,
-            'nama_bank' => 'BCA',
-            'nomor_rekening' => '8830129841',
-            'atas_nama_rekening' => 'Alex Visual Studio',
-        ]);
+        $portBali1 = PhotographerPortfolio::updateOrCreate(
+            ['id_photographer' => $baliPhoto->id, 'judul' => 'Exploring Nusa Penida & Uluwatu Cliff'],
+            ['deskripsi' => 'Sesi foto liburan santai di pesisir Bali dengan komposisi lanskap tropis dan warna natural.']
+        );
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80']);
+        PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1200&q=80']);
+
+        // Tandai 5 fotografer demo sebagai terverifikasi profil, jadwal terkonfirmasi, dan disetujui tayang
+        foreach ([$alexPhoto, $budiPhoto, $claraPhoto, $dewaPhoto, $baliPhoto] as $seededPhoto) {
+            PhotographerWorkingHour::initializeDefaults($seededPhoto->id);
+            $seededPhoto->update([
+                'is_onboarded' => true,
+                'is_verified' => true,
+                'status_verifikasi' => 'terverifikasi',
+                'status_etalase' => 'disetujui',
+                'jadwal_dikonfirmasi' => true,
+                'etalase_diajukan_at' => now(),
+                'etalase_disetujui_at' => now(),
+                'nama_bank' => $seededPhoto->nama_bank ?: 'BCA',
+                'nomor_rekening' => $seededPhoto->nomor_rekening ?: '8830129841',
+                'atas_nama_rekening' => $seededPhoto->atas_nama_rekening ?: $seededPhoto->nama,
+            ]);
+        }
 
         // Seed professional FAQs for each photographer in database (Rule #94 Compliant)
         $defaultFaqs = [

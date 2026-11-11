@@ -142,10 +142,16 @@
       const tOk = this.validateTipe();
       const jOk = this.validateJudulLesson();
 
+      let firstInvalidRef = null;
+      if (!mOk) firstInvalidRef = firstInvalidRef || this.$refs.moduleDropdownBtn;
+      if (!tOk) firstInvalidRef = firstInvalidRef || this.$refs.tipeDropdownBtn;
+      if (!jOk) firstInvalidRef = firstInvalidRef || this.$refs.judulLessonInput;
+
       if (!mOk || !tOk || !jOk) {
         e.preventDefault();
-        if (!jOk && this.$refs.judulLessonInput) {
-          this.$refs.judulLessonInput.focus();
+        if (firstInvalidRef) {
+          firstInvalidRef.focus();
+          firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return false;
       }
@@ -166,7 +172,19 @@
 
         urutan: {{ ($course->modules()->max('urutan') ?? 0) + 1 }},
 
-        actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}'
+        actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
+
+        touched: {
+
+          judul_modul: false
+
+        },
+
+        errors: {
+
+          judul_modul: ''
+
+        }
 
       };
 
@@ -188,7 +206,19 @@
 
         urutan: mod.urutan,
 
-        actionUrl: '/admin/elearning/modules/' + mod.id + '/update'
+        actionUrl: '/admin/elearning/modules/' + mod.id + '/update',
+
+        touched: {
+
+          judul_modul: false
+
+        },
+
+        errors: {
+
+          judul_modul: ''
+
+        }
 
       };
 
@@ -196,34 +226,61 @@
 
     },
 
+    lessonMediaPreviewUrl: '',
+    lessonMediaDragging: false,
+    lessonLightboxOpen: false,
+
     handleLessonMediaFile(event) {
+      this.processLessonMediaFiles(event.target.files);
+    },
 
-      const res = window.validateUploadFiles(event.target, {
+    handleLessonMediaDrop(event) {
+      this.lessonMediaDragging = false;
+      if (event.dataTransfer && event.dataTransfer.files) {
+        const file = event.dataTransfer.files[0];
+        if (file && typeof DataTransfer !== 'undefined' && this.$refs.lessonMediaInput) {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          this.$refs.lessonMediaInput.files = dt.files;
+        }
+        this.processLessonMediaFiles(event.dataTransfer.files);
+      }
+    },
 
+    processLessonMediaFiles(fileList) {
+      const res = window.validateUploadFiles(fileList, {
         maxMB: 50,
-
         allowedMimes: [],
-
         allowedExts: []
-
       });
 
       if (res.hasErrors) {
-
         this.lessonForm.errors.media_file = res.errorMessage;
-
         this.lessonForm.mediaFileName = '';
-
+        this.lessonMediaPreviewUrl = '';
         return;
-
       }
 
       const file = res.validFiles[0];
-
       this.lessonForm.errors.media_file = '';
+      if (file) {
+        this.lessonForm.mediaFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
+        if (file.type && file.type.startsWith('image/')) {
+          this.lessonMediaPreviewUrl = URL.createObjectURL(file);
+        } else {
+          this.lessonMediaPreviewUrl = '';
+        }
+      } else {
+        this.lessonForm.mediaFileName = '';
+        this.lessonMediaPreviewUrl = '';
+      }
+    },
 
-      this.lessonForm.mediaFileName = file ? file.name : '';
-
+    clearLessonMediaFile() {
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonForm.mediaFileName = '';
+      this.lessonForm.errors.media_file = '';
+      this.lessonMediaPreviewUrl = '';
     },
 
     openCreateLesson(moduleId = '') {
@@ -279,6 +336,7 @@
       };
 
       if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonMediaPreviewUrl = '';
 
       this.showLessonModal = true;
 
@@ -337,6 +395,7 @@
       };
 
       if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonMediaPreviewUrl = '';
 
       this.showLessonModal = true;
 
@@ -847,7 +906,7 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Modul</label>
 
-            <input type="number" name="urutan" x-model="moduleForm.urutan" min="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="number" name="urutan" x-model="moduleForm.urutan" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
 
           </div>
 
@@ -919,13 +978,17 @@
 
             <div class="relative" x-data="{ open: false }">
 
-              <input type="hidden" name="id_module" :value="lessonForm.id_module" required>
+              <input type="hidden" name="id_module" :value="lessonForm.id_module">
 
               <button type="button" 
 
+                      x-ref="moduleDropdownBtn"
+
                       @click="open = !open" 
 
-                      class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between text-left focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition cursor-pointer">
+                      :class="lessonForm.touched.id_module && lessonForm.errors.id_module ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+
+                      class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between text-left focus:ring-2 focus:outline-hidden transition cursor-pointer">
 
                 <span x-text="
 
@@ -957,7 +1020,7 @@
 
                   <button type="button" 
 
-                          @click="lessonForm.id_module = '{{ $mod->id }}'; open = false;" 
+                          @click="lessonForm.id_module = '{{ $mod->id }}'; lessonForm.touched.id_module = true; validateModule(); open = false;" 
 
                           class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
 
@@ -985,13 +1048,17 @@
 
             <div class="relative" x-data="{ open: false }">
 
-              <input type="hidden" name="tipe" :value="lessonForm.tipe" required>
+              <input type="hidden" name="tipe" :value="lessonForm.tipe">
 
               <button type="button" 
 
+                      x-ref="tipeDropdownBtn"
+
                       @click="open = !open" 
 
-                      class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between text-left focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition cursor-pointer">
+                      :class="lessonForm.touched.tipe && lessonForm.errors.tipe ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+
+                      class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white flex items-center justify-between text-left focus:ring-2 focus:outline-hidden transition cursor-pointer">
 
                 <span x-text="lessonForm.tipe === 'video' ? 'Video (YouTube / Link Video)' : (lessonForm.tipe === 'reading' ? 'Reading (Teks Artikel & Panduan)' : (lessonForm.tipe === 'audio' ? 'Audio (Podcast / Penjelasan Suara)' : (lessonForm.tipe === 'foto' ? 'Foto (Galeri Visual / Bedah Karya)' : '-- Pilih Tipe --')))"></span>
 
@@ -1009,25 +1076,25 @@
 
                    style="display: none;">
 
-                <button type="button" @click="lessonForm.tipe = 'video'; open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'video' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
+                <button type="button" @click="lessonForm.tipe = 'video'; lessonForm.touched.tipe = true; validateTipe(); open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'video' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
 
                   <span>Video (YouTube / Link Video)</span>
 
                 </button>
 
-                <button type="button" @click="lessonForm.tipe = 'reading'; open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'reading' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
+                <button type="button" @click="lessonForm.tipe = 'reading'; lessonForm.touched.tipe = true; validateTipe(); open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'reading' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
 
                   <span>Reading (Teks Artikel & Panduan)</span>
 
                 </button>
 
-                <button type="button" @click="lessonForm.tipe = 'audio'; open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'audio' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
+                <button type="button" @click="lessonForm.tipe = 'audio'; lessonForm.touched.tipe = true; validateTipe(); open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40" :class="lessonForm.tipe === 'audio' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
 
                   <span>Audio (Podcast / Penjelasan Suara)</span>
 
                 </button>
 
-                <button type="button" @click="lessonForm.tipe = 'foto'; open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer last:border-0" :class="lessonForm.tipe === 'foto' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
+                <button type="button" @click="lessonForm.tipe = 'foto'; lessonForm.touched.tipe = true; validateTipe(); open = false;" class="w-full px-4 py-2.5 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer last:border-0" :class="lessonForm.tipe === 'foto' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-bold' : ''">
 
                   <span>Foto (Galeri Visual / Bedah Karya)</span>
 
@@ -1072,17 +1139,59 @@
 
           <!-- 5. File Upload Optional -->
 
-          <div x-show="lessonForm.tipe !== 'reading'">
+          <div x-show="lessonForm.tipe !== 'reading'" class="space-y-3">
 
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Upload File Media (Maks. 50 MB)</label>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Upload File Media (Maks. 50 MB)</label>
 
-            <input type="file" name="media_file" x-ref="lessonMediaInput" @change="handleLessonMediaFile($event)" :class="lessonForm.errors && lessonForm.errors.media_file ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'" class="w-full px-3 py-2 text-xs border rounded-xl bg-gray-50 dark:bg-gray-800 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-white hover:file:bg-amber-600 transition" />
+            <div tabindex="0"
+                 role="button"
+                 @click="$refs.lessonMediaInput.click()"
+                 @keydown.enter.prevent="$refs.lessonMediaInput.click()"
+                 @keydown.space.prevent="$refs.lessonMediaInput.click()"
+                 @dragover.prevent="lessonMediaDragging = true"
+                 @dragleave.prevent="lessonMediaDragging = false"
+                 @drop.prevent="handleLessonMediaDrop($event)"
+                 class="w-full min-h-[120px] px-5 py-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
+                 :class="lessonMediaDragging
+                     ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                     : (lessonForm.errors && lessonForm.errors.media_file
+                         ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                         : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 focus:ring-2 focus:ring-amber-500')">
+              <input type="file" name="media_file" x-ref="lessonMediaInput" @change="handleLessonMediaFile($event)" class="sr-only" />
+              <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400" x-text="lessonForm.mediaFileName ? 'Ganti file media' : 'Pilih file media'"></span>
+                <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+              </p>
+              <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Maksimal 50 MB.</p>
+            </div>
 
-            <p x-show="lessonForm.errors && lessonForm.errors.media_file" x-text="lessonForm.errors.media_file" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <template x-if="lessonForm.mediaFileName && lessonMediaPreviewUrl">
+              <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs shadow-2xs">
+                <div @click="lessonLightboxOpen = true" class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                  <img :src="lessonMediaPreviewUrl" :alt="lessonForm.mediaFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                  </div>
+                </div>
+                <div class="px-3 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                  <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
+                  <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="lessonForm.mediaFileName && !lessonMediaPreviewUrl">
+              <div class="px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
+                <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+              </div>
+            </template>
+
+            <p x-show="lessonForm.errors && lessonForm.errors.media_file" x-text="lessonForm.errors.media_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
             @error('media_file')
 
-              <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+              <p class="text-[11px] font-bold text-red-500">{{ $message }}</p>
 
             @enderror
 
@@ -1172,7 +1281,7 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Durasi (Menit)</label>
 
-            <input type="number" name="durasi_menit" x-model="lessonForm.durasi_menit" min="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="number" name="durasi_menit" x-model="lessonForm.durasi_menit" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
 
           </div>
 
@@ -1184,7 +1293,7 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Tahapan</label>
 
-            <input type="number" name="urutan" x-model="lessonForm.urutan" min="1" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="number" name="urutan" x-model="lessonForm.urutan" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
 
           </div>
 
@@ -1214,6 +1323,21 @@
 
     </div>
 
+  </div>
+
+  <!-- Lightbox Pratinjau Media Tahapan (Rule #97) -->
+  <div x-show="lessonLightboxOpen"
+       x-cloak
+       @keydown.escape.window="lessonLightboxOpen = false"
+       @click.self="lessonLightboxOpen = false"
+       class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+    <button type="button"
+            @click="lessonLightboxOpen = false"
+            aria-label="Tutup pratinjau"
+            class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <img :src="lessonMediaPreviewUrl" :alt="lessonForm.mediaFileName" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
   </div>
 
 

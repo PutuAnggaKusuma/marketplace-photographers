@@ -354,14 +354,17 @@
 
       if (!sOk || !dOk || !tOk || !pOk || !cOk || !lOk) {
         e.preventDefault();
-        if (!sOk) {
-          window.scrollTo({ top: 200, behavior: 'smooth' });
-        } else if (!dOk || !tOk) {
-          window.scrollTo({ top: 500, behavior: 'smooth' });
-        } else if (!pOk || !cOk) {
-          window.scrollTo({ top: 800, behavior: 'smooth' });
-        } else if (!lOk && this.$refs.lokasiInput) {
-          this.$refs.lokasiInput.focus();
+        let target = null;
+        if (!sOk) target = this.$refs.serviceSection;
+        else if (!dOk) target = this.$refs.dateSection;
+        else if (!tOk) target = this.$refs.timeSection;
+        else if (!pOk) target = this.$refs.provinceBtn;
+        else if (!cOk) target = this.$refs.cityBtn;
+        else if (!lOk) target = this.$refs.lokasiInput;
+
+        if (target) {
+          target.focus?.();
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return false;
       }
@@ -398,15 +401,15 @@
       @csrf
       <input type="hidden" name="photographer_id" value="{{ $photographer->id }}">
       <input type="hidden" name="service_id" :value="selectedServiceId">
-      <input type="hidden" name="tanggal_sesi" :value="selectedDate" required>
-      <input type="hidden" name="jam_mulai" :value="selectedTime" required>
+      <input type="hidden" name="tanggal_sesi" :value="selectedDate">
+      <input type="hidden" name="jam_mulai" :value="selectedTime">
       <input type="hidden" name="durasi" :value="sessionDuration">
 
       <!-- Left Column: Form Inputs (7 Cols) -->
       <div class="lg:col-span-7 space-y-6 lg:space-y-7">
 
         <!-- Seksi 1 (Paling Atas): Pilih Paket Layanan Sesi Foto -->
-        <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5">
+        <div x-ref="serviceSection" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
               <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
@@ -465,7 +468,7 @@
         </div>
 
         <!-- Seksi 2: Jadwal Pelaksanaan Sesi Foto (Mini Kalender & Time Slot Chips) -->
-        <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-6">
+        <div x-ref="dateSection" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-6 outline-none">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
               <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -531,7 +534,7 @@
           </div>
 
           <!-- Bagian B: Time-Slot Chips Matrix -->
-          <div class="space-y-3 pt-1">
+          <div x-ref="timeSection" tabindex="-1" class="space-y-3 pt-1 outline-none">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Pilih Jam Mulai Sesi <span class="text-rose-500">*</span>
@@ -607,7 +610,11 @@
               <input type="hidden" name="province_code" :value="selectedCode">
               
               <div class="relative">
-                <button type="button" @click="open = !open" class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition cursor-pointer">
+                <button type="button"
+                        x-ref="provinceBtn"
+                        @click="open = !open"
+                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
+                        :class="touched.province && errors.province ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -624,12 +631,17 @@
             </div>
 
             <!-- City Custom Alpine Dropdown -->
-            <div x-data="{ open: false, selectedCode: '', selectedText: 'Pilih Kota / Kabupaten' }">
+            <div x-data="{ open: false, selectedCode: '', selectedText: 'Pilih Kota / Kabupaten' }"
+                 @booking-city-set.window="selectedCode = $event.detail.code; selectedText = $event.detail.name">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Kota / Kabupaten <span class="text-rose-500">*</span></label>
               <input type="hidden" name="city_code" :value="selectedCode" id="bookingCityInput" @change="cityCode = $event.target.value; selectedCode = $event.target.value; touched.city = true; validateCity()">
               
               <div class="relative">
-                <button type="button" @click="open = !open" class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition cursor-pointer">
+                <button type="button"
+                        x-ref="cityBtn"
+                        @click="open = !open"
+                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
+                        :class="touched.city && errors.city ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText" id="bookingCityLabel"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -853,17 +865,17 @@
 <script>
   function fetchBookingCities(provinceCode) {
     const cityInput = document.getElementById('bookingCityInput');
-    const cityLabel = document.getElementById('bookingCityLabel');
     const cityList = document.getElementById('bookingCityOptionsList');
 
     cityInput.value = '';
-    cityLabel.textContent = 'Memuat Kota...';
+    cityInput.dispatchEvent(new Event('change'));
+    window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: '', name: 'Memuat Kota...' } }));
     cityList.innerHTML = '<div class="px-4 py-2.5 text-xs text-gray-400 font-semibold">Memuat data kota...</div>';
 
     fetch('/api/cities/' + provinceCode)
       .then(res => res.json())
       .then(data => {
-        cityLabel.textContent = 'Pilih Kota / Kabupaten';
+        window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: '', name: 'Pilih Kota / Kabupaten' } }));
         let html = '';
         data.forEach(city => {
           const escapedName = city.name.replace(/'/g, "\\'");
@@ -881,7 +893,7 @@
     const input = document.getElementById('bookingCityInput');
     input.value = code;
     input.dispatchEvent(new Event('change'));
-    document.getElementById('bookingCityLabel').textContent = name;
+    window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: code, name: name } }));
   }
 </script>
 @endsection

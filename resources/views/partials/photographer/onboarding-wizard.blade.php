@@ -119,6 +119,7 @@
 
               <div class="relative">
                 <button type="button" 
+                        x-ref="provinceBtn"
                         @click="provinceDropdownOpen = !provinceDropdownOpen; cityDropdownOpen = false"
                         :class="touched.province && errors.province ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 transition cursor-pointer">
@@ -154,6 +155,7 @@
 
               <div class="relative">
                 <button type="button" 
+                        x-ref="cityBtn"
                         @click="if(provinceCode) { cityDropdownOpen = !cityDropdownOpen; provinceDropdownOpen = false; }"
                         :disabled="!provinceCode || loadingCities"
                         :class="touched.city && errors.city ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
@@ -200,7 +202,7 @@
           </div>
 
           <!-- Kategori Spesialisasi Foto (Pill Selection with Minimum 1 Category) -->
-          <div class="space-y-2">
+          <div class="space-y-2" x-ref="categoriesBox" tabindex="-1">
             <div class="flex items-center justify-between">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kategori Spesialisasi Foto <span class="text-rose-500">*</span>
@@ -315,7 +317,6 @@
                        x-model="form.tarif_harga"
                        @input="touched.tarif_harga = true; validateTarif()"
                        @blur="touched.tarif_harga = true; validateTarif()"
-                       min="10000" 
                        step="10000"
                        placeholder="Masukkan nominal tarif paket (min. 10000)" 
                        :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
@@ -365,6 +366,7 @@
 
               <div class="relative">
                 <button type="button" 
+                        x-ref="bankBtn"
                         @click="bankDropdownOpen = !bankDropdownOpen"
                         :class="touched.bank && errors.bank ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-left flex items-center justify-between shadow-2xs focus:outline-none focus:ring-2 transition cursor-pointer">
@@ -745,8 +747,14 @@ function onboardingWizardApp() {
         const catValid = this.validateCategories();
 
         if (!pValid || !cValid || !aValid || !catValid) {
-          if (!aValid && this.$refs.alamatInput) {
-            this.$refs.alamatInput.focus();
+          let targetEl = null;
+          if (!pValid) targetEl = this.$refs.provinceBtn;
+          else if (!cValid) targetEl = this.$refs.cityBtn;
+          else if (!aValid) targetEl = this.$refs.alamatInput;
+          else if (!catValid) targetEl = this.$refs.categoriesBox;
+          if (targetEl) {
+            targetEl.focus?.();
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           return;
         }
@@ -765,16 +773,15 @@ function onboardingWizardApp() {
         const dValid = this.validateDescLayanan();
 
         if (!sValid || !bValid || !lValid || !tValid || !dValid) {
-          if (!sValid && this.$refs.sosmedInput) {
-            this.$refs.sosmedInput.focus();
-          } else if (!bValid && this.$refs.bioInput) {
-            this.$refs.bioInput.focus();
-          } else if (!lValid && this.$refs.layananInput) {
-            this.$refs.layananInput.focus();
-          } else if (!tValid && this.$refs.tarifInput) {
-            this.$refs.tarifInput.focus();
-          } else if (!dValid && this.$refs.descLayananInput) {
-            this.$refs.descLayananInput.focus();
+          let targetEl = null;
+          if (!sValid) targetEl = this.$refs.sosmedInput;
+          else if (!bValid) targetEl = this.$refs.bioInput;
+          else if (!lValid) targetEl = this.$refs.layananInput;
+          else if (!tValid) targetEl = this.$refs.tarifInput;
+          else if (!dValid) targetEl = this.$refs.descLayananInput;
+          if (targetEl) {
+            targetEl.focus?.();
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           return;
         }
@@ -799,10 +806,13 @@ function onboardingWizardApp() {
 
       if (!bankValid || !rekValid || !anValid) {
         e.preventDefault();
-        if (!rekValid && this.$refs.rekeningInput) {
-          this.$refs.rekeningInput.focus();
-        } else if (!anValid && this.$refs.atasNamaInput) {
-          this.$refs.atasNamaInput.focus();
+        let targetEl = null;
+        if (!bankValid) targetEl = this.$refs.bankBtn;
+        else if (!rekValid) targetEl = this.$refs.rekeningInput;
+        else if (!anValid) targetEl = this.$refs.atasNamaInput;
+        if (targetEl) {
+          targetEl.focus?.();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return false;
       }

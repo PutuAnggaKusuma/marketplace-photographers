@@ -32,6 +32,11 @@ class RolePhotographer extends Model
         'is_onboarded',
         'status_verifikasi',
         'catatan_penolakan',
+        'status_etalase',
+        'catatan_penolakan_etalase',
+        'jadwal_dikonfirmasi',
+        'etalase_diajukan_at',
+        'etalase_disetujui_at',
         'kategori_penghapusan',
         'alasan_penghapusan',
     ];
@@ -39,6 +44,9 @@ class RolePhotographer extends Model
     protected $casts = [
         'is_onboarded' => 'boolean',
         'is_verified' => 'boolean',
+        'jadwal_dikonfirmasi' => 'boolean',
+        'etalase_diajukan_at' => 'datetime',
+        'etalase_disetujui_at' => 'datetime',
     ];
 
     public function user()
@@ -409,5 +417,130 @@ class RolePhotographer extends Model
     public function isFeatureUnlocked(): bool
     {
         return $this->isProfileComplete() && $this->isVerified();
+    }
+
+    public function hasValidServices(): bool
+    {
+        return $this->services()
+            ->whereNotNull('tarif_harga')
+            ->where('tarif_harga', '>', 0)
+            ->whereNotNull('deskripsi_layanan')
+            ->where('deskripsi_layanan', '!=', '')
+            ->exists();
+    }
+
+    public function hasValidPortfolios(): bool
+    {
+        return $this->portfolios()
+            ->whereHas('medias')
+            ->exists();
+    }
+
+    public function hasConfiguredSchedule(): bool
+    {
+        return (bool) $this->jadwal_dikonfirmasi
+            && $this->workingHours()->where('is_open', true)->exists();
+    }
+
+    public function isStorefrontComplete(): bool
+    {
+        return $this->hasValidServices()
+            && $this->hasValidPortfolios()
+            && $this->hasConfiguredSchedule();
+    }
+
+    public function getStorefrontChecklist(): array
+    {
+        $hasServices = $this->hasValidServices();
+        $hasPortfolios = $this->hasValidPortfolios();
+        $hasSchedule = $this->hasConfiguredSchedule();
+
+        $items = [
+            'services' => [
+                'label' => 'Paket Layanan',
+                'done' => $hasServices,
+            ],
+            'portfolios' => [
+                'label' => 'Portofolio',
+                'done' => $hasPortfolios,
+            ],
+            'schedule' => [
+                'label' => 'Jadwal',
+                'done' => $hasSchedule,
+            ],
+        ];
+
+        $missingLabels = [];
+        $completedCount = 0;
+        foreach ($items as $item) {
+            if ($item['done']) {
+                $completedCount++;
+            } else {
+                $missingLabels[] = $item['label'];
+            }
+        }
+
+        return [
+            'items' => $items,
+            'completed_count' => $completedCount,
+            'total_count' => count($items),
+            'missing_labels' => $missingLabels,
+            'is_ready' => $completedCount === count($items),
+        ];
+    }
+
+    public function isStorefrontPending(): bool
+    {
+        return $this->status_etalase === 'menunggu';
+    }
+
+    public function isStorefrontApproved(): bool
+    {
+        return $this->status_etalase === 'disetujui';
+    }
+
+    public function isStorefrontRejected(): bool
+    {
+        return $this->status_etalase === 'ditolak';
+    }
+
+    public function isPublishedToCatalog(): bool
+    {
+        return $this->isProfileComplete()
+            && $this->isVerified()
+            && $this->isStorefrontApproved()
+            && $this->isStorefrontComplete();
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('is_onboarded', true)
+            ->where('status_verifikasi', 'terverifikasi')
+            ->where('status_etalase', 'disetujui')
+            ->where('jadwal_dikonfirmasi', true)
+            ->whereHas('workingHours', function ($q) {
+                $q->where('is_open', true);
+            })
+            ->whereHas('services', function ($q) {
+                $q->whereNotNull('tarif_harga')
+                    ->where('tarif_harga', '>', 0)
+                    ->whereNotNull('deskripsi_layanan')
+                    ->where('deskripsi_layanan', '!=', '');
+            })
+            ->whereHas('portfolios', function ($q) {
+                $q->whereHas('medias');
+            });
+    }
+
+    public function syncStorefrontIntegrity(): bool
+    {
+        if (in_array($this->status_etalase, ['menunggu', 'disetujui'], true) && !$this->isStorefrontComplete()) {
+            $this->update([
+                'status_etalase' => 'belum_diajukan',
+            ]);
+            return true;
+        }
+
+        return false;
     }
 }

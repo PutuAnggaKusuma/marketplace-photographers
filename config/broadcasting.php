@@ -42,7 +42,9 @@ return [
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Bounded timeouts prevent long HTTP hangs if local Reverb server is offline
+                'connect_timeout' => 0.4,
+                'timeout' => 1.5,
             ],
         ],
 
@@ -60,7 +62,9 @@ return [
                 'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Bounded timeouts prevent long HTTP hangs if local Reverb server is offline
+                'connect_timeout' => 0.4,
+                'timeout' => 1.5,
             ],
         ],
 

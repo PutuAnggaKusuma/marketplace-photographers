@@ -2,6 +2,23 @@
 <div 
   x-data="{
     toasts: [],
+    _initialFlushed: false,
+    flushInitialToasts() {
+      if (this._initialFlushed) return;
+      this._initialFlushed = true;
+      @if(session('success'))
+        this.addToast({ type: 'success', message: {{ \Illuminate\Support\Js::from(session('success')) }} });
+      @endif
+      @if(session('error'))
+        this.addToast({ type: 'error', message: {{ \Illuminate\Support\Js::from(session('error')) }} });
+      @endif
+      @if(session('warning'))
+        this.addToast({ type: 'warning', message: {{ \Illuminate\Support\Js::from(session('warning')) }} });
+      @endif
+      @if(session('info'))
+        this.addToast({ type: 'info', message: {{ \Illuminate\Support\Js::from(session('info')) }} });
+      @endif
+    },
     addToast(data) {
       const id = Date.now() + Math.random();
       const duration = data.duration || 4500;
@@ -47,18 +64,12 @@
     }
   }"
   x-init="
-    @if(session('success'))
-      addToast({ type: 'success', message: '{{ addslashes(session('success')) }}' });
-    @endif
-    @if(session('error'))
-      addToast({ type: 'error', message: '{{ addslashes(session('error')) }}' });
-    @endif
-    @if(session('warning'))
-      addToast({ type: 'warning', message: '{{ addslashes(session('warning')) }}' });
-    @endif
-    @if(session('info'))
-      addToast({ type: 'info', message: '{{ addslashes(session('info')) }}' });
-    @endif
+    if (window.__appPreloaderVisible) {
+      window.addEventListener('app:preloader-hidden', () => flushInitialToasts(), { once: true });
+      setTimeout(() => flushInitialToasts(), 1500);
+    } else {
+      flushInitialToasts();
+    }
   "
   @show-toast.window="addToast($event.detail)"
   class="fixed top-20 right-5 z-50 space-y-3.5 max-w-md w-full pointer-events-none"

@@ -28,12 +28,13 @@ class ClientFavoriteController extends Controller
         }
 
         $favorites = $clientProfile->favoritePhotographers()
+            ->published()
             ->with(['city', 'categories', 'portfolios.medias', 'testimonials', 'services'])
             ->latest('client_photographer_favorites.created_at')
             ->paginate($perPage)
             ->withQueryString();
 
-        $totalFavorites = $clientProfile->favorites()->count();
+        $totalFavorites = $clientProfile->favoritePhotographers()->published()->count();
 
         return view('client.favorites.index', compact('favorites', 'clientProfile', 'totalFavorites'));
     }
@@ -73,6 +74,17 @@ class ClientFavoriteController extends Controller
             $isFavorited = false;
             $message = "Fotografer {$photographer->nama} telah dihapus dari daftar favorit.";
         } else {
+            if (!$photographer->isPublishedToCatalog()) {
+                $errMessage = 'Etalase fotografer ini belum aktif di katalog publik.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'authenticated' => true,
+                        'message' => $errMessage,
+                    ], 404);
+                }
+                return redirect()->back()->with('warning', $errMessage);
+            }
             ClientFavorite::create([
                 'id_client' => $clientProfile->id,
                 'id_photographer' => $photographer->id,
@@ -81,7 +93,7 @@ class ClientFavoriteController extends Controller
             $message = "Fotografer {$photographer->nama} berhasil disimpan ke daftar favorit!";
         }
 
-        $totalFavorites = $clientProfile->favorites()->count();
+        $totalFavorites = $clientProfile->favoritePhotographers()->published()->count();
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([

@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false }">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false, lightboxOpen: false, lightboxUrl: '' }">
 
     <!-- Breadcrumb Navigation -->
     <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
@@ -202,12 +202,12 @@
 
     </div>
 
-    <!-- Modal Unggah Bukti Transfer (Rule #59 & Rule #89) -->
+    <!-- Modal Unggah Bukti Transfer (Rule #59, #89 & #97) -->
     <div x-show="showModal" 
          x-cloak 
-         @keydown.escape.window="showModal = false" 
+         @keydown.escape.window="if (!lightboxOpen) showModal = false" 
          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div @click.away="showModal = false" class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 text-center">
+      <div @click.away="if (!lightboxOpen) showModal = false" class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 text-center">
         
         <div class="space-y-1">
           <h3 class="text-lg font-black text-gray-900 dark:text-white">Unggah Bukti Transfer</h3>
@@ -225,39 +225,71 @@
         <form action="{{ route('booking.pay.confirm', $contract->id) }}" 
               method="POST" 
               enctype="multipart/form-data" 
+              novalidate
               class="space-y-4 text-left"
               x-data="{
                 fileSelected: false,
                 fileName: '',
+                fileSizeText: '',
+                previewUrl: '',
+                isDragging: false,
                 touched: false,
                 error: '',
-                handleFile(e) {
+                handleFiles(files) {
                   this.touched = true;
-                  const res = window.validateUploadFiles(e.target, { maxMB: 10 });
+                  const incoming = Array.from(files || []);
+                  if (incoming.length === 0) return false;
+                  const res = window.validateUploadFiles(incoming, { maxMB: 10 });
                   if (res.hasErrors) {
-                    this.fileSelected = false;
-                    this.fileName = '';
                     this.error = res.errorMessage;
                     return false;
                   }
                   const file = res.validFiles[0];
                   if (!file) {
-                    this.fileSelected = false;
-                    this.fileName = '';
+                    this.clearFile();
                     this.error = 'Foto struk / bukti transfer wajib dipilih.';
                     return false;
                   }
+                  if (this.previewUrl && this.previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(this.previewUrl);
+                  }
+                  if (typeof DataTransfer !== 'undefined' && this.$refs.fileInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    this.$refs.fileInput.files = dt.files;
+                  }
                   this.fileSelected = true;
                   this.fileName = file.name;
+                  this.fileSizeText = window.formatFileSizeMB ? window.formatFileSizeMB(file.size) : '';
+                  this.previewUrl = URL.createObjectURL(file);
                   this.error = '';
                   return true;
+                },
+                handleDrop(e) {
+                  this.isDragging = false;
+                  if (e.dataTransfer && e.dataTransfer.files) {
+                    this.handleFiles(e.dataTransfer.files);
+                  }
+                },
+                clearFile() {
+                  if (this.previewUrl && this.previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(this.previewUrl);
+                  }
+                  this.fileSelected = false;
+                  this.fileName = '';
+                  this.fileSizeText = '';
+                  this.previewUrl = '';
+                  if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                  this.touched = true;
+                  this.error = 'Foto struk / bukti transfer wajib dipilih.';
                 },
                 submitForm(e) {
                   this.touched = true;
                   if (!this.fileSelected || this.error) {
                     e.preventDefault();
                     if (!this.error) this.error = 'Foto struk / bukti transfer wajib dipilih.';
-                    this.$refs.fileInput?.focus();
+                    this.$refs.proofDropzone?.focus();
+                    this.$refs.proofDropzone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
                   }
                 }
@@ -268,15 +300,54 @@
           
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Foto Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
-            <input type="file" 
-                   name="bukti_transfer" 
-                   x-ref="fileInput"
-                   accept="image/jpeg,image/png,image/webp" 
-                   @change="handleFile($event)"
-                   class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer p-1.5 rounded-xl border transition"
-                   :class="touched && error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
+            <div class="space-y-3">
+              <div x-ref="proofDropzone"
+                   tabindex="0"
+                   role="button"
+                   @click="$refs.fileInput.click()"
+                   @keydown.enter.prevent="$refs.fileInput.click()"
+                   @keydown.space.prevent="$refs.fileInput.click()"
+                   @dragover.prevent="isDragging = true"
+                   @dragleave.prevent="isDragging = false"
+                   @drop.prevent="handleDrop($event)"
+                   class="w-full min-h-[140px] px-5 py-7 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                   :class="isDragging
+                       ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                       : (touched && error
+                           ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                           : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                <input type="file"
+                       name="bukti_transfer"
+                       x-ref="fileInput"
+                       accept="image/jpeg,image/png,image/webp"
+                       @change="handleFiles($event.target.files)"
+                       class="sr-only">
+                <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto bukti transfer</span>
+                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                </p>
+                <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  Format JPG, PNG, WEBP maksimal 10 MB.
+                </p>
+              </div>
+
+              <template x-if="previewUrl">
+                <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xs">
+                  <div @click="lightboxUrl = previewUrl; lightboxOpen = true"
+                       class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-950 cursor-pointer group">
+                    <img :src="previewUrl" alt="Pratinjau Bukti Transfer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                    </div>
+                  </div>
+                  <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                    <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSizeText ? ' • ' + fileSizeText : '')"></span>
+                    <button type="button" @click="clearFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                  </div>
+                </div>
+              </template>
+            </div>
             <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-            <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 10 MB)</p>
           </div>
 
           <div class="flex items-center justify-center gap-3 pt-2">
@@ -290,6 +361,21 @@
         </form>
 
       </div>
+    </div>
+
+    <!-- Lightbox Pratinjau Bukti Transfer (Rule #97) -->
+    <div x-show="lightboxOpen"
+         x-cloak
+         @keydown.escape.window="lightboxOpen = false"
+         @click.self="lightboxOpen = false"
+         class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+      <button type="button"
+              @click="lightboxOpen = false"
+              aria-label="Tutup pratinjau"
+              class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <img :src="lightboxUrl" alt="Bukti Transfer" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
     </div>
 
   </div>

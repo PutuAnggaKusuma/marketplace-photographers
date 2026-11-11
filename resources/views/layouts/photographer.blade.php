@@ -24,17 +24,42 @@
       document.addEventListener('alpine:init', () => {
         Alpine.store('chatNotifier', {
           unreadCount: 0,
+          _pollTimer: null,
+          _abortController: null,
+          _isUnloading: false,
           init() {
             this.fetchUnread();
-            // 3-second real-time heartbeat polling
-            setInterval(() => {
+            this._pollTimer = setInterval(() => {
               this.fetchUnread();
             }, 3000);
+
+            const stopPolling = () => {
+              this._isUnloading = true;
+              if (this._pollTimer) {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+              }
+              if (this._abortController) {
+                this._abortController.abort();
+                this._abortController = null;
+              }
+            };
+            window.addEventListener('beforeunload', stopPolling);
+            window.addEventListener('pagehide', stopPolling);
           },
           async fetchUnread() {
+            if (this._isUnloading) return;
             try {
+              if (this._abortController) {
+                this._abortController.abort();
+              }
+              this._abortController = new AbortController();
               const res = await fetch('{{ route('chat.unread-count') }}', {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: {
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'Accept': 'application/json'
+                },
+                signal: this._abortController.signal
               });
               if (res.ok) {
                 const data = await res.json();
@@ -74,11 +99,25 @@
          style="display: none;">
     </div>
 
+      @php
+        $layoutPhotographer = null;
+        if (auth()->check() && auth()->user()->role === 'photographer') {
+            $layoutPhotographer = auth()->user()->rolePhotographer
+                ?? \App\Models\RolePhotographer::where('id_user', auth()->id())->first();
+        }
+      @endphp
+
       <div class="relative flex flex-col flex-1 {{ request()->routeIs('photographer.chat*') ? 'h-screen overflow-hidden' : 'overflow-x-hidden overflow-y-auto' }} bg-gray-50/50 dark:bg-gray-900/50">
         @include('partials.shared.header')
 
         <main class="{{ request()->routeIs('photographer.chat*') ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : '' }}">
           <div class="{{ request()->routeIs('photographer.chat*') ? 'w-full h-full min-h-0 flex-1 flex flex-col p-0 overflow-hidden' : 'p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6' }}">
+            @if(!request()->routeIs('photographer.chat*')
+                && $layoutPhotographer
+                && !$layoutPhotographer->isPublishedToCatalog()
+                && (!request()->routeIs('photographer.dashboard') || !$layoutPhotographer->isFeatureUnlocked()))
+              @include('partials.photographer.stage-stepper', ['photographer' => $layoutPhotographer])
+            @endif
             @yield('content')
           </div>
         </main>
@@ -89,13 +128,10 @@
     @if(!request()->routeIs('photographer.chat*'))
       @php
         $unreadChatCount = 0;
-        if (auth()->check() && auth()->user()->role === 'photographer') {
-            $photographerProfile = \App\Models\RolePhotographer::where('id_user', auth()->id())->first();
-            if ($photographerProfile) {
-                $unreadChatCount = \App\Models\ChatMessage::whereHas('chatBooking', function($q) use ($photographerProfile) {
-                    $q->where('id_photographer', $photographerProfile->id);
-                })->where('id_sender', '!=', auth()->id())->where('is_read', false)->count();
-            }
+        if ($layoutPhotographer) {
+            $unreadChatCount = \App\Models\ChatMessage::whereHas('chatBooking', function($q) use ($layoutPhotographer) {
+                $q->where('id_photographer', $layoutPhotographer->id);
+            })->where('id_sender', '!=', auth()->id())->where('is_read', false)->count();
         }
       @endphp
 

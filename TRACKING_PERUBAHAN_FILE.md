@@ -20,6 +20,182 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-11 13:51 WITA] — Perbaikan Inisialisasi Alpine.js (`x-data`) dan Tombol `+ Tambah Benefit` pada Form Paket Layanan
+
+* **Modul / Fitur**:
+  - Form Tambah & Edit Paket Layanan Fotografer (`photographer/services/create.blade.php`, `photographer/services/edit.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/services/create.blade.php`
+  * `resources/views/photographer/services/edit.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Atribut `x-data="serviceFormApp({ ... nama_layanan: {!! json_encode(...) !!}, ... })"` memakai kutip ganda mentah dari `json_encode` di dalam atribut HTML berkutip ganda `x-data="..."`, sehingga parser HTML langsung memutus nilai atribut pada kutip ganda pertama.
+    * Akibatnya inisialisasi Alpine.js gagal total: daftar input benefit default (`<template x-for="(fitur, index) in fiturs">`) tidak ter-render di DOM dan tombol `+ Tambah Benefit` (`@click="addFitur()"`) tidak berfungsi saat diklik.
+  * **After**:
+    * Mengubah pemanggilan menjadi `x-data="serviceFormApp()"` tanpa parameter JSON mentah di atribut HTML, selaras pola aman formulir portofolio/jadwal/profil fotografer.
+    * Memindahkan seluruh nilai awal formulir, `old('fitur')`, serta status/pesan validasi (`nama_layanan`, `tarif_harga`, `deskripsi_layanan`, `fitur` / `fitur.*`) ke dalam `serviceFormApp()` di blok `<script>` menggunakan direktif `@js(...)` Laravel.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #49 (Fokus ketat pada perbaikan komponen bermasalah tanpa mengubah layout, warna, maupun teks lain di luar instruksi).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan optimize:clear` & `php artisan view:cache` (**PASS**).
+  * `scan_xdata.php` & `check_service_forms.php` (**PASS**, 0 kutip rusak di `services/create` & `services/edit`, HTTP 200, keseimbangan `<div>` 62/62 & 55/55).
+  * Uji E2E real browser headless Chrome (`e2e_service_benefit.mjs` via CDP di `http://127.0.0.1:8000` menggunakan data berisi tanda kutip & `<Test>`): **PASS** (`0` runtime JS exceptions, 3 input benefit default tampil, klik `+ Tambah Benefit` menambah baris 3→5, hapus baris bekerja 5→4, submit Create & Edit tersimpan presisi ke MySQL, `cleanup` selesai bersih).
+
+---
+
+### [2026-11-11 13:07 WITA] — Penyesuaian Posisi Tombol `+ Tambah Benefit` pada Form Paket Layanan Fotografer
+
+* **Modul / Fitur**:
+  - Form Tambah & Edit Paket Layanan Fotografer (`photographer/services/create.blade.php`, `photographer/services/edit.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/services/create.blade.php`
+  * `resources/views/photographer/services/edit.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Tombol `+ Tambah Benefit` berada sejajar di sisi kanan (`flex items-center justify-between` dengan `mr-12`) terpisah jauh dari label `Rincian Benefit & Fasilitas yang Didapat Klien *`.
+  * **After**:
+    * Memindahkan tombol `+ Tambah Benefit` ke posisi tepat di bawah label `Rincian Benefit & Fasilitas yang Didapat Klien *` menggunakan tata letak vertikal rata kiri (`flex flex-col items-start gap-1.5 mb-2.5`) tanpa mengubah warna, tipografi, maupun atribut tombol lainnya.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #49 (Fokus ketat terhadap instruksi posisi/layout tanpa mengubah styling lain yang tidak diperintahkan).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:cache` (**PASS**).
+  * Render HTTP & keseimbangan tag HTML untuk `/photographer/services/create` dan `/photographer/services/{id}/edit` (**PASS**).
+
+---
+
+### [2026-11-11 12:00 WITA] — Penambahan Indikator Tahapan Global Fotografer (Opsi A Strip Stepper Lintas Halaman)
+
+* **Modul / Fitur**:
+  - Layout utama dashboard fotografer (`layouts/photographer.blade.php`), partial komponen indikator tahapan global (`partials/photographer/stage-stepper.blade.php`), dan perapian kartu kelengkapan profil (`photographer/profile/index.blade.php`).
+* **File yang Diubah / Ditambahkan**:
+  * `resources/views/partials/photographer/stage-stepper.blade.php` (baru)
+  * `resources/views/layouts/photographer.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Setelah profil fotografer lolos verifikasi Admin tahap 1, kartu `Kelengkapan Profil` di halaman `Profil` disembunyikan sehingga halaman `Profil`, `Paket Layanan`, `Portofolio`, dan `Jadwal` tampil polos tanpa petunjuk bahwa akun masih berada di tahap persiapan etalase dan belum tayang di katalog.
+    * Petunjuk persiapan etalase hanya tampil di halaman `Dashboard`.
+    * Kartu `Kelengkapan Profil` di `photographer/profile/index.blade.php` masih menggunakan 4 bulatan titik status (`w-2 h-2 rounded-full`) dan bullet karakter (`•`), serta tetap muncul saat profil sudah 100% menunggu verifikasi.
+  * **After**:
+    * **Global Stage Stepper (`partials/photographer/stage-stepper.blade.php`)**: Ditampilkan konsisten di bagian atas konten (`layouts/photographer.blade.php`) pada seluruh halaman fotografer (kecuali `photographer/chat*` dan halaman `Dashboard` setelah tahap 1 lolos agar tidak menduplikasi kartu `Persiapan Tayang Etalase`). Menampilkan 3 tahap linear (`1. Profil`, `2. Etalase`, `3. Review Tayang`) dengan nilai progres (`X%` dan `0/3`–`3/3 Lengkap`) menggunakan teks netral standar (`text-gray-500 dark:text-gray-400`, selaras Dashboard), tautan langkah berikutnya yang belum selesai, daftar ringkas status 3 syarat etalase saat tahap 2 berjalan, catatan penolakan etalase bila ditolak, serta tombol langsung `Ajukan Tayang` / `Ajukan Ulang Tayang` ketika syarat `3/3` lengkap. Komponen otomatis hilang menyeluruh setelah `isPublishedToCatalog()` terpenuhi.
+    * **Perapian `photographer/profile/index.blade.php`**: Menghapus 4 bulatan dot status dan divider kartu pada `Kelengkapan Profil` sesuai Rule #41 dan Rule #67, serta membatasi kartu tersebut hanya muncul saat biodata profil masih kurang (`!$isComplete`) agar tidak berduplikasi dengan strip tahapan global.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #14 & #61 (teks status berwarna murni tanpa box/pill), Rule #41 (whitespace tanpa divider berlebih), Rule #47, Rule #49, Rule #67 (bebas dot badge `rounded-full` / `•`), Rule #70 (copywriting to-the-point bebas `&` redundan), Rule #72 (single chevron SVG minimal), Rule #88 (konfirmasi modal `Ajukan Tayang`), Rule #90 (anti-double UI dan tersembunyi otomatis setelah tayang).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:cache` & `npm run build` (**PASS**, zero errors).
+  * `verify_stage_stepper.php` (`72/72` assertions **PASS** mencakup seluruh halaman fotografer published vs unpublished dan simulasi transisi tahap 1 & tahap 2).
+  * `verify_two_stage_flow.php` (`74/74` assertions **PASS**) & `audit_rendered_views.php` (`12/12` views **PASS**, keseimbangan tag HTML + nol dot badge).
+
+---
+
+### [2026-11-11 11:06 WITA] — Implementasi Alur Verifikasi Dua Tahap Fotografer (Profil Mitra dan Review Etalase Tayang Publik)
+
+* **Modul / Fitur**:
+  - Skema & model kelayakan etalase (`RolePhotographer`), alur pengajuan tayang fotografer (`DashboardController`, `AvailabilityController`, `ServiceController`, `PortfolioController`), panel audit Admin 2 tahap (`Admin/DashboardController`, `PhotographerVerificationController`, `admin/photographers/show.blade.php`, `admin/photographers/index.blade.php`), serta proteksi keterlihatan katalog dan transaksi publik (`routes/web.php`, `PhotographerController`, `BookingController`, `ChatController`, `ProfileController`, `ClientFavoriteController`).
+* **File yang Diubah / Ditambahkan**:
+  * `database/migrations/2026_11_11_000001_add_storefront_review_fields_to_role_photographers_table.php` (baru)
+  * `database/seeders/PhotographerSeeder.php`
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Auth/AuthController.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+  * `app/Http/Controllers/Client/ClientFavoriteController.php`
+  * `app/Http/Controllers/Photographer/OnboardingController.php`
+  * `app/Http/Controllers/Photographer/DashboardController.php`
+  * `app/Http/Controllers/Photographer/ServiceController.php`
+  * `app/Http/Controllers/Photographer/PortfolioController.php`
+  * `app/Http/Controllers/Photographer/AvailabilityController.php`
+  * `app/Http/Controllers/Admin/DashboardController.php`
+  * `app/Http/Controllers/Admin/PhotographerVerificationController.php`
+  * `routes/web.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `resources/views/admin/photographers/index.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Persetujuan profil tahap 1 oleh Admin (`status_verifikasi = 'terverifikasi'`) otomatis membuat akun fotografer langsung tampil di beranda, daftar fotografer, katalog, dan endpoint booking/chat publik meski fotografer belum memiliki paket layanan, portofolio, maupun konfirmasi jadwal kerja.
+    * Katalog dan halaman beranda hanya menyaring `where('is_onboarded', true)` dan `status_verifikasi`, tanpa kolom status review etalase ataupun pemeriksaan kelengkapan layanan, media portofolio, serta jadwal kerja mingguan.
+    * Halaman detail verifikasi fotografer Admin hanya menampilkan data biodata, tanpa panel audit paket layanan, album portofolio, maupun jadwal sebelum tayang.
+  * **After**:
+    * **Migrasi & Seeder**: Menambahkan kolom `status_etalase` (`belum_diajukan`, `menunggu`, `disetujui`, `ditolak`), `catatan_penolakan_etalase`, `jadwal_dikonfirmasi`, `etalase_diajukan_at`, dan `etalase_disetujui_at` pada `role_photographers`; melakukan backfill otomatis hanya bagi fotografer existing yang sudah memenuhi syarat etalase lengkap (`#1–#5`), sedangkan fotografer tanpa paket/portofolio/konfirmasi jadwal (`#6 kenji`) otomatis berada di `status_etalase = 'belum_diajukan'`. `PhotographerSeeder` juga diperbarui agar meng-seed 5 akun demo secara eksplisit dan tidak menimpa seluruh baris `RolePhotographer`.
+    * **Model `RolePhotographer`**: Menambahkan helper `hasValidServices()`, `hasValidPortfolios()`, `hasConfiguredSchedule()`, `isStorefrontComplete()`, `getStorefrontChecklist()`, `isStorefrontPending()`, `isStorefrontApproved()`, `isStorefrontRejected()`, `isPublishedToCatalog()`, `scopePublished()`, serta `syncStorefrontIntegrity()`.
+    * **Alur Tahap 2 Fotografer**: `DashboardController@index` menyuplai `$storefrontChecklist`; panel `Persiapan Tayang Etalase` pada `photographer/dashboard.blade.php` memandu pemenuhan 3 syarat (`Paket Layanan`, `Portofolio`, `Jadwal`), tombol `Ajukan Tayang` / `Ajukan Ulang Tayang` menuju `POST /photographer/storefront/submit`, serta tautan `Lihat Profil Publik` disembunyikan sampai `isPublishedToCatalog()` bernilai benar (dan panel checklist otomatis disembunyikan saat etalase sudah live sesuai Rule #90). `AvailabilityController@updateWorkingHours()` menandai `jadwal_dikonfirmasi = true`, sementara `ServiceController@destroy`, `PortfolioController@destroy`, dan penutupan seluruh 7 hari kerja di `AvailabilityController@updateWorkingHours` otomatis memanggil `syncStorefrontIntegrity()` untuk menonaktifkan tayang jika syarat etalase tidak lagi terpenuhi.
+    * **Audit & Keputusan Admin**: `PhotographerVerificationController` dan `admin/photographers/show.blade.php` menambahkan navigasi tab teks horizontal (`Profil Mitra` & `Etalase Tayang` sesuai Rule #78), kartu audit 3 seksi (`1. Paket Layanan`, `2. Portofolio` terhubung ke Lightbox `openImagePreview`, `3. Jadwal` 7 hari beserta tanggal ditutup), serta aksi `Setujui Tayang`, `Tolak Etalase` (modal Rule #59), dan `Batalkan Tayang`. Antrean `DashboardController@index` serta filter/kartu `admin/photographers/index.blade.php` memperhitungkan antrean review tahap 1 maupun tahap 2 dengan status teks murni (`Menunggu Profil`, `Lengkapi Etalase`, `Review Etalase`, `Tayang`, `Profil Ditolak`, `Etalase Ditolak`).
+    * **Guard Keterlihatan Publik & Transaksional**: Halaman `/`, `/fotografer`, `/fotografer/katalog`, `/fotografer/{id}`, `/user/{id}`, `/booking/create`, `/booking/store`, `/chat/start/{photographerId}`, `/chat?photographer=`, dan `/client/favorites/{id}/toggle` seluruhnya menyaring dan memblokir fotografer yang belum lolos tahap 1 dan tahap 2 (`published()` / `isPublishedToCatalog()`).
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #22, #41, #49, #59, #67, #70, #74, #78, #80, #90, #91, #94, #97, #104.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` seluruh file PHP baru dan ubahan: **PASS** (0 error sintaks).
+  * `php artisan migrate`, `php artisan optimize:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`): **PASS**.
+  * Skrip uji E2E terisolasi transaksi (`verify_two_stage_flow.php`): **PASS** (`74/74 assertions`, `0 failures` — memverifikasi ketersembunyian `#6 kenji` pada beranda, katalog, detail profil, user profile, booking create/store, chat start, dan favorit; simulasi penuh pengajuan tahap 2, penolakan etalase + catatan, persetujuan tayang hingga `#6` tampil HTTP 200 & muncul di katalog, pencabutan tayang oleh Admin, serta degradasi otomatis via `syncStorefrontIntegrity()` saat paket terakhir dihapus atau seluruh 7 hari kerja ditutup).
+  * Audit keseimbangan tag HTML/Blade + nihil dot badges (`audit_rendered_views.php`) lintas 12 render halaman Admin & Fotografer: **PASS**.
+
+---
+
+### [2026-11-11 10:33 WITA] — Penyeragaman Tampilan Field Instagram dan Penghapusan Tautan Chat WhatsApp pada Verifikasi Fotografer Admin
+
+* **Modul / Fitur**:
+  - Bagian `1. Kontak` pada halaman Verifikasi Fotografer Admin (`resources/views/admin/photographers/show.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/photographers/show.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Nilai pada field **Instagram** dibungkus tag tautan `<a>` dengan kelas warna kuning (`text-amber-600 dark:text-amber-400`), sehingga terlihat kontras dan tidak seragam dengan field `Nama Lengkap`, `Email`, serta `Nomor WhatsApp` yang memakai warna teks netral.
+    * Di sisi kanan label **Nomor WhatsApp** terdapat teks tautan `Chat WhatsApp` berwarna hijau (`wa.me/...`) yang tidak diperlukan dalam konteks verifikasi data.
+    * Variabel bantu `$waClean`, `$rawIg`, dan `$igUrl` terpasang di blok `@php` atas untuk merender kedua elemen tersebut.
+  * **After**:
+    * Menghapus tautan `Chat WhatsApp` dari label **Nomor WhatsApp** agar sejajar bersih dengan label field lainnya.
+    * Menghapus pembungkus tautan `<a href="...">` beserta kelas warna kuning (`text-amber-600 dark:text-amber-400`) pada nilai **Instagram**, dan menyeragamkan gayanya ke teks netral (`font-bold text-gray-900 dark:text-white` saat terisi atau `font-medium text-gray-400 dark:text-gray-500` saat kosong `-`) sama persis dengan `Nama Lengkap`, `Email`, dan `Nomor WhatsApp`.
+    * Menghapus blok variabel PHP `$waClean`, `$rawIg`, dan `$igUrl` yang sudah tidak terpakai.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #42 (Strict Scope), Rule #70 (Copywriting Ringkas Tanpa Teks atau Simbol Berlebihan), Konsistensi Read-Only Profil Fotografer (`photographer/profile/index.blade.php`).
+* **Hasil Pengujian & Verifikasi**:
+  * Skrip uji HTTP 5 skenario (`verify_admin_photographer_show.php`): **PASS** (memastikan nihil `Chat WhatsApp`, nihil URL `wa.me/`, nihil warna `text-amber-`/`text-emerald-` pada `1. Kontak`, tag balance 73 `<div>` dan 11 `<button>` seimbang).
+  * Render langsung Blade untuk data fotografer aktif (`RolePhotographer #6`) + `artisan view:cache` + `artisan optimize:clear`: **PASS**.
+
+---
+
+### [2026-11-11 10:31 WITA] — Perbaikan Keterlambatan Submit Notifikasi Reverb Offline dan Hilangnya Toast Flash Session Akibat Background Polling
+
+* **Modul / Fitur**:
+  - Broadcast real-time notifikasi dan chat (`RealtimeBroadcastService`), perlindungan session flash middleware (`SafeStartSession`), heartbeat polling header/layout (`chatNotifier`, `headerNotifApp`), inisialisasi Toast Notification pasca-preloader, serta null-guard shortcut pencarian (`resources/js/index.js`).
+* **File yang Diubah / Ditambahkan**:
+  * `app/Services/RealtimeBroadcastService.php` (baru)
+  * `app/Http/Middleware/SafeStartSession.php` (baru)
+  * `config/broadcasting.php`
+  * `bootstrap/app.php`
+  * `app/Models/Notification.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `resources/views/layouts/photographer.blade.php`
+  * `resources/views/partials/shared/header.blade.php`
+  * `resources/views/partials/public/navbar.blade.php`
+  * `resources/views/partials/shared/preloader.blade.php`
+  * `resources/views/partials/shared/toast-notification.blade.php`
+  * `resources/js/index.js`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Ketika server Reverb (`localhost:8080`) sedang offline, setiap pemanggilan `Notification::send()` (misalnya pengajuan ulang profil fotografer yang ditolak menuju N admin di `ProfileController::updateProfile()`) memblokir proses PHP secara sinkron ~2,25 detik per admin (~4,5+ detik) sehingga browser menggantung di ikon loading tab sebelum menerima redirect.
+    * Selama form submit tertahan lebih dari 3 detik, polling `chatNotifier` (`GET /chat/unread-count` tiap 3 detik) dan `headerNotifApp` (`GET /notifications/unread` tiap 30 detik) berjalan melalui `StartSession::saveSession()`, memanggil `ageFlashData()` serta mengonsumsi `session('success')` sebelum halaman tujuan `GET /photographer/profile` sempat me-render Toast Notification. Selain itu `x-data="headerNotifApp()" x-init="init()"` memicu inisialisasi ganda di Alpine v3, `fetchNotifs()` belum mengirim header `X-Requested-With`, dan `resources/js/index.js` melempar `TypeError` karena `#search-button` tidak ada di DOM.
+  * **After**:
+    * `RealtimeBroadcastService::broadcastSafely()` mengecek ketersediaan port Reverb via TCP preflight non-blocking (1x probe cepat dengan cache proses 2 detik; saat Reverb aktif terdeteksi dalam ~1 ms dan tetap broadcast normal) serta `config/broadcasting.php` menetapkan `connect_timeout: 0.4` dan `timeout: 1.5` agar `POST /profile/update` tidak lagi hang berdetik-detik saat Reverb mati.
+    * `SafeStartSession` menggantikan `StartSession` pada grup middleware `web` di `bootstrap/app.php` sehingga endpoint polling read-only dan `GET` JSON (`chat/unread-count`, `notifications/unread`, `chat/messages/*`, `chat/typing`, `broadcasting/auth`, `api/*`) tetap membaca identitas `Auth` dari session tanpa memanggil `saveSession()` / `ageFlashData()` atau menimpa `_previous.url`.
+    * Komponen `chatNotifier` dan `headerNotifApp` mengirimkan header `Accept: application/json` dan `X-Requested-With: XMLHttpRequest`, membersihkan timer/request via `AbortController` saat `beforeunload`/`pagehide`, serta menghilangkan duplikasi pemanggilan `init()` ganda pada `header.blade.php` dan `navbar.blade.php`.
+    * `toast-notification.blade.php` menunggu event `app:preloader-hidden` dari `preloader.blade.php` (dengan fallback 1500 ms) saat preloader masih aktif agar animasi masuk dan durasi tampil 4,5 detik Toast dimulai penuh sesudah layar kuning preloader selesai.
+    * Null-guard ditambahkan untuk `searchButton` dan `searchInput` di `resources/js/index.js`.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #19 (Toast Notification Shared 4.5 detik & Laravel Flash Session), Konsistensi Layout Dashboard & Real-time Reverb Compatibility.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` seluruh file PHP baru dan ubahan: **PASS**.
+  * Bench server offline/online probe (`RealtimeBroadcastService`): Offline probe non-blocking, Online loopback probe `1.12 ms`, waktu eksekusi `POST /profile/update` turun dari `4.533 s` menjadi `0.189 s`: **PASS**.
+  * Uji E2E real browser headless Chrome (`http://127.0.0.1:8000`) dengan skenario fotografer `ditolak` memperbaiki Bio, menembak `GET /chat/unread-count` + `GET /notifications/unread` secara konkuren bersamaan dengan `POST /profile/update`: Toast sukses tampil penuh pasca-preloader hilang (`toastCount: 1`), polling notifikasi ganda hilang, `0` JS console exceptions: **PASS**.
+  * `npm run build` (`1.16 s`), `artisan optimize:clear`, dan `artisan view:cache`: **PASS**.
+
+---
+
 ### [2026-11-10 17:37 WITA] — Penyelarasan Tata Letak Halaman Verifikasi Fotografer Admin (`/admin/photographers/{id}`) dengan Form Profil Fotografer
 
 * **Modul / Fitur**:

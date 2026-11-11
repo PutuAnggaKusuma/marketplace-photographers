@@ -214,6 +214,12 @@ class PortfolioController extends Controller
         PortfolioMedia::where('id_portofolio', $portfolio->id)->delete();
         $portfolio->delete();
 
-        return redirect()->route('photographer.portfolio')->with('success', 'Album portofolio berhasil dihapus!');
+        $downgraded = $photographer->fresh()->syncStorefrontIntegrity();
+        $message = 'Album portofolio berhasil dihapus!';
+        if ($downgraded) {
+            $message .= ' Etalase dinonaktifkan sementara hingga minimal satu album portofolio tersedia kembali.';
+        }
+
+        return redirect()->route('photographer.portfolio')->with('success', $message);
     }
 }

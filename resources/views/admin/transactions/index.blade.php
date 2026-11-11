@@ -24,6 +24,14 @@
 
     payoutProofError: '',
 
+    payoutProofPreviewUrl: '',
+
+    payoutProofFileName: '',
+
+    payoutProofDragging: false,
+
+    payoutProofLightboxOpen: false,
+
     refundNotes: '',
 
     openDetail(c) {
@@ -42,6 +50,10 @@
 
         this.payoutProofError = '';
 
+        this.payoutProofPreviewUrl = '';
+
+        this.payoutProofFileName = '';
+
         if (this.$refs.payoutProofInput) this.$refs.payoutProofInput.value = '';
 
         this.payoutModalOpen = true;
@@ -50,9 +62,89 @@
 
     handlePayoutProofFile(event) {
 
-        const res = window.validateUploadFiles(event.target, { maxMB: 10 });
+        this.processPayoutProofFiles(event.target.files);
 
-        this.payoutProofError = res.hasErrors ? res.errorMessage : '';
+    },
+
+    handlePayoutProofDrop(event) {
+
+        this.payoutProofDragging = false;
+
+        if (event.dataTransfer && event.dataTransfer.files) {
+
+            const file = event.dataTransfer.files[0];
+
+            if (file && typeof DataTransfer !== 'undefined' && this.$refs.payoutProofInput) {
+
+                const dt = new DataTransfer();
+
+                dt.items.add(file);
+
+                this.$refs.payoutProofInput.files = dt.files;
+
+            }
+
+            this.processPayoutProofFiles(event.dataTransfer.files);
+
+        }
+
+    },
+
+    processPayoutProofFiles(fileList) {
+
+        const res = window.validateUploadFiles(fileList, { maxMB: 10 });
+
+        if (res.hasErrors) {
+
+            this.payoutProofError = res.errorMessage;
+
+            this.payoutProofPreviewUrl = '';
+
+            this.payoutProofFileName = '';
+
+            return;
+
+        }
+
+        const file = res.validFiles[0];
+
+        if (file) {
+
+            this.payoutProofError = '';
+
+            this.payoutProofFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
+
+            this.payoutProofPreviewUrl = URL.createObjectURL(file);
+
+        }
+
+    },
+
+    removePayoutProofFile() {
+
+        if (this.$refs.payoutProofInput) this.$refs.payoutProofInput.value = '';
+
+        this.payoutProofError = '';
+
+        this.payoutProofPreviewUrl = '';
+
+        this.payoutProofFileName = '';
+
+    },
+
+    submitPayout(e) {
+
+        if (this.payoutProofError) {
+
+            e.preventDefault();
+
+            this.$refs.payoutProofDropzone?.focus();
+
+            this.$refs.payoutProofDropzone?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            return false;
+
+        }
 
     },
 
@@ -1732,25 +1824,59 @@
 
 
 
-            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/release-payout'" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/release-payout'" method="POST" enctype="multipart/form-data" @submit="submitPayout($event)" novalidate class="space-y-4">
 
                 @csrf
 
-                <div>
+                <div class="space-y-3">
 
-                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Unggah Bukti Struk Transfer Bank (Opsional)</label>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Bukti Struk Transfer Bank (Opsional)</label>
 
-                    <input type="file" name="bukti_transfer_payout" x-ref="payoutProofInput" accept="image/jpeg,image/png,image/webp" @change="handlePayoutProofFile($event)" :class="payoutProofError ? 'border-red-400' : 'border-gray-200 dark:border-gray-700'" class="w-full p-1.5 rounded-xl border text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer transition">
+                    <div x-ref="payoutProofDropzone"
+                         tabindex="0"
+                         role="button"
+                         @click="$refs.payoutProofInput.click()"
+                         @keydown.enter.prevent="$refs.payoutProofInput.click()"
+                         @keydown.space.prevent="$refs.payoutProofInput.click()"
+                         @dragover.prevent="payoutProofDragging = true"
+                         @dragleave.prevent="payoutProofDragging = false"
+                         @drop.prevent="handlePayoutProofDrop($event)"
+                         class="w-full min-h-[120px] px-5 py-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
+                         :class="payoutProofDragging
+                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                             : (payoutProofError
+                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                 : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 focus:ring-2 focus:ring-amber-500')">
+                        <input type="file" name="bukti_transfer_payout" x-ref="payoutProofInput" accept="image/jpeg,image/png,image/webp" @change="handlePayoutProofFile($event)" class="sr-only">
+                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400" x-text="payoutProofPreviewUrl ? 'Ganti bukti transfer' : 'Pilih bukti transfer'"></span>
+                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        </p>
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format JPG, PNG, WEBP maksimal 10 MB.</p>
+                    </div>
 
-                    <p x-show="payoutProofError" x-text="payoutProofError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                    <template x-if="payoutProofPreviewUrl">
+                        <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 max-w-xs shadow-2xs">
+                            <div @click="payoutProofLightboxOpen = true" class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                                <img :src="payoutProofPreviewUrl" :alt="payoutProofFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                                </div>
+                            </div>
+                            <div class="px-3 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                                <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="payoutProofFileName"></span>
+                                <button type="button" @click="removePayoutProofFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <p x-show="payoutProofError" x-text="payoutProofError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
                     @error('bukti_transfer_payout')
 
-                        <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+                        <p class="text-[11px] font-bold text-red-500">{{ $message }}</p>
 
                     @enderror
-
-                    <p class="text-[10px] text-gray-400 mt-1">Format: JPG, PNG, WEBP (maksimal 10 MB)</p>
 
                 </div>
 
@@ -1867,6 +1993,21 @@
 
         </div>
 
+    </div>
+
+    <!-- Lightbox Pratinjau Bukti Transfer Payout (Rule #97) -->
+    <div x-show="payoutProofLightboxOpen"
+         x-cloak
+         @keydown.escape.window="payoutProofLightboxOpen = false"
+         @click.self="payoutProofLightboxOpen = false"
+         class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+        <button type="button"
+                @click="payoutProofLightboxOpen = false"
+                aria-label="Tutup pratinjau"
+                class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img :src="payoutProofPreviewUrl" :alt="payoutProofFileName" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
     </div>
 
 </div>

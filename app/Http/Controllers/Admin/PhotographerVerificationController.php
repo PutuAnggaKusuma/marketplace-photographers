@@ -26,14 +26,34 @@ class PhotographerVerificationController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
 
-        $query = RolePhotographer::with(['user', 'city', 'province', 'categories', 'services', 'testimonials']);
+        $query = RolePhotographer::with([
+            'user',
+            'city',
+            'province',
+            'categories',
+            'services',
+            'portfolios.medias',
+            'workingHours',
+            'testimonials',
+        ]);
 
         if (in_array($statusFilter, ['pending', 'menunggu'])) {
             $query->where('status_verifikasi', 'menunggu');
+        } elseif ($statusFilter === 'pending_storefront') {
+            $query->where('status_verifikasi', 'terverifikasi')
+                  ->where('status_etalase', 'menunggu');
+        } elseif ($statusFilter === 'setup_storefront') {
+            $query->where('status_verifikasi', 'terverifikasi')
+                  ->where('status_etalase', 'belum_diajukan');
+        } elseif ($statusFilter === 'published') {
+            $query->published();
         } elseif (in_array($statusFilter, ['verified', 'terverifikasi'])) {
             $query->where('status_verifikasi', 'terverifikasi');
         } elseif (in_array($statusFilter, ['rejected', 'ditolak'])) {
-            $query->where('status_verifikasi', 'ditolak');
+            $query->where(function ($q) {
+                $q->where('status_verifikasi', 'ditolak')
+                  ->orWhere('status_etalase', 'ditolak');
+            });
         }
 
         if ($categoryFilter !== 'all') {
@@ -67,11 +87,18 @@ class PhotographerVerificationController extends Controller
         $photographers = $query->paginate($perPage)->withQueryString();
         $categories = Category::all();
 
-        // Metrik Ringkasan Status Pendaftaran
+        // Metrik Ringkasan Status Pendaftaran & Tayang Etalase
         $totalStudios = RolePhotographer::count();
+        $totalPublished = RolePhotographer::published()->count();
         $totalVerified = RolePhotographer::where('status_verifikasi', 'terverifikasi')->count();
-        $totalPending = RolePhotographer::where('status_verifikasi', 'menunggu')->count();
-        $totalRejected = RolePhotographer::where('status_verifikasi', 'ditolak')->count();
+        $totalPendingProfile = RolePhotographer::where('status_verifikasi', 'menunggu')->count();
+        $totalPendingStorefront = RolePhotographer::where('status_verifikasi', 'terverifikasi')->where('status_etalase', 'menunggu')->count();
+        $totalSetupStorefront = RolePhotographer::where('status_verifikasi', 'terverifikasi')->where('status_etalase', 'belum_diajukan')->count();
+        $totalPending = $totalPendingProfile + $totalPendingStorefront;
+        $totalRejected = RolePhotographer::where(function ($q) {
+            $q->where('status_verifikasi', 'ditolak')
+              ->orWhere('status_etalase', 'ditolak');
+        })->count();
 
         return view('admin.photographers.index', compact(
             'photographers',
@@ -81,7 +108,11 @@ class PhotographerVerificationController extends Controller
             'categoryFilter',
             'sort',
             'totalStudios',
+            'totalPublished',
             'totalVerified',
+            'totalPendingProfile',
+            'totalPendingStorefront',
+            'totalSetupStorefront',
             'totalPending',
             'totalRejected'
         ));
@@ -99,18 +130,22 @@ class PhotographerVerificationController extends Controller
             'categories',
             'services.details',
             'portfolios.medias',
+            'workingHours',
+            'availabilities',
             'testimonials.client.user'
         ])->findOrFail($id);
 
         $missingFields = $photographer->getMissingProfileFields();
         $completionPercentage = $photographer->getProfileCompletionPercentage();
         $isComplete = $photographer->isProfileComplete();
+        $storefrontChecklist = $photographer->getStorefrontChecklist();
 
         return view('admin.photographers.show', compact(
             'photographer',
             'missingFields',
             'completionPercentage',
-            'isComplete'
+            'isComplete',
+            'storefrontChecklist'
         ));
     }
 
@@ -140,10 +175,10 @@ class PhotographerVerificationController extends Controller
 
         // Notifikasi In-App ke Fotografer
         if ($photographer->id_user) {
-            $notifTitle = $newVerified ? 'Pendaftaran Mitra Terverifikasi' : 'Status Verifikasi Dinonaktifkan';
+            $notifTitle = $newVerified ? 'Profil Mitra Terverifikasi' : 'Status Verifikasi Dinonaktifkan';
             $notifMsg = $newVerified
-                ? "Selamat! Akun fotografer '{$photographer->nama}' telah resmi disetujui dan diverifikasi oleh LensMatch."
-                : "Status verifikasi pada profil studio '{$photographer->nama}' telah dinonaktifkan oleh Admin.";
+                ? "Selamat! Profil akun '{$photographer->nama}' telah diverifikasi Admin. Silakan lengkapi paket layanan, portofolio, dan jadwal untuk pengajuan tayang etalase."
+                : "Status verifikasi akun '{$photographer->nama}' telah dinonaktifkan oleh Admin.";
 
             Notification::send(
                 $photographer->id_user,
@@ -155,6 +190,128 @@ class PhotographerVerificationController extends Controller
         }
 
         return redirect()->back()->with('success', "Status mitra '{$photographer->nama}' berhasil {$statusText}.");
+    }
+
+    /**
+     * Setujui Penayangan Etalase Publik Fotografer (Tahap 2).
+     */
+    public function approveStorefront($id)
+    {
+        $photographer = RolePhotographer::findOrFail($id);
+
+        if (!$photographer->isVerified() || !$photographer->isProfileComplete()) {
+            return redirect()->back()
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Profil fotografer harus lengkap dan terverifikasi Admin sebelum menyetujui tayang etalase.');
+        }
+
+        $checklist = $photographer->getStorefrontChecklist();
+        if (!$checklist['is_ready']) {
+            $missingText = implode(', ', $checklist['missing_labels']);
+            return redirect()->back()
+                ->with('active_tab', 'storefront')
+                ->with('error', "Syarat tayang etalase belum lengkap: {$missingText}.");
+        }
+
+        $photographer->update([
+            'status_etalase' => 'disetujui',
+            'catatan_penolakan_etalase' => null,
+            'etalase_disetujui_at' => now(),
+        ]);
+
+        ActivityLog::record(
+            'photographer_storefront_approved',
+            "Admin menyetujui tayang etalase publik untuk '{$photographer->nama}'.",
+            $photographer,
+            ['status_etalase' => 'disetujui']
+        );
+
+        if ($photographer->id_user) {
+            Notification::send(
+                $photographer->id_user,
+                'Etalase Tayang Disetujui',
+                "Selamat! Etalase Anda '{$photographer->nama}' telah disetujui Admin dan kini resmi tayang di katalog publik LensMatch.",
+                'storefront_approved',
+                url('/photographer/dashboard')
+            );
+        }
+
+        return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+            ->with('success', "Etalase '{$photographer->nama}' berhasil disetujui tayang di katalog publik.");
+    }
+
+    /**
+     * Tolak Pengajuan Tayang Etalase Fotografer (Tahap 2) dengan Catatan.
+     */
+    public function rejectStorefront(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_penolakan_etalase' => 'required|string|min:5|max:1000',
+        ], [
+            'catatan_penolakan_etalase.required' => 'Catatan alasan penolakan etalase wajib diisi.',
+            'catatan_penolakan_etalase.min' => 'Catatan alasan penolakan etalase minimal 5 karakter.',
+        ]);
+
+        $photographer = RolePhotographer::findOrFail($id);
+
+        $photographer->update([
+            'status_etalase' => 'ditolak',
+            'catatan_penolakan_etalase' => trim($request->catatan_penolakan_etalase),
+        ]);
+
+        ActivityLog::record(
+            'photographer_storefront_rejected',
+            "Admin menolak pengajuan tayang etalase '{$photographer->nama}'. Catatan: {$photographer->catatan_penolakan_etalase}",
+            $photographer,
+            ['catatan_penolakan_etalase' => $photographer->catatan_penolakan_etalase]
+        );
+
+        if ($photographer->id_user) {
+            Notification::send(
+                $photographer->id_user,
+                'Pengajuan Etalase Ditolak',
+                "Pengajuan tayang etalase Anda perlu diperbaiki. Catatan Admin: {$photographer->catatan_penolakan_etalase}",
+                'storefront_rejected',
+                url('/photographer/dashboard')
+            );
+        }
+
+        return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+            ->with('active_tab', 'storefront')
+            ->with('success', "Pengajuan etalase '{$photographer->nama}' ditolak dengan catatan.");
+    }
+
+    /**
+     * Nonaktifkan Tayang Etalase Publik Fotografer (Tahap 2).
+     */
+    public function revokeStorefront($id)
+    {
+        $photographer = RolePhotographer::findOrFail($id);
+
+        $photographer->update([
+            'status_etalase' => 'belum_diajukan',
+        ]);
+
+        ActivityLog::record(
+            'photographer_storefront_revoked',
+            "Admin menonaktifkan tayang etalase publik untuk '{$photographer->nama}'.",
+            $photographer,
+            ['status_etalase' => 'belum_diajukan']
+        );
+
+        if ($photographer->id_user) {
+            Notification::send(
+                $photographer->id_user,
+                'Tayang Etalase Dinonaktifkan',
+                "Penayangan etalase '{$photographer->nama}' di katalog publik dinonaktifkan sementara oleh Admin.",
+                'storefront_revoked',
+                url('/photographer/dashboard')
+            );
+        }
+
+        return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+            ->with('active_tab', 'storefront')
+            ->with('success', "Penayangan etalase '{$photographer->nama}' berhasil dinonaktifkan.");
     }
 
     /**

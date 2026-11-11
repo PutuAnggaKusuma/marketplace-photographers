@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\RealtimeBroadcastService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,11 +32,9 @@ class Notification extends Model
     protected static function booted()
     {
         static::created(function ($notification) {
-            try {
-                broadcast(new \App\Events\RealtimeNotificationSent($notification));
-            } catch (\Throwable $e) {
-                // Jangan gagalkan transaksi database jika Reverb sedang offline
-            }
+            RealtimeBroadcastService::broadcastSafely(
+                new \App\Events\RealtimeNotificationSent($notification)
+            );
         });
     }
 

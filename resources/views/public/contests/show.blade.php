@@ -9,8 +9,22 @@
 <section class="py-12 bg-white dark:bg-gray-900 min-h-screen"
          x-data="{
            loginModal: false,
+           lightboxOpen: false,
+           lightboxUrl: '',
+           lightboxCaption: '',
            openLoginModal() { this.loginModal = true; },
-           closeLoginModal() { this.loginModal = false; }
+           closeLoginModal() { this.loginModal = false; },
+           openLightbox(url, caption = '') {
+             if (!url) return;
+             this.lightboxUrl = url;
+             this.lightboxCaption = caption || 'Pratinjau Foto';
+             this.lightboxOpen = true;
+           },
+           closeLightbox() {
+             this.lightboxOpen = false;
+             this.lightboxUrl = '';
+             this.lightboxCaption = '';
+           }
          }"
          @if(isset($errors) && $errors->any())
            x-init="$nextTick(() => $dispatch('show-toast', { type: 'error', message: {{ \Illuminate\Support\Js::from($errors->first()) }} }))"
@@ -265,23 +279,160 @@
           <!-- Logged-in User States -->
           @if(!$userRegistration)
             <!-- CASE 1: Belum Mendaftar -->
+            @php
+              $regHasErrors = isset($errors) && $errors->hasAny([
+                'nama_lengkap', 'email', 'no_wa', 'asal_kota', 'instansi', 'bio_singkat', 'motivasi', 'cv_portfolio_file', 'portfolio_link'
+              ]);
+              $regProfileDefaults = [
+                'nama_lengkap' => $profileData['nama'] ?? '',
+                'email' => $profileData['email'] ?? '',
+                'no_wa' => $profileData['no_wa'] ?? '',
+                'asal_kota' => $profileData['asal_kota'] ?? '',
+                'instansi' => $profileData['instansi'] ?? '',
+                'bio_singkat' => $profileData['bio'] ?? ($profileData['bio_singkat'] ?? ''),
+                'portfolio_link' => $profileData['portfolio_link'] ?? '',
+              ];
+            @endphp
             <div x-data="{
-              showForm: false,
-              nama_lengkap: '{{ old('nama_lengkap', addslashes($profileData['nama'] ?? '')) }}',
-              email: '{{ old('email', addslashes($profileData['email'] ?? '')) }}',
-              no_wa: '{{ old('no_wa', addslashes($profileData['no_wa'] ?? '')) }}',
-              asal_kota: '{{ old('asal_kota', addslashes($profileData['asal_kota'] ?? '')) }}',
-              instansi: '{{ old('instansi', addslashes($profileData['instansi'] ?? '')) }}',
-              bio_singkat: '{{ old('bio_singkat', addslashes($profileData['bio_singkat'] ?? '')) }}',
-              portfolio_link: '{{ old('portfolio_link', addslashes($profileData['portfolio_link'] ?? '')) }}',
+              showForm: {{ $regHasErrors ? 'true' : 'false' }},
+              profileDefaults: @js($regProfileDefaults),
+              cvFileName: '',
+              cvFileSize: '',
+              cvDragging: false,
+              cvError: @js((isset($errors) ? $errors->first('cv_portfolio_file') : '') ?: ''),
+              form: {
+                nama_lengkap: @js(old('nama_lengkap', $regProfileDefaults['nama_lengkap'])),
+                email: @js(old('email', $regProfileDefaults['email'])),
+                no_wa: @js(old('no_wa', $regProfileDefaults['no_wa'])),
+                asal_kota: @js(old('asal_kota', $regProfileDefaults['asal_kota'])),
+                instansi: @js(old('instansi', $regProfileDefaults['instansi'])),
+                bio_singkat: @js(old('bio_singkat', $regProfileDefaults['bio_singkat'])),
+                portfolio_link: @js(old('portfolio_link', $regProfileDefaults['portfolio_link'])),
+                motivasi: @js(old('motivasi', ''))
+              },
+              touched: {
+                nama_lengkap: {{ isset($errors) && $errors->has('nama_lengkap') ? 'true' : 'false' }},
+                email: {{ isset($errors) && $errors->has('email') ? 'true' : 'false' }},
+                no_wa: {{ isset($errors) && $errors->has('no_wa') ? 'true' : 'false' }},
+                asal_kota: {{ isset($errors) && $errors->has('asal_kota') ? 'true' : 'false' }},
+                motivasi: {{ isset($errors) && $errors->has('motivasi') ? 'true' : 'false' }}
+              },
+              errors: {
+                nama_lengkap: @js((isset($errors) ? $errors->first('nama_lengkap') : '') ?: ''),
+                email: @js((isset($errors) ? $errors->first('email') : '') ?: ''),
+                no_wa: @js((isset($errors) ? $errors->first('no_wa') : '') ?: ''),
+                asal_kota: @js((isset($errors) ? $errors->first('asal_kota') : '') ?: ''),
+                motivasi: @js((isset($errors) ? $errors->first('motivasi') : '') ?: '')
+              },
               useProfile() {
-                this.nama_lengkap = '{{ addslashes($profileData['nama'] ?? '') }}';
-                this.email = '{{ addslashes($profileData['email'] ?? '') }}';
-                this.no_wa = '{{ addslashes($profileData['no_wa'] ?? '') }}';
-                this.asal_kota = '{{ addslashes($profileData['asal_kota'] ?? '') }}';
-                this.instansi = '{{ addslashes($profileData['instansi'] ?? '') }}';
-                this.bio_singkat = '{{ addslashes($profileData['bio_singkat'] ?? '') }}';
-                this.portfolio_link = '{{ addslashes($profileData['portfolio_link'] ?? '') }}';
+                this.form.nama_lengkap = this.profileDefaults.nama_lengkap || '';
+                this.form.email = this.profileDefaults.email || '';
+                this.form.no_wa = (this.profileDefaults.no_wa || '').replace(/[^0-9]/g, '');
+                this.form.asal_kota = this.profileDefaults.asal_kota || '';
+                this.form.instansi = this.profileDefaults.instansi || '';
+                this.form.bio_singkat = this.profileDefaults.bio_singkat || '';
+                this.form.portfolio_link = this.profileDefaults.portfolio_link || '';
+                if (this.touched.nama_lengkap) this.validateNama();
+                if (this.touched.email) this.validateEmail();
+                if (this.touched.no_wa) this.validateNoWa();
+                if (this.touched.asal_kota) this.validateAsalKota();
+              },
+              validateNama() {
+                const v = (this.form.nama_lengkap || '').trim();
+                this.errors.nama_lengkap = !v ? 'Nama lengkap wajib diisi.' : (v.length < 3 ? 'Nama lengkap minimal 3 karakter.' : '');
+              },
+              validateEmail() {
+                const v = (this.form.email || '').trim();
+                this.errors.email = !v ? 'Alamat email aktif wajib diisi.' : (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'Format alamat email tidak valid.' : '');
+              },
+              validateNoWa() {
+                this.form.no_wa = (this.form.no_wa || '').replace(/[^0-9]/g, '');
+                const v = this.form.no_wa;
+                this.errors.no_wa = !v ? 'Nomor WhatsApp aktif wajib diisi.' : (v.length < 9 ? 'Nomor WhatsApp minimal 9 digit angka.' : '');
+              },
+              validateAsalKota() {
+                const v = (this.form.asal_kota || '').trim();
+                this.errors.asal_kota = !v ? 'Asal kota / domisili wajib diisi.' : (v.length < 2 ? 'Asal kota minimal 2 karakter.' : '');
+              },
+              validateMotivasi() {
+                const v = (this.form.motivasi || '').trim();
+                this.errors.motivasi = !v ? 'Motivasi mengikuti lomba wajib diisi.' : (v.length < 10 ? 'Motivasi minimal 10 karakter.' : '');
+              },
+              handleCvSelect(e) {
+                this.setCvFile(e.target.files?.[0]);
+              },
+              handleCvDrop(e) {
+                this.cvDragging = false;
+                this.setCvFile(e.dataTransfer?.files?.[0]);
+              },
+              setCvFile(file) {
+                if (!file) return;
+                const res = window.validateUploadFiles([file], {
+                  maxMB: 10,
+                  allowedMimes: [
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/zip',
+                    'application/x-zip-compressed',
+                    'application/x-rar-compressed',
+                    'application/vnd.rar'
+                  ],
+                  allowedExts: ['pdf', 'doc', 'docx', 'zip', 'rar'],
+                  formatLabel: 'PDF, DOC, DOCX, ZIP, atau RAR'
+                });
+                if (res.hasErrors) {
+                  this.removeCvFile();
+                  this.cvError = res.errorMessage;
+                  return;
+                }
+                const valid = res.validFiles[0];
+                if (!valid) return;
+                this.cvError = '';
+                this.cvFileName = valid.name;
+                this.cvFileSize = window.formatFileSizeMB(valid.size);
+                if (typeof DataTransfer !== 'undefined' && this.$refs.cvFileInput) {
+                  const dt = new DataTransfer();
+                  dt.items.add(valid);
+                  this.$refs.cvFileInput.files = dt.files;
+                }
+              },
+              removeCvFile() {
+                this.cvFileName = '';
+                this.cvFileSize = '';
+                this.cvError = '';
+                if (this.$refs.cvFileInput) this.$refs.cvFileInput.value = '';
+              },
+              submitRegister(e) {
+                this.touched.nama_lengkap = true;
+                this.touched.email = true;
+                this.touched.no_wa = true;
+                this.touched.asal_kota = true;
+                this.touched.motivasi = true;
+                this.validateNama();
+                this.validateEmail();
+                this.validateNoWa();
+                this.validateAsalKota();
+                this.validateMotivasi();
+
+                const firstInvalid = [
+                  { err: this.errors.nama_lengkap, ref: this.$refs.namaInput },
+                  { err: this.errors.email, ref: this.$refs.emailInput },
+                  { err: this.errors.no_wa, ref: this.$refs.waInput },
+                  { err: this.errors.asal_kota, ref: this.$refs.kotaInput },
+                  { err: this.errors.motivasi, ref: this.$refs.motivasiInput },
+                  { err: this.cvError, ref: this.$refs.cvDropzone }
+                ].find(item => !!item.err);
+
+                if (firstInvalid) {
+                  e.preventDefault();
+                  if (firstInvalid.ref) {
+                    firstInvalid.ref.focus();
+                    firstInvalid.ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                  return false;
+                }
+                return true;
               }
             }">
               
@@ -390,20 +541,46 @@
                     <p x-show="touched.motivasi && errors.motivasi" x-text="errors.motivasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
 
-                  <div x-data="{ cvFileName: null, cvError: '' }" class="space-y-2">
+                  <div class="space-y-3">
                     <label class="block text-xs font-bold text-gray-800 dark:text-gray-200">
-                      Upload Berkas CV / Portofolio (PDF/DOCX/ZIP/RAR)
+                      Upload Berkas CV / Portofolio <span class="text-gray-400 font-normal">(Opsional)</span>
                     </label>
-                    <div class="flex items-center gap-3">
-                      <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
-                        <span>Pilih File CV / Portofolio</span>
-                        <input type="file" name="cv_portfolio_file" accept=".pdf,.doc,.docx,.zip,.rar" class="hidden" @change="const res = window.validateUploadFiles($event.target, { maxMB: 10, allowedMimes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/vnd.rar'], allowedExts: ['pdf', 'doc', 'docx', 'zip', 'rar'], formatLabel: 'PDF, DOC, DOCX, ZIP, atau RAR' }); cvError = res.errorMessage; cvFileName = res.validFiles[0]?.name || null;">
-                      </label>
-                      <span x-text="cvFileName ? cvFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
+                    <div x-ref="cvDropzone"
+                         tabindex="0"
+                         role="button"
+                         @click="$refs.cvFileInput.click()"
+                         @keydown.enter.prevent="$refs.cvFileInput.click()"
+                         @keydown.space.prevent="$refs.cvFileInput.click()"
+                         @dragover.prevent="cvDragging = true"
+                         @dragleave.prevent="cvDragging = false"
+                         @drop.prevent="handleCvDrop($event)"
+                         class="w-full min-h-[120px] px-6 py-7 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                         :class="cvDragging
+                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                             : (cvError
+                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                 : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                      <input type="file"
+                             name="cv_portfolio_file"
+                             x-ref="cvFileInput"
+                             accept=".pdf,.doc,.docx,.zip,.rar"
+                             @change="handleCvSelect($event)"
+                             class="sr-only">
+                      <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                        <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih berkas dari perangkat</span>
+                        <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                      </p>
+                      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                        Format PDF, DOC, DOCX, ZIP, RAR maksimal 10 MB
+                      </p>
                     </div>
+
+                    <div x-show="cvFileName" x-cloak class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3 shadow-2xs">
+                      <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate" x-text="cvFileName + (cvFileSize ? ' • ' + cvFileSize : '')"></span>
+                      <button type="button" @click="removeCvFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                    </div>
+
                     <p x-show="cvError" x-text="cvError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                    <p class="text-[11px] text-gray-400">Maksimal 10 MB (PDF, DOC, DOCX, ZIP, RAR)</p>
                   </div>
 
                   <div>
@@ -521,58 +698,131 @@
                 <form action="{{ route('public.contests.payment', $contest->id) }}" 
                       method="POST" 
                       enctype="multipart/form-data" 
+                      novalidate
                       class="space-y-4"
                       x-data="{
-                        transferFileName: null,
-                        touched: false,
-                        error: '',
+                        transferFileName: '',
+                        transferFileSize: '',
+                        transferPreview: '',
+                        isDraggingTransfer: false,
+                        touched: {{ isset($errors) && $errors->has('bukti_transfer') ? 'true' : 'false' }},
+                        error: @js((isset($errors) ? $errors->first('bukti_transfer') : '') ?: ''),
                         handleTransferFile(e) {
+                          this.setTransferFile(e.target.files?.[0]);
+                        },
+                        handleTransferDrop(e) {
+                          this.isDraggingTransfer = false;
+                          this.setTransferFile(e.dataTransfer?.files?.[0]);
+                        },
+                        setTransferFile(file) {
                           this.touched = true;
-                          const res = window.validateUploadFiles(e.target, { maxMB: 5 });
-                          if (res.hasErrors) {
-                            this.transferFileName = null;
-                            this.error = res.errorMessage;
-                            return false;
-                          }
-                          const file = res.validFiles[0];
                           if (!file) {
-                            this.transferFileName = null;
+                            this.removeTransferFile();
                             this.error = 'File struk / bukti transfer wajib dipilih.';
                             return false;
                           }
-                          this.transferFileName = file.name;
+                          const res = window.validateUploadFiles([file], { maxMB: 5 });
+                          if (res.hasErrors) {
+                            this.removeTransferFile();
+                            this.error = res.errorMessage;
+                            return false;
+                          }
+                          const valid = res.validFiles[0];
+                          if (!valid) {
+                            this.removeTransferFile();
+                            this.error = 'File struk / bukti transfer wajib dipilih.';
+                            return false;
+                          }
+                          if (this.transferPreview) URL.revokeObjectURL(this.transferPreview);
+                          this.transferFileName = valid.name;
+                          this.transferFileSize = window.formatFileSizeMB(valid.size);
+                          this.transferPreview = URL.createObjectURL(valid);
                           this.error = '';
+                          if (typeof DataTransfer !== 'undefined' && this.$refs.transferFileInput) {
+                            const dt = new DataTransfer();
+                            dt.items.add(valid);
+                            this.$refs.transferFileInput.files = dt.files;
+                          }
                           return true;
+                        },
+                        removeTransferFile() {
+                          if (this.transferPreview) URL.revokeObjectURL(this.transferPreview);
+                          this.transferFileName = '';
+                          this.transferFileSize = '';
+                          this.transferPreview = '';
+                          if (this.$refs.transferFileInput) this.$refs.transferFileInput.value = '';
                         },
                         submitTransfer(e) {
                           this.touched = true;
+                          if (!this.transferFileName) {
+                            this.error = 'File struk / bukti transfer wajib dipilih.';
+                          }
                           if (!this.transferFileName || this.error) {
                             e.preventDefault();
-                            if (!this.error) this.error = 'File struk / bukti transfer wajib dipilih.';
-                            this.$refs.transferFileInput?.click();
+                            if (this.$refs.transferDropzone) {
+                              this.$refs.transferDropzone.focus();
+                              this.$refs.transferDropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                             return false;
                           }
+                          return true;
                         }
                       }"
                       @submit="submitTransfer($event)">
                   @csrf
-                  <div class="space-y-2">
+                  <div class="space-y-3">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
-                    <div class="flex items-center gap-3">
-                      <label class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center gap-2 shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
-                        <span>Pilih File Struk Bukti</span>
-                        <input type="file" 
-                               name="bukti_transfer" 
-                               x-ref="transferFileInput"
-                               accept="image/jpeg,image/png,image/webp" 
-                               class="sr-only" 
-                               @change="handleTransferFile($event)">
-                      </label>
-                      <span x-text="transferFileName ? transferFileName : 'Belum ada file dipilih'" class="text-xs text-gray-500 dark:text-gray-400 font-medium truncate"></span>
+                    <div x-ref="transferDropzone"
+                         tabindex="0"
+                         role="button"
+                         @click="$refs.transferFileInput.click()"
+                         @keydown.enter.prevent="$refs.transferFileInput.click()"
+                         @keydown.space.prevent="$refs.transferFileInput.click()"
+                         @dragover.prevent="isDraggingTransfer = true"
+                         @dragleave.prevent="isDraggingTransfer = false"
+                         @drop.prevent="handleTransferDrop($event)"
+                         class="w-full min-h-[140px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                         :class="isDraggingTransfer
+                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                             : (touched && error
+                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                      <input type="file"
+                             name="bukti_transfer"
+                             x-ref="transferFileInput"
+                             accept="image/jpeg,image/png,image/webp"
+                             @change="handleTransferFile($event)"
+                             class="sr-only">
+                      <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                        <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih struk transfer dari perangkat</span>
+                        <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                      </p>
+                      <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                        Format gambar JPG, PNG, WEBP maksimal 5 MB.
+                      </p>
                     </div>
+
+                    <template x-if="transferPreview">
+                      <div class="max-w-xs rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                        <div @click="openLightbox(transferPreview, transferFileName || 'Bukti Transfer')"
+                             class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                          <img :src="transferPreview" :alt="transferFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                          <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                          </div>
+                        </div>
+                        <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                          <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="transferFileName + (transferFileSize ? ' • ' + transferFileSize : '')"></span>
+                          <button type="button"
+                                  @click.stop="removeTransferFile(); touched = true; error = 'File struk / bukti transfer wajib dipilih.'"
+                                  class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+
                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                    <p class="text-[11px] text-gray-400">Format gambar: JPG, PNG, WEBP (maksimal 5 MB)</p>
                   </div>
                   <button type="submit" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
                     Simpan Data
@@ -629,18 +879,20 @@
               <!-- FORM UPLOAD KARYA FOTO (TAHAP 3) -->
               @if($userSubmissions->count() < ($contest->max_submissions ?? 2))
                 <div x-data="{
-                  showUploadForm: false,
+                  showUploadForm: {{ isset($errors) && $errors->hasAny(['judul_karya', 'foto_file', 'media_link', 'deskripsi_karya']) ? 'true' : 'false' }},
                   preview: null,
                   fileSelected: false,
                   fileName: '',
-                  judul_karya: '',
+                  fileSize: '',
+                  isDraggingKarya: false,
+                  judul_karya: @js(old('judul_karya', '')),
                   touched: {
-                    judul: false,
-                    foto: false
+                    judul: {{ isset($errors) && $errors->has('judul_karya') ? 'true' : 'false' }},
+                    foto: {{ isset($errors) && $errors->has('foto_file') ? 'true' : 'false' }}
                   },
                   errors: {
-                    judul: '',
-                    foto: ''
+                    judul: @js((isset($errors) ? $errors->first('judul_karya') : '') ?: ''),
+                    foto: @js((isset($errors) ? $errors->first('foto_file') : '') ?: '')
                   },
                   validateJudul() {
                     if (!this.judul_karya || !this.judul_karya.trim()) {
@@ -656,36 +908,58 @@
                   },
                   validateFoto() {
                     if (!this.fileSelected) {
-                      this.errors.foto = 'File foto karya wajib dipilih.';
+                      if (!this.errors.foto) this.errors.foto = 'File foto karya wajib dipilih.';
                       return false;
                     }
                     this.errors.foto = '';
                     return true;
                   },
                   handleFile(e) {
+                    this.setKaryaFile(e.target.files?.[0]);
+                  },
+                  handleKaryaDrop(e) {
+                    this.isDraggingKarya = false;
+                    this.setKaryaFile(e.dataTransfer?.files?.[0]);
+                  },
+                  setKaryaFile(file) {
                     this.touched.foto = true;
-                    const res = window.validateUploadFiles(e.target, { maxMB: 10 });
-                    if (res.hasErrors) {
-                      this.fileSelected = false;
-                      this.fileName = '';
-                      this.preview = null;
-                      this.errors.foto = res.errorMessage;
-                      return false;
-                    }
-                    const file = res.validFiles[0];
-                    if (file) {
-                      this.fileSelected = true;
-                      this.fileName = file.name;
-                      this.errors.foto = '';
-                      this.preview = URL.createObjectURL(file);
-                      return true;
-                    } else {
-                      this.fileSelected = false;
-                      this.fileName = '';
-                      this.preview = null;
+                    if (!file) {
+                      this.removeKaryaFile();
                       this.errors.foto = 'File foto karya wajib dipilih.';
                       return false;
                     }
+                    const res = window.validateUploadFiles([file], { maxMB: 10 });
+                    if (res.hasErrors) {
+                      this.removeKaryaFile();
+                      this.errors.foto = res.errorMessage;
+                      return false;
+                    }
+                    const valid = res.validFiles[0];
+                    if (valid) {
+                      if (this.preview) URL.revokeObjectURL(this.preview);
+                      this.fileSelected = true;
+                      this.fileName = valid.name;
+                      this.fileSize = window.formatFileSizeMB(valid.size);
+                      this.errors.foto = '';
+                      this.preview = URL.createObjectURL(valid);
+                      if (typeof DataTransfer !== 'undefined' && this.$refs.fotoFileInput) {
+                        const dt = new DataTransfer();
+                        dt.items.add(valid);
+                        this.$refs.fotoFileInput.files = dt.files;
+                      }
+                      return true;
+                    }
+                    this.removeKaryaFile();
+                    this.errors.foto = 'File foto karya wajib dipilih.';
+                    return false;
+                  },
+                  removeKaryaFile() {
+                    if (this.preview) URL.revokeObjectURL(this.preview);
+                    this.fileSelected = false;
+                    this.fileName = '';
+                    this.fileSize = '';
+                    this.preview = null;
+                    if (this.$refs.fotoFileInput) this.$refs.fotoFileInput.value = '';
                   },
                   submitKarya(e) {
                     this.touched.judul = true;
@@ -695,13 +969,18 @@
                     if (!validJudul) {
                       e.preventDefault();
                       this.$refs.judulKaryaInput?.focus();
+                      this.$refs.judulKaryaInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       return false;
                     }
                     if (!validFoto) {
                       e.preventDefault();
-                      this.$refs.fotoFileInput?.click();
+                      if (this.$refs.karyaDropzone) {
+                        this.$refs.karyaDropzone.focus();
+                        this.$refs.karyaDropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
                       return false;
                     }
+                    return true;
                   }
                 }" class="space-y-4 pt-2">
 
@@ -750,29 +1029,61 @@
                         <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                       </div>
 
-                      <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 space-y-3">
+                      <div class="space-y-3">
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                           Foto Karya dari Perangkat <span class="text-rose-500">*</span>
                         </label>
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                          <div class="relative w-32 h-24 sm:w-40 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-amber-400 shadow-xs shrink-0 flex items-center justify-center">
-                            <template x-if="preview">
-                              <img :src="preview" alt="Preview Foto Karya" class="w-full h-full object-cover">
-                            </template>
-                            <template x-if="!preview">
-                              <span class="text-[11px] text-gray-400 text-center px-2 font-medium">Belum ada foto</span>
-                            </template>
-                          </div>
-                          
-                          <div class="flex-1 space-y-2">
-                            <label class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs cursor-pointer shadow-xs transition inline-flex items-center justify-center">
-                              <span>Pilih File Foto Karya</span>
-                              <input type="file" name="foto_file" x-ref="fotoFileInput" accept="image/jpeg,image/png,image/webp" @change="handleFile($event)" class="hidden">
-                            </label>
-                            <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Format gambar (JPG, PNG, WEBP maks. 10 MB)</p>
-                          </div>
+                        <div x-ref="karyaDropzone"
+                             tabindex="0"
+                             role="button"
+                             @click="$refs.fotoFileInput.click()"
+                             @keydown.enter.prevent="$refs.fotoFileInput.click()"
+                             @keydown.space.prevent="$refs.fotoFileInput.click()"
+                             @dragover.prevent="isDraggingKarya = true"
+                             @dragleave.prevent="isDraggingKarya = false"
+                             @drop.prevent="handleKaryaDrop($event)"
+                             class="w-full min-h-[160px] px-6 py-9 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition outline-none"
+                             :class="isDraggingKarya
+                                 ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                                 : (touched.foto && errors.foto
+                                     ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                                     : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                          <input type="file"
+                                 name="foto_file"
+                                 x-ref="fotoFileInput"
+                                 accept="image/jpeg,image/png,image/webp"
+                                 @change="handleFile($event)"
+                                 class="sr-only">
+                          <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto karya dari perangkat</span>
+                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                          </p>
+                          <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
+                            Format JPG, PNG, WEBP maksimal 10 MB.
+                          </p>
                         </div>
+
+                        <template x-if="preview">
+                          <div class="max-w-md rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                            <div @click="openLightbox(preview, judul_karya || fileName || 'Pratinjau Karya Foto')"
+                                 class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                              <img :src="preview" :alt="fileName || 'Preview Foto Karya'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                              <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                              </div>
+                            </div>
+                            <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                              <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSize ? ' • ' + fileSize : '')"></span>
+                              <button type="button"
+                                      @click.stop="removeKaryaFile(); touched.foto = true; validateFoto()"
+                                      class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                                Hapus
+                              </button>
+                            </div>
+                          </div>
+                        </template>
+
+                        <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                       </div>
 
                       @if($contest->allow_link)
@@ -928,6 +1239,22 @@
 
       </div>
     </div>
+  </div>
+
+  <!-- Lightbox Pratinjau Foto (Rule #97) -->
+  <div x-show="lightboxOpen"
+       x-cloak
+       @keydown.escape.window="closeLightbox()"
+       @click.self="closeLightbox()"
+       class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+    <button type="button"
+            @click="closeLightbox()"
+            aria-label="Tutup pratinjau"
+            class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <img :src="lightboxUrl" :alt="lightboxCaption" class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
+    <div class="mt-4 px-4 py-2 rounded-full bg-white/10 text-xs font-semibold text-white/90" x-text="lightboxCaption"></div>
   </div>
 
 </section>

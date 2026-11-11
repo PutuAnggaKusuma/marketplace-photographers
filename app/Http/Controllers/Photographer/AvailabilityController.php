@@ -196,7 +196,17 @@ class AvailabilityController extends Controller
             );
         }
 
-        return redirect()->route('photographer.availability', ['tab' => 'weekly'])->with('success', 'Jadwal jam kerja mingguan berhasil diperbaharui!');
+        $photographer->update([
+            'jadwal_dikonfirmasi' => true,
+        ]);
+
+        $downgraded = $photographer->fresh()->syncStorefrontIntegrity();
+        $message = 'Jadwal jam kerja mingguan berhasil diperbaharui!';
+        if ($downgraded) {
+            $message .= ' Etalase dinonaktifkan sementara hingga minimal satu hari operasional dibuka kembali.';
+        }
+
+        return redirect()->route('photographer.availability', ['tab' => 'weekly'])->with('success', $message);
     }
 
     /**

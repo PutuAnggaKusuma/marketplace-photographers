@@ -501,7 +501,6 @@
                      x-model="formData.judul"
                      @input="touched.judul = true; validateJudul()"
                      @blur="touched.judul = true; validateJudul()"
-                     required 
                      maxlength="255"
                      placeholder="mis. Rekomendasi Lensa 85mm f/1.4 vs 50mm f/1.2 untuk Sesi Outdoor..." 
                      class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:ring-2 transition shadow-xs"
@@ -515,9 +514,10 @@
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kategori Diskusi <span class="text-rose-500">*</span>
               </label>
-              <input type="hidden" name="kategori" :value="formData.kategori" required>
+              <input type="hidden" name="kategori" :value="formData.kategori">
               <div class="relative">
                 <button type="button"
+                        x-ref="fieldKategori"
                         @click="categoryDropdownOpen = !categoryDropdownOpen"
                         class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition cursor-pointer text-left"
                         :class="touched.kategori && errors.kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700'">
@@ -552,14 +552,13 @@
                 Penjelasan & Isi Diskusi <span class="text-rose-500">*</span>
               </label>
               <textarea name="deskripsi" 
-                        rows="5" 
+                        rows="6" 
                         x-ref="fieldDeskripsi"
                         x-model="formData.deskripsi"
                         @input="touched.deskripsi = true; validateDeskripsi()"
                         @blur="touched.deskripsi = true; validateDeskripsi()"
-                        required 
                         placeholder="Tuliskan pertanyaan, detail permasalahan, lokasi, setting ISO/shutter speed, atau konteks pembahasan Anda secara lengkap..." 
-                        class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-none focus:ring-2 transition shadow-xs leading-relaxed"
+                        class="w-full min-h-[140px] px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-y focus:ring-2 transition shadow-xs leading-relaxed"
                         :class="touched.deskripsi && errors.deskripsi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"></textarea>
               <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
               <p class="text-[11px] text-gray-400">Uraikan detail secara jelas untuk mendapatkan respon dan solusi yang akurat.</p>
@@ -609,124 +608,59 @@
 
 
 
-              <!-- Interactive Upload Box / Dropzone -->
-
-              <div @click="if (photos.length < 5) $refs.fileInput.click()"
-
-                   @dragover.prevent="isDragging = true"
-
+              <!-- Interactive Pure-Text Dropzone (Rule #22 Compliant) -->
+              <div x-ref="photoDropzone"
+                   tabindex="0"
+                   role="button"
+                   @click="if (photos.length < 5) $refs.fileInput.click()"
+                   @keydown.enter.prevent="if (photos.length < 5) $refs.fileInput.click()"
+                   @keydown.space.prevent="if (photos.length < 5) $refs.fileInput.click()"
+                   @dragover.prevent="if (photos.length < 5) isDragging = true"
                    @dragleave.prevent="isDragging = false"
-
                    @drop.prevent="handleDrop($event)"
-
                    :class="{
-
                      'border-red-400 bg-red-50/40 dark:bg-red-950/20': errorMsg,
-
-                     'border-gray-400 bg-gray-100 dark:bg-gray-800': isDragging && !errorMsg,
-
-                     'opacity-60 cursor-not-allowed pointer-events-none': photos.length >= 5,
-
-                     'cursor-pointer hover:border-gray-400 dark:hover:border-gray-600': photos.length < 5 && !errorMsg
-
+                     'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25': isDragging && !errorMsg && photos.length < 5,
+                     'opacity-60 cursor-not-allowed pointer-events-none border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50': photos.length >= 5,
+                     'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500 cursor-pointer': photos.length < 5 && !isDragging && !errorMsg
                    }"
-
-                   class="relative rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 p-6 text-center transition-all group">
-
-                
-
-                <div class="flex flex-col items-center justify-center space-y-2">
-
-                  <div class="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 shadow-xs border border-gray-200/80 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 group-hover:scale-105 transition">
-
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
-
-                  </div>
-
-                  <div>
-
-                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300">
-
-                      Klik untuk memilih foto atau seret foto ke area ini
-
-                    </p>
-
-                    <p class="text-[11px] text-gray-400 mt-0.5">
-
-                      Mendukung format JPG, PNG, WEBP. Maksimal 5 foto, masing-masing hingga 10MB.
-
-                    </p>
-
-                  </div>
-
-                </div>
-
+                   class="w-full min-h-[140px] sm:min-h-[150px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 transition outline-none">
+                <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto dari perangkat</span>
+                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                </p>
+                <p class="text-xs text-gray-400 dark:text-gray-500 font-medium max-w-md leading-relaxed">
+                  Format JPG, PNG, WEBP. Maksimal 5 foto, masing-masing 10 MB.
+                </p>
               </div>
-
-
 
               <!-- Validation Error Message Alert -->
+              <p x-show="errorMsg" x-text="errorMsg" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
-              <div x-show="errorMsg" x-cloak class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-600 dark:text-rose-400 font-bold flex items-center gap-2">
-
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-
-                <span x-text="errorMsg"></span>
-
-              </div>
-
-
-
-              <!-- Live Image Previews Grid (Interactive remove, order badges, size labels) -->
-
+              <!-- Live Image Previews Grid (Clean Cards + Lightbox + Per-File Remove) -->
               <div x-show="photos.length > 0" x-cloak class="pt-2">
-
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
                   <template x-for="(p, index) in photos" :key="index">
-
-                    <div class="relative aspect-square rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 group shadow-xs">
-
-                      <img :src="p.url" class="w-full h-full object-cover">
-
-                      
-
-                      <!-- Order Badge -->
-
-                      <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-xs text-[10px] font-black text-white" x-text="'#' + (index + 1)"></span>
-
-                      
-
-                      <!-- Delete Button -->
-
-                      <button type="button" 
-
-                              @click.stop="removePhoto(index)" 
-
-                              class="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-rose-600 text-white backdrop-blur-xs transition shadow-md cursor-pointer" 
-
-                              title="Hapus foto ini">
-
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-
-                      </button>
-
-
-
-                      <!-- Size and filename pill at bottom -->
-
-                      <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2 text-center">
-
-                        <p class="text-[9px] text-white font-extrabold truncate" x-text="p.size"></p>
-
+                    <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                      <div @click="openForumLightbox(photos, index)"
+                           class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                        <img :src="p.url" :alt="p.name || 'Foto diskusi'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                        </div>
                       </div>
-
+                      <div class="px-2.5 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                        <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate"
+                              x-text="'Foto ' + (index + 1) + ' • ' + p.size"></span>
+                        <button type="button"
+                                @click.stop="removePhoto(index)"
+                                class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                          Hapus
+                        </button>
+                      </div>
                     </div>
-
                   </template>
-
                 </div>
-
               </div>
 
 
@@ -807,6 +741,28 @@
 
 
 
+    <!-- Lightbox Pratinjau Foto Forum (Rule #97) -->
+    <div x-show="forumLightboxOpen"
+         x-cloak
+         @keydown.escape.window="if (forumLightboxOpen) { forumLightboxOpen = false; }"
+         @keydown.arrow-left.window="if (forumLightboxOpen) prevForumLightbox()"
+         @keydown.arrow-right.window="if (forumLightboxOpen) nextForumLightbox()"
+         @click.self="forumLightboxOpen = false"
+         class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+      <button type="button"
+              @click="forumLightboxOpen = false"
+              aria-label="Tutup pratinjau"
+              class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <img :src="forumLightboxUrl" :alt="forumLightboxCaption" class="max-w-full max-h-[78vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-3 px-4 py-2 rounded-full bg-white/10 text-xs font-semibold text-white/90">
+        <button type="button" x-show="forumLightboxItems.length > 1" @click="prevForumLightbox()" class="hover:text-amber-300 transition cursor-pointer">Sebelumnya</button>
+        <span x-text="forumLightboxCaption"></span>
+        <button type="button" x-show="forumLightboxItems.length > 1" @click="nextForumLightbox()" class="hover:text-amber-300 transition cursor-pointer">Berikutnya</button>
+      </div>
+    </div>
+
   </div>
 
 </section>
@@ -814,14 +770,26 @@
 
 
 <script>
+@php
+  $forumPostErrors = (isset($errors) && $errors->any()) ? $errors : new \Illuminate\Support\ViewErrorBag();
+  $hasForumPostErrors = $forumPostErrors->hasAny(['judul', 'kategori', 'deskripsi', 'foto_files', 'foto_files.*']);
+  $forumCategoryLabels = [
+      'teknis' => 'Teknis & Pengaturan Lensa',
+      'spot_foto' => 'Rekomendasi Spot Foto Outdoor',
+      'peralatan' => 'Peralatan & Aksesoris Studio',
+      'lainnya' => 'Lainnya & Diskusi Umum',
+  ];
+  $oldForumKategori = old('kategori', 'lainnya');
+  $oldForumKategoriLabel = $forumCategoryLabels[$oldForumKategori] ?? 'Lainnya & Diskusi Umum';
+@endphp
 
 function forumPostUpload() {
   return {
     photos: [],
-    errorMsg: '',
+    errorMsg: @js($forumPostErrors->first('foto_files') ?: $forumPostErrors->first('foto_files.*') ?: ''),
     isDragging: false,
     categoryDropdownOpen: false,
-    selectedCategoryLabel: 'Lainnya & Diskusi Umum',
+    selectedCategoryLabel: @js($oldForumKategoriLabel),
     categories: {
       'teknis': 'Teknis & Pengaturan Lensa',
       'spot_foto': 'Rekomendasi Spot Foto Outdoor',
@@ -829,19 +797,19 @@ function forumPostUpload() {
       'lainnya': 'Lainnya & Diskusi Umum'
     },
     formData: {
-      judul: '',
-      kategori: 'lainnya',
-      deskripsi: ''
+      judul: @js(old('judul', '')),
+      kategori: @js($oldForumKategori),
+      deskripsi: @js(old('deskripsi', ''))
     },
     touched: {
-      judul: false,
-      kategori: false,
-      deskripsi: false
+      judul: {{ $forumPostErrors->has('judul') ? 'true' : 'false' }},
+      kategori: {{ $forumPostErrors->has('kategori') ? 'true' : 'false' }},
+      deskripsi: {{ $forumPostErrors->has('deskripsi') ? 'true' : 'false' }}
     },
     errors: {
-      judul: '',
-      kategori: '',
-      deskripsi: ''
+      judul: @js($forumPostErrors->first('judul') ?: ''),
+      kategori: @js($forumPostErrors->first('kategori') ?: ''),
+      deskripsi: @js($forumPostErrors->first('deskripsi') ?: '')
     },
     validateJudul() {
       const val = (this.formData.judul || '').trim();
@@ -868,8 +836,14 @@ function forumPostUpload() {
       this.validateDeskripsi();
       if (this.errors.judul || this.errors.kategori || this.errors.deskripsi) {
         e.preventDefault();
-        if (this.errors.judul) this.$refs.fieldJudul?.focus();
-        else if (this.errors.deskripsi) this.$refs.fieldDeskripsi?.focus();
+        let targetEl = null;
+        if (this.errors.judul) targetEl = this.$refs.fieldJudul;
+        else if (this.errors.kategori) targetEl = this.$refs.fieldKategori;
+        else if (this.errors.deskripsi) targetEl = this.$refs.fieldDeskripsi;
+        if (targetEl) {
+          targetEl.focus();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return false;
       }
     },
@@ -980,11 +954,67 @@ function forumSectionApp() {
 
   return {
 
-    newPostModal: false,
+    newPostModal: {{ $hasForumPostErrors ? 'true' : 'false' }},
 
     loginRequiredModal: false,
 
     loading: false,
+
+    forumLightboxOpen: false,
+
+    forumLightboxItems: [],
+
+    forumLightboxIdx: 0,
+
+    forumLightboxUrl: '',
+
+    forumLightboxCaption: '',
+
+    openForumLightbox(items, idx) {
+
+      if (!items || idx < 0 || idx >= items.length) return;
+
+      this.forumLightboxItems = items;
+
+      this.forumLightboxIdx = idx;
+
+      this.updateForumLightbox();
+
+      this.forumLightboxOpen = true;
+
+    },
+
+    prevForumLightbox() {
+
+      if (this.forumLightboxItems.length === 0) return;
+
+      this.forumLightboxIdx = (this.forumLightboxIdx - 1 + this.forumLightboxItems.length) % this.forumLightboxItems.length;
+
+      this.updateForumLightbox();
+
+    },
+
+    nextForumLightbox() {
+
+      if (this.forumLightboxItems.length === 0) return;
+
+      this.forumLightboxIdx = (this.forumLightboxIdx + 1) % this.forumLightboxItems.length;
+
+      this.updateForumLightbox();
+
+    },
+
+    updateForumLightbox() {
+
+      const item = this.forumLightboxItems[this.forumLightboxIdx];
+
+      if (!item) return;
+
+      this.forumLightboxUrl = item.url;
+
+      this.forumLightboxCaption = (item.name || ('Foto ' + (this.forumLightboxIdx + 1))) + ' • Foto ' + (this.forumLightboxIdx + 1) + ' dari ' + this.forumLightboxItems.length;
+
+    },
 
     init() {
 

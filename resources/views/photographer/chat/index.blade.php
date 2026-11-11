@@ -651,17 +651,21 @@
                 </p>
 
                 <!-- Form Inputs (Rule #73: 2-column grid for short fields) -->
-                <form @submit.prevent="submitCustomOffer()" class="mt-5 space-y-4">
+                <form @submit.prevent="submitCustomOffer()" novalidate class="mt-5 space-y-4">
                     <!-- Judul Penawaran -->
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                             Judul Penawaran Sesi <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" 
-                               x-model="offerForm.judul_penawaran" 
-                               required 
+                        <input type="text"
+                               x-ref="offerJudul"
+                               x-model="offerForm.judul_penawaran"
+                               @input="offerTouched.judul_penawaran = true; validateOfferField('judul_penawaran')"
+                               @blur="offerTouched.judul_penawaran = true; validateOfferField('judul_penawaran')"
                                placeholder="Contoh: Sesi Prewedding Outdoor 3 Hari"
-                               class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                               :class="offerTouched.judul_penawaran && offerErrors.judul_penawaran ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                               class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                        <p x-show="offerTouched.judul_penawaran && offerErrors.judul_penawaran" x-text="offerErrors.judul_penawaran" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -670,13 +674,16 @@
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Total Biaya (Rp) <span class="text-rose-500">*</span>
                             </label>
-                            <input type="number" 
-                                   x-model="offerForm.harga" 
-                                   required 
-                                   min="10000" 
+                            <input type="number"
+                                   x-ref="offerHarga"
+                                   x-model="offerForm.harga"
+                                   @input="offerTouched.harga = true; validateOfferField('harga')"
+                                   @blur="offerTouched.harga = true; validateOfferField('harga')"
                                    step="1000"
                                    placeholder="Contoh: 2500000"
-                                   class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                                   :class="offerTouched.harga && offerErrors.harga ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.harga && offerErrors.harga" x-text="offerErrors.harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
                         <!-- Durasi (Jam) -->
@@ -684,13 +691,15 @@
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Durasi Sesi (Jam) <span class="text-rose-500">*</span>
                             </label>
-                            <input type="number" 
-                                   x-model="offerForm.durasi_jam" 
-                                   required 
-                                   min="1" 
-                                   max="72"
+                            <input type="number"
+                                   x-ref="offerDurasi"
+                                   x-model="offerForm.durasi_jam"
+                                   @input="offerTouched.durasi_jam = true; validateOfferField('durasi_jam')"
+                                   @blur="offerTouched.durasi_jam = true; validateOfferField('durasi_jam')"
                                    placeholder="Contoh: 3"
-                                   class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                                   :class="offerTouched.durasi_jam && offerErrors.durasi_jam ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.durasi_jam && offerErrors.durasi_jam" x-text="offerErrors.durasi_jam" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
                         <!-- Tanggal Sesi -->
@@ -698,10 +707,14 @@
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Tanggal Sesi <span class="text-rose-500">*</span>
                             </label>
-                            <input type="date" 
-                                   x-model="offerForm.booking_date" 
-                                   required 
-                                   class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                            <input type="date"
+                                   x-ref="offerDate"
+                                   x-model="offerForm.booking_date"
+                                   @input="offerTouched.booking_date = true; validateOfferField('booking_date')"
+                                   @blur="offerTouched.booking_date = true; validateOfferField('booking_date')"
+                                   :class="offerTouched.booking_date && offerErrors.booking_date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.booking_date && offerErrors.booking_date" x-text="offerErrors.booking_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
                         <!-- Jam Mulai Sesi -->
@@ -709,10 +722,14 @@
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Jam Mulai <span class="text-rose-500">*</span>
                             </label>
-                            <input type="time" 
-                                   x-model="offerForm.booking_time" 
-                                   required 
-                                   class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                            <input type="time"
+                                   x-ref="offerTime"
+                                   x-model="offerForm.booking_time"
+                                   @input="offerTouched.booking_time = true; validateOfferField('booking_time')"
+                                   @blur="offerTouched.booking_time = true; validateOfferField('booking_time')"
+                                   :class="offerTouched.booking_time && offerErrors.booking_time ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.booking_time && offerErrors.booking_time" x-text="offerErrors.booking_time" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
                     </div>
 
@@ -721,22 +738,31 @@
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                             Lokasi Pemotretan <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" 
-                               x-model="offerForm.lokasi" 
-                               required 
+                        <input type="text"
+                               x-ref="offerLokasi"
+                               x-model="offerForm.lokasi"
+                               @input="offerTouched.lokasi = true; validateOfferField('lokasi')"
+                               @blur="offerTouched.lokasi = true; validateOfferField('lokasi')"
                                placeholder="Contoh: Pantai Melasti & Tebing Karang Boma, Uluwatu"
-                               class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition">
+                               :class="offerTouched.lokasi && offerErrors.lokasi ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                               class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                        <p x-show="offerTouched.lokasi && offerErrors.lokasi" x-text="offerErrors.lokasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                     </div>
 
                     <!-- Deskripsi Rincian -->
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                            Rincian Layanan & Catatan Khusus
+                            Rincian Layanan & Catatan Khusus <span class="text-rose-500">*</span>
                         </label>
-                        <textarea x-model="offerForm.deskripsi" 
-                                  rows="3" 
+                        <textarea x-ref="offerDeskripsi"
+                                  x-model="offerForm.deskripsi"
+                                  @input="offerTouched.deskripsi = true; validateOfferField('deskripsi')"
+                                  @blur="offerTouched.deskripsi = true; validateOfferField('deskripsi')"
+                                  rows="3"
                                   placeholder="Tuliskan detail paket, output file foto, akomodasi, atau catatan yang disepakati..."
-                                  class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none transition resize-none"></textarea>
+                                  :class="offerTouched.deskripsi && offerErrors.deskripsi ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                  class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition resize-none"></textarea>
+                        <p x-show="offerTouched.deskripsi && offerErrors.deskripsi" x-text="offerErrors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                     </div>
 
                     <!-- Action Buttons: Centered, Batal on Left, Max 2 buttons (Rule #59 & Rule #74) -->
@@ -916,6 +942,24 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             durasi_jam: 3,
             lokasi: '',
             harga: '',
+            deskripsi: ''
+        },
+        offerTouched: {
+            judul_penawaran: false,
+            harga: false,
+            durasi_jam: false,
+            booking_date: false,
+            booking_time: false,
+            lokasi: false,
+            deskripsi: false
+        },
+        offerErrors: {
+            judul_penawaran: '',
+            harga: '',
+            durasi_jam: '',
+            booking_date: '',
+            booking_time: '',
+            lokasi: '',
             deskripsi: ''
         },
 
@@ -1506,6 +1550,29 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             return box.scrollHeight - box.scrollTop - box.clientHeight < 100;
         },
 
+        validateOfferField(field) {
+            const f = this.offerForm;
+            if (field === 'judul_penawaran') {
+                const v = (f.judul_penawaran || '').trim();
+                this.offerErrors.judul_penawaran = !v ? 'Judul penawaran wajib diisi.' : (v.length < 3 ? 'Judul penawaran minimal 3 karakter.' : '');
+            } else if (field === 'harga') {
+                const n = Number(f.harga);
+                this.offerErrors.harga = (f.harga === '' || f.harga === null) ? 'Total biaya penawaran wajib diisi.' : (isNaN(n) || n < 50000 ? 'Total biaya penawaran minimal Rp 50.000.' : '');
+            } else if (field === 'durasi_jam') {
+                const n = Number(f.durasi_jam);
+                this.offerErrors.durasi_jam = (f.durasi_jam === '' || f.durasi_jam === null) ? 'Durasi sesi wajib diisi.' : (!Number.isInteger(n) || n < 1 || n > 48 ? 'Durasi sesi harus antara 1 hingga 48 jam.' : '');
+            } else if (field === 'booking_date') {
+                const today = new Date().toISOString().split('T')[0];
+                this.offerErrors.booking_date = !f.booking_date ? 'Tanggal sesi wajib diisi.' : (f.booking_date < today ? 'Tanggal sesi minimal hari ini atau mendatang.' : '');
+            } else if (field === 'booking_time') {
+                this.offerErrors.booking_time = !f.booking_time ? 'Jam mulai wajib ditentukan.' : '';
+            } else if (field === 'lokasi') {
+                this.offerErrors.lokasi = !(f.lokasi || '').trim() ? 'Lokasi pemotretan wajib diisi.' : '';
+            } else if (field === 'deskripsi') {
+                this.offerErrors.deskripsi = !(f.deskripsi || '').trim() ? 'Rincian layanan dan catatan wajib diisi.' : '';
+            }
+        },
+
         closeOfferModal() {
             this.openOfferModal = false;
             this.offerForm = {
@@ -1517,9 +1584,35 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 harga: '',
                 deskripsi: ''
             };
+            Object.keys(this.offerTouched).forEach(k => this.offerTouched[k] = false);
+            Object.keys(this.offerErrors).forEach(k => this.offerErrors[k] = '');
         },
 
         submitCustomOffer() {
+            const fields = ['judul_penawaran', 'harga', 'durasi_jam', 'booking_date', 'booking_time', 'lokasi', 'deskripsi'];
+            fields.forEach(k => {
+                this.offerTouched[k] = true;
+                this.validateOfferField(k);
+            });
+            const refMap = {
+                judul_penawaran: this.$refs.offerJudul,
+                harga: this.$refs.offerHarga,
+                durasi_jam: this.$refs.offerDurasi,
+                booking_date: this.$refs.offerDate,
+                booking_time: this.$refs.offerTime,
+                lokasi: this.$refs.offerLokasi,
+                deskripsi: this.$refs.offerDeskripsi
+            };
+            const firstErrField = fields.find(k => !!this.offerErrors[k]);
+            if (firstErrField) {
+                const el = refMap[firstErrField];
+                if (el) {
+                    el.focus();
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
             if (!this.activeThreadId || this.offerSubmitting) return;
             this.offerSubmitting = true;
             const tokenEl = document.querySelector('meta[name=csrf-token]');
@@ -1544,9 +1637,17 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                     this.closeOfferModal();
                     const newMsg = data.chat_message || data.message;
                     this.messages.push(newMsg);
-                    this.(() => this.scrollToBottom());
+                    this.$nextTick(() => this.scrollToBottom());
                     this.showToastNotification('Penawaran khusus berhasil dikirim');
                 } else {
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(k => {
+                            if (k in this.offerErrors) {
+                                this.offerTouched[k] = true;
+                                this.offerErrors[k] = Array.isArray(data.errors[k]) ? data.errors[k][0] : data.errors[k];
+                            }
+                        });
+                    }
                     window.dispatchEvent(new CustomEvent('show-toast', { 
                         detail: { type: 'error', message: data.message || 'Gagal mengirim penawaran khusus' } 
                     }));

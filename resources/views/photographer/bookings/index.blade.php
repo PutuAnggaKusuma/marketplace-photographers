@@ -134,14 +134,28 @@
 
 
 
+    rateFormError: '',
+
     closeRateModal() {
 
 
 
         this.rateClientModal = false;
+        this.rateFormError = '';
 
 
 
+    },
+
+    submitRateClient(e) {
+        const ratings = [this.rateRating, this.rateKetepatanWaktu, this.rateKomunikasi, this.rateKerjasama];
+        if (ratings.some(r => !r || Number(r) < 1 || Number(r) > 5)) {
+            e.preventDefault();
+            this.rateFormError = 'Semua aspek penilaian wajib dipilih antara 1 sampai 5.';
+            return false;
+        }
+        this.rateFormError = '';
+        return true;
     },
 
 
@@ -1433,7 +1447,10 @@
                            this.touched = true;
                            if (!this.validateUrl()) {
                              e.preventDefault();
-                             this.$refs.urlInput?.focus();
+                             if (this.$refs.urlInput) {
+                               this.$refs.urlInput.focus();
+                               this.$refs.urlInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                             }
                              return false;
                            }
                            return true;
@@ -1704,7 +1721,10 @@
                           this.touched = true;
                           if (!this.validateAlasan()) {
                             e.preventDefault();
-                            this.$refs.alasanInput?.focus();
+                            if (this.$refs.alasanInput) {
+                              this.$refs.alasanInput.focus();
+                              this.$refs.alasanInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                             return false;
                           }
                           return true;
@@ -1975,6 +1995,10 @@
                             this.errors.date = 'Tanggal baru wajib dipilih.';
                             return false;
                           }
+                          if (this.rescheduleDate < '{{ date('Y-m-d') }}') {
+                            this.errors.date = 'Tanggal baru minimal hari ini atau mendatang.';
+                            return false;
+                          }
                           this.errors.date = '';
                           return true;
                         },
@@ -1997,8 +2021,13 @@
                           const rOk = this.validateReason();
                           if (!dOk || !rOk) {
                             e.preventDefault();
-                            if (!dOk && this.$refs.rescheduleDateInput) this.$refs.rescheduleDateInput.focus();
-                            else if (!rOk && this.$refs.rescheduleReasonInput) this.$refs.rescheduleReasonInput.focus();
+                            if (!dOk && this.$refs.rescheduleDateInput) {
+                              this.$refs.rescheduleDateInput.focus();
+                              this.$refs.rescheduleDateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            } else if (!rOk && this.$refs.rescheduleReasonInput) {
+                              this.$refs.rescheduleReasonInput.focus();
+                              this.$refs.rescheduleReasonInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                             return false;
                           }
                           return true;
@@ -2021,7 +2050,6 @@
                                    x-model="rescheduleDate"
                                    @input="touched.date = true; validateDate()"
                                    @blur="touched.date = true; validateDate()"
-                                   min="{{ date('Y-m-d') }}" 
                                    :class="touched.date && errors.date ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                                    class="w-full px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border rounded-xl focus:ring-2 focus:outline-none transition">
                             <p x-show="touched.date && errors.date" x-text="errors.date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
@@ -2203,8 +2231,6 @@
 
 
                     <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59, #74, #76) -->
-
-
 
                     <div class="pt-2 flex items-center justify-center gap-3">
 
@@ -2426,7 +2452,7 @@
 
 
 
-                <form :action="'/photographer/bookings/' + rateContractId + '/rate-client'" method="POST" class="mt-5 space-y-4 text-left">
+                <form :action="'/photographer/bookings/' + rateContractId + '/rate-client'" method="POST" novalidate @submit="submitRateClient($event)" class="mt-5 space-y-4 text-left">
 
 
 
@@ -2956,7 +2982,7 @@
 
                     <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59, #74, #76) -->
 
-
+                    <p x-show="rateFormError" x-text="rateFormError" x-cloak class="text-[11px] font-bold text-red-500 text-center"></p>
 
                     <div class="pt-2 flex items-center justify-center gap-3">
 

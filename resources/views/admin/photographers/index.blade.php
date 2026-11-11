@@ -25,27 +25,27 @@
 
     <!-- 4 Clean Summary Metric Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Total Studio -->
+        <!-- Card 1: Total Mitra -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Mitra Fotografer</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStudios }} Fotografer</h2>
         </div>
 
-        <!-- Card 2: Terverifikasi -->
+        <!-- Card 2: Tayang di Katalog -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Fotografer Terverifikasi</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified }} Fotografer</h2>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Tayang di Katalog</span>
+            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPublished }} Fotografer</h2>
         </div>
 
-        <!-- Card 3: Menunggu Verifikasi -->
+        <!-- Card 3: Menunggu Review -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Verifikasi</span>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Review</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPending }} Fotografer</h2>
         </div>
 
         <!-- Card 4: Ditolak -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pendaftaran Ditolak</span>
+            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak</span>
             <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected }} Fotografer</h2>
         </div>
     </div>
@@ -61,8 +61,10 @@
                 @php
                     $statusLabels = [
                         'all' => 'Semua Status (' . $totalStudios . ')',
-                        'pending' => 'Menunggu (' . $totalPending . ')',
-                        'verified' => 'Terverifikasi (' . $totalVerified . ')',
+                        'pending' => 'Menunggu Profil (' . $totalPendingProfile . ')',
+                        'pending_storefront' => 'Review Etalase (' . $totalPendingStorefront . ')',
+                        'setup_storefront' => 'Lengkapi Etalase (' . $totalSetupStorefront . ')',
+                        'published' => 'Tayang (' . $totalPublished . ')',
                         'rejected' => 'Ditolak (' . $totalRejected . ')'
                     ];
                     $curStatusName = $statusLabels[$statusFilter] ?? 'Semua Status';
@@ -227,17 +229,29 @@
 
                             <!-- Status -->
                             <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                                @if($photo->status_verifikasi === 'terverifikasi')
-                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                                        Terverifikasi
-                                    </span>
-                                @elseif($photo->status_verifikasi === 'ditolak')
+                                @if($photo->status_verifikasi === 'ditolak')
                                     <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
-                                        Ditolak
+                                        Profil Ditolak
+                                    </span>
+                                @elseif($photo->status_verifikasi !== 'terverifikasi')
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                        Menunggu Profil
+                                    </span>
+                                @elseif($photo->isPublishedToCatalog())
+                                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                                        Tayang
+                                    </span>
+                                @elseif($photo->status_etalase === 'menunggu')
+                                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
+                                        Review Etalase
+                                    </span>
+                                @elseif($photo->status_etalase === 'ditolak')
+                                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                                        Etalase Ditolak
                                     </span>
                                 @else
-                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                                        Menunggu
+                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
+                                        Lengkapi Etalase
                                     </span>
                                 @endif
                             </td>
@@ -295,7 +309,7 @@
                 </p>
             </div>
 
-            <form :action="deleteActionUrl" method="POST" class="space-y-4" x-data="{
+            <form :action="deleteActionUrl" method="POST" novalidate class="space-y-4" x-data="{
                 categoryOpen: false,
                 selectedCategory: '',
                 alasanText: '',

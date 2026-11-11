@@ -47,13 +47,16 @@ class BookingController extends Controller
         $photographerId = $request->input('photographer_id');
 
         if (!$photographerId) {
-
-            $photographer = RolePhotographer::firstOrFail();
-
+            $photographer = RolePhotographer::published()->with(['services.details', 'user', 'province', 'city'])->first();
+            if (!$photographer) {
+                return redirect()->route('public.photographers.katalog')
+                    ->with('warning', 'Belum ada fotografer yang siap menerima pemesanan.');
+            }
         } else {
-
             $photographer = RolePhotographer::with(['services.details', 'user', 'province', 'city'])->findOrFail($photographerId);
-
+            if (!$photographer->isPublishedToCatalog()) {
+                abort(404, 'Etalase fotografer ini belum aktif untuk pemesanan.');
+            }
         }
 
 
@@ -233,6 +236,11 @@ class BookingController extends Controller
         $tanggalSesi = $request->input('tanggal_sesi');
 
         $photographerId = $request->input('photographer_id');
+
+        $targetPhotographer = RolePhotographer::findOrFail($photographerId);
+        if (!$targetPhotographer->isPublishedToCatalog()) {
+            return redirect()->back()->withInput()->with('error', 'Etalase fotografer belum aktif untuk menerima pemesanan.');
+        }
 
 
 

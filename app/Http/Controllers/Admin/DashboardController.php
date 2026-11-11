@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $totalUsers = User::count();
         $totalClients = User::where('role', 'client')->count();
         $totalPhotographers = User::where('role', 'photographer')->count();
-        $verifiedPhotographers = RolePhotographer::count();
+        $verifiedPhotographers = RolePhotographer::where('status_verifikasi', 'terverifikasi')->count();
         $totalContracts = Contract::count();
         
         $elearningRevenue = \App\Models\ElearningTransaction::where('payment_status', 'completed')->sum('nominal');
@@ -32,7 +32,13 @@ class DashboardController extends Controller
         $escrowHolding = Contract::whereIn('status_payout', ['holding', 'ready'])->sum('jumlah');
         
         // 2. Actionable Operational Alerts (100% Dynamic)
-        $pendingVerifications = RolePhotographer::where('is_verified', false)->count();
+        $pendingVerifications = RolePhotographer::where(function ($q) {
+            $q->where('status_verifikasi', 'menunggu')
+              ->orWhere(function ($q2) {
+                  $q2->where('status_verifikasi', 'terverifikasi')
+                     ->where('status_etalase', 'menunggu');
+              });
+        })->count();
         $pendingPayouts = Contract::where('status_payout', 'ready')->count();
         $pendingContestReviews = PhotoContest::where('status', 'pending')->count();
 
