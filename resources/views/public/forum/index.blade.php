@@ -458,7 +458,7 @@
 
       <div class="flex min-h-full items-center justify-center p-4 sm:p-6 lg:p-8">
 
-        <div class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl lg:max-w-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 lg:p-10 space-y-6"
+        <div class="relative transform overflow-hidden rounded-3xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-2xl lg:max-w-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 lg:p-10 flex flex-col gap-6"
 
              x-data="forumPostUpload()"
 
@@ -468,7 +468,7 @@
 
           <!-- Modal Header (Rule #59 Compliant: Centered without Icon, NO X button) -->
 
-          <div class="border-b border-gray-100 dark:border-gray-700/70 pb-5 text-center space-y-1">
+          <div class="border-b border-gray-100 dark:border-gray-700/70 pb-5 text-center flex flex-col gap-1">
 
             <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight text-center">
 
@@ -487,11 +487,11 @@
 
 
           <!-- Form Element -->
-          <form action="{{ route('public.forum.store') }}" method="POST" enctype="multipart/form-data" @submit="submitPost($event)" novalidate class="space-y-5">
+          <form action="{{ route('public.forum.store') }}" method="POST" enctype="multipart/form-data" @submit="submitPost($event)" novalidate class="flex flex-col gap-5">
             @csrf
 
             <!-- Field 1: Judul Topik Diskusi -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Judul Topik Diskusi <span class="text-rose-500">*</span>
               </label>
@@ -505,12 +505,12 @@
                      placeholder="mis. Rekomendasi Lensa 85mm f/1.4 vs 50mm f/1.2 untuk Sesi Outdoor..." 
                      class="w-full px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:ring-2 transition shadow-xs"
                      :class="touched.judul && errors.judul ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'">
-              <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.judul && errors.judul" x-text="errors.judul" x-cloak class="text-[11px] font-bold text-red-500"></p>
               <p class="text-[11px] text-gray-400">Tuliskan judul yang spesifik agar memudahkan fotografer lain menemukan topik Anda.</p>
             </div>
 
             <!-- Field 2: Kategori Topik Diskusi (Rule #11 Compliant Custom Alpine.js Dropdown) -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kategori Diskusi <span class="text-rose-500">*</span>
               </label>
@@ -543,11 +543,11 @@
                   </template>
                 </div>
               </div>
-              <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
 
             <!-- Field 3: Penjelasan & Detail Isi Diskusi -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Penjelasan & Isi Diskusi <span class="text-rose-500">*</span>
               </label>
@@ -560,7 +560,7 @@
                         placeholder="Tuliskan pertanyaan, detail permasalahan, lokasi, setting ISO/shutter speed, atau konteks pembahasan Anda secara lengkap..." 
                         class="w-full min-h-[140px] px-4 py-3 rounded-xl border bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none resize-y focus:ring-2 transition shadow-xs leading-relaxed"
                         :class="touched.deskripsi && errors.deskripsi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"></textarea>
-              <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500"></p>
               <p class="text-[11px] text-gray-400">Uraikan detail secara jelas untuk mendapatkan respon dan solusi yang akurat.</p>
             </div>
 
@@ -568,7 +568,7 @@
 
             <!-- Field 3: Multi-Photo Upload (Max 5 Photos) -->
 
-            <div class="space-y-2 pt-1">
+            <div class="flex flex-col gap-2">
 
               <div class="flex items-center justify-between flex-wrap gap-2">
 
@@ -625,9 +625,11 @@
                      'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500 cursor-pointer': photos.length < 5 && !isDragging && !errorMsg
                    }"
                    class="w-full min-h-[140px] sm:min-h-[150px] px-6 py-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-2 transition outline-none">
-                <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
-                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto dari perangkat</span>
-                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 transition-colors" :class="isDragging && !errorMsg && photos.length < 5 ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <p class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">
+                  Seret dan lepas di sini
                 </p>
                 <p class="text-xs text-gray-400 dark:text-gray-500 font-medium max-w-md leading-relaxed">
                   Format JPG, PNG, WEBP. Maksimal 5 foto, masing-masing 10 MB.
@@ -635,7 +637,7 @@
               </div>
 
               <!-- Validation Error Message Alert -->
-              <p x-show="errorMsg" x-text="errorMsg" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="errorMsg" x-text="errorMsg" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
               <!-- Live Image Previews Grid (Clean Cards + Lightbox + Per-File Remove) -->
               <div x-show="photos.length > 0" x-cloak class="pt-2">
@@ -671,7 +673,7 @@
 
             <!-- Modal Action Buttons Footer (Rule #74 Standard: Batal di samping kiri tombol kuning, rata kanan gap-3) -->
 
-            <div class="flex items-center justify-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/80">
+            <div class="flex items-center justify-center gap-3 pt-5 border-t border-gray-100 dark:border-gray-700/80">
 
               <button type="button" 
 
@@ -711,7 +713,7 @@
          aria-modal="true">
       <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="loginRequiredModal = false"></div>
       <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4" @click.stop>
           
           <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
           <button type="button" @click="loginRequiredModal = false" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1">
@@ -729,7 +731,7 @@
           </p>
 
           <!-- Action Button -->
-          <div class="pt-1">
+          <div>
             <a href="{{ route('login', ['redirect' => route('public.forum.index')]) }}" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
               Masuk ke Akun
             </a>

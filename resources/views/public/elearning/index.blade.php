@@ -435,29 +435,31 @@
         @endforelse
       </div>
 
-      <!-- Prominent "Lihat Lebih Banyak Modul" CTA Button Container -->
-      <div class="pt-8 text-center">
-        @if($isHoldPhotographer)
-          <button type="button"
-                  @click="openPhotographerHoldModal('mengakses materi E-Learning')"
-                  class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group cursor-pointer">
-            <span>Lihat Lebih Banyak Modul</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-          </button>
-        @elseif(auth()->check())
-          <a href="{{ route('public.elearning.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
-            <span>Lihat Lebih Banyak Modul</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-          </a>
-        @else
-          <button type="button" 
-                  @click="openGuestLoginModal('{{ route('public.elearning.katalog') }}', 'Katalog Modul Edukasi')"
-                  class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group cursor-pointer">
-            <span>Lihat Lebih Banyak Modul</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-          </button>
-        @endif
-      </div>
+      {{-- CTA "Lihat Lebih Banyak Modul" hanya tampil jika total data > 6 preview --}}
+      @if($totalCourses > 6)
+        <div class="pt-8 text-center">
+          @if($isHoldPhotographer)
+            <button type="button"
+                    @click="openPhotographerHoldModal('mengakses materi E-Learning')"
+                    class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group cursor-pointer">
+              <span>Lihat Lebih Banyak Modul</span>
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+            </button>
+          @elseif(auth()->check())
+            <a href="{{ route('public.elearning.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
+              <span>Lihat Lebih Banyak Modul</span>
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+            </a>
+          @else
+            <button type="button" 
+                    @click="openGuestLoginModal('{{ route('public.elearning.katalog') }}', 'Katalog Modul Edukasi')"
+                    class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group cursor-pointer">
+              <span>Lihat Lebih Banyak Modul</span>
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+            </button>
+          @endif
+        </div>
+      @endif
 
     </div>
     </section>
@@ -478,7 +480,7 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4">
         
         <!-- Plain Close Button Absolute Top Right -->
         <button type="button" @click="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
@@ -494,7 +496,7 @@
         </p>
 
         <!-- Action Button -->
-        <div class="pt-1">
+        <div>
           <a :href="'{{ route('login') }}?redirect=' + encodeURIComponent(targetRedirectUrl)" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
             Masuk ke Akun
           </a>

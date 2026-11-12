@@ -17,36 +17,36 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Topik Diskusi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Topik Diskusi</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPosts }} Topik</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Topik Diskusi</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPosts }} Topik</h2>
         </div>
 
         <!-- Card 2: Total Balasan Komentar -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Balasan Komentar</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalComments }} Balasan</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Balasan Komentar</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalComments }} Balasan</h2>
         </div>
 
         <!-- Card 3: Topik Bulan Ini -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Bulan Ini</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $thisMonthPosts }} Topik</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Bulan Ini</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $thisMonthPosts }} Topik</h2>
         </div>
 
         <!-- Card 4: Topik Paling Ramai -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Paling Ramai</span>
-            <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight truncate" title="{{ $topPost ? $topPost->judul : '-' }}">{{ $topPost ? $topPost->judul : '-' }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Topik Paling Ramai</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight truncate" title="{{ $topPost ? $topPost->judul : '-' }}">{{ $topPost ? $topPost->judul : '-' }}</h2>
         </div>
     </div>
 
     </div>
 
     <!-- Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Sort (Alpine.js Custom Floating Dropdown) -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <!-- Filter Urutan di Kiri -->
             <div class="flex items-center gap-3 w-full md:w-auto">
                 @php
@@ -107,16 +107,16 @@
                         <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                             <!-- Judul & Ringkasan -->
                             <td class="py-4 px-4 sm:px-6 space-y-1">
-                                <a href="{{ route('public.forum.show', $post->id) }}" target="_blank" class="font-extrabold text-gray-900 dark:text-white hover:text-amber-500 transition line-clamp-1">
+                                <a href="{{ route('public.forum.show', $post->id) }}" target="_blank" class="text-xs font-extrabold text-gray-900 dark:text-white hover:text-amber-500 transition line-clamp-1">
                                     {{ $post->judul }}
                                 </a>
-                                <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 leading-relaxed">{{ $post->deskripsi }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 leading-relaxed">{{ $post->deskripsi }}</p>
                             </td>
 
                             <!-- Penulis -->
                             <td class="py-4 px-4 sm:px-6">
-                                <div class="font-bold text-gray-900 dark:text-white">{{ $post->user->nama ?? 'Anggota Komunitas' }}</div>
-                                <div class="text-[10px] text-gray-400 truncate">{{ $post->user->email ?? '-' }}</div>
+                                <div class="text-xs font-bold text-gray-900 dark:text-white">{{ $post->user->nama ?? 'Anggota Komunitas' }}</div>
+                                <div class="text-xs text-gray-400 truncate">{{ $post->user->email ?? '-' }}</div>
                             </td>
 
                             <!-- Tanggal Rilis -->

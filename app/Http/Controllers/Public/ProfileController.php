@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Validation\Rule;
+
 use Illuminate\Validation\Rules\Password;
 
 
@@ -52,12 +54,13 @@ class ProfileController extends Controller
                 ['nama' => $user->nama]
             );
             $provinces = \Laravolt\Indonesia\Models\Province::orderBy('name', 'asc')->get();
-            $categories = \App\Models\Category::all();
+            $categories = \App\Models\Category::orderBy('nama_kategori', 'asc')->get();
+            $usedCategoryCounts = $photographer->getUsedPortfolioCategoryCounts();
             $cities = $photographer->province_code 
                 ? \Laravolt\Indonesia\Models\City::where('province_code', $photographer->province_code)->orderBy('name', 'asc')->get()
                 : collect();
 
-            return view('photographer.profile.index', compact('user', 'photographer', 'provinces', 'categories', 'cities'));
+            return view('photographer.profile.index', compact('user', 'photographer', 'provinces', 'categories', 'usedCategoryCounts', 'cities'));
         }
 
 
@@ -116,7 +119,7 @@ class ProfileController extends Controller
 
             'categories' => 'nullable|array',
 
-            'categories.*' => 'exists:categories,id',
+            'categories.*' => ['integer', Rule::exists('categories', 'id')->whereNull('deleted_at')],
 
             'deskripsi_bio' => 'nullable|string|max:2000',
 
@@ -150,7 +153,41 @@ class ProfileController extends Controller
 
         ]);
 
+        $photographer = null;
+        $categoriesProvided = false;
+        $submittedCategories = [];
 
+        if ($user->role === 'photographer') {
+            $photographer = RolePhotographer::where('id_user', $user->id)->first();
+            $categoriesProvided = $request->has('categories') || $request->boolean('categories_submitted');
+
+            if ($photographer && $categoriesProvided) {
+                $submittedCategories = array_values(array_unique(array_map('intval', $request->input('categories', []))));
+                $usedCategoryCounts = $photographer->getUsedPortfolioCategoryCounts();
+
+                if (!empty($usedCategoryCounts)) {
+                    $missingUsedIds = array_diff(array_keys($usedCategoryCounts), $submittedCategories);
+                    if (!empty($missingUsedIds)) {
+                        $blockedNames = \App\Models\Category::whereIn('id', $missingUsedIds)
+                            ->pluck('nama_kategori', 'id');
+
+                        $blockedLabels = [];
+                        foreach ($missingUsedIds as $missingId) {
+                            $catName = $blockedNames[$missingId] ?? "Kategori #{$missingId}";
+                            $cnt = $usedCategoryCounts[$missingId] ?? 1;
+                            $blockedLabels[] = "{$catName} ({$cnt} portofolio)";
+                        }
+
+                        $errorMsg = 'Kategori berikut tidak dapat dihapus karena masih digunakan portofolio: ' . implode(', ', $blockedLabels) . '.';
+
+                        return redirect()->back()
+                            ->withErrors(['categories' => $errorMsg])
+                            ->with('error', $errorMsg)
+                            ->withInput();
+                    }
+                }
+            }
+        }
 
         $user->update([
 
@@ -163,8 +200,6 @@ class ProfileController extends Controller
 
 
         if ($user->role === 'photographer') {
-
-            $photographer = RolePhotographer::where('id_user', $user->id)->first();
 
             if ($photographer) {
 
@@ -220,10 +255,11 @@ class ProfileController extends Controller
 
 
                 $wasRejected = ($photographer->status_verifikasi === 'ditolak');
+                $wasComplete = $photographer->isProfileComplete();
                 $photographer->update($photoData);
 
-                if ($request->has('categories')) {
-                    $photographer->categories()->sync($request->categories);
+                if ($categoriesProvided) {
+                    $photographer->categories()->sync($submittedCategories);
                 }
 
                 $isComplete = $photographer->fresh(['categories'])->isProfileComplete();
@@ -232,6 +268,7 @@ class ProfileController extends Controller
                 if ($wasRejected) {
                     $updatePayload['status_verifikasi'] = 'menunggu';
                     $updatePayload['is_verified'] = false;
+                    $updatePayload['catatan_penolakan'] = null;
                 }
 
                 $photographer->update($updatePayload);
@@ -255,6 +292,25 @@ class ProfileController extends Controller
                     }
 
                     return redirect()->back()->with('success', 'Profil berhasil diperbarui dan diajukan kembali ke Admin untuk verifikasi!');
+                }
+
+                if (!$wasComplete && $isComplete && $photographer->status_verifikasi === 'menunggu') {
+                    \App\Models\ActivityLog::record(
+                        'photographer_profile_completed',
+                        "Fotografer '{$photographer->nama}' telah melengkapi profil dan siap diverifikasi Admin.",
+                        $photographer
+                    );
+
+                    $admins = User::whereIn('role', ['admin', 'super_admin'])->get();
+                    foreach ($admins as $admin) {
+                        \App\Models\Notification::send(
+                            $admin->id,
+                            'Profil Fotografer Siap Verifikasi',
+                            "Fotografer '{$photographer->nama}' telah melengkapi profil 100% dan menunggu verifikasi Admin.",
+                            'photographer_verification',
+                            route('admin.photographers.show', $photographer->id)
+                        );
+                    }
                 }
 
             }

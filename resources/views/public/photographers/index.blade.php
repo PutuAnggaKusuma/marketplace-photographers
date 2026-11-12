@@ -218,7 +218,7 @@
             Fotografer Pilihan Bulan Ini
           </h2>
           <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-            Fotografer terverifikasi dengan ulasan bintang lima, portofolio memukau, dan jaminan pembayaran aman.
+            Fotografer terverifikasi dengan performa sesi dan ulasan terbaik.
           </p>
         </div>
 
@@ -227,7 +227,7 @@
 
       <!-- Featured Photographers 4-Equal Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-        @foreach($featuredPhotographers as $p)
+        @forelse($featuredPhotographers as $p)
           @php
             $lowestPrice = $p->services->where('tarif_harga', '>', 0)->min('tarif_harga');
             $coverPortfolio = $p->portfolios->first()?->medias?->first()?->media;
@@ -252,13 +252,9 @@
                 @endif
                 <!-- Rating Badge Top-Right -->
                 <div class="absolute top-4 right-4 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                  @if($rating)
-                    <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    <span>{{ $rating }}</span>
-                    <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
-                  @else
-                    <span class="text-amber-500 text-[11px] font-bold">Baru</span>
-                  @endif
+                  <svg class="w-3.5 h-3.5 {{ $rating ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600' }} fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <span>{{ $rating ?? 0 }}</span>
+                  <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
                 </div>
               </div>
 
@@ -330,16 +326,28 @@
             </div>
 
           </div>
-        @endforeach
+        @empty
+          <div class="col-span-full bg-white dark:bg-gray-800 p-12 sm:p-16 rounded-3xl border border-gray-200 dark:border-gray-700 text-center space-y-3 shadow-xs">
+            <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>
+            </div>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white">Belum Ada Fotografer</h3>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+              Belum ada fotografer yang tayang saat ini.
+            </p>
+          </div>
+        @endforelse
       </div>
 
-      <!-- Prominent "Lihat Lebih Banyak Fotografer" CTA Button Container -->
-      <div class="pt-6 text-center">
-        <a href="{{ route('public.photographers.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
-          <span>Lihat Lebih Banyak Fotografer</span>
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-        </a>
-      </div>
+      {{-- CTA "Lihat Lebih Banyak Fotografer" hanya tampil jika total data > 4 preview --}}
+      @if($totalPhotographers > 4)
+        <div class="pt-6 text-center">
+          <a href="{{ route('public.photographers.katalog') }}" class="inline-flex items-center justify-center gap-2.5 px-9 py-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-sm rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-0.5 group">
+            <span>Lihat Lebih Banyak Fotografer</span>
+            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+          </a>
+        </div>
+      @endif
 
     </section>
 

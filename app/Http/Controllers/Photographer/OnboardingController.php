@@ -73,8 +73,13 @@ class OnboardingController extends Controller
                 'is_onboarded' => true,
             ]);
 
-            // 2. Hubungkan kategori spesialisasi terpilih
-            $photographer->categories()->sync($request->categories);
+            // 2. Hubungkan kategori spesialisasi terpilih (pertahankan kategori yang sedang dipakai portofolio)
+            $usedCategoryIds = array_keys($photographer->getUsedPortfolioCategoryCounts());
+            $categoriesToSync = array_values(array_unique(array_merge(
+                array_map('intval', $request->categories ?? []),
+                $usedCategoryIds
+            )));
+            $photographer->categories()->sync($categoriesToSync);
 
             // 3. Terbitkan paket layanan perdana
             PhotographerService::create([

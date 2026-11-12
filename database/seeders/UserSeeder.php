@@ -77,24 +77,65 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 5. Client (Dian & Febri)
-        $clientUser = User::updateOrCreate(
-            ['email' => 'dian@gmail.com'],
+        // 5. Clients (6 Akun Klien Terpisah agar Data Kontrak, Invoice, & Ulasan Terisolasi)
+        $clients = [
             [
-                'nama' => 'Dian & Febri',
-                'password' => Hash::make('password123'),
-                'role' => 'client',
-                'is_protected' => false,
-                'email_verified_at' => now(),
-            ]
-        );
-        RoleClient::updateOrCreate(
-            ['id_user' => $clientUser->id],
-            [
+                'email' => 'dian@gmail.com',
                 'nama' => 'Dian & Febri',
                 'nomor_telepon' => '081234567899',
                 'alamat' => 'Jakarta Selatan',
-            ]
-        );
+            ],
+            [
+                'email' => 'mahkota@event.com',
+                'nama' => 'PT Mahkota Event Organizer',
+                'nomor_telepon' => '081999888777',
+                'alamat' => 'Semarang',
+            ],
+            [
+                'email' => 'bulilik@kuliner.com',
+                'nama' => 'Bu Lilik Kuliner Nusantara',
+                'nomor_telepon' => '081567891234',
+                'alamat' => 'Bandung',
+            ],
+            [
+                'email' => 'reza.itb@gmail.com',
+                'nama' => 'Reza Pratama',
+                'nomor_telepon' => '081387654321',
+                'alamat' => 'Yogyakarta',
+            ],
+            [
+                'email' => 'siti.rahma@gmail.com',
+                'nama' => 'Siti Rahmawati',
+                'nomor_telepon' => '085712345678',
+                'alamat' => 'Surabaya',
+            ],
+            [
+                'email' => 'finance@baliluxury.com',
+                'nama' => 'PT Bali Luxury Resort',
+                'nomor_telepon' => '08113987654',
+                'alamat' => 'Seminyak, Bali',
+            ],
+        ];
+
+        foreach ($clients as $c) {
+            $clientUser = User::updateOrCreate(
+                ['email' => $c['email']],
+                [
+                    'nama' => $c['nama'],
+                    'password' => Hash::make('password123'),
+                    'role' => 'client',
+                    'is_protected' => false,
+                    'email_verified_at' => now(),
+                ]
+            );
+            RoleClient::updateOrCreate(
+                ['id_user' => $clientUser->id],
+                [
+                    'nama' => $c['nama'],
+                    'nomor_telepon' => $c['nomor_telepon'],
+                    'alamat' => $c['alamat'],
+                ]
+            );
+        }
     }
 }

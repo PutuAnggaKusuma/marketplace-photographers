@@ -112,7 +112,7 @@
 
         <main class="{{ request()->routeIs('photographer.chat*') ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : '' }}">
           <div class="{{ request()->routeIs('photographer.chat*') ? 'w-full h-full min-h-0 flex-1 flex flex-col p-0 overflow-hidden' : 'p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6' }}">
-            @if(!request()->routeIs('photographer.chat*')
+            @if(!request()->routeIs('photographer.chat*', 'photographer.*.create', 'photographer.*.edit')
                 && $layoutPhotographer
                 && !$layoutPhotographer->isPublishedToCatalog()
                 && (!request()->routeIs('photographer.dashboard') || !$layoutPhotographer->isFeatureUnlocked()))

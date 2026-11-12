@@ -28,26 +28,26 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       <!-- Card 1: Total Semua Invoice -->
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Tagihan</span>
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Tagihan</h2>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Tagihan</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Tagihan</h2>
       </div>
 
       <!-- Card 2: Menunggu Pembayaran -->
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Bayar</span>
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Tagihan</h2>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Bayar</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Tagihan</h2>
       </div>
 
       <!-- Card 3: Pembayaran Lunas -->
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Lunas</span>
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Tagihan</h2>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Lunas</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Tagihan</h2>
       </div>
 
       <!-- Card 4: Total Nominal Terbayar -->
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Terbayar</span>
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($stats['paid_amount'] ?? 0, 0, ',', '.') }}</h2>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Terbayar</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($stats['paid_amount'] ?? 0, 0, ',', '.') }}</h2>
       </div>
     </div>
 
@@ -88,10 +88,10 @@
     </div>
 
     <!-- Data Table Card (Following Dashboard Table Standard) -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-0">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
       
       <!-- Toolbar: Filter Status di Kiri, Search Bar di Kanan -->
-      <div class="p-4 border-b border-gray-100 dark:border-gray-700/80 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
         
         <!-- Filter Status (Alpine.js Custom Floating Dropdown) -->
         <div class="flex items-center gap-3 w-full md:w-auto">
@@ -164,16 +164,16 @@
                 <!-- Nomor Invoice -->
                 <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
                   <span class="font-mono text-xs font-black text-gray-900 dark:text-white block">{{ $invoiceCode }}</span>
-                  <span class="text-[10px] text-gray-400 dark:text-gray-500 block mt-0.5">{{ $c->created_at->translatedFormat('d M Y, H:i') }}</span>
+                  <span class="text-xs text-gray-400 dark:text-gray-500 block mt-0.5">{{ $c->created_at->translatedFormat('d M Y, H:i') }}</span>
                 </td>
 
                 <!-- Layanan -->
                 <td class="py-4 px-4 sm:px-6 align-middle">
                   <div class="space-y-0.5">
-                    <span class="font-bold text-gray-900 dark:text-white block text-xs sm:text-sm">
+                    <span class="font-bold text-gray-900 dark:text-white block text-xs">
                       {{ $c->bookingDetail->service->nama_layanan ?? 'Sesi Fotografi' }}
                     </span>
-                    <span class="text-[11px] text-gray-500 dark:text-gray-400 block">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">
                       Jadwal: {{ $c->bookingDetail && $c->bookingDetail->booking_date ? \Carbon\Carbon::parse($c->bookingDetail->booking_date)->translatedFormat('d M Y') : '-' }}
                     </span>
                   </div>
@@ -188,15 +188,15 @@
                          class="w-8 h-8 rounded-full object-cover border border-amber-400 shrink-0" />
                     <div>
                       <span class="font-bold text-gray-900 dark:text-white block">{{ $c->photographer->nama ?? 'Fotografer' }}</span>
-                      <span class="text-[11px] text-gray-500 dark:text-gray-400 block">{{ $c->photographer->city->name ?? $c->photographer->alamat ?? '-' }}</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 block">{{ $c->photographer->city->name ?? $c->photographer->alamat ?? '-' }}</span>
                     </div>
                   </div>
                 </td>
 
                 <!-- Total Tagihan -->
                 <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
-                  <span class="text-sm font-black text-gray-900 dark:text-white block">Rp {{ number_format($c->jumlah, 0, ',', '.') }}</span>
-                  <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium block">
+                  <span class="text-xs font-black text-gray-900 dark:text-white block">Rp {{ number_format($c->jumlah, 0, ',', '.') }}</span>
+                  <span class="text-xs text-gray-400 dark:text-gray-500 font-medium block">
                     {{ $isDp ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh (100%)' }}
                   </span>
                 </td>
@@ -236,7 +236,7 @@
             @empty
               <tr>
                 <td colspan="6" class="py-12 text-center space-y-3">
-                  <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Belum Ada Tagihan Pembayaran</h3>
+                  <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Belum Ada Tagihan Pembayaran</h3>
                   <p class="text-xs text-gray-500">Semua riwayat tagihan invoice sesi booking Anda akan ditampilkan di sini.</p>
                 </td>
               </tr>
@@ -271,7 +271,7 @@
                 <!-- Nomor Invoice -->
                 <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
                   {{ $el->invoice_code }}
-                  <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
+                  <span class="block text-xs font-normal text-gray-400 mt-0.5">
                     {{ $el->paid_at ? $el->paid_at->format('d M Y, H:i') : $el->created_at->format('d M Y, H:i') }}
                   </span>
                 </td>
@@ -281,7 +281,7 @@
                   <span class="font-extrabold text-gray-900 dark:text-white block">
                     {{ $el->elearning->judul ?? 'Kursus Fotografi' }}
                   </span>
-                  <span class="text-[11px] text-gray-500 capitalize">
+                  <span class="text-xs text-gray-500 capitalize">
                     Tingkat: {{ $el->elearning->tingkat ?? 'Semua Tingkat' }}
                   </span>
                 </td>
@@ -333,7 +333,7 @@
             @empty
               <tr>
                 <td colspan="6" class="py-12 text-center space-y-3">
-                  <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Belum Ada Transaksi E-Learning</h3>
+                  <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Belum Ada Transaksi E-Learning</h3>
                   <p class="text-xs text-gray-500">Materi e-learning berbayar yang telah Anda beli akan tercatat rapi di sini.</p>
                 </td>
               </tr>
@@ -361,7 +361,7 @@
                 <!-- Kode Registrasi -->
                 <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
                   REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
-                  <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
+                  <span class="block text-xs font-normal text-gray-400 mt-0.5">
                     {{ $cr->created_at->format('d M Y, H:i') }}
                   </span>
                 </td>
@@ -371,7 +371,7 @@
                   <span class="font-extrabold text-gray-900 dark:text-white block">
                     {{ $cr->contest->judul_lomba ?? 'Event Lomba Foto' }}
                   </span>
-                  <span class="text-[11px] text-gray-500 capitalize">
+                  <span class="text-xs text-gray-500 capitalize">
                     Kategori: {{ $cr->contest->kategori ?? '-' }}
                   </span>
                 </td>
@@ -420,7 +420,7 @@
             @empty
               <tr>
                 <td colspan="6" class="py-12 text-center space-y-3">
-                  <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Belum Ada Pendaftaran Lomba Berbayar</h3>
+                  <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Belum Ada Pendaftaran Lomba Berbayar</h3>
                   <p class="text-xs text-gray-500">Seluruh struk pembayaran pendaftaran event lomba foto Anda akan muncul di tab ini.</p>
                 </td>
               </tr>

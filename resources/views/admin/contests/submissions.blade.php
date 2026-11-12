@@ -188,9 +188,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Karya Masuk</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Karya Masuk</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Karya</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Karya</div>
 
         </div>
 
@@ -200,9 +200,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pemenang Juara</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pemenang Juara</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalWinners ?? 0 }} Juara</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalWinners ?? 0 }} Juara</div>
 
         </div>
 
@@ -212,9 +212,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Terverifikasi</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Terverifikasi</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified ?? 0 }} Karya</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified ?? 0 }} Karya</div>
 
         </div>
 
@@ -224,9 +224,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak / Diskualifikasi</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak / Diskualifikasi</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected ?? 0 }} Karya</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected ?? 0 }} Karya</div>
 
         </div>
 
@@ -276,13 +276,13 @@
 
     <!-- Standard Data Table Card -->
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
         
 
         <!-- Search Toolbar & Sort -->
 
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
             <div class="flex items-center gap-3 w-full md:w-auto">
 
@@ -448,7 +448,7 @@
 
                                     <div class="space-y-1 min-w-0">
 
-                                        <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight leading-snug hover:text-amber-600 transition cursor-pointer line-clamp-1"
+                                        <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight leading-snug hover:text-amber-600 transition cursor-pointer line-clamp-1"
 
                                             @click="openReview({{ json_encode($subPayload) }}, '{{ route('admin.contests.submission.winner', $sub->id) }}')">
 
@@ -456,7 +456,7 @@
 
                                         </h4>
 
-                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
 
                                             {{ $sub->deskripsi_karya ?: 'Tidak ada deskripsi tambahan.' }}
 
@@ -464,7 +464,7 @@
 
                                         @if($sub->media_link)
 
-                                            <a href="{{ $sub->media_link }}" target="_blank" rel="noopener noreferrer" class="inline-block text-[10px] font-semibold text-gray-900 dark:text-white underline">
+                                            <a href="{{ $sub->media_link }}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs font-semibold text-gray-900 dark:text-white underline">
 
                                                 Tautan Media Eksternal
 
@@ -492,13 +492,13 @@
 
                                     </span>
 
-                                    <span class="text-[11px] text-gray-400 block">
+                                    <span class="text-xs text-gray-400 block">
 
                                         {{ $sub->user->email ?? '-' }}
 
                                     </span>
 
-                                    <span class="text-[10px] text-gray-400 font-medium block pt-0.5">
+                                    <span class="text-xs text-gray-400 font-medium block pt-0.5">
 
                                         {{ $sub->created_at->diffForHumans() }}
 
@@ -574,7 +574,7 @@
 
                                 @if($sub->catatan_juri)
 
-                                    <p class="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2" title="{{ $sub->catatan_juri }}">
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2" title="{{ $sub->catatan_juri }}">
 
                                         "{{ $sub->catatan_juri }}"
 
@@ -678,7 +678,7 @@
 
             <!-- Modal Header (Rule #59 Compliant: Centered without Icon, NO X button) -->
 
-            <div class="p-5 border-b border-gray-100 dark:border-gray-700 text-center space-y-1">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-center">
 
                 
                 <h3 class="text-base font-black text-gray-900 dark:text-white tracking-tight text-center" x-text="selectedSubmission.judul_karya"></h3>
@@ -689,7 +689,7 @@
 
             <!-- Modal Body Scrollable -->
 
-            <div class="p-6 space-y-6 overflow-y-auto flex-1">
+            <div class="p-6 flex flex-col gap-6 overflow-y-auto flex-1">
 
                 <!-- Large Image Preview -->
 
@@ -707,7 +707,7 @@
 
                 <!-- Detail Info Section -->
 
-                <div class="space-y-3">
+                <div class="flex flex-col gap-3">
 
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
 
@@ -745,7 +745,7 @@
 
                     <template x-if="selectedSubmission.media_link">
 
-                        <div class="pt-1">
+                        <div>
 
                             <span class="text-gray-400 block text-[10px] uppercase font-bold mb-1">Tautan Media Eksternal</span>
 
@@ -761,7 +761,7 @@
 
                 <!-- Grading / Status Assignment Form -->
 
-                <form :action="selectedSubmission.update_url" method="POST" @submit="submitSubmissionReview($event)" novalidate class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <form :action="selectedSubmission.update_url" method="POST" @submit="submitSubmissionReview($event)" novalidate class="flex flex-col gap-4 pt-6 border-t border-gray-100 dark:border-gray-700">
 
                     @csrf
 
@@ -791,7 +791,7 @@
 
                     <!-- Status Selection Dropdown -->
 
-                    <div class="space-y-1.5" x-data="{
+                    <div class="flex flex-col gap-1.5" x-data="{
 
                         openModalDropdown: false,
 
@@ -872,7 +872,7 @@
 
                         </div>
 
-                        <p x-show="submissionStatusTouched && submissionStatusError" x-text="submissionStatusError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        <p x-show="submissionStatusTouched && submissionStatusError" x-text="submissionStatusError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
                     </div>
 
@@ -880,7 +880,7 @@
 
                     <!-- Catatan Juri Textarea -->
 
-                    <div class="space-y-1.5">
+                    <div class="flex flex-col gap-1.5">
 
                         <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 
@@ -904,7 +904,7 @@
 
                     <!-- Modal Actions (Rule #59 Compliant: Centered Buttons) -->
 
-                    <div class="flex items-center justify-center gap-3 pt-3">
+                    <div class="flex items-center justify-center gap-3">
 
                         <button type="button" @click="modalOpen = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition cursor-pointer">
 

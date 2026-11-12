@@ -118,7 +118,7 @@ return new class extends Migration
             }
 
             // Pastikan memiliki jam kerja mingguan
-            PhotographerWorkingHour::initializeDefaults((int) $photographer->id);
+            PhotographerWorkingHour::initializeDefaults((int) $photographer->id, true);
 
             $updateData = [
                 'is_onboarded' => true,

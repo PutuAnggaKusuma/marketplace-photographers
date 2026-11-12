@@ -98,9 +98,13 @@ class DashboardController extends Controller
         }
 
         // 5. Top 4 Performing Photographers
-        $topPhotographers = RolePhotographer::with(['user', 'province', 'city', 'categories', 'testimonials'])
+        $topPhotographers = RolePhotographer::with([
+            'user', 'province', 'city', 'categories',
+            'testimonials' => fn($q) => $q->where('is_hidden', false),
+        ])
             ->withCount(['contracts as completed_orders_count' => function ($q) {
-                $q->where('status_contract', 'completed');
+                $q->where('status_contract', 'completed')
+                  ->where('is_validated_client', true);
             }])
             ->orderByDesc('completed_orders_count')
             ->take(4)

@@ -20,6 +20,651 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-12 16:50 WITA] — Pembatasan Visibilitas Tombol Preview (`Lihat Lebih Banyak` / `Lihat Semua`) Berdasarkan Batas Jumlah Data
+
+* **Modul / Fitur**:
+  - Preview katalog modul pada `/elearning` ([elearning/index.blade.php](resources/views/public/elearning/index.blade.php)), preview fotografer pada `/fotografer` ([photographers/index.blade.php](resources/views/public/photographers/index.blade.php)), beranda `/` ([home.blade.php](resources/views/public/home.blade.php)), dashboard fotografer ([photographer/dashboard.blade.php](resources/views/photographer/dashboard.blade.php)), serta tabel transaksi terbaru dashboard admin ([table-01.blade.php](resources/views/partials/table/table-01.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/public/elearning/index.blade.php`
+  * `resources/views/public/photographers/index.blade.php`
+  * `resources/views/public/home.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/partials/table/table-01.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Tombol CTA preview (`Lihat Lebih Banyak Modul` di `/elearning`, `Lihat Lebih Banyak Fotografer` di `/fotografer`, `Lihat Katalog Lengkap (150+)` beserta kartu `Lihat Semua Kategori` di `/`, `Lihat Semua` di `Order Booking Masuk Terkini` dashboard fotografer, serta `Lihat Semua` di `partials/table/table-01.blade.php`) dirender tanpa syarat sehingga tetap tampil meskipun data kosong atau kurang dari batas maksimal preview UI.
+    - Tautan katalog di beranda `/` masih memuat angka hardcoded palsu `(150+)` serta mengarah ke `/fotografer` alih-alih `route('public.photographers.katalog')`, dan grid fotografer di `/` maupun `/fotografer` belum memiliki empty state.
+  * **After**:
+    - `/elearning`: tombol `Lihat Lebih Banyak Modul` hanya dirender saat `@if($totalCourses > 6)`.
+    - `/fotografer`: tombol `Lihat Lebih Banyak Fotografer` hanya dirender saat `@if($totalPhotographers > 4)` dan loop kartu menggunakan `@forelse` dengan empty state ringkas `Belum Ada Fotografer`.
+    - `/` (Beranda): kartu `Lihat Semua Kategori` hanya dirender saat `@if($categories->count() > 7)`; tautan `Lihat Katalog Lengkap` hanya dirender saat `@if($totalPhotographers > 4)` tanpa angka palsu `(150+)`, mengarah ke `route('public.photographers.katalog')`, disertai empty state `@forelse` pada grid fotografer.
+    - Dashboard Fotografer serta `table-01.blade.php`: tautan `Lihat Semua` masing-masing dibungkus kondisi `@if(($totalBookingsCount ?? 0) > 5)` serta `@if($totalContractsCount > 6)`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #51**, **Rule #70**, **Rule #94**, serta **Rule #104**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 801ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` pada kelima view serta 30 asersi HTTP Kernel (kondisi live DB 0/6/13/16 serta simulasi batas rolled-back `6` vs `7` modul E-Learning, `4` vs `0` fotografer, `7` kategori, dan `6` kontrak admin): **PASS** (`30/30 PASSED`).
+
+---
+
+### [2026-11-12 16:43 WITA] — Isolasi Data Klien Seeder & Logika Otomatis "Fotografer Pilihan Bulan Ini" Berbasis Performa
+
+* **Modul / Fitur**:
+  - Seeder akun pengguna, kontrak booking, invoice, ulasan, notifikasi, & submisi lomba ([UserSeeder.php](database/seeders/UserSeeder.php), [BookingContractSeeder.php](database/seeders/BookingContractSeeder.php), [ContestSubmissionSeeder.php](database/seeders/ContestSubmissionSeeder.php), [ActivityLogSeeder.php](database/seeders/ActivityLogSeeder.php)).
+  - Seksi `Fotografer Pilihan Bulan Ini` pada halaman Beranda (`/`, [routes/web.php](routes/web.php)) serta halaman utama Fotografer (`/fotografer`, [PhotographerController.php](app/Http/Controllers/Public/PhotographerController.php), [index.blade.php](resources/views/public/photographers/index.blade.php)).
+* **File yang Diubah**:
+  * `database/seeders/UserSeeder.php`
+  * `database/seeders/BookingContractSeeder.php`
+  * `database/seeders/ContestSubmissionSeeder.php`
+  * `database/seeders/ActivityLogSeeder.php`
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `routes/web.php`
+  * `resources/views/public/photographers/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - `UserSeeder.php` hanya membuat 1 akun klien (`dian@gmail.com`) sedangkan `BookingContractSeeder.php` menulis fallback `?? $clientDian` untuk 5 klien fiktif lain (`mahkota@event.com`, `bulilik@kuliner.com`, `reza.itb@gmail.com`, `siti.rahma@gmail.com`, `finance@baliluxury.com`), sehingga seluruh kontrak, tagihan invoice, ulasan, galeri, dan notifikasi klien lain masuk ke akun Dian & Febri (selain itu terdapat bug kelebihan kurung kurawal di akhir `BookingContractSeeder.php`).
+    - `ContestSubmissionSeeder.php` memakai ID user hardcode (`9`, `11`, `12`) yang berisiko menempel ke ID akun keliru di database (ID `9` di live DB adalah fotografer `kenji`).
+    - `Fotografer Pilihan Bulan Ini` pada `routes/web.php` serta `PhotographerController::index()` hanya memanggil `RolePhotographer::published()->...->take(4)->get()` tanpa pengurutan performa.
+  * **After**:
+    - Menambahkan seluruh 6 akun klien terpisah di `UserSeeder.php`, menghapus fallback silang `?? $clientDian` di `BookingContractSeeder.php` menggunakan helper `$resolveClient()` terisolasi per email (sekarang `dian@gmail.com` hanya memiliki 5 kontrak, 2 galeri selesai, serta 4 notifikasi miliknya sendiri), memperbaiki kurung kurawal penutup di `BookingContractSeeder.php`, serta mengganti lookup ID hardcode di `ContestSubmissionSeeder.php` menjadi lookup `email` dan membersihkan terminologi Rule #70/#89 di `BookingContractSeeder.php` / `ActivityLogSeeder.php`.
+    - Menambahkan `RolePhotographer::scopeFeaturedThisMonth()` yang mengurutkan fotografer `published()` secara otomatis berdasarkan: (1) sesi `completed` tervalidasi klien pada bulan berjalan terbanyak, (2) ulasan positif (`rating >= 4`) bulan berjalan terbanyak, lalu fallback otomatis ke (3) `testimonials_avg_rating` tertinggi, (4) `testimonials_count` terbanyak, dan (5) total sesi `completed` tervalidasi klien terbanyak. Diterapkan seragam di `routes/web.php` maupun `PhotographerController::index()`, sekaligus merapikan subjudul seksi pada `public/photographers/index.blade.php`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**, **Rule #89**, **Rule #94**, **Rule #103**, dan **Rule #104**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` seluruh file PHP & seeder terkait: **PASS**.
+  * Eksekusi `UserSeeder`, `BookingContractSeeder`, `ContestSubmissionSeeder` serta `php artisan view:clear`, `php artisan view:cache`, `npm run build` (`vite v8.2.1`, 808ms): **PASS**.
+  * 34 asersi isolasi data klien di `/client/bookings`, `/client/invoices`, `/client/galleries`, notifikasi Dian, keutuhan akun `kenji`, urutan otomatis `featuredThisMonth()` (baik mode fallback maupun simulasi transaksi rolled-back bulan berjalan), serta keseimbangan tag `<div>`: **PASS** (`34/34 PASSED`).
+
+---
+
+### [2026-11-12 16:34 WITA] — Penyeragaman Metrik Numerik `0` Fotografer Tanpa Ulasan/Sesi (Eliminasi Label `Mitra Baru` & `Baru`)
+
+* **Modul / Fitur**:
+  - Model metrik editorial fotografer (`RolePhotographer::getEditorialMetricsAttribute()`), badge rating pojok kanan atas kartu katalog/beranda/admin, halaman detail profil fotografer (`/fotografer/{id}`), daftar favorit klien (`/client/favorites`), serta pratinjau metrik di Dashboard Fotografer.
+* **File yang Diubah**:
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+  * `resources/views/public/photographers/index.blade.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/home.blade.php`
+  * `resources/views/client/favorites/index.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `README.md`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Fotografer yang belum memiliki ulasan maupun sesi selesai (misalnya `kenji`) menampilkan teks `Mitra Baru` di baris metrik kartu katalog/favorit, badge `Baru` di pojok kanan atas cover foto, menyembunyikan jumlah sesi selesai, serta menampilkan angka rating kosong (`null`) di samping bintang pada `/fotografer/{id}`.
+  * **After**:
+    - `RolePhotographer::getEditorialMetricsAttribute()` selalu menghasilkan struktur metrik seragam berbasis data nyata, yakni `0.0 (0 ulasan)` dan `0 Sesi Selesai` ketika belum ada ulasan maupun kontrak selesai (menggantikan `Mitra Baru` serta pengosongan sesi).
+    - Badge rating pojok kanan atas kartu (`katalog.blade.php`, `photographers/index.blade.php`, `home.blade.php`) dan `admin/dashboard.blade.php` kini seragam menampilkan `★ 0 (0)` / `★ 0` dengan ikon bintang abu-abu redup (`text-gray-300 dark:text-gray-600`) ketika belum ada ulasan, menggantikan teks `Baru`.
+    - `PhotographerController::show()` mengembalikan `'0.0'` ketika total ulasan `0` agar baris metrik atas (`★ 0.0 (0 ulasan) • 0 Sesi Selesai`) maupun tab Ulasan Klien di `show.blade.php` menampilkan angka `0.0` yang konsisten dengan bintang abu-abu redup.
+    - Menyelaraskan dokumentasi **Rule #94 Poin 3** di `README.md` agar standar metrik nol konsisten di seluruh sistem.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**, **Rule #92**, **Rule #94**, serta **Rule #103**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` (`RolePhotographer.php`, `PhotographerController.php`), `php artisan view:clear`, `php artisan view:cache`, serta `npm run build` (`vite v8.2.1`, 886ms): **PASS**.
+  * Audit grep lintas `app/` dan `resources/views/` (nol sisa `Mitra Baru` / `>Baru<`), keseimbangan tag `<div>` pada 7 Blade view, serta 38 asersi HTTP Kernel & model (termasuk perbandingan langsung `kenji` vs `Dewa Portrait Studio`): **PASS** (`38/38 PASSED`).
+
+---
+
+### [2026-11-12 16:22 WITA] — Penghapusan Ikon Centang Kuning (`Mitra Terverifikasi`) di Samping Nama Fotografer
+
+* **Modul / Fitur**:
+  - Header profil publik fotografer (`/fotografer/{id}`, [show.blade.php](resources/views/public/photographers/show.blade.php)) serta kartu daftar fotografer favorit klien (`/client/favorites`, [index.blade.php](resources/views/client/favorites/index.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Nama fotografer pada `/fotografer/{id}` serta `/client/favorites` didampingi ikon centang kuning (`✓`, `title="Mitra Terverifikasi ..."`) padahal seluruh fotografer yang tayang di katalog publik memang wajib sudah terverifikasi Admin, sehingga ikon tersebut tidak memberi informasi pembeda.
+  * **After**: Menghapus elemen ikon centang kuning (`@if($photographer->is_verified)`) beserta pembungkus flex tambahan di samping nama fotografer pada `public/photographers/show.blade.php` maupun `client/favorites/index.blade.php` agar judul nama tampil bersih.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22**, **Rule #49**, **Rule #51**, **Rule #67**, dan **Rule #103**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 814ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` serta uji render HTTP Kernel pada `/fotografer/{id}` dan `/client/favorites`: **PASS** (`ALL_CHECKS_PASSED`, `14` asersi sukses).
+
+---
+
+### [2026-11-12 16:20 WITA] — Penyeragaman Ikon `Dashboard` pada Dropdown Navbar Publik Seluruh Role (`Admin`, `Super Admin`, serta `Fotografer`)
+
+* **Modul / Fitur**:
+  - Dropdown akun pengguna pada navbar publik ([navbar.blade.php](resources/views/partials/public/navbar.blade.php)) lintas role `admin`, `super_admin`, `photographer`, serta pemeriksaan keselarasan role `client`.
+* **File yang Diubah**:
+  * `resources/views/partials/public/navbar.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Menu `Dashboard` untuk role `admin` serta `super_admin` di `partials/public/navbar.blade.php` memakai ikon perisai centang (`M9 12l2 2 4-4...`), berbeda dari ikon grid `Dashboard` 4 kotak bersudut membulat (`squares-2x2`) pada `partials/admin/sidebar.blade.php`.
+    - Menu `Dashboard` untuk role `photographer` di `partials/public/navbar.blade.php` masih memakai variasi Heroicons v1 (`M4 6a2 2...`, `stroke-width="2"`), sedikit berbeda bentuk sudut dengan `partials/photographer/sidebar.blade.php` (`M3.75 6A2.25...`, `stroke-width="1.75"`).
+  * **After**:
+    - Menyeragamkan ikon SVG `Dashboard` pada cabang `photographer` serta cabang `admin`/`super_admin` di `partials/public/navbar.blade.php` menjadi SVG `squares-2x2` identik dengan `partials/admin/sidebar.blade.php` maupun `partials/photographer/sidebar.blade.php` (`M3.75 6A2.25...`, `stroke-width="1.75"`).
+    - Memeriksa menu role `client` pada `partials/public/navbar.blade.php`: klien menggunakan layout publik tanpa link `Dashboard` di dropdown, seluruh 6 menu klien serta tombol keluar sudah memakai ikon SVG yang sesuai fungsinya.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #21**, **Rule #49**, **Rule #51**, serta **Section 7 Poin 6** (Standar Ikon Vektor SVG Sistem).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 883ms): **PASS**.
+  * Audit grep lintas seluruh `resources/views/**/*.blade.php` memastikan nol sisa ikon perisai centang (`M9 12l2 2 4-4`) maupun ikon `M4 6a2 2` di navbar: **PASS**.
+  * Uji render langsung halaman `/` via HTTP Kernel untuk keempat role (`client`, `photographer`, `admin`, `super_admin`) termasuk pengecekan keseimbangan tag `<div>` header ter-render: **PASS** (`ALL_CHECKS_PASSED`, `26` asersi sukses).
+
+---
+
+### [2026-11-12 16:16 WITA] — Penggantian Klaim `1+ Tahun Pengalaman` Menjadi `Sesi Selesai` Nyata pada Profil Publik Fotografer
+
+* **Modul / Fitur**:
+  - Halaman detail profil publik fotografer (`/fotografer/{id}`, [show.blade.php](resources/views/public/photographers/show.blade.php) serta [PhotographerController.php](app/Http/Controllers/Public/PhotographerController.php)).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `README.md` (`Rule #103`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Baris informasi di bawah spesialisasi profil publik fotografer menampilkan klaim `1+ Tahun Pengalaman` yang dipaksa dari `max(1, (int) now()->diffInYears($photographer->created_at))`, sehingga fotografer yang baru mendaftar tetap dianggap berpengalaman 1 tahun ke atas meski bukan data asli.
+  * **After**:
+    - Menghitung `$completedSessionsCount` di `PhotographerController::show()` dari kontrak yang benar-benar selesai serta sudah dikonfirmasi klien (`status_contract === 'completed'` dengan `is_validated_client === true`).
+    - Menampilkan **`{jumlah} Sesi Selesai`** pada [show.blade.php](resources/views/public/photographers/show.blade.php) menggantikan `1+ Tahun Pengalaman`, serta memperbarui **Rule #103** di `README.md` selaras **Rule #90** dan **Rule #104**.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #51**, **Rule #70**, **Rule #90**, **Rule #103**, dan **Rule #104**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l app/Http/Controllers/Public/PhotographerController.php`, `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 870ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` (`public/photographers/show.blade.php`: `121/121`): **PASS**.
+  * Uji render HTTP Kernel pada `/fotografer/{id}` dengan `DB::beginTransaction` + `DB::rollBack()` (verifikasi metrik `Sesi Selesai` hanya bertambah untuk order `status_contract = 'completed'` dengan `is_validated_client = true`, tidak menghitung order belum tervalidasi maupun masih aktif): **PASS** (`5/5` asersi sukses).
+
+---
+
+### [2026-11-12 15:47 WITA] — Penyederhanaan Ringkasan Status Akun pada Detail Verifikasi Fotografer Admin (`/admin/photographers/{id}`)
+
+* **Modul / Fitur**:
+  - Kartu ringkasan status di atas tab pada halaman detail verifikasi mitra fotografer Admin ([show.blade.php](resources/views/admin/photographers/show.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/admin/photographers/show.blade.php`
+  * `README.md` (`Rule #95`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Kartu ringkasan status mengulang informasi kelengkapan profil hingga tiga kali dalam area yang berdekatan (`Kelengkapan Profil (4/4 bagian)` di kiri, `100% Lengkap` di kanan, serta pill `100%` pada tab `Profil Mitra` tepat di bawahnya), mencampurkan tanggal `Terdaftar` ke deretan status, memunculkan pembatas `border-t` di atas daftar field kurang, serta tidak konsisten memberi awalan `Profil:` vs `Etalase:`.
+  * **After**:
+    - Menyederhanakan baris utama menjadi dua status jelas di sisi kiri (**`Profil:`** `Terverifikasi` / `Menunggu` / `Ditolak` `/` **`Etalase:`** `Tayang` / `Menunggu` / `Ditolak` / `Belum Diajukan`) dengan tanggal **`Terdaftar`** di sisi kanan.
+    - Menghapus teks duplikat `Kelengkapan Profil (X/4 bagian)` serta `100% Lengkap` (termasuk variabel `$sectionStatus` yang tidak lagi terpakai) karena persentase kelengkapan sudah tampil di tab `Profil Mitra`.
+    - Saat data profil belum 100%, menampilkan satu baris ringkas tanpa garis pembatas (`Belum diisi (X data): ...`). Memperbarui **Rule #95** di `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41**, **Rule #49**, **Rule #51**, **Rule #61**, **Rule #67**, **Rule #70**, dan **Rule #95**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 868ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` (`admin/photographers/show.blade.php`: `129/129`): **PASS**.
+  * Uji render langsung via HTTP Kernel (`DB::beginTransaction` dengan `DB::rollBack()`) untuk status `Terverifikasi`/`Tayang`, `Menunggu`, serta `Ditolak` dengan field kurang: **PASS** (`11/11` asersi sukses).
+
+---
+
+### [2026-11-12 14:51 WITA] — Penambahan Indikator Teks `Tayang di Katalog` pada Header Dashboard serta Profil Fotografer
+
+* **Modul / Fitur**:
+  - Header halaman `Dashboard Fotografer` (`/photographer/dashboard`) serta halaman `Kelola Profil` (`/photographer/profile`).
+* **File yang Diubah**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+  * `README.md` (`Rule #108`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Setelah Admin menyetujui penayangan etalase (`isPublishedToCatalog() === true`), `stage-stepper` maupun kartu `Persiapan Tayang Etalase` disembunyikan secara otomatis sehingga di sisi kanan judul `Kelola Profil` kosong tanpa keterangan tayang maupun tautan ke halaman publik, serta di header kanan `Dashboard` hanya muncul chip `Tahun Operasional`.
+  * **After**:
+    - Menambahkan teks hijau murni **`Tayang di Katalog`** (`text-xs font-bold text-emerald-600 dark:text-emerald-400`) di sisi kanan header `Dashboard` di samping `Tahun Operasional` ketika `$photographer->isPublishedToCatalog()` bernilai `true`.
+    - Menambahkan teks **`Tayang di Katalog`** beserta pemisah tipis `/` dan tautan **`Lihat Profil Publik`** (`route('public.photographers.show', $photographer->id)`) di sisi kanan header `Kelola Profil` pada kondisi yang sama, tanpa kotak banner tambahan, tanpa ikon ekstra (**Rule #22**), tanpa dot badge (**Rule #67**), serta tanpa simbol `&` redundan (**Rule #70**).
+    - Mendokumentasikan standar tersebut ke **Rule #108 Point 4** di `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22**, **Rule #49**, **Rule #51**, **Rule #61**, **Rule #67**, **Rule #70**, dan **Rule #108**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), serta `npm run build` (`vite v8.2.1`, 867ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` (`dashboard.blade.php`: `100/100`; `profile/index.blade.php`: `69/69`): **PASS**.
+  * Uji render langsung via HTTP Kernel (`DB::beginTransaction` dengan `DB::rollBack()`) pada `/photographer/dashboard` serta `/photographer/profile` saat status tayang aktif dan saat dicabut (`belum_diajukan`): **PASS** (`16/16` asersi sukses).
+
+---
+
+### [2026-11-12 13:47 WITA] — Perbaikan Radio Button Amber Global, Pembersihan Halaman `Atur Tanggal Libur`, serta Penyederhanaan Stepper Fotografer
+
+* **Modul / Fitur**:
+  - Formulir `Atur Tanggal Libur` (`/photographer/availability/create`), partial `stage-stepper.blade.php`, master layout fotografer (`layouts/photographer.blade.php`), gaya dasar CSS (`resources/css/app.css`), serta input radio/checkbox pada `public/forum/show.blade.php`, `public/booking/create.blade.php`, `public/auth/signin.blade.php`, `public/auth/signup.blade.php`.
+* **File yang Diubah**:
+  * `resources/css/app.css`
+  * `resources/views/photographer/availability/create.blade.php`
+  * `resources/views/layouts/photographer.blade.php`
+  * `resources/views/partials/photographer/stage-stepper.blade.php`
+  * `resources/views/public/forum/show.blade.php`
+  * `resources/views/public/booking/create.blade.php`
+  * `resources/views/public/auth/signin.blade.php`
+  * `resources/views/public/auth/signup.blade.php`
+  * `README.md` (`Rule #108`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    1. Tanpa `@tailwindcss/forms` pada Tailwind CSS v4, kelas `text-amber-500` pada `<input type="radio">` maupun `<input type="checkbox">` diabaikan sehingga browser menampilkan warna biru bawaan OS Windows (`#0075FF`), khususnya pada kartu pilihan `Libur Seharian` di `/photographer/availability/create`.
+    2. `stage-stepper.blade.php` tetap dirender di atas halaman form sekunder (`create`/`edit`), menampilkan dua baris breadcrumb bertumpuk di atas formulir `Atur Tanggal Libur`, memuat baris ceklist mikro duplikat (`Paket Layanan: ... Portofolio: ... Jadwal: ...`), menampilkan paragraf merah mentah `Catatan Admin`, serta menganggap rute `photographer.availability.create` sebagai tab mingguan sehingga memunculkan teks `"Tentukan hari buka lalu simpan jam operasional"`.
+    3. Halaman `availability/create.blade.php` memakai tombol `Kembali ke Kalender` berwarna amber lembut yang melanggar **Rule #71**, breadcrumb berwarna aktif yang melanggar **Rule #62**, pembatas horizontal `border-t` di bawah kartu pilihan, placeholder contoh panjang di textarea, serta tautan kembali yang tidak membawa query `tab=overrides`.
+  * **After**:
+    1. Menambahkan `accent-color: #f59e0b;` secara global di `@layer base` `resources/css/app.css`, menambahkan kelas `accent-amber-500` pada radio/checkbox asli di `public/forum/show.blade.php`, `public/booking/create.blade.php`, `public/auth/signin.blade.php`, `public/auth/signup.blade.php`, serta mengganti radio kartu pada `photographer/availability/create.blade.php` dengan `sr-only peer` + lingkaran indikator Tailwind beraksen Amber (`border-amber-500` + `bg-amber-500`) sesuai `public/booking/create.blade.php`.
+    2. Mengecualikan rute `photographer.*.create` maupun `photographer.*.edit` dari `stage-stepper` pada `layouts/photographer.blade.php`, memperbaiki logika `$isWeeklyTab` pada `stage-stepper.blade.php`, dan mengembalikan tampilan `stage-stepper.blade.php` menjadi satu baris horizontal ringkas tanpa baris ceklist duplikat, tanpa kalimat instruksi mengambang, maupun paragraf catatan mentah.
+    3. Menyelaraskan `photographer/availability/create.blade.php`: breadcrumb netral **Rule #62**, judul `text-lg sm:text-xl`, tombol netral `Kembali` dengan single chevron **Rule #71** / **Rule #72**, penghapusan garis `border-t` (**Rule #41**), textarea `rows="4" resize-y` berplaceholder `"Masukkan keterangan libur jika diperlukan"`, serta tautan kembali mengarah tepat ke `tab=overrides`. Mendokumentasikan standar ini pada **Rule #108** di `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22**, **Rule #41**, **Rule #49**, **Rule #51**, **Rule #58**, **Rule #61**, **Rule #62**, **Rule #71**, **Rule #72**, **Rule #73**, **Rule #104**, serta **Rule #108**.
+* **Hasil Pengujian & Verifikasi**:
+  * `npm run build` (`vite v8.2.1`): **PASS** (1.18s; bundel CSS terverifikasi memuat `accent-color:#f59e0b` serta utilitas `accent-amber-500`).
+  * `php artisan view:clear` & `php artisan view:cache` (PHP 8.4.24): **PASS** (*Blade templates cached successfully*).
+  * Uji render langsung via HTTP Kernel (`kenji`, `id=6`) pada 5 rute (`/photographer/availability/create`, `/photographer/availability?tab=weekly`, `/photographer/availability?tab=overrides`, `/photographer/services/create`, `/photographer/dashboard`) termasuk pengecekan keseimbangan tag `<div>` serta asersi elemen DOM: **PASS** (`HTTP 200`, `ALL_VIEW_AND_ROUTE_CHECKS_PASS`).
+
+---
+
+### [2026-11-12 13:24 WITA] — Penegakan Alur Ketat Persetujuan dan Penolakan Verifikasi Profil serta Etalase Fotografer Admin
+
+* **Modul / Fitur**:
+  - Halaman detail verifikasi fotografer Admin (`/admin/photographers/{id}`) pada Tab `Profil Mitra` serta Tab `Etalase Tayang`, beserta alur pengajuan ulang profil fotografer.
+* **File yang Diubah**:
+  * `resources/views/admin/photographers/show.blade.php`
+  * `app/Http/Controllers/Admin/PhotographerVerificationController.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+  * `README.md` (`Rule #95`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Setelah Admin menolak pendaftaran profil (`status_verifikasi === 'ditolak'`) atau menolak penayangan etalase (`status_etalase === 'ditolak'`), tombol `Verifikasi Fotografer` dan `Setujui Tayang` tetap tampil serta bisa diklik langsung oleh Admin meskipun fotografer belum memperbarui data atau mengajukan ulang. Selain itu, saat `status_etalase === 'belum_diajukan'` dengan checklist 3/3 sudah lengkap, tombol `Setujui Tayang` sudah aktif walau fotografer belum menekan `Ajukan Tayang`, dan `catatan_penolakan` lama belum dibersihkan saat fotografer menyimpan ulang profil.
+  * **After**:
+    - **Tab 1 (`Profil Mitra`)**: Saat `status_verifikasi === 'ditolak'`, tombol `Verifikasi Fotografer` dan `Tolak Pendaftaran` disembunyikan (hanya tampil teks status `Menunggu fotografer memperbarui profil.` beserta tombol `Hapus`), dan backend `toggleVerification()` serta `reject()` memblokir permintaan hingga fotografer menyimpan ulang profilnya (`ProfileController::updateProfile()` mengembalikan status ke `menunggu` dan membersihkan `catatan_penolakan`). Saat `menunggu` menampilkan `Tolak Pendaftaran` dengan `Verifikasi Fotografer`; saat `terverifikasi` menampilkan `Tolak Pendaftaran` dengan `Batalkan Verifikasi`.
+    - **Tab 2 (`Etalase Tayang`)**: Saat `status_etalase === 'belum_diajukan'` maupun `ditolak`, tombol `Setujui Tayang` dan `Tolak Etalase` disembunyikan (menampilkan teks status netral sesuai kondisi), dan backend `approveStorefront()`, `rejectStorefront()`, serta `revokeStorefront()` menegakkan transisi status secara ketat hingga fotografer menekan `Ajukan Tayang` / `Ajukan Ulang Tayang` (`status_etalase === 'menunggu'`). Menyelaraskan `$initialTab` agar `tab=profile` atau error validasi penolakan profil tetap bertahan di Tab 1, serta memperbarui **Rule #95** di `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #51**, **Rule #67**, **Rule #70**, **Rule #74**, **Rule #91**, dan **Rule #95**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` (`PhotographerVerificationController.php`, `ProfileController.php`, PHP 8.4.24): **PASS** (*No syntax errors detected*).
+  * `php artisan route:list --path=admin/photographers`: **PASS** (8 rute aktif terverifikasi).
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (*Blade templates cached successfully*).
+  * `npm run build` (`vite v8.2.1`): **PASS** (893ms).
+  * Pengujian transaksional (rolled-back) controller guards + render HTML `admin.photographers.show` di seluruh skenario status Tab 1 (`menunggu`, `ditolak`, `terverifikasi`) dan Tab 2 (`belum_diajukan`, `menunggu`, `ditolak`, `disetujui`) serta pengajuan ulang profil (`catatan_penolakan` ter-reset `null`): **PASS** (*ALL_ASSERTIONS_PASSED*, *DB_STATE_VERIFIED_UNCHANGED*).
+
+---
+
+### [2026-11-12 12:10 WITA] — Penghapusan Divider Toolbar (`border-b`) & Celah Jarak (`space-y-4` / `space-y-0`) pada Seluruh Tampilan Card Tabel Sistem
+
+* **Modul / Fitur**:
+  - Seluruh tampilan Data Table Card pada panel Admin, Fotografer, dan Klien (*20 file view tabel / 21 kartu tabel*).
+* **File yang Diubah**:
+  * `resources/views/admin/activity_logs/index.blade.php`
+  * `resources/views/admin/admins/index.blade.php`
+  * `resources/views/admin/categories/index.blade.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/admin/contests/manage.blade.php` *(Tabel Pendaftar & Tabel Submisi)*
+  * `resources/views/admin/contests/participants.blade.php`
+  * `resources/views/admin/contests/submissions.blade.php`
+  * `resources/views/admin/elearning/index.blade.php`
+  * `resources/views/admin/forum/index.blade.php`
+  * `resources/views/admin/photographers/index.blade.php`
+  * `resources/views/admin/reviews/index.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/admin/users/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/photographer/faqs/index.blade.php`
+  * `resources/views/photographer/portfolio/index.blade.php`
+  * `resources/views/photographer/reports/index.blade.php`
+  * `resources/views/photographer/services/index.blade.php`
+  * `README.md` (`Rule #107`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Kontainer toolbar/header di bagian atas setiap Data Table Card memiliki garis pembatas `border-b border-gray-100 dark:border-gray-700` (atau `/80`, `/60`) dan mayoritas pembungkus card memakai `space-y-4` (atau `space-y-0` di `client/invoices/index.blade.php`), sehingga muncul garis pembatas tambahan beserta celah putih 16px tepat di atas pita `<thead>`.
+  * **After**: Menghapus seluruh `border-b border-gray-100 ...` pada toolbar/header kartu tabel serta menghapus `space-y-4` (`space-y-0`) pada pembungkus luar Data Table Card agar toolbar filter & pencarian langsung menyatu mulus ke `<thead>` tanpa divider ganda. Mendokumentasikan standar baru tersebut di **Rule #107** pada `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41**, **Rule #49**, **Rule #58**, dan **Rule #107**.
+* **Hasil Pengujian & Verifikasi**:
+  * Audit regex across `resources/views/**/*.blade.php`: 0 sisa `overflow-hidden space-y-4`/`space-y-0` dan 0 sisa toolbar/header `border-b` di seluruh tampilan card tabel (**PASS**).
+  * `php artisan view:clear` & `php artisan view:cache` (PHP 8.4.24): **PASS** (*Blade templates cached successfully*).
+  * `npm run build` (`vite v8.2.1`): **PASS** (797ms).
+
+---
+
+### [2026-11-12 11:59 WITA] — Perbaikan Default Switch Jadwal Libur (`is_open = false`), Audit Alur Verifikasi Mitra, dan Pembaruan UI `x-time-dropdown` (Menit `00`–`59`, Lebar Card, & Zero Dividers)
+
+* **Modul / Fitur**:
+  - Komponen pemilih jam [`x-time-dropdown`](resources/views/components/time-dropdown.blade.php), Jadwal & Ketersediaan Fotografer (`/photographer/availability`, `/photographer/availability/create`), modal penawaran chat (`/photographer/chat`, `/chat`), serta alur verifikasi profil dan penayangan etalase fotografer (`/photographer/profile`, `/photographer/dashboard`, `/admin/photographers/{id}`).
+* **File yang Diubah**:
+  * `resources/views/components/time-dropdown.blade.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `resources/views/photographer/availability/create.blade.php`
+  * `resources/views/photographer/chat/index.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/partials/photographer/stage-stepper.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+  * `app/Models/PhotographerWorkingHour.php`
+  * `app/Http/Controllers/Photographer/AvailabilityController.php`
+  * `app/Http/Controllers/Admin/PhotographerVerificationController.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+  * `database/migrations/2024_01_01_000014_create_photographer_working_hours_table.php`
+  * `database/migrations/2026_11_11_000001_add_storefront_review_fields_to_role_photographers_table.php`
+  * `database/migrations/2026_11_12_000001_set_default_is_open_false_on_photographer_working_hours_table.php` *(file baru)*
+  * `database/seeders/PhotographerSeeder.php`
+  * `README.md` (`Rule #95`, `Rule #105`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Saat fotografer pertama kali membuka `/photographer/availability`, `PhotographerWorkingHour::initializeDefaults()` dan skema `photographer_working_hours.is_open` langsung menyalakan semua 7 hari (`is_open = true`, Senin–Minggu berstatus `(Buka)`) seolah fotografer buka setiap hari padahal belum pernah mengatur jadwal.
+    * Menyimpan jadwal dengan seluruh hari libur (0 hari buka) tetap mengeset `jadwal_dikonfirmasi = true` dan memunculkan pesan sukses meski `hasConfiguredSchedule()` bernilai `false`.
+    * Admin dapat menekan `Verifikasi Fotografer` walau kelengkapan profil belum 100%, tidak ada notifikasi Admin saat profil baru selesai dilengkapi pertama kali, serta terdapat sisa kata `Studio` pada pesan hapus `PhotographerVerificationController::destroy()`.
+    * Panel menu `x-time-dropdown` terlalu sempit (`min-w-[136px]`), memakai garis pembatas `divide-x` dan `border-b` berulang, serta kolom Menit hanya menyediakan opsi `00` dan `30`.
+  * **After**:
+    * `PhotographerWorkingHour::initializeDefaults(int $photographerId, bool $defaultOpen = false)` dan skema database kini mewajibkan default `is_open = false` (**Libur / OFF**) bagi fotografer yang belum mengatur jadwal, sementara `PhotographerSeeder` dan migrasi demo mengoper `true` agar akun demo tetap tayang. Migrasi baru `2026_11_12_000001` mengubah default kolom dan mereset jadwal belum terkonfirmasi.
+    * `AvailabilityController::updateWorkingHours()` memvalidasi format `HH:mm`, menormalkan opsi 24 jam agar nonaktif bila `is_open = false`, menyetel `jadwal_dikonfirmasi = $hasOpenDay`, memberi notifikasi `warning` bila 0 hari aktif, serta meringkas copywriting tanpa tanda `&`/`/` redundan.
+    * `PhotographerVerificationController::toggleVerification()` dan `admin/photographers/show.blade.php` memblokir verifikasi bila profil belum 100% lengkap; istilah `Studio` di `destroy()` diubah menjadi `Fotografer`; `ProfileController::updateProfile()` mengirim log & notifikasi ke Admin saat profil pertama kali selesai 100%.
+    * `x-time-dropdown` diperlebar ke `w-[224px] sm:w-[240px]` dengan dukungan prop `align` (`left`, `right`, `md-right`), seluruh garis pembatas internal (`divide-x` dan `border-b`) dihapus, serta daftar Menit diperluas penuh menjadi **`00`–`59`** ber-scroll `.custom-scrollbar` yang otomatis menengahkan jam dan menit saat dibuka.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #19, Rule #41, Rule #46, Rule #49, Rule #58, Rule #70, Rule #94, Rule #95, Rule #104, Rule #105**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan migrate --force`: **PASS** (`2026_11_12_000001_set_default_is_open_false_on_photographer_working_hours_table` `50.23ms DONE`, `DEFAULT` `is_open = '0'`).
+  * Pengujian skrip PHP 8.4 (DB transaction rollback): `initializeDefaults()` membuat 7 hari OFF default, akun demo `id 1..5` tetap `isPublishedToCatalog()`, `toggleVerification()` menolak profil belum lengkap, `updateWorkingHours()` menjaga `jadwal_dikonfirmasi = false` bila 0 hari buka dan menyimpan jam presisi menit (`09:15`–`18:45`): **PASS**.
+  * `php -l` seluruh file PHP terubah, `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, `857ms`): **PASS**.
+
+---
+
+### [2026-11-12 11:37 WITA] — Refaktor Menu `x-time-dropdown` ke Grid 2 Kolom (Jam | Menit) Sesuai Standar Custom Dropdown `README.md`
+
+* **Modul / Fitur**:
+  - Komponen Pemilih Jam Standar [`x-time-dropdown`](resources/views/components/time-dropdown.blade.php) serta seluruh pemanggilnya (`/photographer/availability`, `/photographer/availability/create`, modal penawaran `/photographer/chat`, dan modal penawaran `/chat`).
+* **File yang Diubah**:
+  * `resources/views/components/time-dropdown.blade.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `README.md` (`Rule #105`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Menu melayang `x-time-dropdown` menampilkan satu daftar panjang 48 baris (`00:00`–`23:30`) dengan scrollbar bawaan OS yang panjang untuk digulir, dan `scrollIntoView()` sebelumnya kurang akurat saat pembukaan animasi `x-transition`.
+  * **After**:
+    * Mempertahankan tombol trigger identik (`rounded-xl border text-xs font-bold flex items-center justify-between gap-2 shadow-2xs` dengan ikon chevron berotasi dan ring fokus amber) serta hidden input / Alpine binding `HH:mm`.
+    * Mengubah panel dropdown melayang (`bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80`) menjadi **grid 2 kolom (`grid-cols-2 divide-x`)**: **Kolom Kiri `Jam` (`00`–`23`)** memakai scroll ramping `.custom-scrollbar` (`max-h-48`) dan **Kolom Kanan `Menit` (`00`, `30`)**, masing-masing berheader label minimalis `text-[10px] font-extrabold uppercase tracking-wider text-gray-400 border-b` serta item `Rule #46` (`hover:bg-amber-50 hover:text-amber-600`, aktif `bg-amber-50/70 text-amber-600 font-extrabold`, `border-b border-gray-50 last:border-0`).
+    * Menambahkan koordinasi `pickHour` / `pickMin` (memilih jam otomatis melengkapi menit `'00'` jika masih kosong dan membiarkan menu terbuka sampai menit dikonfirmasi; memilih menit menutup menu otomatis jika jam sudah terisi) serta perhitungan `box.scrollTop` terkurung container lewat `$nextTick` + `requestAnimationFrame` dengan jangkar `'08'` saat masih kosong.
+    * Menyesuaikan `menu-class="min-w-[136px] w-full"` di `resources/views/photographer/availability/index.blade.php` agar proporsi kedua kolom seimbang dengan trigger `w-[104px]`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #46, Rule #49, Rule #105**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), `npm run build` (`vite v8.2.1`, 882ms, utilitas `.custom-scrollbar` terkompilasi pada `public/build/assets/app-B8eyXLyY.css`): **PASS**.
+
+---
+
+### [2026-11-12 11:24 WITA] — Penyatuan Sebaris Label Status Hari Operasional `(Buka)` / `(Libur)` di Halaman Jadwal Fotografer
+
+* **Modul / Fitur**:
+  - Halaman Kelola Jam Kerja Mingguan Fotografer (`/photographer/availability`).
+* **File yang Diubah**:
+  * `resources/views/photographer/availability/index.blade.php`
+  * `README.md` (`Rule #105`)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Nama hari (`Senin`, `Selasa`, dst.) dan status (`Aktif` / `Libur`, `text-[11px]`) ditumpuk vertikal 2 baris di bawah satu sama lain.
+  * **After**:
+    * Status diposisikan sebaris tepat di samping nama hari dengan format **`Senin (Buka)`** (hijau emerald tebal) dan **`Senin (Libur)`** (abu-abu netral) dalam ukuran seragam `text-sm` disertai fallback SSR Blade sebelum hidrasi Alpine.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49, Rule #67, Rule #105**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache` (PHP 8.4.24), dan `npm run build` (`vite v8.2.1`, 871ms): **PASS**.
+
+---
+
+### [2026-11-12 11:18 WITA] — Penyeragaman Tipografi KPI Cards dan Isi Tabel (`<tbody>`) ke `text-xs`, Teks Ringkas Fasilitas Paket Layanan, dan Perbaikan Proporsi `<th>` Tabel FAQ
+
+* **Modul / Fitur**:
+  - Standarisasi KPI Metric Cards pada Dashboard Utama, Halaman Tabel Fitur (Admin, Fotografer, Klien), dan Profil Akun Publik, Tipografi Seragam `text-xs` pada Sel `<tbody>`, Daftar Ringkas Fasilitas Paket Layanan Fotografer, serta Proporsi Kolom `<th>` Tabel Tanya Jawab Fotografer.
+* **File yang Diubah**:
+  * **Prioritas Utama & Dokumentasi**:
+    * `resources/views/photographer/faqs/index.blade.php`
+    * `resources/views/photographer/services/index.blade.php`
+    * `README.md` (`Rule #64` dan `Rule #106`)
+    * `TRACKING_PERUBAHAN_FILE.md`
+  * **Dashboard Utama, Profil Publik, dan Partial Tabel**:
+    * `resources/views/admin/dashboard.blade.php`
+    * `resources/views/photographer/dashboard.blade.php`
+    * `resources/views/public/users/show.blade.php`
+    * `resources/views/partials/table/table-01.blade.php`
+  * **Panel Admin**:
+    * `resources/views/admin/photographers/index.blade.php`
+    * `resources/views/admin/photographers/show.blade.php`
+    * `resources/views/admin/users/index.blade.php`
+    * `resources/views/admin/categories/index.blade.php`
+    * `resources/views/admin/elearning/index.blade.php`
+    * `resources/views/admin/forum/index.blade.php`
+    * `resources/views/admin/activity_logs/index.blade.php`
+    * `resources/views/admin/admins/index.blade.php`
+    * `resources/views/admin/reviews/index.blade.php`
+    * `resources/views/admin/contests/index.blade.php`
+    * `resources/views/admin/contests/manage.blade.php`
+    * `resources/views/admin/contests/participants.blade.php`
+    * `resources/views/admin/contests/submissions.blade.php`
+    * `resources/views/admin/transactions/index.blade.php`
+  * **Panel Fotografer, Klien, dan Faktur Online**:
+    * `resources/views/photographer/portfolio/index.blade.php`
+    * `resources/views/photographer/availability/index.blade.php`
+    * `resources/views/photographer/bookings/index.blade.php`
+    * `resources/views/photographer/reports/index.blade.php`
+    * `resources/views/client/bookings/index.blade.php`
+    * `resources/views/client/invoices/index.blade.php`
+    * `resources/views/public/booking/invoice.blade.php`
+    * `resources/views/public/booking/invoice-print.blade.php`
+    * `resources/views/public/elearning/invoice-print.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Seluruh KPI Cards di halaman dashboard dan tabel memakai label `text-[11px]` dengan nilai `text-lg sm:text-xl` (atau `text-2xl`), serta pada `admin/forum/index` bernilai `text-base sm:text-lg`, sehingga angka nilai tampak menonjol sendiri dibanding label di atasnya.
+    * Isi sel `<tbody>` di seluruh tabel aplikasi mencampur ukuran font tidak seragam: judul nama, layanan, dan nominal memakai `text-sm`, `text-base`, `text-xs sm:text-sm`, atau `text-theme-sm`, sedangkan subteks atau kode memakai `text-[10px]` dan `text-[11px]`.
+    * Rincian fasilitas pada `photographer/services/index.blade.php` dirender sebagai tumpukan pill kapsul `bg-gray-100 rounded-md text-[10px]`.
+    * Header `<th>` pada `photographer/faqs/index.blade.php` dipaksa memakai pecahan lebar timpang (`w-1/12`, `w-5/12`, `w-4/12`) dan menerapkan `line-clamp-2` langsung pada tag `<td>`, sehingga saat tabel kosong kolom header tampak timpang dan tidak proporsional dibanding tabel lain (seperti `admin/photographers/index`).
+  * **After**:
+    * Menyeragamkan seluruh label dan nilai KPI Cards pada halaman tabel fitur, dashboard utama, rangkuman grafik dashboard, kartu ringkasan kesiapan (`admin/photographers/show`), dan statistik akun `public/users/show` ke **`text-xs`**, dibedakan murni lewat ketebalan (`font-black` vs `font-bold`) dan warna kontras tanpa mengubah ukuran hero marketing atau harga katalog komersial.
+    * Menyeragamkan seluruh sel `<tbody>` pada tabel Admin, Fotografer, Klien, `table-01.blade.php`, dan invoice online ke **`text-xs`** (kecuali cetak A4 PDF `photographer/reports/export.blade.php`), sehingga hierarki data murni ditentukan oleh ketebalan huruf dan warna teks.
+    * Mengubah daftar pill fasilitas di `photographer/services/index.blade.php` menjadi teks ringkas satu baris/paragraf dipisah `•` (`text-xs text-gray-500 dark:text-gray-400 leading-relaxed`).
+    * Menghapus fraksi `w-*/12` pada `<th>` di `photographer/faqs/index.blade.php` disertai `whitespace-nowrap`, memberi `align-top` pada sel, memindahkan `line-clamp-2` ke `<p>` di dalam sel jawaban, serta membiarkan proporsi `<th>` tabel lain tetap utuh tanpa modifikasi.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49, Rule #64, Rule #67, Rule #68, Rule #70, Rule #80, Rule #106**.
+* **Hasil Pengujian & Verifikasi**:
+  * Scan PowerShell lintas seluruh view non-demo terhadap `<tbody>` non-`text-xs` (0 temuan sisa), audit `git diff` header `<th>` terkonfirmasi hanya menyentuh `photographer/faqs/index.blade.php`, serta kompilasi Blade (`php artisan view:clear`, `php artisan view:cache`) dan aset produksi (`npm run build`, `vite v8.2.1`, 905ms) via PHP 8.4.24: **PASS**.
+
+---
+
+### [2026-11-12 10:36 WITA] — Custom Alpine.js Time Dropdown (`x-time-dropdown`), Pembersihan UI Baris Flat Jadwal Mingguan, dan Perbaikan Empty State Sidebar Chat
+
+* **Modul / Fitur**:
+  - Komponen Pemilih Jam Standar (`x-time-dropdown`), Halaman Kelola Jadwal & Ketersediaan Fotografer (`/photographer/availability`), Tambah Blokir Tanggal (`/photographer/availability/create`), serta Sidebar Obrolan & Modal Penawaran Khusus (`/chat` dan `/photographer/chat`).
+* **File yang Ditambahkan / Diubah**:
+  * `resources/views/components/time-dropdown.blade.php` (baru)
+  * `resources/views/photographer/availability/index.blade.php`
+  * `resources/views/photographer/availability/create.blade.php`
+  * `resources/views/photographer/chat/index.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `README.md` (`Rule #105`)
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Seluruh pemilih jam masih memakai `<input type="time">` bawaan browser sehingga memunculkan popup biru standar OS Windows yang tidak selaras dengan Custom Alpine.js Floating Dropdown sistem (**Rule #46**).
+    * Jadwal mingguan di `photographer/availability/index.blade.php` membungkus tiap hari dalam kotak abu-abu bertumpuk (`bg-gray-50` card-in-card), menyisakan ruang kosong lebar di tengah baris (`justify-between`), menumpuk garis pemisah `border-b` di bawah tajuk kartu, dan memakai label repetitif (*"Buka Operasional"*, *"24 Jam / Fleksibel Kapan Saja"*).
+    * Empty state daftar percakapan pada `public/chat/index.blade.php` dan `photographer/chat/index.blade.php` menempel di bagian atas sidebar serta menumpuk teks terpotong vertikal ("gepeng") saat panel sidebar diperkecil (*collapse*).
+  * **After**:
+    * Menambahkan komponen Blade standar [`x-time-dropdown`](resources/views/components/time-dropdown.blade.php) berinterval 30 menit (`00:00`–`23:30`) yang meniru desain trigger dropdown sistem (`rounded-xl`, chevron berotasi, focus ring amber, auto-scroll item aktif), menggantikan total `<input type="time">` di 4 halaman produksi dan mengatur modal penawaran chat menjadi `overflow-visible`.
+    * Merombak jadwal 7 hari pada `photographer/availability/index.blade.php` menjadi baris flat putih dengan garis pemisah tipis (`divide-y`), grid 3-kolom sejajar (`md:grid-cols-12`), tanpa garis pemisah sub-heading (**Rule #41 & #58**), dan copywriting ringkas (*"Jadwal"*, *"Tanggal Libur"*, *"Aktif"* / *"Libur"*, *"24 Jam"*).
+    * Memusatkan posisi vertikal empty state sidebar chat (`h-full min-h-full flex flex-col items-center justify-center`) dan menyembunyikannya dengan aman saat `chatListCollapsed` aktif agar teks tidak tergencet menjadi vertikal.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41, Rule #46, Rule #49, Rule #58, Rule #70, Rule #105**.
+* **Hasil Pengujian & Verifikasi**:
+  * **PASS** — Seluruh template Blade terkompilasi bersih via PHP 8.4 (`artisan view:cache`), `npm run build` selesai tanpa error, serta audit grep memastikan tidak ada sisa `<input type="time">` pada view produksi non-demo.
+
+---
+
+### [2026-11-12 09:57 WITA] — Implementasi Arsitektur FAQ Kombinasi Opsi A (Tanya Jawab Fotografer + Ketentuan Sistem Hardcoded Terpusat) & Audit Kepatuhan README
+
+* **Modul / Fitur**:
+  - Konfigurasi FAQ Terpusat, Halaman Pusat Bantuan (`/faq`), Tab Tanya Jawab Profil Publik Fotografer (`/fotografer/{id}`), Halaman Kelola Tanya Jawab Fotografer (`/photographer/faqs`), dan Seeder Demo Fotografer.
+* **File yang Ditambahkan / Diubah**:
+  * `config/lensmatch_faqs.php` (baru)
+  * `app/Http/Controllers/Public/HelpController.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `app/Http/Controllers/Photographer/FaqController.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/photographer/faqs/index.blade.php`
+  * `database/seeders/PhotographerSeeder.php`
+  * `README.md` (`Rule #86`)
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Halaman `/faq` menyimpan array FAQ secara terpisah di `HelpController`, masih memakai istilah `"Escrow"`, menyebut metode `"QRIS"` yang tidak ada di invoice, serta menyebut syarat `"minimal 3 portofolio"`.
+    * `PhotographerSeeder` mengisi 7 pertanyaan bertopik aturan sistem (DP 30%, pembayaran platform, alur booking) ke akun demo fotografer, sehingga membingungkan batas kewenangan antara sistem dan fotografer.
+    * Tab Tanya Jawab di `public/photographers/show.blade.php` hanya membaca `$photographer->faqs` sehingga fotografer baru terlihat kosong total di tab tersebut.
+    * `photographer/faqs/index.blade.php` menggunakan istilah `'Studio'` untuk peran fotografer, simbol `+` ganda pada tombol header, tombol duplikat pada empty state tabel, judul memakai `&`, `json_encode($faq)` pada atribut HTML, kelas dark-mode non-standar (`dark:bg-gray-850`, `dark:hover:bg-gray-750`, serta input modal `dark:bg-gray-800`), validasi min/max backend-frontend belum selaras, serta belum menampilkan referensi ketentuan sistem.
+  * **After**:
+    * Menambahkan `config/lensmatch_faqs.php` sebagai satu sumber hardcoded terpusat untuk `help_categories` (`/faq`) dan `profile_system_faqs` (4 ketentuan baku platform), menggunakan copywriting to-the-point berbahasa Indonesia alami tanpa istilah `'Studio'`, `'Escrow'`, `'Rekening Bersama'`, atau `'QRIS'` (menyebut transfer bank ke rekening resmi PT LensMatch Indonesia sesuai `public/booking/invoice.blade.php`).
+    * Memperbaharui `HelpController@faq` dan `Public\PhotographerController@show` untuk membaca konfigurasi terpusat tersebut dan menyelaraskan informasi Pembayaran Penuh / DP 30%, pembatalan H-24 jam, serta jadwal ulang dengan logika aplikasi aktual.
+    * Memperbaharui Tab 5 **Tanya Jawab** pada `resources/views/public/photographers/show.blade.php` dengan 2 blok terpisah: **Tanya Jawab Fotografer** (diatur fotografer) dan **Ketentuan Sistem LensMatch** (otomatis tampil dari kode) memakai ikon accordion `?` yang konsisten, kartu putih bebas shadow internal (`Rule #100`), hover dark-mode valid (`dark:hover:bg-gray-700/50`), serta badge counter gabungan.
+    * Memperbaharui `Photographer\FaqController` dan `resources/views/photographer/faqs/index.blade.php`: menyelaraskan penamaan **Tanya Jawab (FAQ)** (konsisten dengan sidebar & Rule #19), tabel **Daftar Tanya Jawab**, panel referensi *read-only* **Ketentuan Sistem LensMatch**, validasi backend-frontend (`pertanyaan` `min:5|max:255`, `jawaban` `min:10|max:2500`, `urutan` `min:1|max:999`), menghapus simbol `+` ganda dan tombol CTA duplikat empty state, mengganti `json_encode` dengan `Js::from`, menyamakan dark-mode modal/input (`dark:bg-gray-800` card, `dark:bg-gray-900` input, `dark:hover:bg-gray-700/50`), layout grid penuh `Urutan Tampil` pada mode Tambah, serta menghapus elemen pembantu tambahan tanpa persetujuan (Rule #42).
+    * Memperbaharui `PhotographerSeeder.php` agar men-seed contoh tanya jawab layanan fotografer (estimasi edit, tiket lokasi, transport luar kota, revisi warna, ketentuan hujan).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #19, Rule #22, Rule #42, Rule #51, Rule #59, Rule #64, Rule #70, Rule #71, Rule #76, Rule #80, Rule #86, Rule #89, Rule #100**.
+* **Hasil Pengujian & Verifikasi**:
+  * **PASS** — `php -l` seluruh file PHP/konfigurasi terkait tanpa syntax error; `php artisan config:clear`, `view:cache`, `view:clear`, dan `npm run build` (`vite v8.2.1`, 759ms) selesai bersih; serta uji integrasi runtime (`verify_faq.php` dalam transaksi rollback DB) memverifikasi `/faq`, profil publik (`/fotografer/{id}`), validasi/CRUD `/photographer/faqs` + escape `Js::from`, penyembunyian FAQ nonaktif, dan konsistensi 4 ketentuan sistem.
+
+---
+
+### [2026-11-11 21:37 WITA] — Standardisasi Padding Vertikal Modal Popup Lintas Role (Migrasi `space-y-*` ke `flex flex-col gap-*`)
+
+* **Modul / Fitur**:
+  - Komponen modal dan dialog konfirmasi lintas role (Shared Partials, Fotografer, Klien, Admin, dan Publik).
+* **File yang Diubah**:
+  * **Shared Partials**:
+    * `resources/views/partials/shared/confirm-modal.blade.php`
+    * `resources/views/partials/shared/access-notice-modal.blade.php`
+    * `resources/views/partials/client/review-modal.blade.php`
+    * `resources/views/partials/photographer/onboarding-wizard.blade.php`
+  * **Fotografer dan Klien**:
+    * `resources/views/photographer/bookings/index.blade.php`
+    * `resources/views/photographer/faqs/index.blade.php`
+    * `resources/views/photographer/reports/index.blade.php`
+    * `resources/views/photographer/chat/index.blade.php`
+    * `resources/views/client/bookings/index.blade.php`
+    * `resources/views/client/galleries/index.blade.php`
+  * **Admin**:
+    * `resources/views/admin/contests/index.blade.php`
+    * `resources/views/admin/contests/manage.blade.php`
+    * `resources/views/admin/contests/submissions.blade.php`
+    * `resources/views/admin/contests/participants.blade.php`
+    * `resources/views/admin/transactions/index.blade.php`
+    * `resources/views/admin/elearning/curriculum.blade.php`
+    * `resources/views/admin/photographers/index.blade.php`
+    * `resources/views/admin/photographers/show.blade.php`
+    * `resources/views/admin/activity_logs/index.blade.php`
+  * **Publik**:
+    * `resources/views/public/chat/index.blade.php`
+    * `resources/views/public/booking/invoice.blade.php`
+    * `resources/views/public/forum/index.blade.php`
+    * `resources/views/public/forum/show.blade.php`
+    * `resources/views/public/elearning/show.blade.php`
+    * `resources/views/public/elearning/index.blade.php`
+    * `resources/views/public/elearning/katalog.blade.php`
+    * `resources/views/public/contests/index.blade.php`
+    * `resources/views/public/contests/show.blade.php`
+    * `resources/views/public/photographers/katalog.blade.php`
+    * `resources/views/public/photographers/show.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Container modal, `<form>`, dan wrapper internal yang memakai `space-y-*` di atas saudara `<template>`, `<input type="hidden">`, elemen `x-show`, maupun tombol close `absolute` tetap memberi `margin-bottom` pada child visual terakhir, sehingga padding bawah modal tampak lebih tinggi daripada padding atas.
+    * Sejumlah footer tombol aksi modal tanpa divider masih menumpuk `pt-1` hingga `pt-4` di atas `space-y-*`, judul awal modal memiliki `mt-1` atau `mb-4`, serta beberapa modal scrollable memiliki padding header dan footer yang tidak simetris.
+  * **After**:
+    * Mengganti `space-y-*` menjadi `flex flex-col gap-*` pada container kartu modal, elemen `<form>`, dan wrapper internal (CSS Flexbox `gap` otomatis mengabaikan `<template>`, elemen `display: none`, `<input type="hidden">`, dan elemen `absolute`).
+    * Menyesuaikan wrapper dinamis pada modal peserta lomba di `admin/contests/manage.blade.php` (`grid grid-cols-1 sm:grid-cols-2` vs `flex flex-col` dengan `gap-4`).
+    * Menghapus `pt-1`/`pt-2`/`pt-3`/`pt-4` bertumpuk pada footer tombol tanpa border, menghapus `mt-1`/`mb-4` pada `<h3>` judul awal modal, serta menyamakan padding header dan footer pada modal scrollable dan modal ber-divider (`onboarding-wizard`, `submissions`, `transactions`, `public/forum/index`, `activity_logs`).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**: Perubahan fokus pada kelas layout/spacing tanpa mengubah teks copy, warna, ikon, alignment horizontal tombol, maupun logika JS.
+  * **Rule #59, Rule #70, dan Rule #74**: Posisi tengah/kanan tombol aksi yang ada dipertahankan, tanpa tambahan ornamen maupun duplikasi istilah.
+* **Hasil Pengujian & Verifikasi**:
+  * Audit grep lintas seluruh view non-demo (`role="dialog"`, `aria-modal`, `fixed inset-0`, dan inspeksi diff 30 file Blade): **PASS**.
+  * `php artisan view:cache` dan `php artisan view:clear` (via PHP 8.4.24): **PASS** (seluruh template Blade terkompilasi tanpa error).
+  * `npm run build` (`vite v8.2.1`): **PASS** (aset CSS/JS produksi ter-build bersih dalam 801ms).
+
+---
+
+### [2026-11-11 21:22 WITA] — Hirarki Kategori Portofolio Berbasis Profil Fotografer, Penguncian Opsi B, dan Penyimpanan `id_kategori`
+
+* **Modul / Fitur**:
+  - Skema & Seeder `photographer_portofolios.id_kategori`, Form Tambah/Edit & Kelola Portofolio Fotografer, Penguncian Kategori Profil Fotografer (Opsi B), Detail Verifikasi Admin, serta Etalase Publik.
+* **File yang Diubah / Ditambahkan**:
+  * `database/migrations/2026_11_11_000002_add_id_kategori_to_photographer_portofolios_table.php` (baru)
+  * `database/seeders/PhotographerSeeder.php`
+  * `app/Models/Category.php`
+  * `app/Models/PhotographerPortfolio.php`
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Photographer/PortfolioController.php`
+  * `app/Http/Controllers/Public/ProfileController.php`
+  * `app/Http/Controllers/Photographer/OnboardingController.php`
+  * `app/Http/Controllers/Admin/PhotographerVerificationController.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `resources/views/photographer/portfolio/create.blade.php`
+  * `resources/views/photographer/portfolio/edit.blade.php`
+  * `resources/views/photographer/portfolio/index.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+  * `resources/views/public/photographers/show.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Dropdown kategori di form Tambah/Edit Portofolio menampilkan seluruh `Category::all()`, tidak dipilih otomatis saat kategori profil hanya 1, dan tidak pernah menyimpan `id_kategori` ke database.
+    * Tabel `photographer_portofolios` belum memiliki kolom `id_kategori`, sehingga halaman `Kelola Portofolio` menampilkan fallback `'Karya Foto'`, salah membaca `$port->foto`, serta metrik tema/pencarian tidak akurat; `Admin Detail` dan `Etalase Publik` belum menampilkan kategori per album.
+    * Fotografer dapat melepas centang kategori di `Profil` meski kategori tersebut masih dipakai portofolio.
+  * **After**:
+    * **Migrasi, Backfill, & Seeder**: Menambahkan kolom nullable FK `id_kategori` (`nullOnDelete`) pada `photographer_portofolios` beserta backfill otomatis berbasis kategori profil dan kata kunci judul/deskripsi, serta menyertakan `id_kategori` pada `PhotographerSeeder`.
+    * **Model & Relasi**: Menambah `PhotographerPortfolio::category()`, `Category::portfolios()`, dan `RolePhotographer::getUsedPortfolioCategoryCounts()` (mengabaikan portofolio maupun kategori global yang sudah dihapus agar tidak terjadi kebuntuan).
+    * **Cakupan & Auto-Select Kategori Portofolio**: `PortfolioController@create` dan `@edit` membatasi opsi hanya kategori milik `$photographer->categories` (urut abjad), memvalidasi `Rule::in($allowedCategoryIds)` di `store`/`update`, otomatis memilih kategori jika profil hanya memiliki 1 kategori, menonaktifkan dropdown dengan tautan ke `Profil` jika masih 0 kategori, serta menampilkan catatan netral di halaman Edit bila kategori lama sudah dihapus.
+    * **Penguncian Ketat Opsi B di Profil**: `ProfileController@updateProfile` memeriksa secara atomik sebelum menyimpan apakah ada kategori terpakai portofolio yang dilepas, `OnboardingController@complete` mempertahankan kategori terpakai secara defensif, dan `photographer/profile/index.blade.php` mengunci tombol hapus/chip kategori yang terpakai beserta indikator jumlah albumnya.
+    * **Tampilan Kategori Asli & Perbaikan `Kelola Portofolio`**: Menampilkan `$port->category->nama_kategori` pada `Kelola Portofolio` (menggantikan fallback `'Karya Foto'`, memperbaiki thumbnail via `$port->medias->first()?->media`, metrik `$topCategoryName`/`$uniqueCategoryCount`, serta pencarian nama kategori & urutan `title_asc`/`title_desc`), `Admin Detail` (`admin/photographers/show.blade.php`), dan `Etalase Publik` (`public/photographers/show.blade.php`). `PhotographerService` (`Paket Layanan`) tetap dipertahankan fleksibel tanpa kategori.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #15 (Bagian 7), Rule #94, & Rule #104**: Data kategori 100% dinamis dari database (`id_kategori`) tanpa fallback statis `'Karya Foto'` serta ikon kamera outline/strip netral saat data kosong.
+  * **Rule #46**: Menggunakan Alpine.js Custom Floating Dropdown tanpa `<select>` native.
+  * **Rule #49**: Perubahan fokus ketat sesuai cakupan (mempertahankan `PhotographerService` tanpa ikatan kategori).
+  * **Rule #64, Rule #67, Rule #68, & Rule #70**: Metric cards 2 baris, bebas bulatan dot badge, kolom kategori tabel teks netral, serta copywriting ringkas tanpa tanda `&` redundan.
+  * **Rule #73, Rule #75, Rule #95, & Rule #100**: Konsistensi form portofolio, kartu galeri portofolio publik, validasi real-time profil, serta master card etalase.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan migrate`: **PASS** (kolom `id_kategori` ditambahkan dan seluruh portofolio aktif ter-backfill).
+  * `php -l` via PHP 8.4.24 pada seluruh 10 file PHP yang dibuat/diubah: **PASS** (0 syntax errors).
+  * `php artisan view:cache` & `php artisan view:clear`: **PASS** (seluruh template Blade terkompilasi tanpa error).
+  * `npm run build` (`vite v8.2.1`): **PASS** (aset CSS/JS produksi ter-build bersih dalam 868ms).
+  * Uji integrasi Laravel end-to-end (rollback transaksi + `Storage::fake('public')`): **PASS** (`25/25` assertion lolos — mencakup backfill, form 0/1/multi kategori, validasi `store`, pencarian/tampilan `Kelola Portofolio` bebas `'Karya Foto'`, penguncian Opsi B profil & pengecualian kategori terhapus, catatan kategori legacy di `edit`, serta rendering kategori di `Admin Detail` & `Etalase Publik`).
+
+---
+
+### [2026-11-11 20:44 WITA] — Penggantian Teks "Pilih ..." dengan Ikon Unggah pada Seluruh Dropzone Upload Lintas Role
+
+* **Modul / Fitur**:
+  - Area dropzone unggah foto, media, dan berkas pada seluruh formulir role Fotografer, Klien/Publik, dan Admin (17 dropzone di 14 file Blade).
+* **File yang Diubah**:
+  * `resources/views/photographer/portfolio/create.blade.php`
+  * `resources/views/photographer/portfolio/edit.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/public/profile/index.blade.php`
+  * `resources/views/public/forum/index.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/admin/contests/create.blade.php`
+  * `resources/views/admin/contests/edit.blade.php`
+  * `resources/views/admin/elearning/create.blade.php`
+  * `resources/views/admin/elearning/edit.blade.php`
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    * Seluruh 17 dropzone menampilkan teks tautan bergaris bawah `"Pilih ... atau seret dan lepas di sini"` (atau `"Pilih ... atau seret ke sini"`).
+  * **After**:
+    * Mengganti teks tautan bergaris bawah `"Pilih ..."` dengan ikon standar *tray upload* Heroicons outline (`arrow-up-tray`, `aria-hidden="true"`) di bagian tengah atas (`text-amber-500` saat state drag aktif, `text-gray-400 dark:text-gray-500` saat normal), diikuti teks ringkas `"Seret dan lepas di sini"` dan teks ketentuan format/ukuran di bawahnya.
+    * Menyesuaikan tinggi minimal dropzone avatar dan sampul di `photographer/profile/index.blade.php` dari `min-h-[96px]` menjadi `min-h-[112px]` (`py-5 gap-1.5`) agar susunan vertikal ikon dan dua baris teks tetap proporsional.
+* **Standar / Rule README yang Dipatuhi**:
+  * Rule #22 (konfirmasi jenis dan tata letak ikon unggah dari pengguna sebelum implementasi).
+  * Rule #49, Rule #70, Rule #97 (konsisten di seluruh role tanpa mengubah handler JS, validasi, maupun pratinjau/lightbox).
+* **Hasil Pengujian & Verifikasi**:
+  * Audit teks residu dropzone lintas `resources/views` (kecuali `demo/`): **0** sisa pola lama (`atau seret` / `Pilih ...dari perangkat`), **17/17** dropzone terverifikasi menggunakan ikon upload + `"Seret dan lepas di sini"`.
+  * `npm run build` (**PASS**, utilitas Tailwind termasuk `min-h-[112px]`, `transition-colors`, `w-6`/`w-7`/`sm:w-8`, `text-amber-500`, `text-gray-700` terkompilasi ke CSS produksi).
+  * Kompilasi seluruh **154** non-demo Blade views + `php -l` syntax check via PHP 8.4.24 (**PASS**, Failed: 0) dan `php artisan view:clear` (**PASS**).
+
+---
+
 ### [2026-11-11 13:51 WITA] — Perbaikan Inisialisasi Alpine.js (`x-data`) dan Tombol `+ Tambah Benefit` pada Form Paket Layanan
 
 * **Modul / Fitur**:
@@ -2664,3 +3309,66 @@ Setiap entri log perubahan wajib mencantumkan:
   - Scanning AST seluruh 129 input wajib (*) di 60+ file Blade: **100% tervalidasi real-time**.
   - Pemeriksaan Keseimbangan Tag: **20 File Termodifikasi: 100% MATCH Div Open & Close (Diff = 0)**.
   - Template Compilation: `php artisan view:cache` **100% PASS tanpa error syntax**.
+
+---
+
+### [2026-11-12] Pembaruan Reputasi & Metrik Keunggulan Fotografer (Opsi 2 + Validasi Berbasis Klien)
+* **Modul / Fitur**: Indikator Reputasi Fotografer (`Top Rated`, `Jam Terbang Tinggi`, `Respon Cepat`) pada Model, Dashboard Fotografer, Katalog Publik, Favorit Klien, dan Dashboard Admin.
+* **File yang Dimodifikasi**:
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Photographer/DashboardController.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `app/Http/Controllers/Client/ClientFavoriteController.php`
+  * `app/Http/Controllers/Admin/DashboardController.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `resources/views/client/favorites/index.blade.php`
+  * `routes/web.php`
+  * `README.md` (Pembaruan `Rule #84`)
+* **Rincian Perubahan (Before vs After)**:
+  1. **Kecepatan Respon (`Respon Cepat`) -> Opsi 2 (Interaksi Klien)**:
+     * *Before*: Menggunakan `users.last_seen_at` dalam 24 jam terakhir sehingga fotografer baru yang baru membuka dashboard admin verifikasi langsung mendapat status `Tercapai` dan badge `Respon Cepat` tanpa pernah merespons klien.
+     * *After*: Menambahkan `RolePhotographer::getClientResponseStats()` yang menghitung kecepatan rata-rata balasan chat klien (`chat_messages`, `deleted_for_all = false`) <= 24 jam (minimal 1 balasan nyata, mengabaikan pesan sapaan sistem otomatis sebelum klien mengirim pesan), memastikan tidak ada pesan klien terbengkalai > 24 jam, serta menggugurkan lencana `Respon Cepat` bila ada order booking `pending` (`is_validated_photographer = false`, `status_booking = 'pending'`) yang dibiarkan > 24 jam.
+  2. **Jam Terbang Sesi (`Jam Terbang Tinggi`) -> Validasi Konfirmasi Klien**:
+     * *Before*: Menghitung semua `contracts` dengan `status_contract = 'completed'`, termasuk pesanan yang baru diunggah link Google Drive oleh fotografer tetapi masih berstatus *"Menunggu Konfirmasi Klien"* (`is_validated_client = false`).
+     * *After*: Diperketat menjadi `status_contract = 'completed'` dan `is_validated_client = true` di `RolePhotographer`, `Photographer/DashboardController`, dan `Admin/DashboardController` / `admin/dashboard.blade.php`.
+  3. **Rating Fotografer (`Top Rated`) -> Filter Ulasan Aktif (`is_hidden = false`)**:
+     * *Before*: Relasi `testimonials` dan query statistik rating belum menyaring kolom `is_hidden = false`, sehingga ulasan yang disembunyikan oleh moderasi admin masih ikut terhitung di rata-rata rating dan jumlah ulasan.
+     * *After*: Menambahkan relasi `visibleTestimonials()` (`where('is_hidden', false)`) pada `RolePhotographer` dan menyaring `is_hidden = false` di seluruh query rating (`DashboardController`, `Public/PhotographerController`, `ClientFavoriteController`, `Admin/DashboardController`, `routes/web.php`), serta menjaga ikon bintang pada `client/favorites/index.blade.php` agar hanya tampil jika rating ada.
+* **Hasil Pengujian**:
+  * Kompilasi Blade (`php artisan view:clear` & `view:cache` via PHP 8.4.24): **PASS (0 error)**.
+  * Uji HTTP Render Routes (`/` `200`, `/fotografer` `200`, `/fotografer/katalog` `200`, `/fotografer/1` `200`, `/client/favorites` `200`, `/photographer/dashboard` `200` untuk Kenji & Alex, `/admin/dashboard` `200`): **PASS**.
+  * Uji Perilaku Transaksional (DB Rollback 7 Skenario: sapaan otomatis diabaikan, balasan chat cepat, gugur saat booking pending > 24 jam, gugur saat chat terbengkalai > 24 jam, gugur saat rata-rata > 24 jam, ulasan tersembunyi dikecualikan, sesi butuh `is_validated_client = true`): **ALL 7 SCENARIOS PASS**.
+
+---
+
+### [2026-11-12] Penyeragaman Toolbar Filter, Live Search, Pagination, dan Siklus Tanggal Lewat pada Tabel Tanggal Libur (`photographer/availability`)
+* **Modul / Fitur**: Halaman Kelola Jadwal Fotografer Tab `Tanggal Libur` (`/photographer/availability?tab=overrides`).
+* **File yang Dimodifikasi**:
+  * `app/Http/Controllers/Photographer/AvailabilityController.php`
+  * `resources/views/photographer/availability/index.blade.php`
+  * `README.md` (Penambahan poin 4 pada `Rule #105`)
+* **Rincian Perubahan**:
+  1. Menambahkan filter `periode` (`all`, `upcoming`, `past`), filter `tipe` (`all`, `all_day`, `time_slot`), dan urutan `sort` pada `AvailabilityController::index()`, mendukung pencarian format tanggal tampilan (`DATE_FORMAT` `%d %b %Y` serta `%d/%m/%Y` untuk driver MySQL/MariaDB), serta memisahkan metrik `$totalAllBlocked` (badge tab) dengan `$totalBlocked` (`Libur Aktif`, `tanggal >= today`).
+  2. Mengintegrasikan `x-data="dashboardLiveTable()"` dengan toolbar 3 dropdown filter Alpine.js di kiri, live search di kanan, `#dashboard-stats-container`, `#dashboard-table-container`, dan partial pagination standar `partials.dashboard.pagination` saat `$availabilities->total() > 0`.
+  3. Menangani tanggal libur yang sudah lewat (`tanggal < hari ini`): data tidak dihapus otomatis dari database, tampil dengan status `Sudah Lewat` dan tombol `Hapus` (soft delete), sementara tanggal aktif (`>= hari ini`) tetap berstatus `Ditutup` dengan tombol `Buka Jadwal`.
+* **Hasil Pengujian**:
+  * `artisan view:clear` lalu `view:cache` via PHP 8.4.24 serta keseimbangan tag HTML (`40/40` `<div>`): **PASS**.
+  * Uji render HTTP (`/photographer/availability?tab=weekly` serta `?tab=overrides` status `200`) dan simulasi transaksional DB Rollback (30/30 asersi lulus: seluruh filter `periode`/`tipe`/`sort`/`per_page`, pencarian format tanggal tampilan, pagination standar, pemisahan hitungan aktif vs riwayat, pengecualian tanggal lewat di kalender publik, serta pesan flash `destroy()` untuk riwayat vs jadwal aktif): **PASS**.
+
+---
+
+### [2026-11-12] Catatan Penolakan Inline pada Stepper Tahap Fotografer serta Eliminasi Banner Ganda (`Cara A`)
+* **Modul / Fitur**: Partial `stage-stepper.blade.php`, Profil Fotografer, dan Dashboard Fotografer.
+* **File yang Dimodifikasi**:
+  * `resources/views/partials/photographer/stage-stepper.blade.php`
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `README.md` (Pembaruan `Rule #95` poin 5 serta `Rule #108` poin 2)
+* **Rincian Perubahan**:
+  1. Menampilkan tepat satu baris teks lembut `Catatan Admin: <isi catatan>` (`text-xs text-gray-600 dark:text-gray-300` dengan label `text-rose-600 font-bold`) tepat di bawah baris utama stepper pada `stage-stepper.blade.php` ketika `status_verifikasi === 'ditolak'` (Tahap 1) atau `status_etalase === 'ditolak'` (Tahap 3), tanpa garis pembatas (`0 border-t`) serta tanpa kotak berlapis (`0 bg-rose-50` / `0 border`).
+  2. Menghapus tautan redundan `Lihat Catatan Admin` di sisi kanan stepper ketika berada pada langkah aktif (`Atur Jadwal`), serta menampilkan CTA `Perbaiki Profil` pada Dashboard ketika pendaftaran Tahap 1 ditolak.
+  3. Menghapus banner penolakan profil ganda pada `photographer/profile/index.blade.php` dan `photographer/dashboard.blade.php`, sekaligus merapikan tampilan catatan penolakan etalase di kartu `Persiapan Tayang Etalase` pada `dashboard.blade.php` agar memakai satu baris teks lembut yang seragam tanpa kotak merah bersarang maupun judul berulang.
+* **Hasil Pengujian**:
+  * Kompilasi Blade (`artisan view:clear` lalu `view:cache` via PHP 8.4.24) dan keseimbangan `<div>` (`stage-stepper` `7/7`, `profile/index` `68/68`, `dashboard` `100/100`): **PASS**.
+  * Uji render HTTP (`dashboard`, `profile`, `availability`, `services`) dan simulasi transaksional DB Rollback 4 skenario (tanpa penolakan, profil ditolak Tahap 1, etalase ditolak 2/3, etalase ditolak 3/3 siap ajukan ulang): **27/27 asersi PASS** (catatan muncul tepat sekali per halaman, nol divider garis, nol kotak berlapis, nol `&` berlebih).

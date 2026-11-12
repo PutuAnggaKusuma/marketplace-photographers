@@ -62,34 +62,34 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- Card 1 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Portofolio</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->total() }} Karya</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Portofolio</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->total() }} Karya</div>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Spesialisasi</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $topCategoryName ?? 'Wedding' }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Spesialisasi</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $topCategoryName ?? '-' }}</div>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Variasi Tema</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->unique('kategori')->count() }} Kategori</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Variasi Tema</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $uniqueCategoryCount ?? 0 }} Kategori</div>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Terakhir Diperbarui</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $portfolios->first()?->created_at ? $portfolios->first()->created_at->format('d M Y') : '-' }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Terakhir Diperbarui</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ ($latestPortfolio ?? $portfolios->first())?->created_at ? ($latestPortfolio ?? $portfolios->first())->created_at->format('d M Y') : '-' }}</div>
         </div>
     </div>
 
     <!-- Standard Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Sort -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto">
                 @php
                     $sortLabels = [
@@ -151,22 +151,47 @@
                                 
                                 <!-- Foto & Judul -->
                                 <td class="py-4 px-4 sm:px-6 align-top">
+                                    @php
+                                        $firstMedia = $port->medias->first()?->media;
+                                        if ($firstMedia) {
+                                            if (str_starts_with($firstMedia, 'http')) {
+                                                $thumbUrl = $firstMedia;
+                                            } elseif (str_starts_with($firstMedia, 'storage/') || str_starts_with($firstMedia, '/storage/')) {
+                                                $thumbUrl = asset(ltrim($firstMedia, '/'));
+                                            } else {
+                                                $thumbUrl = asset('storage/' . ltrim($firstMedia, '/'));
+                                            }
+                                        } else {
+                                            $thumbUrl = null;
+                                        }
+                                    @endphp
                                     <div class="flex items-center gap-3.5">
-                                        <div class="w-16 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs">
-                                            <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ asset('storage/' . $port->foto) }}" class="w-full h-full object-cover">
+                                        <div class="w-16 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-xs flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                            @if($thumbUrl)
+                                                <img onerror="this.onerror=null;this.src=window.SVG_IMAGE_FALLBACK;" src="{{ $thumbUrl }}" alt="{{ $port->judul }}" class="w-full h-full object-cover">
+                                            @else
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                                </svg>
+                                            @endif
                                         </div>
                                         <div>
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $port->judul }}</h4>
-                                            <span class="text-[11px] text-gray-400 block mt-0.5">{{ $port->created_at ? $port->created_at->format('d M Y') : '-' }}</span>
+                                            <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight">{{ $port->judul }}</h4>
+                                            <span class="text-xs text-gray-400 block mt-0.5">{{ $port->created_at ? $port->created_at->format('d M Y') : '-' }}</span>
                                         </div>
                                     </div>
                                 </td>
 
                                 <!-- Kategori -->
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
-                                    <span class="font-bold text-gray-700 dark:text-gray-300 text-xs">
-                                        {{ $port->category ? $port->category->nama_kategori : 'Karya Foto' }}
-                                    </span>
+                                    @if($port->category)
+                                        <span class="font-bold text-gray-700 dark:text-gray-300 text-xs">
+                                            {{ $port->category->nama_kategori }}
+                                        </span>
+                                    @else
+                                        <span class="font-medium text-gray-400 dark:text-gray-500 text-xs">-</span>
+                                    @endif
                                 </td>
 
                                 <!-- Deskripsi -->
@@ -189,7 +214,7 @@
                                         <button type="button" 
                                                 @click="$dispatch('open-confirm-modal', {
                                                     title: 'Hapus Portofolio Karya?',
-                                                    message: 'Apakah Anda yakin ingin menghapus karya {{ addslashes($port->judul) }}?',
+                                                    message: @js('Apakah Anda yakin ingin menghapus karya ' . $port->judul . '?'),
                                                     buttonText: 'Ya, Hapus Karya',
                                                     iconType: 'delete',
                                                     buttonClass: 'bg-red-600 hover:bg-red-700 text-white',

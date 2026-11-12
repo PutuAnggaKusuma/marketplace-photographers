@@ -177,6 +177,11 @@ layer(base);
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+  input[type="radio"],
+  input[type="checkbox"],
+  input[type="range"] {
+    accent-color: #f59e0b;
+  }
 }
 
 @utility menu-item {

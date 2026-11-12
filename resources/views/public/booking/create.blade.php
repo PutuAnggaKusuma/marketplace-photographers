@@ -754,7 +754,7 @@
                     <input type="checkbox" 
                            :checked="selectedFeatures.includes(det.id)"
                            @click="toggleFeature(det.id)"
-                           class="mt-0.5 rounded text-amber-500 focus:ring-amber-400 w-3.5 h-3.5">
+                           class="mt-0.5 rounded text-amber-500 accent-amber-500 focus:ring-amber-400 w-3.5 h-3.5">
                     <div class="flex-1">
                       <span class="font-medium block" x-text="det.nama"></span>
                       <template x-if="det.harga > 0">

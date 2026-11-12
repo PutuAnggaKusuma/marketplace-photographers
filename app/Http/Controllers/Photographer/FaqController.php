@@ -22,8 +22,9 @@ class FaqController extends Controller
         );
 
         $faqs = $photographer->faqs()->orderBy('urutan', 'asc')->get();
+        $systemFaqs = config('lensmatch_faqs.profile_system_faqs', []);
 
-        return view('photographer.faqs.index', compact('photographer', 'faqs'));
+        return view('photographer.faqs.index', compact('photographer', 'faqs', 'systemFaqs'));
     }
 
     /**
@@ -32,14 +33,20 @@ class FaqController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pertanyaan' => 'required|string|max:255',
-            'jawaban' => 'required|string|max:2500',
-            'urutan' => 'nullable|integer|min:0|max:999',
+            'pertanyaan' => 'required|string|min:5|max:255',
+            'jawaban' => 'required|string|min:10|max:2500',
+            'urutan' => 'required|integer|min:1|max:999',
         ], [
             'pertanyaan.required' => 'Pertanyaan FAQ wajib diisi.',
+            'pertanyaan.min' => 'Pertanyaan FAQ minimal 5 karakter.',
             'pertanyaan.max' => 'Pertanyaan maksimal 255 karakter.',
             'jawaban.required' => 'Jawaban FAQ wajib diisi.',
+            'jawaban.min' => 'Jawaban FAQ minimal 10 karakter.',
             'jawaban.max' => 'Jawaban maksimal 2500 karakter.',
+            'urutan.required' => 'Urutan tampil wajib diisi.',
+            'urutan.integer' => 'Urutan tampil harus berupa angka.',
+            'urutan.min' => 'Urutan tampil minimal 1.',
+            'urutan.max' => 'Urutan tampil maksimal 999.',
         ]);
 
         $photographer = RolePhotographer::firstOrCreate(
@@ -51,11 +58,11 @@ class FaqController extends Controller
             'id_photographer' => $photographer->id,
             'pertanyaan' => trim($request->pertanyaan),
             'jawaban' => trim($request->jawaban),
-            'urutan' => $request->urutan ?? ($photographer->faqs()->count() + 1),
+            'urutan' => (int) $request->urutan,
             'is_active' => true,
         ]);
 
-        return redirect()->route('photographer.faqs')->with('success', 'Tanya Jawab (FAQ) berhasil ditambahkan ke etalase profil Anda!');
+        return redirect()->route('photographer.faqs')->with('success', 'Pertanyaan FAQ berhasil ditambahkan ke profil Anda.');
     }
 
     /**
@@ -67,24 +74,30 @@ class FaqController extends Controller
         $faq = PhotographerFaq::where('id_photographer', $photographer->id)->findOrFail($id);
 
         $request->validate([
-            'pertanyaan' => 'required|string|max:255',
-            'jawaban' => 'required|string|max:2500',
-            'urutan' => 'nullable|integer|min:0|max:999',
+            'pertanyaan' => 'required|string|min:5|max:255',
+            'jawaban' => 'required|string|min:10|max:2500',
+            'urutan' => 'required|integer|min:1|max:999',
         ], [
             'pertanyaan.required' => 'Pertanyaan FAQ wajib diisi.',
+            'pertanyaan.min' => 'Pertanyaan FAQ minimal 5 karakter.',
             'pertanyaan.max' => 'Pertanyaan maksimal 255 karakter.',
             'jawaban.required' => 'Jawaban FAQ wajib diisi.',
+            'jawaban.min' => 'Jawaban FAQ minimal 10 karakter.',
             'jawaban.max' => 'Jawaban maksimal 2500 karakter.',
+            'urutan.required' => 'Urutan tampil wajib diisi.',
+            'urutan.integer' => 'Urutan tampil harus berupa angka.',
+            'urutan.min' => 'Urutan tampil minimal 1.',
+            'urutan.max' => 'Urutan tampil maksimal 999.',
         ]);
 
         $faq->update([
             'pertanyaan' => trim($request->pertanyaan),
             'jawaban' => trim($request->jawaban),
-            'urutan' => $request->urutan ?? $faq->urutan,
-            'is_active' => $request->has('is_active') ? (bool) $request->is_active : true,
+            'urutan' => (int) $request->urutan,
+            'is_active' => $request->boolean('is_active', true),
         ]);
 
-        return redirect()->route('photographer.faqs')->with('success', 'Pertanyaan FAQ berhasil diperbaharui!');
+        return redirect()->route('photographer.faqs')->with('success', 'Pertanyaan FAQ berhasil diperbaharui.');
     }
 
     /**

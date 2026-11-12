@@ -13,7 +13,6 @@
     $sampulUrl = $rawSampul ? (str_starts_with($rawSampul, 'http') ? $rawSampul : asset('storage/' . $rawSampul)) : null;
 
     $missingCount = count($missingFields);
-    $sectionStatus = $photographer->getProfileSectionsStatus();
     $storefrontChecklist = $storefrontChecklist ?? $photographer->getStorefrontChecklist();
 
     $requestedTab = request()->query('tab');
@@ -21,7 +20,10 @@
     if ($requestedTab === 'storefront'
         || session('active_tab') === 'storefront'
         || $errors->has('catatan_penolakan_etalase')
-        || ($photographer->isVerified() && $photographer->status_etalase === 'menunggu')) {
+        || ($requestedTab !== 'profile'
+            && !$errors->has('catatan_penolakan')
+            && $photographer->isVerified()
+            && $photographer->status_etalase === 'menunggu')) {
         $initialTab = 'storefront';
     }
 
@@ -93,53 +95,47 @@
         </div>
     @endif
 
-    <!-- Indikator Status & Kelengkapan Profil (Selaras dengan Halaman Profil Fotografer) -->
+    <!-- Ringkasan Status Akun Fotografer -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <span class="font-bold text-gray-900 dark:text-white">Kelengkapan Profil</span>
-                <span class="text-gray-400 dark:text-gray-500">({{ $sectionStatus['completed_count'] }}/{{ $sectionStatus['total_sections'] }} bagian)</span>
+                <div class="inline-flex items-center gap-1">
+                    <span class="font-bold text-gray-900 dark:text-white">Profil:</span>
+                    @if($photographer->status_verifikasi === 'terverifikasi')
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">Terverifikasi</span>
+                    @elseif($photographer->status_verifikasi === 'ditolak')
+                        <span class="font-bold text-rose-600 dark:text-rose-400">Ditolak</span>
+                    @else
+                        <span class="font-bold text-amber-500 dark:text-amber-400">Menunggu</span>
+                    @endif
+                </div>
+
                 <span class="text-gray-300 dark:text-gray-600">/</span>
-                @if($photographer->status_verifikasi === 'terverifikasi')
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">Terverifikasi</span>
-                @elseif($photographer->status_verifikasi === 'ditolak')
-                    <span class="font-bold text-rose-600 dark:text-rose-400">Ditolak</span>
-                @else
-                    <span class="font-bold text-amber-500 dark:text-amber-400">Menunggu Verifikasi</span>
-                @endif
-                <span class="text-gray-300 dark:text-gray-600">/</span>
-                @if($photographer->isPublishedToCatalog())
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400">Etalase Tayang</span>
-                @elseif($photographer->status_etalase === 'menunggu')
-                    <span class="font-bold text-blue-600 dark:text-blue-400">Review Etalase</span>
-                @elseif($photographer->status_etalase === 'ditolak')
-                    <span class="font-bold text-rose-600 dark:text-rose-400">Etalase Ditolak</span>
-                @else
-                    <span class="font-bold text-gray-500 dark:text-gray-400">Etalase Belum Diajukan</span>
-                @endif
-                <span class="text-gray-300 dark:text-gray-600">/</span>
-                <span class="text-gray-500 dark:text-gray-400">Terdaftar {{ $photographer->created_at ? $photographer->created_at->format('d M Y, H:i') : '-' }}</span>
+
+                <div class="inline-flex items-center gap-1">
+                    <span class="font-bold text-gray-900 dark:text-white">Etalase:</span>
+                    @if($photographer->isPublishedToCatalog())
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">Tayang</span>
+                    @elseif($photographer->status_etalase === 'menunggu')
+                        <span class="font-bold text-blue-600 dark:text-blue-400">Menunggu</span>
+                    @elseif($photographer->status_etalase === 'ditolak')
+                        <span class="font-bold text-rose-600 dark:text-rose-400">Ditolak</span>
+                    @else
+                        <span class="font-bold text-gray-500 dark:text-gray-400">Belum Diajukan</span>
+                    @endif
+                </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-                <span class="font-black text-gray-900 dark:text-white">{{ $completionPercentage }}%</span>
-                @if(!$isComplete)
-                    <span class="text-rose-600 dark:text-rose-400 font-semibold">Kurang {{ $missingCount }} data</span>
-                @elseif($photographer->status_verifikasi === 'terverifikasi')
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">Lengkap</span>
-                @elseif($photographer->status_verifikasi === 'ditolak')
-                    <span class="text-gray-600 dark:text-gray-300 font-bold">Data lengkap</span>
-                @else
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">Siap diverifikasi</span>
-                @endif
-            </div>
+            <span class="text-gray-500 dark:text-gray-400 shrink-0">
+                Terdaftar {{ $photographer->created_at ? $photographer->created_at->format('d M Y, H:i') : '-' }}
+            </span>
         </div>
 
         @if(!$isComplete && count($missingFields) > 0)
-            <div class="pt-2 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-400">
-                <span class="font-bold text-gray-700 dark:text-gray-300">Belum diisi:</span>
-                <span class="text-gray-500 dark:text-gray-400 ml-1 leading-relaxed">{{ implode(', ', array_values($missingFields)) }}.</span>
-            </div>
+            <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                <span class="font-bold text-rose-600 dark:text-rose-400">Belum diisi ({{ $missingCount }} data):</span>
+                {{ implode(', ', array_values($missingFields)) }}.
+            </p>
         @endif
     </div>
 
@@ -421,6 +417,12 @@
 
         <!-- Bottom Action Bar (Rule #74: Rata Kanan, Selaras Posisi Submit Form Profil) -->
         <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+            @if($photographer->status_verifikasi === 'ditolak')
+                <span class="text-xs text-gray-400 dark:text-gray-500">
+                    Menunggu fotografer memperbarui profil.
+                </span>
+            @endif
+
             <button type="button"
                     @click="deleteModalOpen = true"
                     class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
@@ -433,36 +435,47 @@
                         class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
                     Tolak Pendaftaran
                 </button>
-            @endif
 
-            @if($photographer->status_verifikasi === 'terverifikasi')
-                <button type="button"
-                        @click="$dispatch('open-confirm-modal', {
-                            title: 'Batalkan Verifikasi Fotografer?',
-                            message: {{ \Illuminate\Support\Js::from('Apakah Anda yakin ingin membatalkan status verifikasi untuk ' . $photographer->nama . '?') }},
-                            buttonText: 'Ya, Batalkan Verifikasi',
-                            buttonClass: 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs',
-                            type: 'warning',
-                            actionUrl: '{{ route('admin.photographers.verify', $photographer->id) }}',
-                            method: 'POST'
-                        })"
-                        class="px-5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition cursor-pointer">
-                    Batalkan Verifikasi
-                </button>
-            @else
-                <button type="button"
-                        @click="$dispatch('open-confirm-modal', {
-                            title: 'Verifikasi Fotografer?',
-                            message: {{ \Illuminate\Support\Js::from('Apakah Anda yakin ingin memverifikasi akun ' . $photographer->nama . '?') }},
-                            buttonText: 'Ya, Verifikasi',
-                            buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs',
-                            type: 'success',
-                            actionUrl: '{{ route('admin.photographers.verify', $photographer->id) }}',
-                            method: 'POST'
-                        })"
-                        class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
-                    Verifikasi Fotografer
-                </button>
+                @if($photographer->status_verifikasi === 'terverifikasi')
+                    <button type="button"
+                            @click="$dispatch('open-confirm-modal', {
+                                title: 'Batalkan Verifikasi Fotografer?',
+                                message: {{ \Illuminate\Support\Js::from('Apakah Anda yakin ingin membatalkan status verifikasi untuk ' . $photographer->nama . '?') }},
+                                buttonText: 'Ya, Batalkan Verifikasi',
+                                buttonClass: 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs',
+                                type: 'warning',
+                                actionUrl: '{{ route('admin.photographers.verify', $photographer->id) }}',
+                                method: 'POST'
+                            })"
+                            class="px-5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition cursor-pointer">
+                        Batalkan Verifikasi
+                    </button>
+                @else
+                    @if(!$isComplete)
+                        <span class="text-xs text-gray-400 dark:text-gray-500">
+                            Profil belum lengkap ({{ $completionPercentage }}%).
+                        </span>
+                        <button type="button"
+                                disabled
+                                class="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs cursor-not-allowed">
+                            Verifikasi Fotografer
+                        </button>
+                    @else
+                        <button type="button"
+                                @click="$dispatch('open-confirm-modal', {
+                                    title: 'Verifikasi Fotografer?',
+                                    message: {{ \Illuminate\Support\Js::from('Apakah Anda yakin ingin memverifikasi akun ' . $photographer->nama . '?') }},
+                                    buttonText: 'Ya, Verifikasi',
+                                    buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs',
+                                    type: 'success',
+                                    actionUrl: '{{ route('admin.photographers.verify', $photographer->id) }}',
+                                    method: 'POST'
+                                })"
+                                class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
+                            Verifikasi Fotografer
+                        </button>
+                    @endif
+                @endif
             @endif
         </div>
     </div>
@@ -494,9 +507,9 @@
         <!-- Ringkasan Kesiapan 3 Komponen Etalase -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 flex items-center justify-between gap-3">
-                <div>
-                    <span class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Paket Layanan</span>
-                    <span class="text-sm font-black text-gray-900 dark:text-white">{{ $photographer->services->count() }} paket</span>
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Paket Layanan</span>
+                    <span class="text-xs font-black text-gray-900 dark:text-white block">{{ $photographer->services->count() }} paket</span>
                 </div>
                 @if($storefrontChecklist['items']['services']['done'])
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Lengkap</span>
@@ -506,9 +519,9 @@
             </div>
 
             <div class="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 flex items-center justify-between gap-3">
-                <div>
-                    <span class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Portofolio</span>
-                    <span class="text-sm font-black text-gray-900 dark:text-white">{{ $photographer->portfolios->count() }} album</span>
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Portofolio</span>
+                    <span class="text-xs font-black text-gray-900 dark:text-white block">{{ $photographer->portfolios->count() }} album</span>
                 </div>
                 @if($storefrontChecklist['items']['portfolios']['done'])
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Lengkap</span>
@@ -518,9 +531,9 @@
             </div>
 
             <div class="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 flex items-center justify-between gap-3">
-                <div>
-                    <span class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jadwal</span>
-                    <span class="text-sm font-black text-gray-900 dark:text-white">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jadwal</span>
+                    <span class="text-xs font-black text-gray-900 dark:text-white block">
                         {{ $photographer->jadwal_dikonfirmasi ? $photographer->workingHours->where('is_open', true)->count() . ' hari aktif' : 'Belum diatur' }}
                     </span>
                 </div>
@@ -609,9 +622,15 @@
                                     <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ $portfolio->judul }}</h3>
                                     <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{{ $portfolio->deskripsi ?: '-' }}</p>
                                 </div>
-                                <span class="text-xs font-bold {{ $portfolio->medias->isEmpty() ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }} shrink-0">
-                                    {{ $portfolio->medias->count() }} foto
-                                </span>
+                                <div class="flex items-center gap-2 text-xs shrink-0">
+                                    @if($portfolio->category)
+                                        <span class="font-bold text-gray-700 dark:text-gray-300">{{ $portfolio->category->nama_kategori }}</span>
+                                        <span class="text-gray-300 dark:text-gray-600">/</span>
+                                    @endif
+                                    <span class="font-bold {{ $portfolio->medias->isEmpty() ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                        {{ $portfolio->medias->count() }} foto
+                                    </span>
+                                </div>
                             </div>
 
                             @if($portfolio->medias->isEmpty())
@@ -731,15 +750,15 @@
 
         <!-- Bottom Action Bar (Rule #74 & Rule #91: Rata Kanan, Emerald Setujui Tayang) -->
         <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
-            @if($photographer->isVerified() && in_array($photographer->status_etalase, ['menunggu', 'disetujui'], true))
-                <button type="button"
-                        @click="rejectStorefrontModalOpen = true"
-                        class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
-                    Tolak Etalase
-                </button>
-            @endif
-
             @if($photographer->isStorefrontApproved())
+                @if($photographer->isVerified())
+                    <button type="button"
+                            @click="rejectStorefrontModalOpen = true"
+                            class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
+                        Tolak Etalase
+                    </button>
+                @endif
+
                 <button type="button"
                         @click="$dispatch('open-confirm-modal', {
                             title: 'Batalkan Tayang Etalase?',
@@ -753,33 +772,57 @@
                         class="px-5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition cursor-pointer">
                     Batalkan Tayang
                 </button>
-            @elseif($photographer->isVerified() && $isComplete && $storefrontChecklist['is_ready'])
-                <button type="button"
-                        @click="$dispatch('open-confirm-modal', {
-                            title: 'Setujui Tayang Etalase?',
-                            message: {{ \Illuminate\Support\Js::from('Etalase ' . $photographer->nama . ' akan tampil di katalog publik setelah disetujui.') }},
-                            buttonText: 'Ya, Setujui Tayang',
-                            buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs',
-                            type: 'success',
-                            actionUrl: '{{ route('admin.photographers.storefront.approve', $photographer->id) }}',
-                            method: 'POST'
-                        })"
-                        class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
-                    Setujui Tayang
-                </button>
+            @elseif($photographer->isStorefrontPending())
+                @if($photographer->isVerified())
+                    <button type="button"
+                            @click="rejectStorefrontModalOpen = true"
+                            class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
+                        Tolak Etalase
+                    </button>
+                @endif
+
+                @if($photographer->isVerified() && $isComplete && $storefrontChecklist['is_ready'])
+                    <button type="button"
+                            @click="$dispatch('open-confirm-modal', {
+                                title: 'Setujui Tayang Etalase?',
+                                message: {{ \Illuminate\Support\Js::from('Etalase ' . $photographer->nama . ' akan tampil di katalog publik setelah disetujui.') }},
+                                buttonText: 'Ya, Setujui Tayang',
+                                buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs',
+                                type: 'success',
+                                actionUrl: '{{ route('admin.photographers.storefront.approve', $photographer->id) }}',
+                                method: 'POST'
+                            })"
+                            class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition cursor-pointer">
+                        Setujui Tayang
+                    </button>
+                @else
+                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                        @if(!$photographer->isVerified() || !$isComplete)
+                            Verifikasi profil terlebih dahulu.
+                        @else
+                            Kurang {{ implode(', ', $storefrontChecklist['missing_labels']) }}.
+                        @endif
+                    </span>
+                    <button type="button"
+                            disabled
+                            class="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs cursor-not-allowed">
+                        Setujui Tayang
+                    </button>
+                @endif
+            @elseif($photographer->isStorefrontRejected())
+                <span class="text-xs text-gray-400 dark:text-gray-500">
+                    Menunggu fotografer mengajukan ulang tayang.
+                </span>
             @else
                 <span class="text-xs text-gray-400 dark:text-gray-500">
                     @if(!$photographer->isVerified() || !$isComplete)
                         Verifikasi profil terlebih dahulu.
-                    @else
+                    @elseif(!$storefrontChecklist['is_ready'])
                         Kurang {{ implode(', ', $storefrontChecklist['missing_labels']) }}.
+                    @else
+                        Menunggu fotografer mengajukan tayang.
                     @endif
                 </span>
-                <button type="button"
-                        disabled
-                        class="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold text-xs cursor-not-allowed">
-                    Setujui Tayang
-                </button>
             @endif
         </div>
     </div>
@@ -790,9 +833,9 @@
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
          @keydown.escape.window="rejectModalOpen = false">
         <div @click.away="rejectModalOpen = false"
-             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5">
+             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 flex flex-col gap-5">
 
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
                 <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                     Tolak Pendaftaran Mitra
                 </h3>
@@ -804,7 +847,7 @@
             <form action="{{ route('admin.photographers.reject', $photographer->id) }}"
                   method="POST"
                   novalidate
-                  class="space-y-4"
+                  class="flex flex-col gap-4"
                   x-data="adminRejectProfileForm()"
                   @submit="submitForm($event)">
                 @csrf
@@ -824,7 +867,7 @@
                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
                     <button type="button" @click="rejectModalOpen = false; error = ''; touched = false" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>
@@ -842,9 +885,9 @@
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
          @keydown.escape.window="rejectStorefrontModalOpen = false">
         <div @click.away="rejectStorefrontModalOpen = false"
-             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5">
+             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 flex flex-col gap-5">
 
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
                 <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                     Tolak Pengajuan Etalase
                 </h3>
@@ -856,7 +899,7 @@
             <form action="{{ route('admin.photographers.storefront.reject', $photographer->id) }}"
                   method="POST"
                   novalidate
-                  class="space-y-4"
+                  class="flex flex-col gap-4"
                   x-data="adminRejectStorefrontForm()"
                   @submit="submitForm($event)">
                 @csrf
@@ -876,7 +919,7 @@
                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
                     <button type="button" @click="rejectStorefrontModalOpen = false; error = ''; touched = false" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>
@@ -894,9 +937,9 @@
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
          @keydown.escape.window="deleteModalOpen = false">
         <div @click.away="deleteModalOpen = false"
-             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5">
+             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 flex flex-col gap-5">
 
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
                 <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                     Hapus Fotografer
                 </h3>
@@ -905,7 +948,7 @@
                 </p>
             </div>
 
-            <form action="{{ route('admin.photographers.destroy', $photographer->id) }}" method="POST" novalidate class="space-y-4" x-data="adminDeletePhotographerForm()" @submit="submitForm($event)">
+            <form action="{{ route('admin.photographers.destroy', $photographer->id) }}" method="POST" novalidate class="flex flex-col gap-4" x-data="adminDeletePhotographerForm()" @submit="submitForm($event)">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -979,7 +1022,7 @@
                     <p x-show="touched.alasan && errors.alasan" x-text="errors.alasan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
                     <button type="button" @click="deleteModalOpen = false; selectedCategory = ''; alasanText = ''; touched.category = false; touched.alasan = false; errors.category = ''; errors.alasan = ''" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>

@@ -27,7 +27,7 @@
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-gray-700/80">
 
-            <form method="POST" :action="formAction" @submit="submitReviewForm($event)" novalidate class="p-6 sm:p-7 space-y-5">
+            <form method="POST" :action="formAction" @submit="submitReviewForm($event)" novalidate class="p-6 sm:p-7 flex flex-col gap-5">
                 @csrf
                 <template x-if="isEdit">
                     <input type="hidden" name="_method" value="PUT">
@@ -47,13 +47,13 @@
                 </button>
 
                 <!-- Header (No Icon, Centered Title) -->
-                <div class="border-b border-gray-100 dark:border-gray-700 pb-4 text-center space-y-1">
+                <div class="border-b border-gray-100 dark:border-gray-700 pb-4 text-center flex flex-col gap-1">
                     <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white" id="modal-title" x-text="isEdit ? 'Ulasan Fotografer' : 'Beri Ulasan Fotografer'"></h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400" x-text="photoName || 'Fotografer'"></p>
                 </div>
 
                 <!-- Star Rating Picker -->
-                <div class="text-center space-y-2 py-2">
+                <div class="text-center flex flex-col gap-2 py-2">
                     <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Pilih Kepuasan Layanan (1 - 5 Bintang) <span class="text-rose-500">*</span></label>
                     <div class="flex items-center justify-center gap-2">
                         <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
@@ -81,11 +81,11 @@
                             <span class="text-gray-400 dark:text-gray-500 font-normal">Pilih jumlah bintang kepuasan (1 - 5)</span>
                         </template>
                     </div>
-                    <p x-show="touched.rating && errors.rating" x-text="errors.rating" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                    <p x-show="touched.rating && errors.rating" x-text="errors.rating" x-cloak class="text-[11px] font-bold text-red-500"></p>
                 </div>
 
                 <!-- Written Testimonial Textarea -->
-                <div class="space-y-1.5 text-left">
+                <div class="flex flex-col gap-1.5 text-left">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                         Ulasan Testimoni Anda <span class="text-rose-500">*</span>
                     </label>
@@ -98,11 +98,11 @@
                               placeholder="Bagikan pengalaman Anda mengenai kualitas foto, ketepatan waktu, dan keramahan fotografer..."
                               :class="touched.reviewText && errors.reviewText ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'"
                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none transition resize-none"></textarea>
-                    <p x-show="touched.reviewText && errors.reviewText" x-text="errors.reviewText" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                    <p x-show="touched.reviewText && errors.reviewText" x-text="errors.reviewText" x-cloak class="text-[11px] font-bold text-red-500"></p>
                 </div>
 
                 <!-- Modal Actions (Always Centered, Maximum 2 Buttons, Never 3 Buttons Horizontally) -->
-                <div class="flex items-center justify-center gap-3 pt-3">
+                <div class="flex items-center justify-center gap-3">
                     <template x-if="!isEdit">
                         <button type="button" @click="closeModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                             Batal

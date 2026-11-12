@@ -23,7 +23,7 @@ class ActivityLogSeeder extends Seeder
             [
                 'id_user' => $superAdmin?->id,
                 'log_name' => 'payout_released',
-                'description' => 'Admin mencairkan dana payout sebesar Rp 1.800.000 ke studio ' . ($photographer?->nama ?? 'Aura Lens Photography') . ' untuk sesi KTRK-00001',
+                'description' => 'Admin mentransfer dana sebesar Rp 1.800.000 ke fotografer ' . ($photographer?->nama ?? 'Alex Visual Studio') . ' untuk sesi KTRK-00001',
                 'subject_type' => Contract::class,
                 'subject_id' => $contract?->id ?? 1,
                 'properties' => ['payout_amount' => 1800000, 'fee_marketplace' => 200000],
@@ -32,7 +32,7 @@ class ActivityLogSeeder extends Seeder
             [
                 'id_user' => $superAdmin?->id,
                 'log_name' => 'photographer_verified',
-                'description' => "Admin mengubah status verifikasi studio '" . ($photographer?->nama ?? 'Aura Lens Photography') . "' menjadi: diverifikasi (Centang Biru Aktif)",
+                'description' => "Admin mengubah status verifikasi '" . ($photographer?->nama ?? 'Alex Visual Studio') . "' menjadi: diverifikasi",
                 'subject_type' => RolePhotographer::class,
                 'subject_id' => $photographer?->id ?? 1,
                 'properties' => ['is_verified' => true],
@@ -59,7 +59,7 @@ class ActivityLogSeeder extends Seeder
             [
                 'id_user' => $contract?->client?->id_user ?? $superAdmin?->id,
                 'log_name' => 'payment_confirmed',
-                'description' => 'Pembayaran sebesar Rp 2.000.000 untuk sesi KTRK-00001 telah diverifikasi dan masuk ke Rekening Bersama Escrow',
+                'description' => 'Pembayaran sebesar Rp 2.000.000 untuk sesi KTRK-00001 telah diverifikasi',
                 'subject_type' => Contract::class,
                 'subject_id' => $contract?->id ?? 1,
                 'properties' => ['amount' => 2000000, 'status_payout' => 'holding'],

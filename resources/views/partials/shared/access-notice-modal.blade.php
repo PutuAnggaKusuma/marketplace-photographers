@@ -40,7 +40,7 @@
      aria-modal="true">
   <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
   <div class="flex min-h-full items-center justify-center p-4">
-    <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+    <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4" @click.stop>
 
       <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
       <button type="button" @click="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
@@ -53,7 +53,7 @@
       </div>
 
       <!-- Body Text (Centered) -->
-      <div class="space-y-2 text-center">
+      <div class="flex flex-col gap-2 text-center">
         <p class="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed text-center" x-text="message"></p>
         <template x-if="note">
           <p class="text-xs text-rose-600 dark:text-rose-400 font-semibold leading-relaxed text-center" x-text="note"></p>
@@ -61,7 +61,7 @@
       </div>
 
       <!-- Action Button -->
-      <div class="pt-1">
+      <div>
         <template x-if="redirectUrl">
           <a :href="redirectUrl" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer" x-text="buttonText"></a>
         </template>

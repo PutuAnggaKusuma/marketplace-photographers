@@ -102,7 +102,7 @@
   x-transition:leave-end="opacity-0"
 >
   <div @click.away="closeModal()" 
-       class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-5 text-center transform transition-all"
+       class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-5 text-center transform transition-all"
        x-transition:enter="transition ease-out duration-200"
        x-transition:enter-start="opacity-0 scale-95"
        x-transition:enter-end="opacity-100 scale-100"
@@ -111,14 +111,14 @@
        x-transition:leave-end="opacity-0 scale-95">
     
     <!-- Modal Title & Description (Strictly Rule #59: Centered, No Icon) -->
-    <div class="space-y-2 text-center">
+    <div class="flex flex-col gap-2 text-center">
       <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white text-center tracking-tight" x-text="modalTitle"></h3>
       <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-center" x-text="modalMessage"></p>
     </div>
 
     <!-- Case 1: Target Form Submission (Simpan / Perbaharui Data) -->
     <template x-if="targetForm">
-      <div class="flex items-center justify-center gap-3 pt-2">
+      <div class="flex items-center justify-center gap-3">
         <button type="button" 
                 @click="closeModal()" 
                 :disabled="isSubmitting"
@@ -137,7 +137,7 @@
 
     <!-- Case 3: JavaScript Callback Submission -->
     <template x-if="onConfirmCallback && !targetForm">
-      <div class="flex items-center justify-center gap-3 pt-2">
+      <div class="flex items-center justify-center gap-3">
         <button type="button" 
                 @click="closeModal()" 
                 :disabled="isSubmitting"
@@ -156,13 +156,13 @@
 
     <!-- Case 2: Action URL Submission (Hapus / Status Change / Logout) -->
     <template x-if="!targetForm && !onConfirmCallback">
-      <form x-ref="actionUrlForm" :action="modalActionUrl" :method="modalMethod === 'GET' ? 'GET' : 'POST'" @submit.prevent="executeConfirm($el)" class="space-y-3">
+      <form x-ref="actionUrlForm" :action="modalActionUrl" :method="modalMethod === 'GET' ? 'GET' : 'POST'" @submit.prevent="executeConfirm($el)" class="flex flex-col gap-3">
         @csrf
         <template x-if="modalMethod !== 'GET' && modalMethod !== 'POST'">
           <input type="hidden" name="_method" :value="modalMethod">
         </template>
 
-        <div class="flex items-center justify-center gap-3 pt-2">
+        <div class="flex items-center justify-center gap-3">
           <button type="button" 
                   @click="closeModal()" 
                   :disabled="isSubmitting"

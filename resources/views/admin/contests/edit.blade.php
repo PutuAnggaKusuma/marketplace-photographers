@@ -705,9 +705,11 @@
                                  ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
                                  : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
                         <input type="file" name="banner_file" x-ref="bannerFileInput" accept="image/png, image/jpeg, image/webp" @change="fileChosen" class="sr-only">
-                        <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
-                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400" x-text="previewUrl ? 'Ganti poster lomba' : 'Pilih poster lomba'"></span>
-                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 transition-colors" :class="isBannerDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        <p class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">
+                            Seret dan lepas di sini
                         </p>
                         <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
                             Format JPG, PNG, WEBP maksimal 10 MB.

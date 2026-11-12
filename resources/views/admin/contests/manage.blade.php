@@ -420,33 +420,33 @@
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pendaftar</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pendaftar</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalParticipants ?? 0 }} Orang</div>
-
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Verifikasi</span>
-
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $pendingParticipants ?? 0 }} Orang</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalParticipants ?? 0 }} Orang</div>
 
             </div>
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Disetujui</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Verifikasi</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $approvedParticipants ?? 0 }} Orang</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $pendingParticipants ?? 0 }} Orang</div>
 
             </div>
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pendaftaran Ditolak</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Disetujui</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $rejectedParticipants ?? 0 }} Orang</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $approvedParticipants ?? 0 }} Orang</div>
+
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pendaftaran Ditolak</span>
+
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $rejectedParticipants ?? 0 }} Orang</div>
 
             </div>
 
@@ -496,11 +496,11 @@
 
         <!-- Data Table Pendaftar -->
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
             <!-- Search & Sort Toolbar -->
 
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
                 <div class="flex items-center gap-3 w-full md:w-auto">
 
@@ -652,11 +652,11 @@
 
                                     <div class="font-bold text-gray-900 dark:text-white">{{ $p->nama_lengkap }}</div>
 
-                                    <div class="text-[11px] text-gray-400 mt-0.5">{{ $p->instansi ?: 'Independen' }}</div>
+                                    <div class="text-xs text-gray-400 mt-0.5">{{ $p->instansi ?: 'Independen' }}</div>
 
                                     @if($p->bio_singkat)
 
-                                        <p class="text-[10px] text-gray-500 mt-1 max-w-xs line-clamp-1 italic">"{{ $p->bio_singkat }}"</p>
+                                        <p class="text-xs text-gray-500 mt-1 max-w-xs line-clamp-1 italic">"{{ $p->bio_singkat }}"</p>
 
                                     @endif
 
@@ -670,9 +670,9 @@
 
                                     <div class="font-medium text-gray-800 dark:text-gray-200">{{ $p->email }}</div>
 
-                                    <div class="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">WA: {{ $p->no_wa }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">WA: {{ $p->no_wa }}</div>
 
-                                    <div class="text-[10px] text-gray-400">{{ $p->asal_kota ?: '-' }}</div>
+                                    <div class="text-xs text-gray-400">{{ $p->asal_kota ?: '-' }}</div>
 
                                 </td>
 
@@ -736,7 +736,7 @@
 
                                             @if($p->catatan_admin)
 
-                                                <p class="text-[10px] text-gray-500 dark:text-gray-400 max-w-[160px] truncate" title="{{ $p->catatan_admin }}">
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-[160px] truncate" title="{{ $p->catatan_admin }}">
 
                                                     "{{ \Illuminate\Support\Str::limit($p->catatan_admin, 25, '...') }}"
 
@@ -776,11 +776,11 @@
 
                                             @if($p->status_pembayaran === 'lunas')
 
-                                                <span class="text-[11px] font-bold text-gray-900 dark:text-white block">Lunas</span>
+                                                <span class="text-xs font-bold text-gray-900 dark:text-white block">Lunas</span>
 
                                             @else
 
-                                                <span class="text-[11px] font-bold text-gray-900 dark:text-white block">Menunggu Konfirmasi</span>
+                                                <span class="text-xs font-bold text-gray-900 dark:text-white block">Menunggu Konfirmasi</span>
 
                                             @endif
 
@@ -876,33 +876,33 @@
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Karya Masuk</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Karya Masuk</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Karya</div>
-
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pemenang Juara</span>
-
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalWinners ?? 0 }} Juara</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Karya</div>
 
             </div>
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Terverifikasi</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Pemenang Juara</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified ?? 0 }} Karya</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalWinners ?? 0 }} Juara</div>
 
             </div>
 
             <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak / Diskualifikasi</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Peserta Terverifikasi</span>
 
-                <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected ?? 0 }} Karya</div>
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalVerified ?? 0 }} Karya</div>
+
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
+
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak / Diskualifikasi</span>
+
+                <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected ?? 0 }} Karya</div>
 
             </div>
 
@@ -952,11 +952,11 @@
 
         <!-- Data Table Submisi -->
 
-        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
             <!-- Search & Sort Toolbar -->
 
-            <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
                 <div class="flex items-center gap-3 w-full md:w-auto">
 
@@ -1122,7 +1122,7 @@
 
                                         <div class="space-y-1 min-w-0">
 
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight leading-snug hover:text-amber-600 transition cursor-pointer line-clamp-1"
+                                            <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight leading-snug hover:text-amber-600 transition cursor-pointer line-clamp-1"
 
                                                 @click="openSubmissionReview({{ json_encode($subPayload) }}, '{{ route('admin.contests.submission.winner', $sub->id) }}')">
 
@@ -1130,7 +1130,7 @@
 
                                             </h4>
 
-                                            <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
 
                                                 {{ $sub->deskripsi_karya ?: 'Tidak ada deskripsi tambahan.' }}
 
@@ -1138,7 +1138,7 @@
 
                                             @if($sub->media_link)
 
-                                                <a href="{{ $sub->media_link }}" target="_blank" rel="noopener noreferrer" class="inline-block text-[10px] font-semibold text-gray-900 dark:text-white underline">
+                                                <a href="{{ $sub->media_link }}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs font-semibold text-gray-900 dark:text-white underline">
 
                                                     Tautan Media Eksternal
 
@@ -1162,9 +1162,9 @@
 
                                         <span class="font-bold text-gray-900 dark:text-white block">{{ $sub->user->nama ?? 'Peserta' }}</span>
 
-                                        <span class="text-[11px] text-gray-400 block">{{ $sub->user->email ?? '-' }}</span>
+                                        <span class="text-xs text-gray-400 block">{{ $sub->user->email ?? '-' }}</span>
 
-                                        <span class="text-[10px] text-gray-400 font-medium block pt-0.5">{{ $sub->created_at ? $sub->created_at->translatedFormat('d M Y, H:i') . ' WIB' : '-' }}</span>
+                                        <span class="text-xs text-gray-400 font-medium block pt-0.5">{{ $sub->created_at ? $sub->created_at->translatedFormat('d M Y, H:i') . ' WIB' : '-' }}</span>
 
                                     </div>
 
@@ -1212,7 +1212,7 @@
 
                                     @if($sub->catatan_juri)
 
-                                        <p class="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2" title="{{ $sub->catatan_juri }}">
+                                        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2" title="{{ $sub->catatan_juri }}">
 
                                             "{{ $sub->catatan_juri }}"
 
@@ -1318,7 +1318,7 @@
 
             <!-- Modal Header (Rule #59 Compliant: Centered without Icon, NO X button) -->
 
-            <div class="p-6 pb-2 text-center space-y-1">
+            <div class="p-6 pb-2 text-center">
 
                 
                 <h3 class="text-base font-black text-gray-900 dark:text-white tracking-tight text-center" x-text="selectedParticipant.nama_lengkap"></h3>
@@ -1333,7 +1333,7 @@
 
                 @csrf
 
-                <div class="p-6 space-y-5 overflow-y-auto flex-1">
+                <div class="p-6 flex flex-col gap-5 overflow-y-auto flex-1">
 
                     <!-- Info Grid -->
 
@@ -1391,11 +1391,11 @@
 
                     <!-- Dokumen Kualifikasi (Clean Underlined Links) -->
 
-                    <div class="space-y-1">
+                    <div class="flex flex-col gap-1">
 
                         <span class="text-gray-400 block text-[10px] uppercase font-bold">Dokumen Kualifikasi</span>
 
-                        <div class="flex flex-wrap gap-4 items-center pt-0.5">
+                        <div class="flex flex-wrap gap-4 items-center">
 
                             <template x-if="selectedParticipant.cv_portfolio_file">
 
@@ -1427,7 +1427,7 @@
 
                     <template x-if="selectedParticipant.bukti_transfer">
 
-                        <div class="space-y-2 pt-1">
+                        <div class="flex flex-col gap-2">
 
                             <div class="flex items-center justify-between">
 
@@ -1469,11 +1469,11 @@
 
                     <!-- Dropdown Form Section (Grid 2 Kolom jika ada Bukti Transfer) -->
 
-                    <div class="space-y-4 pt-1" :class="selectedParticipant.bukti_transfer ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 space-y-0' : ''">
+                    <div class="gap-4" :class="selectedParticipant.bukti_transfer ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col'">
 
                         <!-- Dropdown 1: Keputusan Status Pendaftaran -->
 
-                        <div class="space-y-1.5" x-data="{
+                        <div class="flex flex-col gap-1.5" x-data="{
 
                             openPartDropdown: false,
 
@@ -1583,7 +1583,7 @@
 
                         <template x-if="selectedParticipant.bukti_transfer">
 
-                            <div class="space-y-1.5" x-data="{
+                            <div class="flex flex-col gap-1.5" x-data="{
 
                                 openPayDropdown: false,
 
@@ -1683,7 +1683,7 @@
 
                     <!-- Catatan Admin Textarea (Required if Ditolak) -->
 
-                    <div class="space-y-1.5 pt-1" x-show="selectedParticipant.status_pendaftaran === 'ditolak'" x-transition>
+                    <div class="flex flex-col gap-1.5" x-show="selectedParticipant.status_pendaftaran === 'ditolak'" x-transition>
 
                         <label class="block text-[11px] font-extrabold uppercase tracking-wider text-rose-500">
 
@@ -1700,7 +1700,7 @@
                                   placeholder="Tuliskan alasan penolakan calon peserta..." 
                                   class="w-full px-4 py-2.5 text-xs rounded-xl border bg-rose-50/40 dark:bg-rose-950/20 text-gray-900 dark:text-white placeholder-gray-400 outline-none transition resize-none leading-relaxed"
                                   :class="participantCatatanTouched && participantCatatanError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-rose-300 dark:border-rose-900 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500'"></textarea>
-                        <p x-show="participantCatatanTouched && participantCatatanError" x-text="participantCatatanError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        <p x-show="participantCatatanTouched && participantCatatanError" x-text="participantCatatanError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
                     </div>
 
@@ -1768,7 +1768,7 @@
 
             <!-- Modal Header (Rule #59 Compliant: Centered without Icon, NO X button) -->
 
-            <div class="p-6 pb-2 text-center space-y-1">
+            <div class="p-6 pb-2 text-center">
 
                 
                 <h3 class="text-base font-black text-gray-900 dark:text-white tracking-tight text-center" x-text="selectedSubmission.judul_karya"></h3>
@@ -1777,7 +1777,7 @@
 
 
 
-            <div class="p-6 space-y-5 overflow-y-auto flex-1">
+            <div class="p-6 flex flex-col gap-5 overflow-y-auto flex-1">
 
                 <!-- Compact Image Preview with Full Photo Click -->
 
@@ -1813,7 +1813,7 @@
 
                 <!-- Detail Info Section -->
 
-                <div class="space-y-3">
+                <div class="flex flex-col gap-3">
 
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
 
@@ -1851,7 +1851,7 @@
 
                     <template x-if="selectedSubmission.media_link">
 
-                        <div class="pt-1">
+                        <div>
 
                             <span class="text-gray-400 block text-[10px] uppercase font-bold mb-1">Tautan Media Eksternal</span>
 
@@ -1867,7 +1867,7 @@
 
                 <!-- Grading / Status Assignment Form (No divider line) -->
 
-                <form :action="selectedSubmission.update_url" method="POST" @submit="submitSubmissionReview($event)" novalidate class="space-y-4 pt-2">
+                <form :action="selectedSubmission.update_url" method="POST" @submit="submitSubmissionReview($event)" novalidate class="flex flex-col gap-4">
 
                     @csrf
 
@@ -1897,7 +1897,7 @@
 
                     <!-- Status Selection Dropdown -->
 
-                    <div class="space-y-1.5" x-data="{
+                    <div class="flex flex-col gap-1.5" x-data="{
 
                         openModalDropdown: false,
 
@@ -1978,7 +1978,7 @@
 
                         </div>
 
-                        <p x-show="submissionStatusTouched && submissionStatusError" x-text="submissionStatusError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        <p x-show="submissionStatusTouched && submissionStatusError" x-text="submissionStatusError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
                     </div>
 
@@ -1986,7 +1986,7 @@
 
                     <!-- Catatan Juri Textarea -->
 
-                    <div class="space-y-1.5">
+                    <div class="flex flex-col gap-1.5">
 
                         <label class="block text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 
@@ -2010,7 +2010,7 @@
 
                     <!-- Modal Actions -->
 
-                    <div class="flex items-center justify-center gap-3 pt-3">
+                    <div class="flex items-center justify-center gap-3">
 
                         <button type="button" @click="submissionModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition cursor-pointer">
 

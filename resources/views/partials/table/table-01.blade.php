@@ -2,6 +2,7 @@
   $contractsList = isset($recentTransactions) && $recentTransactions->isNotEmpty() 
     ? $recentTransactions 
     : \App\Models\Contract::with(['client.user', 'photographer.user', 'photographer.categories', 'bookingDetail.service', 'payments'])->orderBy('created_at', 'desc')->take(6)->get();
+  $totalContractsCount = $totalContracts ?? \App\Models\Contract::count();
 @endphp
 
 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
@@ -13,13 +14,15 @@
       <p class="text-xs text-gray-400 mt-0.5">Monitoring pemesanan sesi foto & status pembayaran real-time</p>
     </div>
 
-    <div class="flex items-center gap-2">
-      <a href="{{ auth()->user() && auth()->user()->role === 'photographer' ? route('photographer.bookings') : route('admin.transactions') }}"
-        class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline inline-flex items-center gap-1 transition">
-        <span>Lihat Semua</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-      </a>
-    </div>
+    @if($totalContractsCount > 6)
+      <div class="flex items-center gap-2">
+        <a href="{{ auth()->user() && auth()->user()->role === 'photographer' ? route('photographer.bookings') : route('admin.transactions') }}"
+          class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline inline-flex items-center gap-1 transition">
+          <span>Lihat Semua</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        </a>
+      </div>
+    @endif
   </div>
 
   <div class="w-full overflow-x-auto">
@@ -64,7 +67,7 @@
                   <p class="font-extrabold text-gray-900 dark:text-white truncate max-w-[220px]">
                     {{ $serviceName }}
                   </p>
-                  <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
                     Fotografer: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $item->photographer->nama ?? '-' }}</span> • Klien: {{ $item->client->nama ?? '-' }}
                   </p>
                 </div>
@@ -73,14 +76,14 @@
 
             <!-- Kategori Sesi (Plain Text without Card Badge) -->
             <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <p class="font-medium text-gray-700 text-theme-sm dark:text-gray-300">
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
                 {{ $catName }}
               </p>
             </td>
 
             <!-- Total Biaya -->
             <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <p class="font-extrabold text-gray-900 dark:text-white text-theme-sm">
+              <p class="text-xs font-extrabold text-gray-900 dark:text-white">
                 Rp {{ number_format($item->jumlah, 0, ',', '.') }}
               </p>
             </td>

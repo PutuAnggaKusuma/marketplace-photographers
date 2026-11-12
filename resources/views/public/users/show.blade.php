@@ -103,32 +103,32 @@
             </div>
         </div>
 
-        <!-- Metric Cards (Rule #64 Anti-AI Slop Clean Minimalist: Label + Big Number Only) -->
+        <!-- Metric Cards (Rule #64 Anti-AI Slop Clean Minimalist: Uniform Size) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs">
-                <p class="text-[11px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-1.5">
+                <p class="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Sesi Foto Selesai
                 </p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white mt-1">
+                <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">
                     {{ $totalCompletedBookings }} Sesi
                 </p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs">
-                <p class="text-[11px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-1.5">
+                <p class="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Ulasan Terverifikasi
                 </p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white mt-1">
+                <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">
                     {{ $reviewsCount }} Ulasan
                 </p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs">
-                <p class="text-[11px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-1.5">
+                <p class="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Diskusi Komunitas
                 </p>
-                <p class="text-2xl font-black text-gray-900 dark:text-white mt-1">
+                <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">
                     {{ $forumPostsCount }} Topik
                 </p>
             </div>

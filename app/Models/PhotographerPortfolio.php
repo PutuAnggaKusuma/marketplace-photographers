@@ -14,6 +14,7 @@ class PhotographerPortfolio extends Model
 
     protected $fillable = [
         'id_photographer',
+        'id_kategori',
         'judul',
         'deskripsi',
     ];
@@ -21,6 +22,11 @@ class PhotographerPortfolio extends Model
     public function photographer()
     {
         return $this->belongsTo(RolePhotographer::class, 'id_photographer');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'id_kategori')->withTrashed();
     }
 
     public function medias()

@@ -61,34 +61,34 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- Card 1 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Materi</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $materials->total() }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Materi</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $materials->total() }}</div>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kursus Berbayar</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::where('is_premium', true)->orWhere('harga', '>', 0)->count() }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kursus Berbayar</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::where('is_premium', true)->orWhere('harga', '>', 0)->count() }}</div>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Edukasi</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $categories->count() }} Kategori</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Edukasi</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $categories->count() }} Kategori</div>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pembaca</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::sum('view_count') }} View</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pembaca</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ \App\Models\Elearning::sum('view_count') }} View</div>
         </div>
     </div>
 
     <!-- Standard Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Sort -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto">
                 @php
                     $sortLabels = [
@@ -160,8 +160,8 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $m->judul }}</h4>
-                                            <span class="text-[11px] text-gray-400 block mt-0.5">{{ $m->created_at ? $m->created_at->format('d M Y') : '-' }}</span>
+                                            <h4 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $m->judul }}</h4>
+                                            <span class="text-xs text-gray-400 block mt-0.5">{{ $m->created_at ? $m->created_at->format('d M Y') : '-' }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -176,7 +176,7 @@
                                             <span class="text-xs font-bold text-gray-900 dark:text-white block">
                                                 Rp {{ number_format($m->harga ?? 0, 0, ',', '.') }}
                                             </span>
-                                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium block">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium block">
                                                 Berbayar
                                             </span>
                                         </div>
@@ -185,7 +185,7 @@
                                             <span class="text-xs font-bold text-gray-900 dark:text-white block">
                                                 Gratis
                                             </span>
-                                            <span class="text-[11px] text-gray-400 dark:text-gray-500 font-medium block">
+                                            <span class="text-xs text-gray-400 dark:text-gray-500 font-medium block">
                                                 Akses Terbuka
                                             </span>
                                         </div>

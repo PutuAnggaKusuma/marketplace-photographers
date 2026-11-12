@@ -33,6 +33,7 @@ class PhotographerVerificationController extends Controller
             'categories',
             'services',
             'portfolios.medias',
+            'portfolios.category',
             'workingHours',
             'testimonials',
         ]);
@@ -130,6 +131,7 @@ class PhotographerVerificationController extends Controller
             'categories',
             'services.details',
             'portfolios.medias',
+            'portfolios.category',
             'workingHours',
             'availabilities',
             'testimonials.client.user'
@@ -154,9 +156,20 @@ class PhotographerVerificationController extends Controller
      */
     public function toggleVerification(Request $request, $id)
     {
-        $photographer = RolePhotographer::findOrFail($id);
+        $photographer = RolePhotographer::with(['user', 'categories'])->findOrFail($id);
         $wasVerified = ($photographer->status_verifikasi === 'terverifikasi');
         $newVerified = !$wasVerified;
+
+        if ($newVerified && $photographer->status_verifikasi === 'ditolak') {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'profile'])
+                ->with('error', 'Pendaftaran yang ditolak hanya dapat diverifikasi setelah fotografer memperbarui profil.');
+        }
+
+        if ($newVerified && !$photographer->isProfileComplete()) {
+            $missingList = implode(', ', array_values($photographer->getMissingProfileFields()));
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'profile'])
+                ->with('error', "Profil belum lengkap. Lengkapi terlebih dahulu: {$missingList}.");
+        }
 
         $photographer->update([
             'status_verifikasi' => $newVerified ? 'terverifikasi' : 'menunggu',
@@ -189,7 +202,8 @@ class PhotographerVerificationController extends Controller
             );
         }
 
-        return redirect()->back()->with('success', "Status mitra '{$photographer->nama}' berhasil {$statusText}.");
+        return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'profile'])
+            ->with('success', "Status mitra '{$photographer->nama}' berhasil {$statusText}.");
     }
 
     /**
@@ -200,15 +214,33 @@ class PhotographerVerificationController extends Controller
         $photographer = RolePhotographer::findOrFail($id);
 
         if (!$photographer->isVerified() || !$photographer->isProfileComplete()) {
-            return redirect()->back()
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
                 ->with('active_tab', 'storefront')
                 ->with('error', 'Profil fotografer harus lengkap dan terverifikasi Admin sebelum menyetujui tayang etalase.');
+        }
+
+        if ($photographer->isStorefrontApproved()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('info', "Etalase '{$photographer->nama}' sudah disetujui tayang.");
+        }
+
+        if ($photographer->isStorefrontRejected()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Etalase yang ditolak hanya dapat disetujui setelah fotografer mengajukan ulang tayang.');
+        }
+
+        if (!$photographer->isStorefrontPending()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Etalase hanya dapat disetujui setelah fotografer mengajukan tayang.');
         }
 
         $checklist = $photographer->getStorefrontChecklist();
         if (!$checklist['is_ready']) {
             $missingText = implode(', ', $checklist['missing_labels']);
-            return redirect()->back()
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
                 ->with('active_tab', 'storefront')
                 ->with('error', "Syarat tayang etalase belum lengkap: {$missingText}.");
         }
@@ -245,14 +277,32 @@ class PhotographerVerificationController extends Controller
      */
     public function rejectStorefront(Request $request, $id)
     {
+        $photographer = RolePhotographer::findOrFail($id);
+
+        if (!$photographer->isVerified()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Profil fotografer harus terverifikasi sebelum menolak etalase.');
+        }
+
+        if ($photographer->isStorefrontRejected()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Pengajuan etalase ini sudah ditolak.');
+        }
+
+        if (!in_array($photographer->status_etalase, ['menunggu', 'disetujui'], true)) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Etalase hanya dapat ditolak setelah fotografer mengajukan tayang.');
+        }
+
         $request->validate([
             'catatan_penolakan_etalase' => 'required|string|min:5|max:1000',
         ], [
             'catatan_penolakan_etalase.required' => 'Catatan alasan penolakan etalase wajib diisi.',
             'catatan_penolakan_etalase.min' => 'Catatan alasan penolakan etalase minimal 5 karakter.',
         ]);
-
-        $photographer = RolePhotographer::findOrFail($id);
 
         $photographer->update([
             'status_etalase' => 'ditolak',
@@ -288,6 +338,12 @@ class PhotographerVerificationController extends Controller
     {
         $photographer = RolePhotographer::findOrFail($id);
 
+        if (!$photographer->isStorefrontApproved()) {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'storefront'])
+                ->with('active_tab', 'storefront')
+                ->with('error', 'Hanya etalase yang sedang tayang yang dapat dibatalkan.');
+        }
+
         $photographer->update([
             'status_etalase' => 'belum_diajukan',
         ]);
@@ -319,14 +375,19 @@ class PhotographerVerificationController extends Controller
      */
     public function reject(Request $request, $id)
     {
+        $photographer = RolePhotographer::findOrFail($id);
+
+        if ($photographer->status_verifikasi === 'ditolak') {
+            return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'profile'])
+                ->with('error', 'Pendaftaran mitra ini sudah ditolak.');
+        }
+
         $request->validate([
             'catatan_penolakan' => 'required|string|min:5|max:1000',
         ], [
             'catatan_penolakan.required' => 'Catatan alasan penolakan wajib diisi.',
             'catatan_penolakan.min' => 'Catatan alasan penolakan minimal 5 karakter.',
         ]);
-
-        $photographer = RolePhotographer::findOrFail($id);
 
         $photographer->update([
             'status_verifikasi' => 'ditolak',
@@ -352,7 +413,8 @@ class PhotographerVerificationController extends Controller
             );
         }
 
-        return redirect()->back()->with('success', "Pendaftaran mitra '{$photographer->nama}' berhasil ditolak dengan catatan.");
+        return redirect()->route('admin.photographers.show', ['id' => $id, 'tab' => 'profile'])
+            ->with('success', "Pendaftaran mitra '{$photographer->nama}' berhasil ditolak dengan catatan.");
     }
 
     /**
@@ -376,7 +438,7 @@ class PhotographerVerificationController extends Controller
             ->exists();
 
         if ($hasActive) {
-            return redirect()->back()->with('error', "Studio '{$photographer->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif yang sedang berjalan.");
+            return redirect()->back()->with('error', "Fotografer '{$photographer->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif.");
         }
 
         $user = $photographer->user;
@@ -389,7 +451,7 @@ class PhotographerVerificationController extends Controller
 
         ActivityLog::record(
             'photographer_deleted',
-            "Admin menghapus studio '{$photographer->nama}' karena pelanggaran: [{$request->kategori_penghapusan}] - {$request->alasan_penghapusan}",
+            "Admin menghapus fotografer '{$photographer->nama}' karena pelanggaran: [{$request->kategori_penghapusan}] - {$request->alasan_penghapusan}",
             $photographer,
             [
                 'kategori_penghapusan' => $request->kategori_penghapusan,
@@ -402,6 +464,6 @@ class PhotographerVerificationController extends Controller
             $user->delete();
         }
 
-        return redirect()->route('admin.photographers')->with('success', "Studio '{$photographer->nama}' dan akun terkait berhasil dihapus.");
+        return redirect()->route('admin.photographers')->with('success', "Fotografer '{$photographer->nama}' berhasil dihapus.");
     }
 }

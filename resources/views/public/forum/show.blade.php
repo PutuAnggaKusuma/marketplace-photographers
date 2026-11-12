@@ -1397,13 +1397,13 @@
 
             <div class="flex min-h-full items-center justify-center p-4">
 
-              <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[460px] border border-gray-200 dark:border-gray-700 p-6 sm:p-8 space-y-5">
+              <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[460px] border border-gray-200 dark:border-gray-700 p-6 sm:p-8 flex flex-col gap-5">
 
                 
 
                 <!-- Centered Header without Icon (Rule #59) -->
 
-                <div class="text-center space-y-1">
+                <div class="text-center flex flex-col gap-1">
 
                   <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">Laporkan Komentar</h3>
 
@@ -1431,7 +1431,7 @@
 
                 <!-- Report Form -->
 
-                <form :action="reportActionUrl" method="POST" @submit="submitReport($event)" novalidate class="space-y-4">
+                <form :action="reportActionUrl" method="POST" @submit="submitReport($event)" novalidate class="flex flex-col gap-4">
 
                   @csrf
 
@@ -1439,7 +1439,7 @@
 
                   <!-- Violation Category Radios -->
 
-                  <div class="space-y-2 text-left">
+                  <div class="flex flex-col gap-2 text-left">
 
                     <label class="text-xs font-bold text-gray-700 dark:text-gray-300 block">
 
@@ -1451,7 +1451,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="spam" x-model="reportKategori" @change="reportKategori = 'spam'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="spam" x-model="reportKategori" @change="reportKategori = 'spam'; reportTouched = true; validateReportKategori()" class="text-amber-500 accent-amber-500 focus:ring-amber-400">
 
                         <span>Spam atau Promosi Tidak Relevan</span>
 
@@ -1459,7 +1459,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="harassment" x-model="reportKategori" @change="reportKategori = 'harassment'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="harassment" x-model="reportKategori" @change="reportKategori = 'harassment'; reportTouched = true; validateReportKategori()" class="text-amber-500 accent-amber-500 focus:ring-amber-400">
 
                         <span>Pelecehan atau Ujaran Kebencian</span>
 
@@ -1467,7 +1467,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="inappropriate" x-model="reportKategori" @change="reportKategori = 'inappropriate'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="inappropriate" x-model="reportKategori" @change="reportKategori = 'inappropriate'; reportTouched = true; validateReportKategori()" class="text-amber-500 accent-amber-500 focus:ring-amber-400">
 
                         <span>Konten Tidak Pantas atau Asusila</span>
 
@@ -1475,7 +1475,7 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="misinformation" x-model="reportKategori" @change="reportKategori = 'misinformation'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="misinformation" x-model="reportKategori" @change="reportKategori = 'misinformation'; reportTouched = true; validateReportKategori()" class="text-amber-500 accent-amber-500 focus:ring-amber-400">
 
                         <span>Informasi Menyesatkan atau Penipuan</span>
 
@@ -1483,14 +1483,14 @@
 
                       <label class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 cursor-pointer">
 
-                        <input type="radio" name="kategori" value="other" x-model="reportKategori" @change="reportKategori = 'other'; reportTouched = true; validateReportKategori()" class="text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="kategori" value="other" x-model="reportKategori" @change="reportKategori = 'other'; reportTouched = true; validateReportKategori()" class="text-amber-500 accent-amber-500 focus:ring-amber-400">
 
                         <span>Lainnya</span>
 
                       </label>
 
                     </div>
-                    <p x-show="reportTouched && reportError" x-text="reportError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                    <p x-show="reportTouched && reportError" x-text="reportError" x-cloak class="text-[11px] font-bold text-red-500"></p>
 
                   </div>
 
@@ -1498,7 +1498,7 @@
 
                   <!-- Optional Notes Textarea -->
 
-                  <div class="space-y-1.5 text-left">
+                  <div class="flex flex-col gap-1.5 text-left">
 
                     <label class="text-xs font-bold text-gray-700 dark:text-gray-300 block">Catatan Tambahan (Opsional)</label>
 
@@ -1510,7 +1510,7 @@
 
                   <!-- Modal Action Buttons (Centered, Max 2 Buttons, Gap-3, No 'X' Button - Rule #59) -->
 
-                  <div class="pt-2 flex items-center justify-center gap-3">
+                  <div class="flex items-center justify-center gap-3">
 
                     <button type="button" @click="reportModalOpen = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-600 transition cursor-pointer">
 
@@ -1566,7 +1566,7 @@
 
             <div class="flex min-h-full items-center justify-center p-4">
 
-              <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4">
+              <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4">
 
                 
 
@@ -1602,7 +1602,7 @@
 
                 <!-- Action Button -->
 
-                <div class="pt-1">
+                <div>
 
                   <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
 

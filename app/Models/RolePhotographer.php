@@ -49,6 +49,8 @@ class RolePhotographer extends Model
         'etalase_disetujui_at' => 'datetime',
     ];
 
+    protected ?array $cachedClientResponseStats = null;
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
@@ -79,6 +81,25 @@ class RolePhotographer extends Model
         return $this->hasMany(PhotographerPortfolio::class, 'id_photographer');
     }
 
+    /**
+     * Hitung jumlah portofolio aktif per kategori milik fotografer.
+     * Hanya menyertakan kategori global yang masih aktif (belum dihapus).
+     *
+     * @return array<int, int>
+     */
+    public function getUsedPortfolioCategoryCounts(): array
+    {
+        return $this->portfolios()
+            ->join('categories', 'categories.id', '=', 'photographer_portofolios.id_kategori')
+            ->whereNull('photographer_portofolios.deleted_at')
+            ->whereNull('categories.deleted_at')
+            ->selectRaw('photographer_portofolios.id_kategori as cat_id, COUNT(*) as total')
+            ->groupBy('photographer_portofolios.id_kategori')
+            ->pluck('total', 'cat_id')
+            ->mapWithKeys(fn($count, $catId) => [(int) $catId => (int) $count])
+            ->toArray();
+    }
+
     public function availabilities()
     {
         return $this->hasMany(PhotographerAvailability::class, 'id_photographer');
@@ -92,6 +113,11 @@ class RolePhotographer extends Model
     public function testimonials()
     {
         return $this->hasMany(Testimonial::class, 'id_photographer');
+    }
+
+    public function visibleTestimonials()
+    {
+        return $this->hasMany(Testimonial::class, 'id_photographer')->where('is_hidden', false);
     }
 
     public function contracts()
@@ -117,7 +143,7 @@ class RolePhotographer extends Model
 
     public function getRatingAverageAttribute()
     {
-        $avg = $this->testimonials()->avg('rating');
+        $avg = $this->visibleTestimonials()->avg('rating');
         return $avg !== null ? round((float) $avg, 1) : null;
     }
 
@@ -133,6 +159,106 @@ class RolePhotographer extends Model
     }
 
     /**
+     * Hitung statistik kecepatan respon fotografer terhadap klien (Opsi 2):
+     * 1. Kecepatan balas chat klien pada `chat_messages` (rata-rata <= 24 jam, minimal 1 balasan nyata,
+     *    mengabaikan sapaan sistem otomatis sebelum klien mengirim pesan, tanpa chat klien terbengkalai > 24 jam).
+     * 2. Kedisiplinan merespon order booking `pending` pada `contracts` (tanpa order pending > 24 jam
+     *    yang belum dikonfirmasi/ditolak fotografer).
+     */
+    public function getClientResponseStats(): array
+    {
+        if ($this->cachedClientResponseStats !== null) {
+            return $this->cachedClientResponseStats;
+        }
+
+        $now = now();
+        $photographerUserId = (int) $this->id_user;
+        $threadIds = ChatBooking::where('id_photographer', $this->id)->pluck('id');
+
+        $replyDurationsSeconds = [];
+        $overdueChatCount = 0;
+
+        if ($threadIds->isNotEmpty() && $photographerUserId > 0) {
+            $messagesByThread = ChatMessage::whereIn('id_chat_booking', $threadIds)
+                ->where('deleted_for_all', false)
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->get(['id', 'id_chat_booking', 'id_sender', 'created_at'])
+                ->groupBy('id_chat_booking');
+
+            foreach ($messagesByThread as $threadMessages) {
+                $waitingSince = null;
+
+                foreach ($threadMessages as $msg) {
+                    if (!$msg->created_at) {
+                        continue;
+                    }
+
+                    if ((int) $msg->id_sender !== $photographerUserId) {
+                        if ($waitingSince === null) {
+                            $waitingSince = $msg->created_at;
+                        }
+                    } else {
+                        if ($waitingSince !== null) {
+                            $replyDurationsSeconds[] = max(0, $waitingSince->diffInSeconds($msg->created_at));
+                            $waitingSince = null;
+                        }
+                    }
+                }
+
+                if ($waitingSince !== null && $waitingSince->diffInSeconds($now) > 86400) {
+                    $overdueChatCount++;
+                }
+            }
+        }
+
+        $respondedChatCount = count($replyDurationsSeconds);
+        $avgSeconds = null;
+        $avgHours = null;
+        $avgReplyLabel = null;
+
+        if ($respondedChatCount > 0) {
+            $avgSeconds = (int) round(array_sum($replyDurationsSeconds) / $respondedChatCount);
+            $avgHours = round($avgSeconds / 3600, 1);
+
+            if ($avgSeconds < 60) {
+                $avgReplyLabel = '< 1 menit';
+            } elseif ($avgSeconds < 3600) {
+                $avgReplyLabel = (int) max(1, round($avgSeconds / 60)) . ' menit';
+            } elseif ($avgSeconds < 86400) {
+                $formattedHours = rtrim(rtrim(number_format($avgSeconds / 3600, 1, ',', ''), '0'), ',');
+                $avgReplyLabel = $formattedHours . ' jam';
+            } else {
+                $avgReplyLabel = (int) max(1, round($avgSeconds / 86400)) . ' hari';
+            }
+        }
+
+        $overdueBookingCount = $this->contracts()
+            ->whereNotIn('status_contract', ['cancelled', 'completed'])
+            ->where('is_validated_photographer', false)
+            ->where('created_at', '<', $now->copy()->subHours(24))
+            ->whereHas('bookingDetail', function ($q) {
+                $q->where('status_booking', 'pending');
+            })
+            ->count();
+
+        $isFastResponse = ($respondedChatCount >= 1)
+            && ($avgSeconds !== null && $avgSeconds <= 86400)
+            && ($overdueChatCount === 0)
+            && ($overdueBookingCount === 0);
+
+        return $this->cachedClientResponseStats = [
+            'responded_chat_count' => $respondedChatCount,
+            'avg_reply_seconds' => $avgSeconds,
+            'avg_reply_hours' => $avgHours,
+            'avg_reply_label' => $avgReplyLabel,
+            'overdue_chat_count' => $overdueChatCount,
+            'overdue_booking_count' => $overdueBookingCount,
+            'is_fast_response' => $isFastResponse,
+        ];
+    }
+
+    /**
      * Lencana Reputasi Otomatis (Badges of Excellence) berdasarkan performa riil database.
      * Kepatuhan Anti-AI Slop: Teks bersih, tenang, tanpa bulatan status / dot badge.
      */
@@ -140,9 +266,9 @@ class RolePhotographer extends Model
     {
         $badges = [];
 
-        // 1. "Top Rated" (Rating >= 4.8 dari minimal 5 ulasan)
-        $reviewCount = $this->testimonials()->count();
-        $avgRating = (float) ($this->testimonials()->avg('rating') ?? 0);
+        // 1. "Top Rated" (Rating >= 4.8 dari minimal 5 ulasan klien aktif)
+        $reviewCount = $this->visibleTestimonials()->count();
+        $avgRating = (float) ($this->visibleTestimonials()->avg('rating') ?? 0);
         if ($reviewCount >= 5 && $avgRating >= 4.8) {
             $badges[] = [
                 'key' => 'top_rated',
@@ -153,8 +279,11 @@ class RolePhotographer extends Model
             ];
         }
 
-        // 2. "Jam Terbang Tinggi" (>= 10 sesi sukses selesai)
-        $completedSessions = $this->contracts()->where('status_contract', 'completed')->count();
+        // 2. "Jam Terbang Tinggi" (>= 10 sesi sukses selesai & tervalidasi klien)
+        $completedSessions = $this->contracts()
+            ->where('status_contract', 'completed')
+            ->where('is_validated_client', true)
+            ->count();
         if ($completedSessions >= 10) {
             $badges[] = [
                 'key' => 'high_flight',
@@ -165,18 +294,16 @@ class RolePhotographer extends Model
             ];
         }
 
-        // 3. "Respon Cepat" (Aktif dalam 24 jam terakhir)
-        if ($this->user && $this->user->last_seen_at) {
-            $diffHours = \Carbon\Carbon::parse($this->user->last_seen_at)->diffInHours(now());
-            if ($diffHours <= 24) {
-                $badges[] = [
-                    'key' => 'fast_response',
-                    'label' => 'Respon Cepat',
-                    'desc' => 'Aktif dalam 24 jam',
-                    'color' => 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-900/50',
-                    'icon' => 'bolt',
-                ];
-            }
+        // 3. "Respon Cepat" (Rata-rata balas chat klien <= 24 jam & tanpa order pending menunggak > 24 jam)
+        $responseStats = $this->getClientResponseStats();
+        if ($responseStats['is_fast_response']) {
+            $badges[] = [
+                'key' => 'fast_response',
+                'label' => 'Respon Cepat',
+                'desc' => 'Rata-rata balas ' . $responseStats['avg_reply_label'],
+                'color' => 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-900/50',
+                'icon' => 'bolt',
+            ];
         }
 
         return $badges;
@@ -188,43 +315,34 @@ class RolePhotographer extends Model
      */
     public function getEditorialMetricsAttribute(): array
     {
-        $reviewCount = $this->testimonials()->count();
-        $rawAvg = $this->testimonials()->avg('rating');
-        $avgRating = $rawAvg !== null ? round((float) $rawAvg, 1) : null;
-        $completedSessions = $this->contracts()->where('status_contract', 'completed')->count();
+        $reviewCount = $this->visibleTestimonials()->count();
+        $rawAvg = $this->visibleTestimonials()->avg('rating');
+        $avgRating = $rawAvg !== null ? round((float) $rawAvg, 1) : 0.0;
+        $completedSessions = $this->contracts()
+            ->where('status_contract', 'completed')
+            ->where('is_validated_client', true)
+            ->count();
 
-        $isFastResponse = false;
-        if ($this->user && $this->user->last_seen_at) {
-            $diffHours = \Carbon\Carbon::parse($this->user->last_seen_at)->diffInHours(now());
-            $isFastResponse = ($diffHours <= 24);
-        }
+        $responseStats = $this->getClientResponseStats();
+        $isFastResponse = $responseStats['is_fast_response'];
 
         $items = [];
 
-        // 1. Rating & Ulasan (Format: 4.9 (12 ulasan) atau 'Mitra Baru')
-        if ($avgRating !== null) {
-            $ratingText = number_format($avgRating, 1) . ($reviewCount > 0 ? ' (' . $reviewCount . ' ulasan)' : '');
-            $items[] = [
-                'type' => 'rating',
-                'text' => $ratingText,
-                'highlight' => true,
-            ];
-        } else {
-            $items[] = [
-                'type' => 'rating',
-                'text' => 'Mitra Baru',
-                'highlight' => false,
-            ];
-        }
+        // 1. Rating & Ulasan (Format seragam numerik: misal 4.9 (12 ulasan) atau 0.0 (0 ulasan))
+        $items[] = [
+            'type' => 'rating',
+            'text' => number_format($avgRating, 1) . ' (' . $reviewCount . ' ulasan)',
+            'highlight' => $reviewCount > 0,
+        ];
 
-        // 2. Sesi Selesai (Format: 10+ Sesi Selesai)
+        // 2. Sesi Selesai (Format: 10+ Sesi Selesai / X Sesi Selesai / 0 Sesi Selesai)
         if ($completedSessions >= 10) {
             $items[] = [
                 'type' => 'sessions',
                 'text' => $completedSessions . '+ Sesi Selesai',
                 'highlight' => false,
             ];
-        } elseif ($completedSessions > 0) {
+        } else {
             $items[] = [
                 'type' => 'sessions',
                 'text' => $completedSessions . ' Sesi Selesai',
@@ -530,6 +648,50 @@ class RolePhotographer extends Model
             ->whereHas('portfolios', function ($q) {
                 $q->whereHas('medias');
             });
+    }
+
+    /**
+     * Urutkan fotografer published berdasarkan performa bulan berjalan:
+     * 1. Sesi completed tervalidasi klien pada bulan berjalan terbanyak
+     * 2. Ulasan positif (rating >= 4) pada bulan berjalan terbanyak
+     * Fallback otomatis bila bulan berjalan belum ada transaksi selesai:
+     * 3. Rata-rata rating tertinggi (testimonials_avg_rating)
+     * 4. Jumlah ulasan terbanyak (testimonials_count)
+     * 5. Total sesi completed tervalidasi klien keseluruhan terbanyak
+     */
+    public function scopeFeaturedThisMonth($query)
+    {
+        $startOfMonth = now()->startOfMonth();
+        $endOfMonth = now()->endOfMonth();
+
+        return $query->published()
+            ->withCount([
+                'contracts as monthly_completed_sessions_count' => function ($q) use ($startOfMonth, $endOfMonth) {
+                    $q->where('status_contract', 'completed')
+                      ->where('is_validated_client', true)
+                      ->where(function ($dateQ) use ($startOfMonth, $endOfMonth) {
+                          $dateQ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+                                ->orWhereBetween('created_at', [$startOfMonth, $endOfMonth]);
+                      });
+                },
+                'testimonials as monthly_positive_reviews_count' => function ($q) use ($startOfMonth, $endOfMonth) {
+                    $q->where('is_hidden', false)
+                      ->where('rating', '>=', 4)
+                      ->whereBetween('created_at', [$startOfMonth, $endOfMonth]);
+                },
+                'testimonials as testimonials_count' => fn($q) => $q->where('is_hidden', false),
+                'contracts as completed_sessions_count' => function ($q) {
+                    $q->where('status_contract', 'completed')
+                      ->where('is_validated_client', true);
+                },
+            ])
+            ->withAvg(['testimonials as testimonials_avg_rating' => fn($q) => $q->where('is_hidden', false)], 'rating')
+            ->orderByDesc('monthly_completed_sessions_count')
+            ->orderByDesc('monthly_positive_reviews_count')
+            ->orderByRaw('COALESCE(testimonials_avg_rating, 0) DESC')
+            ->orderByDesc('testimonials_count')
+            ->orderByDesc('completed_sessions_count')
+            ->orderBy('id', 'asc');
     }
 
     public function syncStorefrontIntegrity(): bool

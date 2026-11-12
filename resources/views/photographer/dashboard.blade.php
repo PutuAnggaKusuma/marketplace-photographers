@@ -11,7 +11,11 @@
       <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Dashboard</h1>
     </div>
     
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-3">
+      @if($photographer->isPublishedToCatalog())
+        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Tayang di Katalog</span>
+      @endif
+
       <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 shadow-2xs text-xs font-bold text-gray-700 dark:text-gray-300">
         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -22,28 +26,8 @@
   </div>
 
   @php
-    $curPhotographer = auth()->user()->rolePhotographer;
     $storefrontChecklist = $storefrontChecklist ?? $photographer->getStorefrontChecklist();
   @endphp
-  @if($curPhotographer && $curPhotographer->status_verifikasi === 'ditolak')
-    <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-extrabold text-sm">
-          <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-          <span>Pendaftaran Anda Ditolak</span>
-        </div>
-        <p class="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
-          Catatan Admin: <span class="font-bold">{{ $curPhotographer->catatan_penolakan ?: 'Data profil belum memenuhi persyaratan.' }}</span>
-        </p>
-        <p class="text-[11px] text-rose-600 dark:text-rose-400/80">
-          Silakan perbaiki data profil Anda, lalu simpan ulang untuk mengajukan verifikasi kembali ke Admin.
-        </p>
-      </div>
-      <a href="{{ route('photographer.profile') }}" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition text-center shrink-0">
-        Perbaiki Profil
-      </a>
-    </div>
-  @endif
 
   @if($photographer->isFeatureUnlocked() && !$photographer->isPublishedToCatalog())
     <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
@@ -73,14 +57,9 @@
       </div>
 
       @if($photographer->isStorefrontRejected())
-        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 space-y-1">
-          <div class="text-xs font-extrabold text-rose-800 dark:text-rose-300">
-            Pengajuan Etalase Ditolak
-          </div>
-          <p class="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
-            Catatan Admin: <span class="font-bold">{{ $photographer->catatan_penolakan_etalase ?: 'Etalase belum memenuhi syarat penayangan.' }}</span>
-          </p>
-        </div>
+        <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+          <span class="font-bold text-rose-600 dark:text-rose-400">Catatan Admin:</span> {{ trim((string) ($photographer->catatan_penolakan_etalase ?? '')) ?: 'Etalase belum memenuhi syarat penayangan.' }}
+        </p>
       @endif
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -100,7 +79,7 @@
               ],
               'schedule' => [
                   'route' => route('photographer.availability', ['tab' => 'weekly']),
-                  'desc' => 'Simpan jam operasional mingguan pada menu Jadwal.',
+                  'desc' => 'Tentukan hari buka dan simpan jam operasional pada menu Jadwal.',
                   'done_label' => 'Ubah',
                   'todo_label' => 'Atur Jadwal',
               ],
@@ -216,31 +195,31 @@
     
     <!-- Card 1: Total Omzet Bersih -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Pendapatan Bersih</span>
-      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">Rp {{ number_format($totalNetRevenue, 0, ',', '.') }}</p>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Pendapatan Bersih</span>
+      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalNetRevenue, 0, ',', '.') }}</p>
     </div>
 
     <!-- Card 2: Total Kontrak Booking -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Kontrak Booking</span>
-      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ $totalBookingsCount }} Order</p>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Kontrak Booking</span>
+      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalBookingsCount }} Order</p>
     </div>
 
     <!-- Card 3: Kepuasan Klien Klien -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Kepuasan Klien</span>
-      <div class="flex items-center gap-2">
-        <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ $avgRating }}</p>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Kepuasan Klien</span>
+      <div class="flex items-center gap-1.5">
+        <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $avgRating }}</p>
         <div class="flex items-center text-amber-400">
-          <svg class="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="w-3.5 h-3.5 fill-amber-400 text-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
       </div>
     </div>
 
     <!-- Card 4: Katalog & Portofolio Aktif -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-      <span class="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Galeri Portofolio Aktif</span>
-      <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight">{{ $totalServices }} Paket</p>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Galeri Portofolio Aktif</span>
+      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalServices }} Paket</p>
     </div>
 
   </div>
@@ -263,11 +242,8 @@
     @php
       $isTopRated = ($avgRating >= 4.8 && $totalReviews >= 5);
       $isHighFlight = ($completedBookingsCount >= 10);
-      $isFastResponse = false;
-      if ($photographer->user && $photographer->user->last_seen_at) {
-        $diffHours = \Carbon\Carbon::parse($photographer->user->last_seen_at)->diffInHours(now());
-        $isFastResponse = ($diffHours <= 24);
-      }
+      $responseStats = $responseStats ?? $photographer->getClientResponseStats();
+      $isFastResponse = $responseStats['is_fast_response'];
     @endphp
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -330,12 +306,22 @@
           @endif
         </div>
         <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-          Syarat: Aktif di platform dalam 24 jam terakhir.
+          Syarat: Rata-rata balas chat klien &le; 24 jam tanpa tunggakan order pending &gt; 24 jam.
         </p>
         <div class="space-y-1.5 pt-1">
-          <div class="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-            <span>Keaktifan:</span>
-            <span class="font-bold {{ $isFastResponse ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400' }}">{{ $isFastResponse ? 'Aktif dalam 24 jam' : 'Tidak aktif > 24 jam' }}</span>
+          <div class="flex items-center justify-between gap-2 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+            <span>Status respon:</span>
+            @if($responseStats['overdue_booking_count'] > 0)
+              <span class="font-bold text-rose-600 dark:text-rose-400 text-right">{{ $responseStats['overdue_booking_count'] }} order pending &gt; 24 jam</span>
+            @elseif($responseStats['overdue_chat_count'] > 0)
+              <span class="font-bold text-rose-600 dark:text-rose-400 text-right">{{ $responseStats['overdue_chat_count'] }} chat belum dibalas &gt; 24 jam</span>
+            @elseif($responseStats['responded_chat_count'] === 0)
+              <span class="font-bold text-gray-500 dark:text-gray-400 text-right">Belum ada chat klien</span>
+            @elseif($isFastResponse)
+              <span class="font-bold text-gray-900 dark:text-white text-right">Rata-rata {{ $responseStats['avg_reply_label'] }}</span>
+            @else
+              <span class="font-bold text-gray-500 dark:text-gray-400 text-right">Rata-rata {{ $responseStats['avg_reply_label'] }} (&gt; 24 jam)</span>
+            @endif
           </div>
           <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
             <div class="{{ $isFastResponse ? 'bg-amber-400' : 'bg-gray-300 dark:bg-gray-600' }} h-full rounded-full transition-all duration-300" style="width: {{ $isFastResponse ? '100%' : '0%' }}"></div>
@@ -356,9 +342,7 @@
             @endif
             @if($m['type'] === 'rating')
               <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                @if($m['highlight'])
-                  <span class="text-amber-500">★</span>
-                @endif
+                <span class="{{ $m['highlight'] ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
                 <span>{{ $m['text'] }}</span>
               </span>
             @elseif($m['type'] === 'fast_response')
@@ -429,16 +413,16 @@
       <!-- Summary Bar Bottom Stats (Clean Whitespace without Top Border) -->
       <div class="grid grid-cols-3 gap-2 pt-4 text-center">
         <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Rata-Rata Bulanan</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $avgMonthlyRevenue }} Juta</p>
+          <span class="text-xs font-bold text-gray-400 uppercase">Rata-Rata Bulanan</span>
+          <p class="text-xs font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $avgMonthlyRevenue }} Juta</p>
         </div>
         <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Bulan Tertinggi</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $maxMonthlyRevenue }} Juta</p>
+          <span class="text-xs font-bold text-gray-400 uppercase">Bulan Tertinggi</span>
+          <p class="text-xs font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $maxMonthlyRevenue }} Juta</p>
         </div>
         <div>
-          <span class="text-[10px] font-bold text-gray-400 uppercase">Total Akumulasi</span>
-          <p class="text-sm font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $totalAccumulatedRevenue }} Juta</p>
+          <span class="text-xs font-bold text-gray-400 uppercase">Total Akumulasi</span>
+          <p class="text-xs font-black text-gray-900 dark:text-white mt-0.5">Rp {{ $totalAccumulatedRevenue }} Juta</p>
         </div>
       </div>
     </div>
@@ -487,10 +471,12 @@
           <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Order Booking Masuk Terkini</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pemantauan reservasi & status transaksi klien</p>
         </div>
-        <a href="{{ route('photographer.bookings') }}" class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline inline-flex items-center gap-1 transition">
-          <span>Lihat Semua</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-        </a>
+        @if(($totalBookingsCount ?? 0) > 5)
+          <a href="{{ route('photographer.bookings') }}" class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline inline-flex items-center gap-1 transition">
+            <span>Lihat Semua</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+          </a>
+        @endif
       </div>
 
       <div class="overflow-x-auto">
@@ -513,7 +499,7 @@
                 <td class="py-3.5 px-3 sm:px-4">
                   <div class="space-y-0.5">
                     <p class="font-extrabold text-gray-900 dark:text-white">{{ $client->nama ?? ($client->user->nama ?? 'Klien') }}</p>
-                    <span class="text-[10px] font-mono text-gray-400">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="text-xs font-mono text-gray-400">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
                   </div>
                 </td>
                 <td class="py-3.5 px-3 sm:px-4 font-bold text-gray-800 dark:text-gray-200">

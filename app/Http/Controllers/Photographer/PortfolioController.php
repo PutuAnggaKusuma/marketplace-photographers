@@ -8,6 +8,7 @@ use App\Models\PortfolioMedia;
 use App\Models\RolePhotographer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PortfolioController extends Controller
 {
@@ -18,7 +19,7 @@ class PortfolioController extends Controller
     {
         $user = Auth::user();
         $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
-        $categories = \App\Models\Category::orderBy('nama_kategori', 'asc')->get();
+        $categories = $photographer->categories()->orderBy('nama_kategori', 'asc')->get();
 
         return view('photographer.portfolio.create', compact('photographer', 'categories'));
     }
@@ -31,8 +32,10 @@ class PortfolioController extends Controller
         $user = Auth::user();
         $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
-        $portfolio = \App\Models\PhotographerPortfolio::where('id_photographer', $photographer->id)->findOrFail($id);
-        $categories = \App\Models\Category::orderBy('nama_kategori', 'asc')->get();
+        $portfolio = PhotographerPortfolio::with(['medias', 'category'])
+            ->where('id_photographer', $photographer->id)
+            ->findOrFail($id);
+        $categories = $photographer->categories()->orderBy('nama_kategori', 'asc')->get();
 
         return view('photographer.portfolio.edit', compact('photographer', 'portfolio', 'categories'));
     }
@@ -47,20 +50,23 @@ class PortfolioController extends Controller
 
         $search = $request->query('search', '');
         $sort = $request->query('sort', 'latest');
-        $query = PhotographerPortfolio::with('medias')->where('id_photographer', $photographer->id);
+        $query = PhotographerPortfolio::with(['medias', 'category'])->where('id_photographer', $photographer->id);
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
+                  ->orWhere('deskripsi', 'like', "%{$search}%")
+                  ->orWhereHas('category', function ($cq) use ($search) {
+                      $cq->where('nama_kategori', 'like', "%{$search}%");
+                  });
             });
         }
 
         if ($sort === 'oldest') {
             $query->orderBy('created_at', 'asc');
-        } elseif ($sort === 'name_asc') {
+        } elseif (in_array($sort, ['name_asc', 'title_asc'], true)) {
             $query->orderBy('judul', 'asc');
-        } elseif ($sort === 'name_desc') {
+        } elseif (in_array($sort, ['name_desc', 'title_desc'], true)) {
             $query->orderBy('judul', 'desc');
         } elseif ($sort === 'most_media') {
             $query->withCount('medias')->orderByDesc('medias_count');
@@ -73,11 +79,42 @@ class PortfolioController extends Controller
         $portfolios = $query->paginate($perPage)->withQueryString();
 
         // Metrics
-        $allPortfolios = PhotographerPortfolio::with('medias')->where('id_photographer', $photographer->id)->get();
+        $allPortfolios = PhotographerPortfolio::with(['medias', 'category'])
+            ->where('id_photographer', $photographer->id)
+            ->get();
         $totalPortfolios = $allPortfolios->count();
         $totalMedias = PortfolioMedia::whereIn('id_portofolio', $allPortfolios->pluck('id'))->count();
         $avgMediaPerAlbum = $totalPortfolios > 0 ? round($totalMedias / $totalPortfolios, 1) : 0;
         $latestPortfolio = $allPortfolios->sortByDesc('created_at')->first();
+
+        $categoryCounts = [];
+        $categoryNamesById = [];
+        foreach ($allPortfolios as $item) {
+            if ($item->id_kategori && $item->category) {
+                $catId = (int) $item->id_kategori;
+                $categoryCounts[$catId] = ($categoryCounts[$catId] ?? 0) + 1;
+                $categoryNamesById[$catId] = $item->category->nama_kategori;
+            }
+        }
+
+        $topCategoryName = null;
+        if (!empty($categoryCounts)) {
+            uksort($categoryCounts, function ($a, $b) use ($categoryCounts, $categoryNamesById) {
+                $cmp = $categoryCounts[$b] <=> $categoryCounts[$a];
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+                return strcmp($categoryNamesById[$a] ?? '', $categoryNamesById[$b] ?? '');
+            });
+            $topCatId = array_key_first($categoryCounts);
+            $topCategoryName = $categoryNamesById[$topCatId] ?? null;
+        }
+
+        if (!$topCategoryName) {
+            $topCategoryName = $photographer->categories()->orderBy('nama_kategori', 'asc')->value('nama_kategori') ?: '-';
+        }
+
+        $uniqueCategoryCount = count($categoryCounts);
 
         return view('photographer.portfolio.index', compact(
             'photographer',
@@ -87,7 +124,9 @@ class PortfolioController extends Controller
             'totalPortfolios',
             'totalMedias',
             'avgMediaPerAlbum',
-            'latestPortfolio'
+            'latestPortfolio',
+            'topCategoryName',
+            'uniqueCategoryCount'
         ));
     }
 
@@ -98,15 +137,22 @@ class PortfolioController extends Controller
     {
         $user = Auth::user();
         $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
+        $allowedCategoryIds = $photographer->categories()->pluck('categories.id')->map(fn($id) => (int) $id)->toArray();
 
         $request->validate([
             'judul' => 'required|string|min:3|max:255',
+            'id_kategori' => ['required', 'integer', Rule::in($allowedCategoryIds)],
             'deskripsi' => 'required|string|min:15|max:1000',
             'foto_files' => 'required|array|min:4',
             'foto_files.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:20480',
         ], [
-            'judul.required' => 'Judul album portofolio wajib diisi.',
-            'judul.min' => 'Judul album portofolio minimal 3 karakter.',
+            'judul.required' => 'Judul portofolio wajib diisi.',
+            'judul.min' => 'Judul portofolio minimal 3 karakter.',
+            'id_kategori.required' => 'Kategori portofolio wajib dipilih.',
+            'id_kategori.integer' => 'Kategori portofolio tidak valid.',
+            'id_kategori.in' => empty($allowedCategoryIds)
+                ? 'Pilih kategori di profil terlebih dahulu.'
+                : 'Kategori harus sesuai dengan kategori di profil.',
             'deskripsi.required' => 'Deskripsi portofolio wajib diisi.',
             'deskripsi.min' => 'Deskripsi portofolio minimal 15 karakter agar informatif bagi calon klien.',
             'foto_files.required' => 'Wajib mengunggah minimal 4 foto untuk membuat 1 album portofolio baru.',
@@ -120,6 +166,7 @@ class PortfolioController extends Controller
 
         $portfolio = PhotographerPortfolio::create([
             'id_photographer' => $photographer->id,
+            'id_kategori' => (int) $request->id_kategori,
             'judul' => trim($request->judul),
             'deskripsi' => trim($request->deskripsi),
         ]);
@@ -154,15 +201,22 @@ class PortfolioController extends Controller
         $photographer = RolePhotographer::firstOrCreate(['id_user' => $user->id], ['nama' => $user->nama]);
 
         $portfolio = PhotographerPortfolio::where('id_photographer', $photographer->id)->findOrFail($id);
+        $allowedCategoryIds = $photographer->categories()->pluck('categories.id')->map(fn($id) => (int) $id)->toArray();
 
         $request->validate([
             'judul' => 'required|string|min:3|max:255',
+            'id_kategori' => ['required', 'integer', Rule::in($allowedCategoryIds)],
             'deskripsi' => 'required|string|min:15|max:1000',
             'foto_files' => 'nullable|array',
             'foto_files.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
         ], [
             'judul.required' => 'Judul album portofolio wajib diisi.',
             'judul.min' => 'Judul album portofolio minimal 3 karakter.',
+            'id_kategori.required' => 'Kategori portofolio wajib dipilih.',
+            'id_kategori.integer' => 'Kategori portofolio tidak valid.',
+            'id_kategori.in' => empty($allowedCategoryIds)
+                ? 'Pilih kategori di profil terlebih dahulu.'
+                : 'Kategori harus sesuai dengan kategori di profil.',
             'deskripsi.required' => 'Deskripsi portofolio wajib diisi.',
             'deskripsi.min' => 'Deskripsi portofolio minimal 15 karakter.',
             'foto_files.*.image' => 'Setiap file harus berupa gambar.',
@@ -177,6 +231,7 @@ class PortfolioController extends Controller
         }
 
         $portfolio->update([
+            'id_kategori' => (int) $request->id_kategori,
             'judul' => trim($request->judul),
             'deskripsi' => trim($request->deskripsi),
         ]);

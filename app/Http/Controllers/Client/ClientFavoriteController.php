@@ -29,7 +29,13 @@ class ClientFavoriteController extends Controller
 
         $favorites = $clientProfile->favoritePhotographers()
             ->published()
-            ->with(['city', 'categories', 'portfolios.medias', 'testimonials', 'services'])
+            ->with([
+                'city',
+                'categories',
+                'portfolios.medias',
+                'testimonials' => fn($q) => $q->where('is_hidden', false),
+                'services',
+            ])
             ->latest('client_photographer_favorites.created_at')
             ->paginate($perPage)
             ->withQueryString();

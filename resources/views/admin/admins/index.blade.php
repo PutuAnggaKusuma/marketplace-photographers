@@ -62,34 +62,34 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- Card 1 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pengelola</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pengelola</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }}</div>
         </div>
 
         <!-- Card 2 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Super Admin</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSuperAdmins ?? $admins->where('role', 'super_admin')->count() }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Super Admin</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSuperAdmins ?? $admins->where('role', 'super_admin')->count() }}</div>
         </div>
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Operasional</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStaffAdmins ?? $admins->where('role', 'admin')->count() }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Operasional</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStaffAdmins ?? $admins->where('role', 'admin')->count() }}</div>
         </div>
 
         <!-- Card 4 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Terdaftar</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }} Akun</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Terdaftar</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }} Akun</div>
         </div>
     </div>
 
     <!-- Standard Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Sort -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto">
                 @php
                     $roleLabels = [
@@ -148,8 +148,8 @@
                             <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                                 <td class="py-4 px-4 sm:px-6 align-middle">
                                     <div class="min-w-0">
-                                        <h4 class="font-extrabold text-gray-900 dark:text-white text-xs sm:text-sm tracking-tight">{{ $a->nama ?? $a->name ?? 'Admin' }}</h4>
-                                        <span class="text-[11px] text-gray-400 block mt-0.5">{{ $a->email }}</span>
+                                        <h4 class="font-extrabold text-gray-900 dark:text-white text-xs tracking-tight">{{ $a->nama ?? $a->name ?? 'Admin' }}</h4>
+                                        <span class="text-xs text-gray-400 block mt-0.5">{{ $a->email }}</span>
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
@@ -176,7 +176,7 @@
                                             Hapus
                                         </button>
                                     @else
-                                        <span class="text-[11px] text-gray-400 italic font-medium">Akun Anda</span>
+                                        <span class="text-xs text-gray-400 italic font-medium">Akun Anda</span>
                                     @endif
                                 </td>
                             </tr>

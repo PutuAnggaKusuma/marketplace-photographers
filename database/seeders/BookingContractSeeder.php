@@ -28,28 +28,35 @@ class BookingContractSeeder extends Seeder
         Notification::whereIn('type', ['booking', 'payment'])->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Ambil data Client yang ada di database
-        $clientDian = RoleClient::whereHas('user', fn($q) => $q->where('email', 'dian@gmail.com'))->first() ?? RoleClient::first();
-        if (!$clientDian) {
-            $userDian = \App\Models\User::firstOrCreate(
-                ['email' => 'dian@gmail.com'],
+        // Pastikan masing-masing klien terisolasi di akun miliknya sendiri (tanpa fallback silang ke Dian)
+        $resolveClient = function (string $email, string $nama, string $phone, string $alamat): RoleClient {
+            $user = \App\Models\User::firstOrCreate(
+                ['email' => $email],
                 [
-                    'nama' => 'Dian & Febri',
+                    'nama' => $nama,
                     'password' => \Illuminate\Support\Facades\Hash::make('password123'),
                     'role' => 'client',
+                    'is_protected' => false,
                     'email_verified_at' => now(),
                 ]
             );
-            $clientDian = RoleClient::firstOrCreate(
-                ['id_user' => $userDian->id],
-                ['nama' => 'Dian & Febri', 'nomor_telepon' => '081234567899']
+
+            return RoleClient::firstOrCreate(
+                ['id_user' => $user->id],
+                [
+                    'nama' => $nama,
+                    'nomor_telepon' => $phone,
+                    'alamat' => $alamat,
+                ]
             );
-        }
-        $clientMahkota = RoleClient::whereHas('user', fn($q) => $q->where('email', 'mahkota@event.com'))->first() ?? $clientDian;
-        $clientLilik = RoleClient::whereHas('user', fn($q) => $q->where('email', 'bulilik@kuliner.com'))->first() ?? $clientDian;
-        $clientReza = RoleClient::whereHas('user', fn($q) => $q->where('email', 'reza.itb@gmail.com'))->first() ?? $clientDian;
-        $clientSiti = RoleClient::whereHas('user', fn($q) => $q->where('email', 'siti.rahma@gmail.com'))->first() ?? $clientDian;
-        $clientResort = RoleClient::whereHas('user', fn($q) => $q->where('email', 'finance@baliluxury.com'))->first() ?? $clientDian;
+        };
+
+        $clientDian = $resolveClient('dian@gmail.com', 'Dian & Febri', '081234567899', 'Jakarta Selatan');
+        $clientMahkota = $resolveClient('mahkota@event.com', 'PT Mahkota Event Organizer', '081999888777', 'Semarang');
+        $clientLilik = $resolveClient('bulilik@kuliner.com', 'Bu Lilik Kuliner Nusantara', '081567891234', 'Bandung');
+        $clientReza = $resolveClient('reza.itb@gmail.com', 'Reza Pratama', '081387654321', 'Yogyakarta');
+        $clientSiti = $resolveClient('siti.rahma@gmail.com', 'Siti Rahmawati', '085712345678', 'Surabaya');
+        $clientResort = $resolveClient('finance@baliluxury.com', 'PT Bali Luxury Resort', '08113987654', 'Seminyak, Bali');
 
         // Ambil data Fotografer yang ada di database
         $photoAlex = RolePhotographer::where('nama', 'LIKE', '%Alex%')->first() ?? RolePhotographer::find(1);
@@ -348,7 +355,7 @@ class BookingContractSeeder extends Seeder
                 'payout_amount' => $payout,
                 'status_payout' => $row['payout_status'],
                 'payout_at' => $row['payout_status'] === 'paid' ? $row['session_date']->copy()->addDays(2) : null,
-                'payout_notes' => $row['payout_status'] === 'paid' ? 'Dana payout 90% berhasil dicairkan ke rekening fotografer.' : null,
+                'payout_notes' => $row['payout_status'] === 'paid' ? 'Dana 90% berhasil ditransfer ke rekening fotografer.' : null,
                 'is_validated_photographer' => in_array($row['status'], ['confirmed', 'completed']),
                 'is_validated_client' => true,
                 'expired_at' => $row['created_at']->copy()->addDays(2),
@@ -484,7 +491,6 @@ class BookingContractSeeder extends Seeder
                     'updated_at' => Carbon::create(2026, 11, 1),
                 ]
             );
-        }
         }
     }
 }

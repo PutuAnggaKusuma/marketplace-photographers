@@ -513,7 +513,7 @@
                 <!-- Remember & Forgot -->
                 <div class="flex items-center justify-between pt-1">
                   <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-600 font-medium">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded text-amber-500 focus:ring-amber-400 border-gray-300" />
+                    <input type="checkbox" name="remember" class="w-4 h-4 rounded text-amber-500 accent-amber-500 focus:ring-amber-400 border-gray-300" />
                     <span>Ingat saya</span>
                   </label>
                   <a href="{{ url('/forgot-password') }}" class="text-xs font-bold text-gray-800 hover:text-amber-600 hover:underline transition">

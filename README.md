@@ -779,15 +779,17 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #64: Standarisasi KPI Metric Cards di Atas Tabel Fitur (Eliminasi Teks Ketiga / Anti "AI Slop" Minimalist Standard)
-- **1. Struktur Kartu Metrik di Atas Tabel Halaman Fitur (Non-Dashboard)**:
-  - Pada seluruh halaman fitur yang memiliki tabel di bawahnya (seperti Admin Staf, Kategori, Lomba Foto, Submisi Lomba, E-Learning, Forum, Mitra Fotografer, Ulasan, Transaksi/Escrow, Pengguna Klien, Kalender Fotografer, Portofolio Fotografer, Laporan Fotografer, Layanan Fotografer, Reservasi Klien, Tagihan Klien, dsb):
-  - Kartu ringkasan metrik (KPI Cards) **HANYA terdiri dari 2 elemen teks murni**:
-    1. **Label Judul Kategori**: `<span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Judul Metrik</span>`
-    2. **Angka Nilai Metrik**: `<div/h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Nilai Data</div/h2>`
-  - **DILARANG** menambahkan baris teks ketiga (`<p class="text-[11px] text-gray-400 ...">...</p>` atau sub-teks deskriptif redundan seperti *"Akumulasi seluruh event"*, *"Terdaftar di database"*, *"Tersedia di etalase publik"*). Teks ketiga di atas tabel fitur dinilai sebagai *"UI AI Slop"* yang memenuhi layar tanpa memberikan nilai informasi esensial.
-- **2. Pengecualian Halaman Dashboard Utama**:
-  - Halaman Dashboard ringkasan analitik utama (`admin/dashboard.blade.php` dan `photographer/dashboard.blade.php`) **dikecualikan** dan tetap mempertahankan baris ke-3 sebagai penjelas analitik makro (misal *"Net Payout Bersih (90%) Fotografer"*, *"Berdasarkan 5 ulasan resmi klien"*).
+### Rule #64: Standarisasi KPI Metric Cards di Atas Tabel Fitur & Dashboard Utama (Ukuran Font Seragam `text-xs` & Eliminasi Teks Ketiga)
+- **1. Struktur Kartu Metrik (2 Baris Murni & Ukuran Seragam `text-xs`)**:
+  - Pada seluruh halaman fitur yang memiliki tabel di bawahnya (Admin Staf, Kategori, Lomba Foto, Submisi Lomba, Peserta Lomba, E-Learning, Forum, Mitra Fotografer, Log Aktivitas, Ulasan, Transaksi, Pengguna Klien, Kalender Fotografer, Portofolio Fotografer, Tanya Jawab Fotografer, Laporan Fotografer, Layanan Fotografer, Reservasi Klien, Tagihan Klien), halaman Dashboard Utama (`admin/dashboard.blade.php` dan `photographer/dashboard.blade.php`), serta kartu statistik akun pada profil pengguna publik (`public/users/show.blade.php`):
+  - Kartu ringkasan metrik (KPI Cards) **HANYA terdiri dari 2 elemen teks murni dengan ukuran font yang SERAGAM yaitu `text-xs`** (dibedakan murni lewat ketebalan dan warna kontras):
+    1. **Label Judul Metrik**: `<span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Judul Metrik</span>`
+    2. **Angka Nilai Metrik**: `<h2/div/p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Nilai Data</h2/div/p>`
+  - **DILARANG** memperbesar angka nilai metrik dengan kelas berukuran lebih besar (`text-lg sm:text-xl`, `text-2xl`, `text-3xl`, `text-base`) maupun mengecilkan label (`text-[11px]`, `text-[10px]`), agar tidak tampil mencolok sebelah (*anti-oversized metric slop*).
+  - **DILARANG** menambahkan baris teks ketiga deskriptif redundan (`<p class="text-[11px] text-gray-400 ...">...</p>` seperti *"Terdaftar di database"*) di atas kartu KPI tabel fitur.
+- **2. Penyeragaman Rangkuman Statistik Grafik Dashboard**:
+  - Kotak rangkuman statistik pendukung di bawah grafik analitik pada `admin/dashboard.blade.php` dan `photographer/dashboard.blade.php`, serta kartu ringkasan kesiapan tayang pada `admin/photographers/show.blade.php`, turut menyeragamkan ukuran label dan angkanya ke `text-xs`.
+  - Pengecualian ukuran komersial/marketing tetap berlaku untuk angka statistik hero landing publik (`public/home.blade.php`, `public/elearning/index.blade.php`) dan nominal harga paket komersial pada kartu katalog/profil publik.
 
 ---
 
@@ -1216,10 +1218,13 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 ---
 
 ### Rule #84: Standarisasi Lencana Reputasi Otomatis (Badges of Excellence)
-1. **Perhitungan Otomatis 100% Berbasis Data Riil Database**:
-   - **`Top Rated Studio`**: Diberikan secara otomatis jika fotografer memiliki rating rata-rata $\ge 4.8$ dari minimal 5 ulasan resmi klien (`testimonials`).
-   - **`Jam Terbang Tinggi`**: Diberikan secara otomatis jika fotografer telah menyelesaikan minimal 10 sesi pemotretan berbayar sukses (`contracts` status `completed`).
-   - **`Respon Cepat`**: Diberikan jika akun fotografer aktif dalam 24 jam terakhir (`last_seen_at`).
+1. **Perhitungan Otomatis 100% Berbasis Interaksi Riil Klien**:
+   - **`Top Rated`**: Diberikan secara otomatis jika fotografer memiliki rating rata-rata $\ge 4.8$ dari minimal 5 ulasan resmi klien aktif (`testimonials` dengan `is_hidden = false`). Rating hanya dapat dibuat/diubah oleh klien pemilik kontrak selesai.
+   - **`Jam Terbang Tinggi`**: Diberikan secara otomatis jika fotografer telah menyelesaikan minimal 10 sesi pemotretan berbayar yang telah dikonfirmasi hasilnya oleh klien (`contracts` dengan `status_contract = 'completed'` dan `is_validated_client = true`).
+   - **`Respon Cepat` (Opsi 2 — Gabungan Chat Klien & Booking Pending)**: Diberikan secara otomatis berdasarkan respon fotografer terhadap klien (`RolePhotographer::getClientResponseStats()`):
+     - Rata-rata waktu balas pesan klien pada `chat_messages` (`deleted_for_all = false`) $\le 24$ jam dengan minimal 1 balasan nyata (sapaan otomatis sistem saat membuka chat sebelum klien mengirim pesan tidak dihitung).
+     - Tidak ada pesan klien terakhir yang dibiarkan tidak terjawab $> 24$ jam.
+     - Tidak ada order booking `pending` pada `contracts` (`is_validated_photographer = false`, `status_booking = 'pending'`) yang dibiarkan menunggu konfirmasi/penolakan $> 24$ jam. Jika ada tunggakan, lencana `Respon Cepat` otomatis gugur.
 2. **Kepatuhan Anti-AI Slop & Desain Muted Pill**:
    - DILARANG menggunakan bulatan status berkedip (`●` status dot).
    - Teks lencana lugas, bersih, dan menggunakan skema warna lembut yang tenang (*muted soft tone*):
@@ -1260,19 +1265,20 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #86: Standarisasi Fitur Tanya Jawab Kustom Fotografer (Photographer Custom FAQ)
-1. **Tujuan & Arsitektur Modul**:
-   - Memfasilitasi fotografer mitra untuk mendokumentasikan pertanyaan yang paling sering ditanyakan klien (seperti estimasi waktu penyerahan hasil foto yang sudah diedit, izin lokasi/tiket wisata, penanganan cuaca buruk outdoor, ketentuan DP, dll).
-   - Mengurangi beban pertanyaan berulang pada room obrolan dan mempercepat konversi reservasi klien di etalase profil publik fotografer.
+### Rule #86: Standarisasi Fitur Tanya Jawab Kombinasi (Tanya Jawab Fotografer + Ketentuan Sistem Terpusat — Opsi A)
+1. **Tujuan & Arsitektur Modul (Opsi A)**:
+   - Memisahkan tanggung jawab antara informasi layanan fotografer dan ketentuan platform pada Tab **Tanya Jawab** etalase publik (`/fotografer/{id}`):
+     1. **Tanya Jawab Fotografer**: Fotografer mengelola pertanyaan khusus layanannya melalui `/photographer/faqs` (estimasi waktu editing dan pengiriman hasil, tiket lokasi, transport luar kota, batas revisi warna, penanganan cuaca).
+     2. **Ketentuan Sistem LensMatch (Hardcoded Terpusat)**: Ketentuan platform (alur pemesanan, Pembayaran Penuh atau DP 30%, penahanan dana, pembatalan H-24 jam, jadwal ulang, penerimaan hasil foto) dikelola terpusat di kode pada `config/lensmatch_faqs.php` sebagai sumber tunggal untuk `/faq` dan tab profil fotografer.
+   - Menghindari pengulangan pertanyaan umum di obrolan dan menjaga profil fotografer baru tetap informatif sejak awal aktif.
 2. **Kepatuhan Antarmuka & Standar CRUD**:
-   - **Manajemen Mitra (`/photographer/faqs`)**:
-     - Tabel daftar FAQ dengan aksi standar Rule #80: Tombol **Edit** (biru soft) dan **Hapus** (merah soft) teks murni tanpa ikon.
-     - Modal Tambah/Edit FAQ mematuhi **Rule #59**: Judul rata tengah tanpa ikon, modal tertutup saat klik luar/esc, tombol aksi di bagian bawah rata tengah maksimal 2 tombol: **Batal** di kiri (`bg-gray-100 dark:bg-gray-700`) dan **Simpan Data / Perbaharui Data** di kanan (`bg-amber-400 font-extrabold`). DILARANG menambahkan tombol silang (X) di pojok kanan atas.
-     - Formulir mematuhi **Rule #73**: Urutan (angka) dan Status (dropdown aktif/nonaktif) dalam grid 2-kolom horizontal, sedangkan pertanyaan (teks) dan jawaban (textarea `rows="4"`) menempati baris penuh.
+   - **Dashboard Fotografer (`/photographer/faqs`)**:
+     - Tabel **Daftar Tanya Jawab** dengan tombol aksi standar Rule #80: **Edit** dan **Hapus** teks murni tanpa ikon. Empty state mengikuti Rule #71 Point 3 (tanpa tombol CTA duplikat; hanya 1 tombol `Tambah Pertanyaan` di header).
+     - Panel referensi *read-only* **Ketentuan Sistem LensMatch** menampilkan ketentuan sistem yang otomatis tayang di profil publik.
+     - Modal Tambah/Edit mematuhi **Rule #59** & **Rule #73**: judul rata tengah tanpa ikon (`Tambah Pertanyaan` / `Edit Pertanyaan`), tombol aksi bawah rata tengah maksimal 2 (`Batal` dan `Simpan Data` / `Perbaharui Data` amber brand), tanpa tombol close `X` kanan atas, serta menghindari penambahan elemen pembantu di luar instruksi (Rule #42) dan melarang penggunaan istilah `'Studio'` untuk peran fotografer (Rule #19).
 3. **Penyajian pada Profil Publik (`/fotografer/{id}`)**:
-   - Ditempatkan sebagai Tab ke-5 **Tanya Jawab** di bawah sistem navigasi tab Rule #78 (garis bawah kuning `border-b-2 border-amber-400` teks murni).
-   - Menggunakan akordeon interaktif yang mulus (smooth Alpine.js accordion) dengan palet muted tenang (`bg-gray-50/70 border-gray-200/80 dark:bg-gray-800/50 dark:border-gray-700/80`).
-   - Dilengkapi fallback state ramah jika fotografer belum menambahkan FAQ dengan tombol CTA *"Tanya via Chat"* yang langsung membuka room konsultasi.
+   - Ditempatkan sebagai Tab ke-5 **Tanya Jawab** di bawah sistem navigasi tab Rule #78 dengan counter gabungan.
+   - Menampilkan blok **Tanya Jawab Fotografer** dan **Ketentuan Sistem LensMatch** dengan kartu putih seragam bebas shadow internal (**Rule #100**) serta ikon accordion konsisten (**Rule #22**).
 
 ---
 
@@ -1446,7 +1452,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - **Foto Sampul / Portofolio Kosong**: Menampilkan kontainer abu-abu netral dengan ikon kamera outline abu-abu simpel standar.
    - **Wilayah Operasional Kosong**: Wajib menampilkan tanda strip `-` dengan kelas teks redup `text-gray-400 font-medium` (bukan string lokasi umum atau teks hitam tebal).
    - **Spesialisasi Kategori Kosong**: Wajib menampilkan teks murni `Belum diatur` dengan warna redup `text-gray-400 font-medium` (bukan "Semua Kategori").
-   - **Rating Fotografer Kosong (0 Ulasan)**: Wajib menampilkan teks murni `Mitra Baru` (atau `Baru` pada kartu ringkas) tanpa simbol bintang `★`. Bintang kepuasan hanya boleh muncul jika rating numerik benar-benar dihitung dari tabel ulasan database (`avg('rating') !== null`).
+   - **Rating Fotografer Kosong (0 Ulasan)**: Wajib menampilkan format metrik numerik nol yang konsisten dengan kartu lainnya (`★ 0.0 (0 ulasan) • 0 Sesi Selesai` serta badge ringkas `★ 0 (0)` dengan ikon bintang abu-abu redup `text-gray-300`, bukan label teks `Mitra Baru` / `Baru` maupun rating palsu). Bintang amber aktif hanya ditampilkan bila memiliki minimal 1 ulasan nyata di database.
    - **Paket Layanan Kosong**: Wajib menampilkan teks murni `Belum ada paket` atau `Belum ada paket layanan` (bukan nominal harga default).
    - **Thumbnail Kursus / Materi Kosong**: Menampilkan kontainer netral dengan ikon kamera outline abu-abu simpel standar.
 
@@ -1461,7 +1467,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 2. **Cakupan Informasi Audit Administratif Satu Pintu & Keselarasan Field Profil**:
    - Halaman detail audit `/admin/photographers/{id}` wajib menyajikan data pendaftaran fotografer secara komprehensif mengikuti **Rule #73 (Hybrid Responsive Layout)** dan **WAJIB 100% selaras dengan formulir profil fotografer**:
-     1. **Ringkasan Status & Kelengkapan Data**: Menampilkan status verifikasi (`Menunggu Verifikasi` / `Terverifikasi`), persentase pengisian profil (0 - 100%), dan daftar chip data yang belum diisi sesuai `RolePhotographer::getMissingProfileFields()`.
+     1. **Ringkasan Status Akun**: Baris ringkas non-redundan berisi status **`Profil:`** (`Terverifikasi` / `Menunggu` / `Ditolak`), **`Etalase:`** (`Tayang` / `Menunggu` / `Ditolak` / `Belum Diajukan`), tanggal **`Terdaftar`** di sisi kanan, serta daftar **`Belum diisi`** tanpa garis divider hanya bila data profil belum 100% sesuai `RolePhotographer::getMissingProfileFields()` (tanpa mengulang label `Kelengkapan Profil (X/4 bagian)` maupun `100% Lengkap` yang sudah terwakili di tab `Profil Mitra`).
      2. **1. Kontak**: `Nama Lengkap`, `Email`, `Nomor WhatsApp` (dengan tombol chat), `Instagram`.
      3. **2. Domisili & Kategori**: `Provinsi`, `Kota / Kabupaten`, `Alamat`, `Kategori` (badge atau teks `Belum diatur`).
      4. **3. Bio**: Konten deskripsi bio pengalaman mitra (atau teks `Belum diisi`).
@@ -1474,16 +1480,21 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - Saat submit, sistem memvalidasi seluruh field sekaligus, membatalkan submit jika ada yang tidak valid, lalu secara otomatis mengarahkan fokus (*focus*) dan menggulir (*smooth scroll*) ke field bermasalah pertama.
 
 4. **Standar Bilah Aksi Keputusan Admin & Form Pelanggaran (Bottom Action Bar - Rule #74 & Rule #91)**:
-   - Sisi Kiri: Tombol `Kembali` (abu-abu netral) dan tombol opsional `Lihat Etalase Publik` (hanya muncul jika fotografer telah selesai onboarding dan terverifikasi).
-   - Sisi Kanan:
-     - **Tombol `Hapus`**: Membuka dialog modal form penghapusan fotografer (Rule #59) yang mewajibkan admin memilih **Kategori Pelanggaran** (misal: Data Palsu, Pelanggaran Hak Cipta, Transaksi Luar Sistem, dsb.) dan menuliskan **Deskripsi Alasan Penghapusan**. Data pelanggaran ini tersimpan pada database dan tercatat permanen pada `ActivityLog`.
-     - **Tombol `Tolak Pendaftaran`** (muncul jika status belum ditolak): Membuka dialog modal untuk mengisi **Catatan Alasan Penolakan** (wajib diisi). Sistem mengubah status menjadi `ditolak`, mengirimkan notifikasi in-app ke fotografer, dan memunculkan banner peringatan merah di dashboard dan profil fotografer.
-     - **Tombol `Verifikasi Fotografer`** (muncul jika status `menunggu` atau `ditolak`): Mengubah status menjadi `terverifikasi`, mengaktifkan centang biru, membersihkan catatan penolakan lama, dan mengirimkan notifikasi sukses ke fotografer.
-     - **Tombol `Batalkan Verifikasi`** (muncul jika status `terverifikasi`): Mengembalikan status menjadi `menunggu`.
+   - Sisi Kiri: Tombol `Kembali` (abu-abu netral) dan tombol opsional `Lihat Etalase Publik` (hanya muncul jika etalase telah tayang).
+   - **Tab 1 (`Profil Mitra` — `status_verifikasi`)**:
+     - **Tombol `Hapus`**: Membuka dialog modal form penghapusan fotografer (Rule #59) yang mewajibkan admin memilih **Kategori Pelanggaran** dan menuliskan **Deskripsi Alasan Penghapusan**. Data pelanggaran tersimpan pada database dan tercatat permanen pada `ActivityLog`.
+     - **Saat `status_verifikasi === 'menunggu'`**: Menampilkan `Tolak Pendaftaran` (mengubah status ke `ditolak` dengan catatan alasan) dan `Verifikasi Fotografer` (aktif bila `isProfileComplete()`; dinonaktifkan di UI dan diblokir di backend bila belum 100%).
+     - **Saat `status_verifikasi === 'terverifikasi'`**: Menampilkan `Tolak Pendaftaran` dan `Batalkan Verifikasi` (mengembalikan status ke `menunggu`).
+     - **Saat `status_verifikasi === 'ditolak'` (Alur Ketat Pasca Penolakan)**: Tombol `Verifikasi Fotografer` dan `Tolak Pendaftaran` disembunyikan di UI dan diblokir di backend (`toggleVerification()` & `reject()`). Bilah aksi cukup menampilkan `Menunggu fotografer memperbarui profil.` di samping tombol `Hapus` sampai fotografer menyimpan ulang profilnya.
+   - **Tab 2 (`Etalase Tayang` — `status_etalase`)**:
+     - **Saat `status_etalase === 'belum_diajukan'`**: Tombol `Setujui Tayang` dan `Tolak Etalase` disembunyikan meskipun 3 syarat etalase sudah 3/3 lengkap; bilah aksi menampilkan status teks netral sampai fotografer menekan `Ajukan Tayang`.
+     - **Saat `status_etalase === 'menunggu'`**: Menampilkan `Tolak Etalase` (ketika profil terverifikasi) dan `Setujui Tayang` (aktif bila profil terverifikasi dan 3 syarat etalase lengkap; dinonaktifkan jika syarat belum terpenuhi).
+     - **Saat `status_etalase === 'disetujui'`**: Menampilkan `Tolak Etalase` dan `Batalkan Tayang` (mengembalikan status etalase menjadi `belum_diajukan`).
+     - **Saat `status_etalase === 'ditolak'` (Alur Ketat Pasca Penolakan)**: Tombol `Setujui Tayang`, `Tolak Etalase`, dan `Batalkan Tayang` disembunyikan di UI dan diblokir di backend (`approveStorefront()` & `rejectStorefront()`). Bilah aksi menampilkan `Menunggu fotografer mengajukan ulang tayang.` sampai fotografer menekan `Ajukan Ulang Tayang`.
 
 5. **Alur Pengajuan Ulang Pasca Penolakan (Auto Re-apply)**:
-   - Jika pendaftaran fotografer ditolak, fotografer akan melihat banner merah di dashboard dan halaman profil yang memuat catatan admin.
-   - Begitu fotografer memperbaiki data profilnya dan menekan **Simpan Data**, sistem secara otomatis mengembalikan status menjadi `menunggu`, mencatat log aktivitas pengajuan ulang, dan mengirimkan notifikasi in-app kepada seluruh Administrator.
+   - Jika pendaftaran profil ditolak, fotografer langsung melihat satu baris `Catatan Admin: <isi catatan>` di dalam `stage-stepper.blade.php` pada seluruh halaman fotografer tanpa banner ganda. Begitu fotografer memperbaiki profil dan menekan **Perbaharui Data**, sistem mengembalikan `status_verifikasi` ke `menunggu`, membersihkan `catatan_penolakan`, mencatat log aktivitas pengajuan ulang, dan mengirim notifikasi in-app ke Administrator.
+   - Jika pengajuan etalase ditolak, fotografer langsung melihat satu baris `Catatan Admin: <isi catatan>` di dalam `stage-stepper.blade.php` serta kartu `Persiapan Tayang Etalase` pada Dashboard. Setelah memperbaiki layanan, portofolio, atau jadwal dan menekan **Ajukan Ulang Tayang**, sistem mengembalikan `status_etalase` ke `menunggu`, membersihkan `catatan_penolakan_etalase`, mencatat log pengajuan ulang, dan mengirim notifikasi in-app ke Administrator.
 
 ---
 
@@ -1659,9 +1670,9 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 2. **Hierarki Typografi Editorial (Human-Crafted Hierarchy)**:
    - **Nama Studio / Fotografer**: Ditampilkan dominan dan berwibawa (`text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-none`).
    - **Tagline Spesialisasi**: Teks tipografi murni amber yang tegas (`text-sm sm:text-base font-bold text-amber-600 dark:text-amber-400`).
-   - **Baris Reputasi & Kepercayaan Terpadu (*Inline Trust Signals Bar*)**:
-     Seluruh sinyal reputasi penting (Kota Lokasi, Rating Bintang Ulasan, Pengalaman Tahun, dan Jumlah Portofolio Karya) disatukan dalam satu baris horisontal yang tenang, dipisahkan bullet murni `•` tanpa kotak kaku:
-     `📍 Kota Jakarta Selatan • ★ 5.0 (2 ulasan) • 1+ Tahun Pengalaman • 3 Portofolio Karya`
+   - **Baris Reputasi Terpadu (*Inline Trust Signals Bar*)**:
+     Seluruh sinyal reputasi penting (Kota Lokasi, Rating Bintang Ulasan, Sesi Selesai yang benar-benar terkonfirmasi `status_contract === 'completed'` serta `is_validated_client === true`, dan Jumlah Portofolio Karya) disatukan dalam satu baris horisontal yang tenang, dipisahkan bullet murni `•` tanpa kotak kaku (dilarang menghitung klaim pengalaman dari tanggal daftar `created_at` per **Rule #104**):
+     `Kota Jakarta Selatan • ★ 5.0 (2 ulasan) • 12 Sesi Selesai • 3 Portofolio Karya`
    - **Narasi Bio Studio**: Mengalir alami dengan font proporsional (`text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl`).
 3. **Penyatuan Komersial Tarif & Tombol Aksi (The Commercial Anchor)**:
    - Tarif harga awal (`Mulai Dari Rp ... / sesi pemotretan`) disatukan berdampingan secara seimbang di baris bawah dengan tombol aksi utama: `Reservasi` (amber brand), `Chat` (tombol netral berikon), dan `Bookmark Favorit`.
@@ -1684,4 +1695,62 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - Placeholder input wajib bersifat instruksional (misalnya `placeholder="Masukkan nama lengkap"`, `placeholder="Contoh: 08xxxxxxxxxx"`), dilarang mensimulasikan data dummy yang tampak nyata.
 4. **Pembersihan Residu Template Mockup**:
    - Seluruh kode statis bawaan template (seperti mockup `randomuser@pimjo.com`, `Testing Chowdhury`, nomor kontrak statis `CTR-2026-08129`, atau harga hardcoded) wajib dibersihkan total dari basis kode produksi.
+
+---
+
+### Rule #105: Standar Custom Alpine.js Time Dropdown, Tata Letak Baris Flat, dan Default Switch Jadwal Libur
+1. **Larangan Mutlak `<input type="time">` Bawaan Browser**:
+   - Seluruh pemilih jam (`<input type="time">`) pada halaman produksi wajib digantikan oleh komponen standar [`x-time-dropdown`](file:///d:/IT%20DEPT%20AMAYI/LARAVEL/marketplace-photographers/resources/views/components/time-dropdown.blade.php), agar tampilan trigger dan daftar pilihan seragam total dengan Custom Alpine.js Floating Dropdown LensMatch (**Rule #46**) dan terbebas dari popup biru bawaan OS Windows.
+   - **Spesifikasi Komponen**:
+     - Panel dropdown memiliki lebar lapang **`w-[224px] sm:w-[240px]`** dengan dukungan prop `align` (`left`, `right`, `md-right`) dan grid 2 kolom berdampingan (**Kolom Kiri: Jam `00`–`23`** | **Kolom Kanan: Menit `00`–`59`**), masing-masing memakai scroll ramping `.custom-scrollbar` (`max-h-56`) untuk membentuk nilai 24 jam format `HH:mm`.
+     - Tombol trigger menggunakan `rounded-xl border text-xs font-bold flex items-center justify-between gap-2` dengan ikon chevron berotasi dan focus/open ring amber.
+     - Menu dropdown melayang mengikuti **Rule #46** (`bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80`) dan **bebas dari garis pembatas/divider internal** (`0 divide-x`, `0 border-b` pada header kolom maupun antar-opsi; opsi memakai `rounded-lg`). Saat menu terbuka, scroll kolom Jam memposisikan jam terpilih (`08` saat kosong) dan kolom Menit memposisikan menit terpilih (`00` saat kosong) di tengah tanpa menggeser scroll halaman, disertai efek hover dan sorotan aktif amber lembut (`bg-amber-50 text-amber-600 font-extrabold`).
+     - Mengirim nilai `HH:mm` ke backend melalui hidden `<input>` atau Alpine model binding (misal `form.jam_mulai`, `offerForm.booking_time`). Untuk form di dalam modal, kontainer modal wajib memakai `overflow-visible` agar dropdown jam tidak terpotong batas modal.
+   - **Cakupan Halaman Produksi**:
+     - `resources/views/photographer/availability/index.blade.php` (Jam Buka & Jam Tutup mingguan).
+     - `resources/views/photographer/availability/create.blade.php` (Dari Jam & Sampai Jam).
+     - `resources/views/photographer/chat/index.blade.php` & `resources/views/public/chat/index.blade.php` (Jam Mulai pada modal penawaran khusus).
+2. **Standar Tata Letak Baris Flat & Copywriting Ringkas Jadwal Mingguan**:
+   - Daftar 7 hari pada `photographer/availability/index.blade.php` **dilarang** memakai kotak kartu bertumpuk abu-abu (`card-in-card` `bg-gray-50`) maupun pola `justify-between` penuh yang menciptakan ruang kosong lebar di tengah baris.
+   - Wajib disajikan sebagai baris flat putih bersih dengan pemisah tipis (`divide-y divide-gray-100 dark:divide-gray-700/60`) dan grid 3-kolom seimbang (`md:grid-cols-12`), tanpa garis `border-b` di bawah tajuk kartu (**Rule #41 & #58**), status ditempatkan sebaris di samping nama hari (*"Senin (Buka)"* atau *"Senin (Libur)"* dengan ukuran font seragam), serta menggunakan label ringkas tanpa duplikasi simbol (`"Jadwal"`, `"Tanggal Libur"`, `"Jam Operasional"`, `"24 Jam"`).
+3. **Standar Default Switch Jadwal Mingguan (`is_open = false` / Libur)**:
+   - Seluruh switch hari operasional bawaan pada `PhotographerWorkingHour::initializeDefaults()` dan skema `photographer_working_hours.is_open` **wajib default `false` (Libur / OFF)** sampai fotografer mengaktifkan sendiri hari bukanya (*opt-in*, sesuai **Rule #94 & #104**), kecuali pada akun demo seeder (`initializeDefaults(..., true)`).
+   - Menyimpan formulir jadwal dengan seluruh 7 hari nonaktif (`0` hari buka) menyimpan `jadwal_dikonfirmasi = false`, menampilkan pesan peringatan `warning`, serta menonaktifkan etalase sementara lewat `syncStorefrontIntegrity()`.
+4. **Standar Tabel Tanggal Libur, Siklus Riwayat Tanggal Lewat, Filter, dan Pagination (`photographer/availability/index.blade.php` Tab `overrides`)**:
+   - Tabel `Tanggal Libur` wajib mematuhi standar toolbar seragam (**Rule #15–#18, #45, #46, #107**): dropdown filter periode (`Semua Periode`, `Aktif (Mendatang)`, `Riwayat (Sudah Lewat)`), dropdown tipe penutupan (`Semua Tipe Libur`, `Libur Seharian`, `Tutup Jam Tertentu`), dropdown urutan (`Tanggal Terdekat`, `Tanggal Terjauh`, `Terbaru Ditambahkan`, `Terlama Ditambahkan`) di sisi kiri, serta live search di sisi kanan dengan engine `dashboardLiveTable()` (`#dashboard-table-container` dan `#dashboard-stats-container`), serta menggunakan partial pagination standar `partials.dashboard.pagination` setiap `$availabilities->total() > 0`.
+   - Data tanggal libur di database (`photographer_availability`) tidak terhapus otomatis ketika tanggal telah terlewati agar riwayat penutupan tetap tercatat; seluruh query pemesanan publik otomatis hanya mempertimbangkan `tanggal >= today`, sedangkan di tabel kelola fotografer baris bertanggal `< hari ini` otomatis berstatus **`Sudah Lewat`** dengan tombol **`Hapus`** (soft delete) agar fotografer dapat membersihkan riwayat lama.
+
+---
+
+### Rule #106: Standarisasi Tipografi Seragam `text-xs` Isi Tabel (`<tbody>` / `<td>`), Daftar Ringkas Fasilitas Layanan, dan Proporsi Header `<th>` Tabel FAQ
+1. **Keseragaman Ukuran Font `text-xs` di Seluruh Sel Isi Tabel (`<tbody>` / `<td>`)**:
+   - Seluruh teks judul sel, nama layanan, nominal harga/kontrak, kode referensi, subteks keterangan, status teks, tombol teks inline, serta teks empty state di dalam `<tbody>` pada seluruh tabel antarmuka aplikasi (Admin, Fotografer, Klien, partial `table-01.blade.php`, dan faktur online `public/booking/invoice.blade.php`) **WAJIB menggunakan ukuran font seragam `text-xs`**.
+   - **DILARANG** memberi ukuran yang melonjak lebih besar pada salah satu kolom (`text-sm`, `text-base`, `text-xs sm:text-sm`, `text-theme-sm`) maupun memperkecil subteks (`text-[10px]`, `text-[11px]`). Hierarki visual antarbaris di dalam sel tabel murni dibangun menggunakan ketebalan huruf (`font-bold`, `font-extrabold`, `font-black`) dan kontras warna (`text-gray-900 dark:text-white` vs `text-gray-500 dark:text-gray-400`).
+   - Pengecualian terbatas pada template dokumen cetak A4 PDF (`photographer/reports/export.blade.php`) yang memang memerlukan tipografi terkompresi agar 8 kolom muat dalam satu lebar kertas cetak.
+2. **Daftar Fasilitas Layanan Ringkas tanpa Pill Kapsul (`photographer/services/index.blade.php`)**:
+   - Rincian fasilitas pada tabel Paket Layanan disajikan sebagai baris teks ringkas dipisah pemisah titik tengah (`•`) berukuran `text-xs text-gray-500 dark:text-gray-400 leading-relaxed` (`{{ $srv->details->pluck('nama_fitur')->implode(' • ') }}`), menggantikan tumpukan pill badge kapsul abu-abu di dalam kolom tabel.
+3. **Proporsi Alami Header `<th>` pada Tabel Tanya Jawab Fotografer (`photographer/faqs/index.blade.php`)**:
+   - Menghapus fraksi lebar kolom paksa yang timpang (`w-1/12`, `w-5/12`, `w-4/12`) pada header `<th>` halaman `photographer/faqs/index.blade.php` sehingga kelima kolom (*Urutan*, *Pertanyaan*, *Jawaban Singkat*, *Status*, *Aksi*) membagi ruang horizontal secara alami dan proporsional selaras patokan tabel sistem (`admin/photographers/index.blade.php`), dilengkapi `whitespace-nowrap` pada header dan `<p class="line-clamp-2">` di dalam sel jawaban agar batas baris tidak mematahkan layout `<td>`. Proporsi `<th>` pada tabel halaman lain yang sudah seimbang dibiarkan utuh tanpa modifikasi.
+
+---
+
+### Rule #107: Standar Card Tabel Tanpa Garis Divider Toolbar (`0 border-b` Toolbar & `0 space-y-4`)
+- Selaras dengan **Rule #41 & Rule #58** (prinsip anti-divider berlebih), seluruh tampilan card tabel data (*Data Table Card*) di panel Admin, Fotografer, dan Klien **dilarang** menampilkan garis pembatas `border-b` pada kontainer toolbar/judul kartu di atas tabel serta **dilarang** memberi celah jarak vertikal `space-y-4` (maupun `space-y-0` yang tidak diperlukan) pada pembungkus luar card tabel.
+- Toolbar (`p-4` / `p-5`) menyatu langsung dengan pita `<thead>` agar tampilan card tabel bersih, utuh tanpa garis ganda, dan konsisten di seluruh sistem (20 file view tabel / 21 kartu tabel). Garis pemisah tetap hanya digunakan secara minimal pada batas bawah `<thead>` (`border-b border-gray-200 dark:border-gray-700`) dan pemisah baris `<tbody>` (`divide-y`).
+
+---
+
+### Rule #108: Standar Kontrol Radio/Checkbox Amber serta Stepper Satu Baris Fotografer
+1. **Pelarangan Warna Biru Bawaan Browser pada Radio/Checkbox (`#0075FF` -> Amber `#F59E0B`)**:
+   - Karena proyek memakai Tailwind CSS v4 tanpa `@tailwindcss/forms`, seluruh input `radio`, `checkbox`, serta `range` pada `resources/css/app.css` (`@layer base`) wajib menetapkan `accent-color: #f59e0b;` beserta utilitas `accent-amber-500`.
+   - Kartu pilihan opsi pada formulir (seperti `Libur Seharian` maupun `Tutup Jam Tertentu` di `photographer/availability/create.blade.php`, selaras `public/booking/create.blade.php`) menggunakan `<input type="radio" class="sr-only peer">` dengan indikator lingkaran Tailwind murni beraksen `border-amber-500` serta titik tengah `bg-amber-500`.
+2. **Stepper Tahap Fotografer Satu Baris dan Catatan Penolakan Inline (`stage-stepper.blade.php`)**:
+   - Stepper tahap hanya tampil pada halaman utama modul fotografer (dikecualikan dari `photographer.chat*`, `photographer.*.create`, serta `photographer.*.edit` agar formulir tambah/ubah data tidak ditumpuki breadcrumb ganda).
+   - Baris atas wajib mempertahankan satu baris horizontal ringkas (`1. Profil > 2. Etalase > 3. Review Tayang` di kiri dengan tautan CTA kontekstual atau tombol `Ajukan Tayang` di kanan), bebas dari baris ceklist duplikat serta kalimat instruksi menggantung di sisi kanan.
+   - Ketika `status_verifikasi === 'ditolak'` (Tahap 1) atau `status_etalase === 'ditolak'` (Tahap 3), tepat di bawah baris atas ditampilkan tepat satu baris teks lembut **tanpa garis pembatas** (`0 border-t`) dan **tanpa kotak berlapis** (`0 bg-rose-50` / `0 border`): `Catatan Admin: <isi catatan penolakan>`, sehingga fotografer tetap langsung membaca instruksi perbaikan di halaman mana pun (`Jadwal`, `Profil`, `Paket Layanan`, `Portofolio`). Banner penolakan ganda yang bertumpuk pada `profile/index.blade.php` serta `dashboard.blade.php` ditiadakan agar tidak terjadi duplikasi tampilan.
+3. **Kepatuhan Halaman `Atur Tanggal Libur` (`photographer/availability/create.blade.php`)**:
+   - Menggunakan breadcrumb netral **Rule #62** (`Jadwal > Atur Tanggal Libur`), tombol `Kembali` netral bersimbol single chevron (**Rule #71 Point 2** serta **Rule #72**), tanpa pembatas `border-t` di atas input tanggal (**Rule #41**), serta placeholder instruksional `Masukkan keterangan libur jika diperlukan` pada textarea `rows="4"` (**Rule #73** serta **Rule #104**).
+4. **Indikator Teks Status Tayang Katalog Fotografer (`photographer/dashboard.blade.php` serta `photographer/profile/index.blade.php`)**:
+   - Saat `$photographer->isPublishedToCatalog()` bernilai `true` dan `stage-stepper` otomatis disembunyikan, header kanan `Dashboard` menampilkan teks hijau murni **`Tayang di Katalog`** (`text-xs font-bold text-emerald-600 dark:text-emerald-400`) di samping `Tahun Operasional`, sementara header kanan `Kelola Profil` menampilkan **`Tayang di Katalog`** beserta tautan **`Lihat Profil Publik`**. Tampilan wajib berupa teks murni tanpa kotak banner hijau raksasa, tanpa ikon tambahan (**Rule #22**), tanpa bulatan dot badge (**Rule #67**), serta tanpa simbol `&` redundan (**Rule #70**).
+
 

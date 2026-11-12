@@ -166,7 +166,7 @@
                     <tr>
                         <td class="py-3.5 pr-4">
                             <strong class="font-bold text-gray-900 block">{{ $contract->bookingDetail->service->nama_layanan ?? 'Paket Foto' }}</strong>
-                            <span class="text-[11px] text-gray-500">Sesi pemotretan resolusi tinggi oleh {{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</span>
+                            <span class="text-xs text-gray-500">Sesi pemotretan resolusi tinggi oleh {{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</span>
                         </td>
                         <td class="py-3.5 px-4 text-center uppercase font-bold text-gray-600">
                             {{ $contract->payment_type === 'dp' ? 'Uang Muka 30%' : 'Bayar Penuh 100%' }}

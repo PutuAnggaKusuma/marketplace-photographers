@@ -40,7 +40,8 @@
         </div>
 
         <!-- Reactive Threads List Stream (SPA Real-Time No Reload) -->
-        <div class="flex-1 min-h-0 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/60 no-scrollbar">
+        <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar"
+             :class="threads.length > 0 ? 'divide-y divide-gray-100 dark:divide-gray-700/60' : ''">
             <template x-for="t in threads" :key="t.id">
                 <button type="button" 
                         @click="switchThread(t.id)" 
@@ -85,8 +86,8 @@
             </template>
 
             <!-- Empty Thread State -->
-            <template x-if="threads.length === 0">
-                <div class="p-8 text-center space-y-2">
+            <template x-if="threads.length === 0 && !chatListCollapsed">
+                <div class="h-full min-h-full flex flex-col items-center justify-center px-6 pt-6 pb-8 text-center space-y-2 sm:min-w-[280px]">
                     <p class="text-xs text-gray-400">Belum ada percakapan klien.</p>
                 </div>
             </template>
@@ -640,7 +641,7 @@
                  x-transition:leave="ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative inline-block align-bottom bg-white dark:bg-gray-850 rounded-2xl p-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100 dark:border-gray-700">
+                 class="relative inline-block align-bottom bg-white dark:bg-gray-850 rounded-2xl p-6 text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100 dark:border-gray-700">
                 
                 <!-- Centered Title (NO ICON, per Rule #59) -->
                 <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white text-center" id="offer-modal-title">
@@ -651,7 +652,7 @@
                 </p>
 
                 <!-- Form Inputs (Rule #73: 2-column grid for short fields) -->
-                <form @submit.prevent="submitCustomOffer()" novalidate class="mt-5 space-y-4">
+                <form @submit.prevent="submitCustomOffer()" novalidate class="mt-5 flex flex-col gap-4">
                     <!-- Judul Penawaran -->
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
@@ -722,13 +723,14 @@
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Jam Mulai <span class="text-rose-500">*</span>
                             </label>
-                            <input type="time"
-                                   x-ref="offerTime"
-                                   x-model="offerForm.booking_time"
-                                   @input="offerTouched.booking_time = true; validateOfferField('booking_time')"
-                                   @blur="offerTouched.booking_time = true; validateOfferField('booking_time')"
-                                   :class="offerTouched.booking_time && offerErrors.booking_time ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
-                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <x-time-dropdown
+                                model="offerForm.booking_time"
+                                trigger-ref="offerTime"
+                                error="offerTouched.booking_time && offerErrors.booking_time"
+                                on-select="offerTouched.booking_time = true; validateOfferField('booking_time')"
+                                align="right"
+                                trigger-class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                            />
                             <p x-show="offerTouched.booking_time && offerErrors.booking_time" x-text="offerErrors.booking_time" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
                     </div>
@@ -766,7 +768,7 @@
                     </div>
 
                     <!-- Action Buttons: Centered, Batal on Left, Max 2 buttons (Rule #59 & Rule #74) -->
-                    <div class="pt-3 flex items-center justify-center gap-3">
+                    <div class="flex items-center justify-center gap-3">
                         <button type="button" 
                                 @click="closeOfferModal()"
                                 class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
@@ -822,7 +824,7 @@
                 </button>
 
                 <!-- Centered Title (NO ICON, per Rule #59) -->
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center" id="modal-title">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white text-center" id="modal-title">
                     Hapus Pesan?
                 </h3>
 
@@ -1607,7 +1609,10 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             if (firstErrField) {
                 const el = refMap[firstErrField];
                 if (el) {
-                    el.focus();
+                    const focusEl = el.matches('button,input,select,textarea')
+                        ? el
+                        : (el.querySelector('[data-time-trigger]') || el);
+                    focusEl.focus();
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 return;

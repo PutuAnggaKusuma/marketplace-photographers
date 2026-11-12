@@ -63,37 +63,37 @@
         
         <!-- Card 1: Total Paket -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Paket Aktif</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalServices }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Paket Aktif</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalServices }}</div>
         </div>
 
         <!-- Card 2: Rata-rata Tarif -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rata-rata Tarif</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($avgPrice, 0, ',', '.') }}</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rata-rata Tarif</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($avgPrice, 0, ',', '.') }}</div>
         </div>
 
         <!-- Card 3: Range Harga -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rentang Harga</span>
-            <div class="text-sm sm:text-base font-black text-gray-900 dark:text-white tracking-tight truncate">
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rentang Harga</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight truncate">
                 {{ $minPrice > 0 ? 'Rp ' . number_format($minPrice, 0, ',', '.') : '0' }} - {{ $maxPrice > 0 ? 'Rp ' . number_format($maxPrice, 0, ',', '.') : '-' }}
             </div>
         </div>
 
         <!-- Card 4: Total Fasilitas -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Benefit Layanan</span>
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalFeatures }} Benefit</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Benefit Layanan</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalFeatures }} Benefit</div>
         </div>
 
     </div>
 
     <!-- Standard Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Sort -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             
             <!-- Filter Urutan di Kiri -->
             <div class="flex items-center gap-3 w-full md:w-auto">
@@ -159,18 +159,12 @@
                                 
                                 <!-- Nama Paket & Fasilitas -->
                                 <td class="py-4 px-4 sm:px-6 align-top">
-                                    <div class="space-y-1.5">
-                                        <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $srv->nama_layanan }}</h4>
+                                    <div class="space-y-1">
+                                        <h4 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $srv->nama_layanan }}</h4>
                                         @if($srv->details->count() > 0)
-                                            <div class="flex flex-wrap gap-1">
-                                                @foreach($srv->details as $d)
-                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                                        {{ $d->nama_fitur }}
-                                                    </span>
-                                                @endforeach
-                                            </div>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ $srv->details->pluck('nama_fitur')->implode(' • ') }}</p>
                                         @else
-                                            <span class="text-[10px] italic text-gray-400">Belum ada rincian fasilitas</span>
+                                            <p class="text-xs italic text-gray-400 dark:text-gray-500">Belum ada rincian fasilitas</p>
                                         @endif
                                     </div>
                                 </td>
@@ -182,10 +176,10 @@
 
                                 <!-- Tarif Harga (Rp) -->
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
-                                    <span class="text-sm font-black text-gray-900 dark:text-white">
+                                    <span class="text-xs font-black text-gray-900 dark:text-white">
                                         Rp {{ number_format($srv->tarif_harga, 0, ',', '.') }}
                                     </span>
-                                    <span class="text-[11px] text-gray-400 block mt-0.5">/ sesi foto</span>
+                                    <span class="text-xs text-gray-400 block mt-0.5">/ sesi foto</span>
                                 </td>
 
                                 <!-- Status -->

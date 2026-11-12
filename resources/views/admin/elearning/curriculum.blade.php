@@ -879,7 +879,7 @@
 
         @csrf
 
-        <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="p-6 overflow-y-auto flex flex-col gap-4 flex-1">
 
           <div>
 
@@ -968,7 +968,7 @@
 
 
 
-        <div class="p-6 overflow-y-auto space-y-4 flex-1">
+        <div class="p-6 overflow-y-auto flex flex-col gap-4 flex-1">
 
           <!-- 1. Pilih Modul (Alpine.js Custom Floating Dropdown) -->
 
@@ -1139,7 +1139,7 @@
 
           <!-- 5. File Upload Optional -->
 
-          <div x-show="lessonForm.tipe !== 'reading'" class="space-y-3">
+          <div x-show="lessonForm.tipe !== 'reading'" class="flex flex-col gap-3">
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Upload File Media (Maks. 50 MB)</label>
 
@@ -1158,9 +1158,11 @@
                          ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
                          : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 focus:ring-2 focus:ring-amber-500')">
               <input type="file" name="media_file" x-ref="lessonMediaInput" @change="handleLessonMediaFile($event)" class="sr-only" />
-              <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400" x-text="lessonForm.mediaFileName ? 'Ganti file media' : 'Pilih file media'"></span>
-                <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+              <svg class="w-6 h-6 transition-colors" :class="lessonMediaDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                Seret dan lepas di sini
               </p>
               <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Maksimal 50 MB.</p>
             </div>

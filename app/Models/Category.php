@@ -23,4 +23,9 @@ class Category extends Model
     {
         return $this->belongsToMany(RolePhotographer::class, 'photographer_categories', 'id_category', 'id_photographer');
     }
+
+    public function portfolios()
+    {
+        return $this->hasMany(PhotographerPortfolio::class, 'id_kategori');
+    }
 }

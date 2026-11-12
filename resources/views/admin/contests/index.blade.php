@@ -271,9 +271,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Event Lomba</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Event Lomba</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalContests ?? 0 }}</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalContests ?? 0 }}</div>
 
         </div>
 
@@ -283,9 +283,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Review Admin</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Review Admin</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $pendingContests ?? 0 }} Pengajuan</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $pendingContests ?? 0 }} Pengajuan</div>
 
         </div>
 
@@ -295,9 +295,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Lomba Aktif Terbuka</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Lomba Aktif Terbuka</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $openContests ?? 0 }} Event</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $openContests ?? 0 }} Event</div>
 
         </div>
 
@@ -307,9 +307,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Submisi Karya</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Submisi Karya</span>
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Foto</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalSubmissions ?? 0 }} Foto</div>
 
         </div>
 
@@ -367,13 +367,13 @@
 
     <!-- Standard Data Table Card -->
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
         
 
         <!-- Search Toolbar & Sort -->
 
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
             <div class="flex items-center gap-3 w-full md:w-auto">
 
@@ -573,7 +573,7 @@
 
                                         <div class="space-y-1 min-w-0">
 
-                                            <div class="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                                            <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400">
 
                                                 <span class="uppercase tracking-wider">{{ $c->kategori }}</span>
 
@@ -583,13 +583,13 @@
 
                                             </div>
 
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight leading-snug">
+                                            <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight leading-snug">
 
                                                 {{ $c->judul_lomba }}
 
                                             </h4>
 
-                                            <span class="text-[11px] text-gray-400 block line-clamp-1">
+                                            <span class="text-xs text-gray-400 block line-clamp-1">
 
                                                 Penyelenggara: {{ $c->penyelenggara }}
 
@@ -635,7 +635,7 @@
 
                                             @if($c->catatan_admin)
 
-                                                <p class="text-[10px] text-rose-500 dark:text-rose-400 max-w-[160px] truncate" title="{{ $c->catatan_admin }}">
+                                                <p class="text-xs text-rose-500 dark:text-rose-400 max-w-[160px] truncate" title="{{ $c->catatan_admin }}">
 
                                                     "{{ \Illuminate\Support\Str::limit($c->catatan_admin, 28, '...') }}"
 
@@ -687,7 +687,7 @@
 
                                     <span class="font-bold block">{{ $c->start_date ? $c->start_date->translatedFormat('d M Y') : '-' }}</span>
 
-                                    <span class="block text-[11px] font-medium text-gray-700 dark:text-gray-300">s/d {{ $c->end_date ? $c->end_date->translatedFormat('d M Y') : '-' }}</span>
+                                    <span class="block text-xs font-medium text-gray-700 dark:text-gray-300">s/d {{ $c->end_date ? $c->end_date->translatedFormat('d M Y') : '-' }}</span>
 
                                 </td>
 
@@ -945,7 +945,7 @@
 
         
 
-        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 border border-gray-200 dark:border-gray-700 shadow-2xl text-left my-8" @click.stop>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 flex flex-col gap-6 border border-gray-200 dark:border-gray-700 shadow-2xl text-left my-8" @click.stop>
 
             
 
@@ -953,7 +953,7 @@
 
             <div class="flex items-start justify-between gap-4">
 
-                <div class="space-y-1 min-w-0">
+                <div class="flex flex-col gap-1 min-w-0">
 
                     <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
 
@@ -983,7 +983,7 @@
 
             <!-- Normal Review View -->
 
-            <div x-show="!proposalRejectMode" class="space-y-6">
+            <div x-show="!proposalRejectMode" class="flex flex-col gap-6">
 
                 
 
@@ -1119,7 +1119,7 @@
 
                 <!-- Action Footer Buttons (Rule #59 Compliant: Max 2 Centered Buttons) -->
 
-                <div class="flex items-center justify-center gap-3 pt-4">
+                <div class="flex items-center justify-center gap-3">
 
                     <button type="button" @click="proposalRejectMode = true" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition cursor-pointer">
 
@@ -1147,7 +1147,7 @@
 
             <!-- Reject Reason Input View -->
 
-            <div x-show="proposalRejectMode" class="space-y-5">
+            <div x-show="proposalRejectMode" class="flex flex-col gap-5">
 
                 <div class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 space-y-1">
 
@@ -1163,7 +1163,7 @@
 
 
 
-                <form :action="currentProposal.reject_url" method="POST" @submit="submitProposalReject($event)" novalidate class="space-y-4">
+                <form :action="currentProposal.reject_url" method="POST" @submit="submitProposalReject($event)" novalidate class="flex flex-col gap-4">
 
                     @csrf
 
@@ -1192,7 +1192,7 @@
 
 
 
-                    <div class="flex items-center justify-center gap-3 pt-4">
+                    <div class="flex items-center justify-center gap-3">
                         <button type="button" @click="proposalRejectMode = false" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                             Kembali ke Detail
                         </button>
@@ -1228,9 +1228,9 @@
 
         
 
-        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 border border-gray-200 dark:border-gray-700 shadow-2xl text-left" @click.stop>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 flex flex-col gap-5 border border-gray-200 dark:border-gray-700 shadow-2xl text-left" @click.stop>
 
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
 
                 <h3 class="text-base font-black text-gray-900 dark:text-white text-center">Tolak Pengajuan Lomba</h3>
 
@@ -1240,7 +1240,7 @@
 
 
 
-            <form :action="rejectActionUrl" method="POST" @submit="submitQuickReject($event)" novalidate class="space-y-4">
+            <form :action="rejectActionUrl" method="POST" @submit="submitQuickReject($event)" novalidate class="flex flex-col gap-4">
 
                 @csrf
 
@@ -1271,7 +1271,7 @@
 
 
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
 
                     <button type="button" @click="rejectModalOpen = false" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
 

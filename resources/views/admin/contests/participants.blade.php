@@ -68,7 +68,7 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden shadow-xs">
 
-        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+        <div class="p-5 sm:p-6 flex items-center justify-between">
 
             <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
 
@@ -118,11 +118,11 @@
 
                                 <div class="font-extrabold text-gray-900 dark:text-white">{{ $p->nama_lengkap }}</div>
 
-                                <div class="text-[11px] text-gray-400 mt-0.5">{{ $p->instansi ?: 'Independen' }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $p->instansi ?: 'Independen' }}</div>
 
                                 @if($p->bio_singkat)
 
-                                    <p class="text-[10px] text-gray-500 mt-1 max-w-xs line-clamp-1 italic">"{{ $p->bio_singkat }}"</p>
+                                    <p class="text-xs text-gray-500 mt-1 max-w-xs line-clamp-1 italic">"{{ $p->bio_singkat }}"</p>
 
                                 @endif
 
@@ -136,9 +136,9 @@
 
                                 <div class="font-semibold">{{ $p->email }}</div>
 
-                                <div class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">WA: {{ $p->no_wa }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">WA: {{ $p->no_wa }}</div>
 
-                                <div class="text-[10px] text-gray-400">{{ $p->asal_kota ?: '-' }}</div>
+                                <div class="text-xs text-gray-400">{{ $p->asal_kota ?: '-' }}</div>
 
                             </td>
 
@@ -170,7 +170,7 @@
 
                                 @if(!$p->cv_portfolio_file && !$p->portfolio_link)
 
-                                    <span class="text-[11px] text-gray-400 italic">Tidak dilampirkan</span>
+                                    <span class="text-xs text-gray-400 italic">Tidak dilampirkan</span>
 
                                 @endif
 
@@ -246,7 +246,7 @@
 
                                             <div>
 
-                                                <button type="button" @click="transferProofUrl = '{{ $p->bukti_transfer }}'; transferProofModal = true;" class="text-[11px] text-amber-600 dark:text-amber-400 font-extrabold hover:underline cursor-pointer">
+                                                <button type="button" @click="transferProofUrl = '{{ $p->bukti_transfer }}'; transferProofModal = true;" class="text-xs text-amber-600 dark:text-amber-400 font-extrabold hover:underline cursor-pointer">
 
                                                     Lihat Struk TF
 
@@ -278,7 +278,7 @@
 
                                 <span class="font-extrabold">{{ $p->submissions->count() }}</span>
 
-                                <span class="text-gray-400 text-[11px]">/ {{ $contest->max_submissions }} Karya</span>
+                                <span class="text-gray-400 text-xs">/ {{ $contest->max_submissions }} Karya</span>
 
                             </td>
 
@@ -314,7 +314,7 @@
 
                                                 })"
 
-                                                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] shadow-2xs transition cursor-pointer">
+                                                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-2xs transition cursor-pointer">
 
                                             Terima
 
@@ -322,7 +322,7 @@
 
 
 
-                                        <button type="button" @click="rejectUrl = '{{ route('admin.contests.participant.reject', $p->id) }}'; rejectName = '{{ addslashes($p->nama_lengkap) }}'; rejectModal = true;" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[11px] border border-rose-200 transition cursor-pointer">
+                                        <button type="button" @click="rejectUrl = '{{ route('admin.contests.participant.reject', $p->id) }}'; rejectName = '{{ addslashes($p->nama_lengkap) }}'; rejectModal = true;" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-xs border border-rose-200 transition cursor-pointer">
 
                                             Tolak
 
@@ -352,7 +352,7 @@
 
                                                 })"
 
-                                                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-[11px] shadow-2xs transition cursor-pointer">
+                                                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-2xs transition cursor-pointer">
 
                                             Konfirmasi Lunas
 
@@ -360,7 +360,7 @@
 
                                     @else
 
-                                        <span class="text-[11px] text-gray-400 font-medium">Selesai</span>
+                                        <span class="text-xs text-gray-400 font-medium">Selesai</span>
 
                                     @endif
 
@@ -402,13 +402,13 @@
 
         <div class="flex min-h-full items-center justify-center p-4">
 
-            <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-7 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4">
+            <div class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-7 shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col gap-4">
 
-                <div class="text-center space-y-1">
+                <div class="text-center flex flex-col gap-1">
 
                     <h3 class="text-base font-black text-gray-900 dark:text-white text-center">Tolak Pendaftaran Peserta</h3>
 
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 text-center">Calon Peserta: <span class="font-bold text-gray-800 dark:text-white" x-text="rejectName"></span></p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Calon Peserta: <span class="font-bold text-gray-800 dark:text-white" x-text="rejectName"></span></p>
 
                 </div>
 
@@ -417,7 +417,7 @@
                 <form :action="rejectUrl" 
                       method="POST" 
                       novalidate
-                      class="space-y-4"
+                      class="flex flex-col gap-4"
                       x-data="{
                         catatan: '',
                         touched: false,
@@ -466,7 +466,7 @@
 
 
 
-                    <div class="flex items-center justify-center gap-3 pt-2">
+                    <div class="flex items-center justify-center gap-3">
 
                         <button type="button" @click="rejectModal = false; catatan = ''; error = ''; touched = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 transition cursor-pointer">Batal</button>
 
@@ -492,7 +492,7 @@
 
         <div class="flex min-h-full items-center justify-center p-4">
 
-            <div class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4 text-center">
+            <div class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col gap-4 text-center">
 
                 <h3 class="text-base font-black text-gray-900 dark:text-white text-center">Bukti Transfer Pembayaran</h3>
 
@@ -502,7 +502,7 @@
 
                 </div>
 
-                <div class="flex items-center justify-center pt-2">
+                <div class="flex items-center justify-center">
 
                     <button type="button" 
 

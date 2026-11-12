@@ -256,9 +256,11 @@
                        accept="image/jpeg,image/png,image/webp"
                        @change="handleBanner($event)"
                        class="sr-only">
-                <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
-                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih banner lomba</span>
-                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                <svg class="w-7 h-7 sm:w-8 sm:h-8 transition-colors" :class="isBannerDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <p class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">
+                  Seret dan lepas di sini
                 </p>
                 <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
                   Disarankan rasio horizontal 16:9 (min. 1200x675 px). Format JPG, PNG, WEBP maksimal 5 MB.

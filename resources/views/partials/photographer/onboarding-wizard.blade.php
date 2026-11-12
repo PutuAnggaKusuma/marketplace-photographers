@@ -94,11 +94,11 @@
       </div>
 
       <!-- Wizard Form Content -->
-      <form action="{{ route('photographer.onboarding.complete') }}" method="POST" @submit="submitOnboardingForm($event)" novalidate class="p-6 sm:p-8 space-y-6">
+      <form action="{{ route('photographer.onboarding.complete') }}" method="POST" @submit="submitOnboardingForm($event)" novalidate class="p-6 sm:p-8 flex flex-col gap-6">
         @csrf
 
         <!-- ==================== STEP 1: DOMISILI & KATEGORI SPESIALISASI ==================== -->
-        <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+        <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="flex flex-col gap-6">
           <div class="border-b border-gray-100 dark:border-gray-700/60 pb-3">
             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
               Langkah 1: Domisili Operasional & Kategori Spesialisasi
@@ -111,7 +111,7 @@
           <!-- Hybrid Grid: Provinsi & Kota (Rule #73 & Rule #46) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Dropdown Provinsi -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Provinsi Domisili <span class="text-rose-500">*</span>
               </label>
@@ -143,11 +143,11 @@
                   @endforeach
                 </div>
               </div>
-              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
 
             <!-- Dropdown Kota / Kabupaten -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kota / Kabupaten <span class="text-rose-500">*</span>
               </label>
@@ -180,12 +180,12 @@
                   </template>
                 </div>
               </div>
-              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
           </div>
 
           <!-- Alamat / Domisili Operasional (Full-Width Textarea) -->
-          <div class="space-y-1.5">
+          <div class="flex flex-col gap-1.5">
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
               Alamat Lengkap / Domisili Operasional <span class="text-rose-500">*</span>
             </label>
@@ -198,11 +198,11 @@
                       placeholder="Contoh: Jl. Sunset Road No. 88, Kuta, Bali (Mencakup area pemotretan Bali Selatan, Canggu, dan Ubud)"
                       :class="touched.alamat && errors.alamat ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
-            <p x-show="touched.alamat && errors.alamat" x-text="errors.alamat" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <p x-show="touched.alamat && errors.alamat" x-text="errors.alamat" x-cloak class="text-[11px] font-bold text-red-500"></p>
           </div>
 
           <!-- Kategori Spesialisasi Foto (Pill Selection with Minimum 1 Category) -->
-          <div class="space-y-2" x-ref="categoriesBox" tabindex="-1">
+          <div class="flex flex-col gap-2" x-ref="categoriesBox" tabindex="-1">
             <div class="flex items-center justify-between">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kategori Spesialisasi Foto <span class="text-rose-500">*</span>
@@ -231,12 +231,12 @@
             <template x-for="catId in selectedCategories" :key="catId">
               <input type="hidden" name="categories[]" :value="catId">
             </template>
-            <p x-show="touched.categories && errors.categories" x-text="errors.categories" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <p x-show="touched.categories && errors.categories" x-text="errors.categories" x-cloak class="text-[11px] font-bold text-red-500"></p>
           </div>
         </div>
 
         <!-- ==================== STEP 2: PORTOFOLIO / SOSMED & PAKET PERDANA ==================== -->
-        <div x-show="step === 2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6" style="display: none;">
+        <div x-show="step === 2" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="flex flex-col gap-6" style="display: none;">
           <div class="border-b border-gray-100 dark:border-gray-700/60 pb-3">
             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
               Langkah 2: Tautan Portofolio & Paket Layanan Perdana
@@ -247,7 +247,7 @@
           </div>
 
           <!-- Tautan Instagram / Portofolio Web -->
-          <div class="space-y-1.5">
+          <div class="flex flex-col gap-1.5">
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
               Tautan Instagram / Website Portofolio <span class="text-rose-500">*</span>
             </label>
@@ -260,11 +260,11 @@
                    placeholder="https://instagram.com/studioanda atau https://portofolioanda.com" 
                    :class="touched.link_sosmed && errors.link_sosmed ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                    class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
-            <p x-show="touched.link_sosmed && errors.link_sosmed" x-text="errors.link_sosmed" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <p x-show="touched.link_sosmed && errors.link_sosmed" x-text="errors.link_sosmed" x-cloak class="text-[11px] font-bold text-red-500"></p>
           </div>
 
           <!-- Bio Singkat Perkenalan -->
-          <div class="space-y-1.5">
+          <div class="flex flex-col gap-1.5">
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
               Deskripsi Bio Singkat Profil <span class="text-rose-500">*</span>
             </label>
@@ -277,11 +277,11 @@
                       placeholder="Ceritakan gaya fotografi Anda, pengalaman, atau konsep pemotretan yang menjadi keunggulan Anda..."
                       :class="touched.deskripsi_bio && errors.deskripsi_bio ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                       class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
-            <p x-show="touched.deskripsi_bio && errors.deskripsi_bio" x-text="errors.deskripsi_bio" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <p x-show="touched.deskripsi_bio && errors.deskripsi_bio" x-text="errors.deskripsi_bio" x-cloak class="text-[11px] font-bold text-red-500"></p>
           </div>
 
           <!-- Paket Layanan Perdana (Card Box) -->
-          <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-4">
+          <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 flex flex-col gap-4">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
                 PAKET LAYANAN PERDANA
@@ -291,7 +291,7 @@
 
             <!-- Grid: Nama Paket & Tarif Harga (Rule #73) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1.5">
+              <div class="flex flex-col gap-1.5">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                   Nama Paket Layanan <span class="text-rose-500">*</span>
                 </label>
@@ -304,10 +304,10 @@
                        placeholder="Contoh: Paket Sesi Personal Portrait / Wisuda" 
                        :class="touched.nama_layanan && errors.nama_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
-                <p x-show="touched.nama_layanan && errors.nama_layanan" x-text="errors.nama_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                <p x-show="touched.nama_layanan && errors.nama_layanan" x-text="errors.nama_layanan" x-cloak class="text-[11px] font-bold text-red-500"></p>
               </div>
 
-              <div class="space-y-1.5">
+              <div class="flex flex-col gap-1.5">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                   Tarif Harga Sesi (Rp) <span class="text-rose-500">*</span>
                 </label>
@@ -321,12 +321,12 @@
                        placeholder="Masukkan nominal tarif paket (min. 10000)" 
                        :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
-                <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500"></p>
               </div>
             </div>
 
             <!-- Uraian Deskripsi Fasilitas Paket -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Deskripsi & Fasilitas Paket <span class="text-rose-500">*</span>
               </label>
@@ -339,13 +339,13 @@
                         placeholder="Contoh: Sesi pemotretan 2 jam, 30 foto high-res edited, seluruh file raw dikirimkan via Google Drive dalam 3 hari kerja."
                         :class="touched.deskripsi_layanan && errors.deskripsi_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
-              <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
           </div>
         </div>
 
         <!-- ==================== STEP 3: REKENING BANK PENCAIRAN (PAYOUT) ==================== -->
-        <div x-show="step === 3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6" style="display: none;">
+        <div x-show="step === 3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="flex flex-col gap-6" style="display: none;">
           <div class="border-b border-gray-100 dark:border-gray-700/60 pb-3">
             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
               Langkah 3: Rekening Bank Pencairan Dana (Payout)
@@ -358,7 +358,7 @@
           <!-- Hybrid Grid Rekening: Bank, No Rekening, Atas Nama (Rule #73) -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <!-- Nama Bank (Alpine Floating Dropdown) -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Nama Bank <span class="text-rose-500">*</span>
               </label>
@@ -390,11 +390,11 @@
                   @endforeach
                 </div>
               </div>
-              <p x-show="touched.bank && errors.bank" x-text="errors.bank" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.bank && errors.bank" x-text="errors.bank" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
 
             <!-- Nomor Rekening -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Nomor Rekening <span class="text-rose-500">*</span>
               </label>
@@ -410,11 +410,11 @@
                      placeholder="Contoh: 1234567890" 
                      :class="touched.nomor_rekening && errors.nomor_rekening ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
-              <p x-show="touched.nomor_rekening && errors.nomor_rekening" x-text="errors.nomor_rekening" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.nomor_rekening && errors.nomor_rekening" x-text="errors.nomor_rekening" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
 
             <!-- Atas Nama Rekening -->
-            <div class="space-y-1.5">
+            <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Atas Nama Pemilik <span class="text-rose-500">*</span>
               </label>
@@ -427,7 +427,7 @@
                      placeholder="Sesuai buku tabungan" 
                      :class="touched.atas_nama_rekening && errors.atas_nama_rekening ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                      class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
-              <p x-show="touched.atas_nama_rekening && errors.atas_nama_rekening" x-text="errors.atas_nama_rekening" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.atas_nama_rekening && errors.atas_nama_rekening" x-text="errors.atas_nama_rekening" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
           </div>
 
@@ -444,7 +444,7 @@
         </div>
 
         <!-- Wizard Navigation Footer Buttons (Kepatuhan Rule #59: Center, Max 2 Buttons) -->
-        <div class="pt-4 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-center gap-3">
+        <div class="pt-6 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-center gap-3">
           
           <!-- STEP 1 FOOTER BUTTONS -->
           <template x-if="step === 1">

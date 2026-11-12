@@ -566,9 +566,11 @@
                              accept=".pdf,.doc,.docx,.zip,.rar"
                              @change="handleCvSelect($event)"
                              class="sr-only">
-                      <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                        <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih berkas dari perangkat</span>
-                        <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                      <svg class="w-6 h-6 transition-colors" :class="cvDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                      </svg>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                        Seret dan lepas di sini
                       </p>
                       <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                         Format PDF, DOC, DOCX, ZIP, RAR maksimal 10 MB
@@ -793,9 +795,11 @@
                              accept="image/jpeg,image/png,image/webp"
                              @change="handleTransferFile($event)"
                              class="sr-only">
-                      <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                        <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih struk transfer dari perangkat</span>
-                        <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                      <svg class="w-7 h-7 transition-colors" :class="isDraggingTransfer ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                      </svg>
+                      <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                        Seret dan lepas di sini
                       </p>
                       <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                         Format gambar JPG, PNG, WEBP maksimal 5 MB.
@@ -1054,9 +1058,11 @@
                                  accept="image/jpeg,image/png,image/webp"
                                  @change="handleFile($event)"
                                  class="sr-only">
-                          <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
-                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto karya dari perangkat</span>
-                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                          <svg class="w-7 h-7 sm:w-8 sm:h-8 transition-colors" :class="isDraggingKarya ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                          </svg>
+                          <p class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">
+                            Seret dan lepas di sini
                           </p>
                           <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">
                             Format JPG, PNG, WEBP maksimal 10 MB.
@@ -1213,7 +1219,7 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4" @click.stop>
         
         <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
         <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
@@ -1231,7 +1237,7 @@
         </p>
 
         <!-- Action Button -->
-        <div class="pt-1">
+        <div>
           <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
             Masuk ke Akun
           </a>

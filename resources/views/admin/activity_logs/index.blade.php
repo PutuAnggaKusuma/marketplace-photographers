@@ -44,34 +44,34 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Log Aktivitas -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Audit Log</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalLogs, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Audit Log</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalLogs, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 2: Log Transaksi & Rekber -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Transaksi & Rekber</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalTransactions, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Transaksi & Rekber</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalTransactions, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 3: Log Booking & Reservasi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Booking & Sesi Foto</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalBookings, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Booking & Sesi Foto</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalBookings, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 4: Log Sistem & Pengguna -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sistem & Keamanan</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalSystem, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sistem & Keamanan</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalSystem, 0, ',', '.') }}</h2>
         </div>
     </div>
 
     <!-- Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Filter (Alpine.js Custom Floating Dropdown) -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <!-- Filter di Kiri -->
             <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <!-- 1. Dropdown Filter Tipe Aktivitas -->
@@ -151,7 +151,7 @@
                         <th class="py-3.5 px-4 text-center">Metadata</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50 text-sm">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50 text-xs">
                     @forelse($logs as $log)
                     <tr class="hover:bg-amber-50/30 dark:hover:bg-gray-750 transition duration-150">
                         <!-- Waktu -->
@@ -159,7 +159,7 @@
                             <div class="font-bold text-gray-900 dark:text-white text-xs">
                                 {{ $log->created_at->format('d M Y') }}
                             </div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                 {{ $log->created_at->format('H:i') }} WIB ({{ $log->created_at->diffForHumans() }})
                             </div>
                         </td>
@@ -175,7 +175,7 @@
                                     <div class="font-bold text-gray-900 dark:text-white text-xs truncate">
                                         {{ $log->user->nama }}
                                     </div>
-                                    <div class="text-[11px] text-gray-400 dark:text-gray-500 font-medium mt-0.5 truncate">
+                                    <div class="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5 truncate">
                                         @if($log->user->role === 'super_admin')
                                             Super Admin
                                         @elseif($log->user->role === 'admin')
@@ -229,7 +229,7 @@
                             <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                             </svg>
-                            <span class="text-sm font-semibold">Belum ada riwayat aktivitas yang tercatat.</span>
+                            <span class="text-xs font-semibold">Belum ada riwayat aktivitas yang tercatat.</span>
                         </td>
                     </tr>
                     @endforelse
@@ -256,13 +256,13 @@
          x-transition:leave-end="opacity-0" 
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs" 
          style="display: none;">
-        <div @click.away="detailModalOpen = false" class="bg-white dark:bg-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200 dark:border-gray-700">
+        <div @click.away="detailModalOpen = false" class="bg-white dark:bg-gray-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200 dark:border-gray-700 flex flex-col gap-5">
 
 
             <!-- Centered Title without icons (Rule #59) -->
-            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-4">Detail Metadata Aktivitas</h3>
+            <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white">Detail Metadata Aktivitas</h3>
 
-            <div class="space-y-4">
+            <div class="flex flex-col gap-4">
                 <div>
                     <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Peristiwa</label>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5" x-text="activeLog?.description"></p>
@@ -286,7 +286,7 @@
             </div>
 
             <!-- Single Centered Close Button (Rule #59) -->
-            <div class="mt-6 flex justify-center">
+            <div class="flex justify-center">
                 <button type="button" @click="detailModalOpen = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold text-xs rounded-xl transition">
                     Tutup
                 </button>

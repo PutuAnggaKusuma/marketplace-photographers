@@ -85,17 +85,10 @@
           
           <!-- Identity & Reputation Line -->
           <div class="space-y-2.5">
-            <!-- Photographer Name & Verified Status -->
-            <div class="flex items-center gap-2 flex-wrap">
-              <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
-                {{ $photographer->nama }}
-              </h1>
-              @if($photographer->is_verified)
-                <span title="Mitra Terverifikasi LensMatch" class="inline-flex items-center text-amber-500 dark:text-amber-400">
-                  <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                </span>
-              @endif
-            </div>
+            <!-- Photographer Name -->
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+              {{ $photographer->nama }}
+            </h1>
 
             <!-- Categories / Specialization Tagline -->
             @if($photographer->categories && $photographer->categories->isNotEmpty())
@@ -112,14 +105,14 @@
               </div>
               <span class="text-gray-300 dark:text-gray-700 select-none">&bull;</span>
               <div class="flex items-center gap-1">
-                <span class="text-amber-400 text-sm">★</span>
+                <span class="{{ $totalReviews > 0 ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600' }} text-sm">★</span>
                 <span class="font-black text-gray-900 dark:text-white">{{ $avgRating }}</span>
                 <span class="text-gray-400">({{ $totalReviews }} ulasan)</span>
               </div>
               <span class="text-gray-300 dark:text-gray-700 select-none">&bull;</span>
               <div>
-                <span class="font-bold text-gray-900 dark:text-white">{{ max(1, (int) now()->diffInYears($photographer->created_at)) }}+ Tahun</span>
-                <span class="text-gray-500">Pengalaman</span>
+                <span class="font-bold text-gray-900 dark:text-white">{{ $completedSessionsCount ?? 0 }}</span>
+                <span class="text-gray-500">Sesi Selesai</span>
               </div>
               <span class="text-gray-300 dark:text-gray-700 select-none">&bull;</span>
               <div>
@@ -344,7 +337,7 @@
             <span :class="activeTab === 'faqs' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Tanya Jawab</span>
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black" 
                   :class="activeTab === 'faqs' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'">
-              {{ count($faqs ?? []) }}
+              {{ count($faqs ?? []) + count($systemFaqs ?? []) }}
             </span>
           </button>
         </div>
@@ -546,6 +539,11 @@
                     <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
                       {{ $port->judul }}
                     </h3>
+                    @if($port->category)
+                      <span class="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
+                        &middot; {{ $port->category->nama_kategori }}
+                      </span>
+                    @endif
                     <span class="text-xs sm:text-sm font-semibold text-gray-400 dark:text-gray-500">
                       &middot; {{ $pCount }} Foto
                     </span>
@@ -918,57 +916,116 @@
           </div>
         </div>
 
-        <!-- TAB 5: TANYA JAWAB / FAQ -->
-        <div x-show="activeTab === 'faqs'" class="space-y-6" x-data="{ openFaq: null }">
-          <div>
-            <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">Tanya Jawab</h2>
-          </div>
+        <!-- TAB 5: TANYA JAWAB (Kombinasi Fotografer + Ketentuan Sistem Opsi A) -->
+        <div x-show="activeTab === 'faqs'" class="space-y-8" x-data="{ openFaq: null }">
+          <!-- Bagian 1: Tanya Jawab Fotografer -->
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">Tanya Jawab Fotografer</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Informasi layanan langsung dari {{ $photographer->nama }}.</p>
+            </div>
 
-          <div class="space-y-3">
-            @forelse($faqs as $faq)
-              @php
-                $qId = is_array($faq) ? $faq['id'] : $faq->id;
-                $qText = is_array($faq) ? $faq['pertanyaan'] : $faq->pertanyaan;
-                $aText = is_array($faq) ? $faq['jawaban'] : $faq->jawaban;
-              @endphp
-              <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/80 shadow-none overflow-hidden transition hover:border-amber-400/80">
-                <button type="button" 
-                        @click="openFaq = (openFaq === {{ $qId }} ? null : {{ $qId }})" 
-                        class="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-750/50 transition focus:outline-none focus:ring-0 group">
-                  <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2.5 transition-colors"
-                        :class="openFaq === {{ $qId }} ? 'text-amber-600 dark:text-amber-400' : ''">
-                    <svg class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 transition-transform duration-200" 
-                         :class="openFaq === {{ $qId }} ? 'scale-110' : ''"
-                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            <div class="space-y-3">
+              @forelse($faqs as $faq)
+                @php
+                  $qId = is_array($faq) ? $faq['id'] : $faq->id;
+                  $qText = is_array($faq) ? $faq['pertanyaan'] : $faq->pertanyaan;
+                  $aText = is_array($faq) ? $faq['jawaban'] : $faq->jawaban;
+                  $studioKey = 'photographer_' . $qId;
+                @endphp
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/80 shadow-none overflow-hidden transition hover:border-amber-400/80">
+                  <button type="button" 
+                          @click="openFaq = (openFaq === '{{ $studioKey }}' ? null : '{{ $studioKey }}')" 
+                          class="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition focus:outline-none focus:ring-0 group">
+                    <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2.5 transition-colors"
+                          :class="openFaq === '{{ $studioKey }}' ? 'text-amber-600 dark:text-amber-400' : ''">
+                      <svg class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 transition-transform duration-200" 
+                           :class="openFaq === '{{ $studioKey }}' ? 'scale-110' : ''"
+                           fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                      </svg>
+                      <span>{{ $qText }}</span>
+                    </span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" 
+                         :class="openFaq === '{{ $studioKey }}' ? 'rotate-180 text-amber-500' : ''" 
+                         fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>
-                    <span>{{ $qText }}</span>
-                  </span>
-                  <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" 
-                       :class="openFaq === {{ $qId }} ? 'rotate-180 text-amber-500' : ''" 
-                       fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                  </svg>
-                </button>
+                  </button>
 
-                <div x-show="openFaq === {{ $qId }}" 
-                     x-cloak 
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 -translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="px-4 sm:px-5 pb-4 sm:pb-5 pt-0.5">
-                  <div class="text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-300 pl-6 sm:pl-7">
-                    <p class="whitespace-pre-line">{{ $aText }}</p>
+                  <div x-show="openFaq === '{{ $studioKey }}'" 
+                       x-cloak 
+                       x-transition:enter="transition ease-out duration-200"
+                       x-transition:enter-start="opacity-0 -translate-y-1"
+                       x-transition:enter-end="opacity-100 translate-y-0"
+                       class="px-4 sm:px-5 pb-4 sm:pb-5 pt-0.5">
+                    <div class="text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-300 pl-6 sm:pl-7">
+                      <p class="whitespace-pre-line">{{ $aText }}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            @empty
-              <div class="bg-white dark:bg-gray-800 p-8 sm:p-10 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
-                <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Tanya Jawab</h4>
-                <p class="text-xs text-gray-400">Fotografer ini belum mempublikasikan daftar pertanyaan umum.</p>
-              </div>
-            @endforelse
+              @empty
+                <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-1.5">
+                  <h4 class="text-sm font-bold text-gray-900 dark:text-white">Belum Ada Tanya Jawab</h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ $photographer->nama }} belum menambahkan pertanyaan khusus. Gunakan tombol Chat untuk bertanya langsung.</p>
+                </div>
+              @endforelse
+            </div>
           </div>
+
+          <!-- Bagian 2: Ketentuan Sistem LensMatch (Hardcoded Terpusat) -->
+          @if(!empty($systemFaqs))
+            <div class="space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                <div class="space-y-1">
+                  <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">Ketentuan Sistem LensMatch</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Ketentuan pemesanan, pembayaran, jadwal ulang, dan penerimaan hasil foto di LensMatch.</p>
+                </div>
+                <a href="{{ route('public.faq') }}" target="_blank" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0">
+                  Lihat Pusat Bantuan
+                </a>
+              </div>
+
+              <div class="space-y-3">
+                @foreach($systemFaqs as $sysIdx => $sysFaq)
+                  @php
+                    $sysKey = 'system_' . ($sysFaq['id'] ?? $sysIdx);
+                  @endphp
+                  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/80 shadow-none overflow-hidden transition hover:border-amber-400/80">
+                    <button type="button" 
+                            @click="openFaq = (openFaq === '{{ $sysKey }}' ? null : '{{ $sysKey }}')" 
+                            class="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition focus:outline-none focus:ring-0 group">
+                      <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2.5 transition-colors"
+                            :class="openFaq === '{{ $sysKey }}' ? 'text-amber-600 dark:text-amber-400' : ''">
+                        <svg class="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 transition-transform duration-200" 
+                             :class="openFaq === '{{ $sysKey }}' ? 'scale-110' : ''"
+                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                        </svg>
+                        <span>{{ $sysFaq['pertanyaan'] }}</span>
+                      </span>
+                      <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" 
+                           :class="openFaq === '{{ $sysKey }}' ? 'rotate-180 text-amber-500' : ''" 
+                           fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                      </svg>
+                    </button>
+
+                    <div x-show="openFaq === '{{ $sysKey }}'" 
+                         x-cloak 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="px-4 sm:px-5 pb-4 sm:pb-5 pt-0.5">
+                      <div class="text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-300 pl-6 sm:pl-7">
+                        <p class="whitespace-pre-line">{{ $sysFaq['jawaban'] }}</p>
+                      </div>
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          @endif
         </div>
 
       </div>
@@ -1027,7 +1084,7 @@
         </div>
       </div>
       
-      <div class="text-center text-white space-y-1 px-4">
+      <div class="text-center text-white flex flex-col gap-1 px-4">
         <p class="text-xs sm:text-sm font-bold truncate max-w-lg" x-text="lightboxTitle"></p>
         <template x-if="lightboxImages.length > 1">
           <p class="text-[11px] text-gray-400 font-mono" x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></p>
@@ -1050,7 +1107,7 @@
        aria-modal="true">
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
     <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+      <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4" @click.stop>
         
         <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
         <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
@@ -1067,7 +1124,7 @@
         </p>
 
         <!-- Action Button -->
-        <div class="pt-1">
+        <div>
           <a :href="loginRedirectUrl ? '{{ route('login') }}?redirect=' + encodeURIComponent(loginRedirectUrl) : '{{ route('login') }}'" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
             Masuk ke Akun
           </a>

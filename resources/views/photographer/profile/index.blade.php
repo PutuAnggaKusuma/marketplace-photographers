@@ -12,8 +12,20 @@
 <div x-data="{ activeTab: '{{ $initialTab }}' }" class="space-y-6 w-full pb-10">
 
   <!-- Header Section -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
     <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Kelola Profil</h1>
+
+    @if($photographer && $photographer->isPublishedToCatalog())
+      <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs">
+        <span class="font-bold text-emerald-600 dark:text-emerald-400">Tayang di Katalog</span>
+        <span class="text-gray-300 dark:text-gray-600">/</span>
+        <a href="{{ route('public.photographers.show', $photographer->id) }}"
+           target="_blank"
+           class="font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-500 underline underline-offset-4 decoration-amber-400 transition">
+          Lihat Profil Publik
+        </a>
+      </div>
+    @endif
   </div>
 
   <!-- Tab Navigasi Horizontal (Rule #78: Active Text Underline, Tanpa Divider Panjang) -->
@@ -35,21 +47,6 @@
 
   <!-- TAB 1: Data Profil (Biodata, Domisili, Bio, Media, Rekening Bank) -->
   <div x-show="activeTab === 'profile'" @if($initialTab !== 'profile') x-cloak @endif class="space-y-6">
-
-  @if($photographer && $photographer->status_verifikasi === 'ditolak')
-    <div class="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 space-y-2">
-      <div class="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-extrabold text-sm">
-        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
-        <span>Pendaftaran Anda Ditolak</span>
-      </div>
-      <p class="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
-        Catatan Admin: <span class="font-bold">{{ $photographer->catatan_penolakan ?: 'Data profil belum memenuhi persyaratan.' }}</span>
-      </p>
-      <p class="text-[11px] text-rose-600 dark:text-rose-400/80">
-        Silakan perbaiki data profil di bawah ini, lalu klik Simpan Data untuk mengajukan verifikasi kembali ke Admin.
-      </p>
-    </div>
-  @endif
 
   @php
     $user = auth()->user();
@@ -277,6 +274,7 @@
 
           <!-- Kategori (Sleek Multi-select Dropdown) -->
           <div class="relative" x-ref="fieldCategories">
+            <input type="hidden" name="categories_submitted" value="1">
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Kategori <span class="text-rose-500">*</span>
@@ -305,10 +303,17 @@
               @foreach($categories as $category)
                 <button type="button" 
                         @click="toggleCategory({{ $category->id }})" 
-                        class="w-full text-left px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between border-b border-gray-100 dark:border-gray-700/40 last:border-0 cursor-pointer"
-                        :class="formData.selectedCategories.includes({{ $category->id }}) ? 'bg-amber-50/70 dark:bg-amber-950/60 font-bold text-amber-600' : ''">
+                        class="w-full text-left px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-700/40 last:border-0"
+                        :class="isCategoryLocked({{ $category->id }})
+                            ? 'bg-amber-50/70 dark:bg-amber-950/60 font-bold text-amber-700 dark:text-amber-300 cursor-not-allowed'
+                            : (formData.selectedCategories.includes({{ $category->id }}) ? 'bg-amber-50/70 dark:bg-amber-950/60 font-bold text-amber-600 cursor-pointer' : 'cursor-pointer')">
                   <span>{{ $category->nama_kategori }}</span>
-                  <svg x-show="formData.selectedCategories.includes({{ $category->id }})" class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  <span class="flex items-center gap-2 shrink-0">
+                    <span x-show="isCategoryLocked({{ $category->id }})"
+                          x-text="getCategoryUsageCount({{ $category->id }}) + ' portofolio'"
+                          class="text-[11px] font-medium text-gray-400 dark:text-gray-500"></span>
+                    <svg x-show="formData.selectedCategories.includes({{ $category->id }})" class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </span>
                 </button>
               @endforeach
             </div>
@@ -317,10 +322,17 @@
 
             <!-- Selected Category Chips Display Under Dropdown -->
             <div x-show="formData.selectedCategories.length > 0" class="flex flex-wrap gap-1.5 pt-2">
-              <template x-for="cat in allCategories.filter(c => formData.selectedCategories.includes(c.id))" :key="cat.id">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60">
+              <template x-for="cat in allCategories.filter(c => formData.selectedCategories.includes(Number(c.id)))" :key="cat.id">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60"
+                      :title="isCategoryLocked(cat.id) ? ('Dipakai oleh ' + getCategoryUsageCount(cat.id) + ' portofolio aktif') : ''">
                   <span x-text="cat.name"></span>
-                  <button type="button" @click="toggleCategory(cat.id)" class="text-amber-600 hover:text-rose-500 transition cursor-pointer">
+                  <span x-show="isCategoryLocked(cat.id)"
+                        x-text="'(' + getCategoryUsageCount(cat.id) + ' portofolio)'"
+                        class="text-[10px] font-semibold text-amber-600/80 dark:text-amber-400/80"></span>
+                  <button type="button"
+                          x-show="!isCategoryLocked(cat.id)"
+                          @click="toggleCategory(cat.id)"
+                          class="text-amber-600 hover:text-rose-500 transition cursor-pointer">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
                 </span>
@@ -400,16 +412,18 @@
                        @dragover.prevent="avatarDragging = true"
                        @dragleave.prevent="avatarDragging = false"
                        @drop.prevent="handleAvatarDrop($event)"
-                       class="w-full min-h-[96px] px-4 py-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1 cursor-pointer transition outline-none"
+                       class="w-full min-h-[112px] px-4 py-5 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
                        :class="avatarDragging
                            ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
                            : (uploadErrors.foto_file
                                ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
                     <input type="file" name="foto_file" x-ref="avatarInput" accept="image/jpeg, image/png, image/webp" @change="handleAvatarFile($event)" class="sr-only">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto profil dari perangkat</span>
-                      <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret ke sini</span>
+                    <svg class="w-6 h-6 transition-colors" :class="avatarDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    </svg>
+                    <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                      Seret dan lepas di sini
                     </p>
                     <p class="text-[11px] text-gray-400">Format JPG, PNG, WEBP maksimal 10 MB.</p>
                   </div>
@@ -464,16 +478,18 @@
                        @dragover.prevent="sampulDragging = true"
                        @dragleave.prevent="sampulDragging = false"
                        @drop.prevent="handleSampulDrop($event)"
-                       class="w-full min-h-[96px] px-4 py-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1 cursor-pointer transition outline-none"
+                       class="w-full min-h-[112px] px-4 py-5 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
                        :class="sampulDragging
                            ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
                            : (uploadErrors.foto_sampul_file
                                ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
                     <input type="file" name="foto_sampul_file" x-ref="sampulInput" accept="image/jpeg, image/png, image/webp" @change="handleSampulFile($event)" class="sr-only">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto sampul dari perangkat</span>
-                      <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret ke sini</span>
+                    <svg class="w-6 h-6 transition-colors" :class="sampulDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    </svg>
+                    <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                      Seret dan lepas di sini
                     </p>
                     <p class="text-[11px] text-gray-400">Rasio 16:9 format JPG, PNG, WEBP maksimal 20 MB.</p>
                   </div>
@@ -682,6 +698,14 @@
 </div>
 
 <!-- Dedicated Alpine.js Component Script Functions (Robust Standard) -->
+@php
+  $initialCategoryIds = array_map('intval', (array) old('categories', $photographer->categories->pluck('id')->toArray()));
+  foreach (array_keys($usedCategoryCounts ?? []) as $lockedCatId) {
+    if (!in_array((int) $lockedCatId, $initialCategoryIds, true)) {
+      $initialCategoryIds[] = (int) $lockedCatId;
+    }
+  }
+@endphp
 <script>
 function photographerProfileForm() {
   return {
@@ -695,13 +719,14 @@ function photographerProfileForm() {
       city_code: {!! json_encode(old('city_code', $photographer->city_code ?? '')) !!},
       city_name: {!! json_encode($photographer->city->name ?? '') !!},
       alamat: {!! json_encode(old('alamat', $photographer?->alamat ?? '')) !!},
-      selectedCategories: {!! json_encode(old('categories', $photographer->categories->pluck('id')->toArray())) !!},
+      selectedCategories: @js($initialCategoryIds),
       deskripsi_bio: {!! json_encode(old('deskripsi_bio', $photographer?->deskripsi_bio ?? '')) !!},
       nama_bank: {!! json_encode(old('nama_bank', $photographer?->nama_bank ?? '')) !!},
       nomor_rekening: {!! json_encode(old('nomor_rekening', $photographer?->nomor_rekening ?? '')) !!},
       atas_nama_rekening: {!! json_encode(old('atas_nama_rekening', $photographer?->atas_nama_rekening ?? '')) !!}
     },
-    allCategories: {!! json_encode($categories->map(fn($c) => ['id' => $c->id, 'name' => $c->nama_kategori])) !!},
+    allCategories: @js($categories->map(fn($c) => ['id' => (int) $c->id, 'name' => $c->nama_kategori])->values()),
+    usedCategoryCounts: @js((object) ($usedCategoryCounts ?? [])),
     avatarPreview: {!! json_encode($avatarUrl) !!},
     sampulPreview: {!! json_encode($sampulUrl) !!},
     avatarDragging: false,
@@ -756,10 +781,18 @@ function photographerProfileForm() {
       const count = this.formData.selectedCategories.length;
       if (count === 0) return 'Pilih Kategori';
       if (count === 1) {
-        const found = this.allCategories.find(c => c.id == this.formData.selectedCategories[0]);
+        const found = this.allCategories.find(c => Number(c.id) === Number(this.formData.selectedCategories[0]));
         return found ? found.name : '1 Kategori Dipilih';
       }
       return count + ' Kategori Dipilih';
+    },
+
+    getCategoryUsageCount(catId) {
+      return Number((this.usedCategoryCounts && this.usedCategoryCounts[Number(catId)]) || 0);
+    },
+
+    isCategoryLocked(catId) {
+      return this.formData.selectedCategories.includes(Number(catId)) && this.getCategoryUsageCount(catId) > 0;
     },
 
     validateNama() {
@@ -922,11 +955,20 @@ function photographerProfileForm() {
     },
 
     toggleCategory(catId) {
-      const idx = this.formData.selectedCategories.indexOf(catId);
+      const numericId = Number(catId);
+      const idx = this.formData.selectedCategories.indexOf(numericId);
       if (idx > -1) {
+        const usageCount = this.getCategoryUsageCount(numericId);
+        if (usageCount > 0) {
+          const found = this.allCategories.find(c => Number(c.id) === numericId);
+          const catName = found ? found.name : 'Kategori ini';
+          this.touched.categories = true;
+          this.errors.categories = `${catName} tidak dapat dihapus karena masih dipakai ${usageCount} portofolio.`;
+          return;
+        }
         this.formData.selectedCategories.splice(idx, 1);
       } else {
-        this.formData.selectedCategories.push(catId);
+        this.formData.selectedCategories.push(numericId);
       }
       this.touched.categories = true;
       this.validateCategories();

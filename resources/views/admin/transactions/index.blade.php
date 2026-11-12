@@ -262,9 +262,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Omzet Masuk</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Omzet Masuk</span>
 
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalGrossVolume, 0, ',', '.') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalGrossVolume, 0, ',', '.') }}</h2>
 
         </div>
 
@@ -274,9 +274,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Dana Ditahan</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Dana Ditahan</span>
 
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowHolding, 0, ',', '.') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowHolding, 0, ',', '.') }}</h2>
 
         </div>
 
@@ -286,9 +286,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Siap Dicairkan</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Siap Dicairkan</span>
 
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowReady, 0, ',', '.') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowReady, 0, ',', '.') }}</h2>
 
         </div>
 
@@ -298,9 +298,9 @@
 
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Dana Ditransfer</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Dana Ditransfer</span>
 
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalPayoutPaid, 0, ',', '.') }}</h2>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalPayoutPaid, 0, ',', '.') }}</h2>
 
         </div>
 
@@ -382,13 +382,13 @@
 
     <!-- Data Table Card -->
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
         
 
         <!-- Filters & Search Toolbar (Alpine.js Custom Floating Dropdown) -->
 
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
             <!-- Filter Dropdowns di Kiri -->
 
@@ -582,7 +582,7 @@
 
                                 <div class="font-extrabold text-gray-900 dark:text-white">{{ $invoiceCode }}</div>
 
-                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $c->created_at->format('d M Y, H:i') }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $c->created_at->format('d M Y, H:i') }}</div>
 
                             </td>
 
@@ -594,7 +594,7 @@
 
                                 <div class="font-bold text-gray-900 dark:text-white">{{ $c->client->nama ?? 'Klien' }}</div>
 
-                                <div class="text-[11px] text-gray-500 dark:text-gray-400">{{ $c->client->user->email ?? '-' }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $c->client->user->email ?? '-' }}</div>
 
                             </td>
 
@@ -606,7 +606,7 @@
 
                                 <div class="font-bold text-gray-900 dark:text-white">{{ $c->photographer->nama ?? 'Fotografer' }}</div>
 
-                                <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
 
                                     {{ $c->bookingDetail->service->nama_layanan ?? 'Paket Foto Custom' }}
 
@@ -622,13 +622,13 @@
 
                                 <div class="font-extrabold text-gray-900 dark:text-white">Total: Rp {{ number_format($c->jumlah, 0, ',', '.') }}</div>
 
-                                <div class="text-[10px] text-gray-500">
+                                <div class="text-xs text-gray-500">
 
                                     Komisi Platform (10%): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($feeAmount, 0, ',', '.') }}</span>
 
                                 </div>
 
-                                <div class="text-[11px] font-bold text-gray-900 dark:text-white">
+                                <div class="text-xs font-bold text-gray-900 dark:text-white">
 
                                     Pendapatan Bersih: Rp {{ number_format($netPayout, 0, ',', '.') }}
 
@@ -660,7 +660,7 @@
 
                                     @if($c->payout_at)
 
-                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $c->payout_at->format('d M Y, H:i') }}</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">{{ $c->payout_at->format('d M Y, H:i') }}</p>
 
                                     @endif
 
@@ -928,11 +928,11 @@
 
                                             @if($c->status_payout === 'paid')
 
-                                                <div class="px-3.5 py-1.5 text-[11px] font-bold text-gray-400 dark:text-gray-500 block"><span>Transfer Selesai</span></div>
+                                                <div class="px-3.5 py-1.5 text-xs font-bold text-gray-400 dark:text-gray-500 block"><span>Transfer Selesai</span></div>
 
                                             @elseif($c->status_payout === 'refunded')
 
-                                                <div class="px-3.5 py-1.5 text-[11px] font-bold text-gray-400 dark:text-gray-500 block">
+                                                <div class="px-3.5 py-1.5 text-xs font-bold text-gray-400 dark:text-gray-500 block">
 
                                                     <span>Refund Selesai</span>
 
@@ -1046,7 +1046,7 @@
 
                                 {{ $el->invoice_code }}
 
-                                <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
+                                <span class="block text-xs font-normal text-gray-400 mt-0.5">
 
                                     {{ $el->paid_at ? $el->paid_at->format('d M Y, H:i') : $el->created_at->format('d M Y, H:i') }}
 
@@ -1062,7 +1062,7 @@
 
                                 <span class="font-bold text-gray-900 dark:text-white block">{{ $el->user->nama ?? 'Pengguna' }}</span>
 
-                                <span class="text-[11px] text-gray-500">{{ $el->user->email ?? '-' }}</span>
+                                <span class="text-xs text-gray-500">{{ $el->user->email ?? '-' }}</span>
 
                             </td>
 
@@ -1078,7 +1078,7 @@
 
                                 </span>
 
-                                <span class="text-[11px] text-gray-500 capitalize">
+                                <span class="text-xs text-gray-500 capitalize">
 
                                     Tingkat: {{ $el->elearning->tingkat ?? 'Semua Tingkat' }}
 
@@ -1104,7 +1104,7 @@
 
                                 Rp {{ number_format($el->nominal, 0, ',', '.') }}
 
-                                <span class="block text-[10px] text-gray-400 font-medium">100% Platform Revenue</span>
+                                <span class="block text-xs text-gray-400 font-medium">100% Platform Revenue</span>
 
                             </td>
 
@@ -1150,7 +1150,7 @@
 
                                 @if($el->elearning)
 
-                                    <a href="{{ route('public.elearning.show', $el->elearning->slug) }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-[11px] shadow-2xs transition inline-block">
+                                    <a href="{{ route('public.elearning.show', $el->elearning->slug) }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs shadow-2xs transition inline-block">
 
                                         Lihat Kursus
 
@@ -1228,7 +1228,7 @@
 
                                 REG-LMB-{{ str_pad($cr->id, 4, '0', STR_PAD_LEFT) }}
 
-                                <span class="block text-[10px] font-normal text-gray-400 mt-0.5">
+                                <span class="block text-xs font-normal text-gray-400 mt-0.5">
 
                                     {{ $cr->created_at->format('d M Y, H:i') }}
 
@@ -1244,7 +1244,7 @@
 
                                 <span class="font-bold text-gray-900 dark:text-white block">{{ $cr->nama_lengkap }}</span>
 
-                                <span class="text-[11px] text-gray-500">{{ $cr->email }} • {{ $cr->no_wa }}</span>
+                                <span class="text-xs text-gray-500">{{ $cr->email }} • {{ $cr->no_wa }}</span>
 
                             </td>
 
@@ -1260,7 +1260,7 @@
 
                                 </span>
 
-                                <span class="text-[11px] text-gray-500">
+                                <span class="text-xs text-gray-500">
 
                                     Penyelenggara: {{ $cr->contest->penyelenggara ?? '-' }}
 
@@ -1276,7 +1276,7 @@
 
                                 Rp {{ number_format($cr->contest->biaya_pendaftaran ?? 0, 0, ',', '.') }}
 
-                                <span class="block text-[10px] text-gray-400 font-medium">100% Platform Revenue</span>
+                                <span class="block text-xs text-gray-400 font-medium">100% Platform Revenue</span>
 
                             </td>
 
@@ -1344,7 +1344,7 @@
 
                                 @if($cr->contest)
 
-                                    <a href="{{ route('admin.contests.manage', $cr->contest->id) }}" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-[11px] shadow-2xs transition inline-block">
+                                    <a href="{{ route('admin.contests.manage', $cr->contest->id) }}" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs shadow-2xs transition inline-block">
 
                                         Kelola Peserta
 
@@ -1398,17 +1398,17 @@
 
         <div @click.away="detailModalOpen = false" 
 
-             class="bg-white dark:bg-gray-800 max-w-2xl w-full p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+             class="bg-white dark:bg-gray-800 max-w-2xl w-full p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
 
             
 
             <!-- Modal Header (No Icon, No X button because Tutup button exists) -->
 
-            <div class="border-b border-gray-100 dark:border-gray-700/80 pb-4 text-center space-y-1">
+            <div class="border-b border-gray-100 dark:border-gray-700/80 pb-4 text-center flex flex-col gap-1">
 
                 <h3 class="text-lg font-black text-gray-900 dark:text-white" x-text="activeContract?.code || 'Detail Transaksi'"></h3>
 
-                <p class="text-xs text-gray-500 mt-0.5">Dibuat pada <span x-text="activeContract?.created_at"></span></p>
+                <p class="text-xs text-gray-500">Dibuat pada <span x-text="activeContract?.created_at"></span></p>
 
             </div>
 
@@ -1416,39 +1416,39 @@
 
             <template x-if="activeContract">
 
-                <div class="space-y-6">
+                <div class="flex flex-col gap-6">
 
                     <!-- Ringkasan Nominal 3 Kolom -->
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-                        <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60">
+                        <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 space-y-1">
 
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Bruto</span>
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Total Bruto</span>
 
-                            <div class="text-base font-black text-gray-900 dark:text-white mt-1" x-text="activeContract.jumlah_formatted"></div>
+                            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight" x-text="activeContract.jumlah_formatted"></div>
 
-                            <span class="text-[10px] text-gray-500">Nilai invoice sesi</span>
-
-                        </div>
-
-                        <div class="bg-amber-50/60 dark:bg-amber-950/30 p-4 rounded-xl border border-amber-200/60 dark:border-amber-800/40">
-
-                            <span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">Fee Platform (10%)</span>
-
-                            <div class="text-base font-black text-amber-600 dark:text-amber-400 mt-1" x-text="activeContract.fee_formatted"></div>
-
-                            <span class="text-[10px] text-amber-700/70 dark:text-amber-400/70">Pendapatan LensMatch</span>
+                            <span class="text-xs text-gray-500 block">Nilai invoice sesi</span>
 
                         </div>
 
-                        <div class="bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40">
+                        <div class="bg-amber-50/60 dark:bg-amber-950/30 p-4 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-1">
 
-                            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Pendapatan Bersih (90%)</span>
+                            <span class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">Fee Platform (10%)</span>
 
-                            <div class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-1" x-text="activeContract.net_payout_formatted"></div>
+                            <div class="text-xs font-black text-amber-600 dark:text-amber-400 tracking-tight" x-text="activeContract.fee_formatted"></div>
 
-                            <span class="text-[10px] text-emerald-700/70 dark:text-emerald-400/70">Hak mitra fotografer</span>
+                            <span class="text-xs text-amber-700/70 dark:text-amber-400/70 block">Pendapatan LensMatch</span>
+
+                        </div>
+
+                        <div class="bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 space-y-1">
+
+                            <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Pendapatan Bersih (90%)</span>
+
+                            <div class="text-xs font-black text-emerald-600 dark:text-emerald-400 tracking-tight" x-text="activeContract.net_payout_formatted"></div>
+
+                            <span class="text-xs text-emerald-700/70 dark:text-emerald-400/70 block">Hak mitra fotografer</span>
 
                         </div>
 
@@ -1478,7 +1478,7 @@
 
                         <!-- Pihak Fotografer -->
 
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-1.5">
+                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col gap-1.5">
 
                             <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-1">Mitra Fotografer</span>
 
@@ -1576,7 +1576,7 @@
 
                     <template x-if="activeContract.hasil_foto_url">
 
-                        <div class="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 space-y-2 text-xs">
+                        <div class="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col gap-2 text-xs">
 
                             <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Tautan Galeri Hasil Foto</span>
 
@@ -1634,7 +1634,7 @@
 
                     <template x-if="activeContract.cancellation_reason">
 
-                        <div class="p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-1.5 text-xs text-left">
+                        <div class="p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex flex-col gap-1.5 text-xs text-left">
 
                             <div class="flex items-center justify-between">
 
@@ -1660,7 +1660,7 @@
 
                     <!-- Status Escrow & Catatan Admin -->
 
-                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-2 text-xs">
+                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col gap-2 text-xs">
 
                         <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Status Dana</span>
 
@@ -1722,7 +1722,7 @@
 
             <!-- Modal Footer (Centered) -->
 
-            <div class="flex justify-center pt-3 border-t border-gray-100 dark:border-gray-700/80">
+            <div class="flex justify-center pt-4 border-t border-gray-100 dark:border-gray-700/80">
 
                 <button type="button" @click="detailModalOpen = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition cursor-pointer">
 
@@ -1752,13 +1752,13 @@
 
         <div @click.away="payoutModalOpen = false" 
 
-             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6">
+             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6">
 
             
 
             <!-- Modal Title (No Icon, Centered) -->
 
-            <div class="space-y-2 text-center">
+            <div class="flex flex-col gap-2 text-center">
 
                 <h3 class="text-base font-black text-gray-900 dark:text-white">Transfer Dana ke Fotografer?</h3>
 
@@ -1774,7 +1774,7 @@
 
             <!-- Rincian Rekening Bank Fotografer -->
 
-            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700/80 space-y-2 text-xs text-left">
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700/80 flex flex-col gap-2 text-xs text-left">
 
                 <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rekening Tujuan Transfer</span>
 
@@ -1824,11 +1824,11 @@
 
 
 
-            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/release-payout'" method="POST" enctype="multipart/form-data" @submit="submitPayout($event)" novalidate class="space-y-4">
+            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/release-payout'" method="POST" enctype="multipart/form-data" @submit="submitPayout($event)" novalidate class="flex flex-col gap-4">
 
                 @csrf
 
-                <div class="space-y-3">
+                <div class="flex flex-col gap-3">
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Bukti Struk Transfer Bank (Opsional)</label>
 
@@ -1848,9 +1848,11 @@
                                  ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
                                  : 'border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/60 hover:border-amber-400 dark:hover:border-amber-500 focus:ring-2 focus:ring-amber-500')">
                         <input type="file" name="bukti_transfer_payout" x-ref="payoutProofInput" accept="image/jpeg,image/png,image/webp" @change="handlePayoutProofFile($event)" class="sr-only">
-                        <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400" x-text="payoutProofPreviewUrl ? 'Ganti bukti transfer' : 'Pilih bukti transfer'"></span>
-                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        <svg class="w-6 h-6 transition-colors" :class="payoutProofDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                            Seret dan lepas di sini
                         </p>
                         <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Format JPG, PNG, WEBP maksimal 10 MB.</p>
                     </div>
@@ -1892,7 +1894,7 @@
 
 
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
 
                     <button type="button" @click="payoutModalOpen = false" class="px-5 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 transition cursor-pointer">
 
@@ -1930,13 +1932,13 @@
 
         <div @click.away="refundModalOpen = false" 
 
-             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6">
+             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6">
 
             
 
             <!-- Modal Title (No Icon, Centered) -->
 
-            <div class="space-y-2 text-center">
+            <div class="flex flex-col gap-2 text-center">
 
                 <h3 class="text-base font-black text-gray-900 dark:text-white">Refund Transaksi ke Klien?</h3>
 
@@ -1950,7 +1952,7 @@
 
 
 
-            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/refund'" method="POST" @submit="submitRefund($event)" novalidate class="space-y-4">
+            <form :action="'{{ url('/admin/transactions') }}/' + activeContract?.id + '/refund'" method="POST" @submit="submitRefund($event)" novalidate class="flex flex-col gap-4">
 
                 @csrf
 
@@ -1973,7 +1975,7 @@
 
 
 
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
 
                     <button type="button" @click="refundModalOpen = false" class="px-5 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 transition cursor-pointer">
 

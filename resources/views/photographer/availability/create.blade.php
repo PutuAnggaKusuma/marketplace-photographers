@@ -2,7 +2,7 @@
 
 
 
-@section('title', 'Blokir Jadwal & Libur — Fotografer')
+@section('title', 'Atur Tanggal Libur — Fotografer')
 
 
 
@@ -17,22 +17,24 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
         <div>
-            <!-- Breadcrumb Navigation -->
-            <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
-                <a href="{{ route('photographer.availability') }}" class="hover:text-amber-500 transition">Kalender Jadwal</a>
-                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                <span class="text-gray-900 dark:text-white font-bold">Blokir Jadwal</span>
+            <!-- Breadcrumb Navigation (Rule #62 Uniform Neutral) -->
+            <nav class="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-1.5">
+                <a href="{{ route('photographer.availability', ['tab' => 'overrides']) }}" class="hover:text-amber-500 transition">Jadwal</a>
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                <span>Atur Tanggal Libur</span>
             </nav>
-            <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                Tutup Jadwal / Libur Pemotretan
+            <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">
+                Atur Tanggal Libur
             </h1>
         </div>
 
         <div>
 
-            <a href="{{ route('photographer.availability') }}" class="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-extrabold text-xs transition inline-flex items-center justify-center shrink-0">
+            <a href="{{ route('photographer.availability', ['tab' => 'overrides']) }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0">
 
-                Kembali ke Kalender
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+
+                <span>Kembali</span>
 
             </a>
 
@@ -76,15 +78,20 @@
 
                            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-start gap-3 select-none">
 
-                        <input type="radio" name="tipe_blokir" value="all_day" x-model="tipeBlokir" class="mt-1 text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="tipe_blokir" value="all_day" x-model="tipeBlokir" class="sr-only peer">
+
+                        <span class="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400"
+                              :class="tipeBlokir === 'all_day' ? 'border-amber-500 bg-white dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900'">
+                            <span class="w-2 h-2 rounded-full bg-amber-500" x-show="tipeBlokir === 'all_day'"></span>
+                        </span>
 
                         <div>
 
-                            <span class="text-xs font-black block">Libur Seharian Penuh (All Day)</span>
+                            <span class="text-xs font-black block">Libur Seharian</span>
 
                             <span class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 block leading-relaxed">
 
-                                Menutup 1 hari atau beberapa hari berturut-turut (misal: acara keluarga, trip luar kota).
+                                Tutup pemesanan untuk satu hari atau beberapa hari berturut-turut.
 
                             </span>
 
@@ -102,15 +109,20 @@
 
                            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-start gap-3 select-none">
 
-                        <input type="radio" name="tipe_blokir" value="time_slot" x-model="tipeBlokir" class="mt-1 text-amber-500 focus:ring-amber-400">
+                        <input type="radio" name="tipe_blokir" value="time_slot" x-model="tipeBlokir" class="sr-only peer">
+
+                        <span class="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition peer-focus-visible:ring-2 peer-focus-visible:ring-amber-400"
+                              :class="tipeBlokir === 'time_slot' ? 'border-amber-500 bg-white dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900'">
+                            <span class="w-2 h-2 rounded-full bg-amber-500" x-show="tipeBlokir === 'time_slot'"></span>
+                        </span>
 
                         <div>
 
-                            <span class="text-xs font-black block">Tutup Jam Tertentu (Mendadak / Slot Jam)</span>
+                            <span class="text-xs font-black block">Tutup Jam Tertentu</span>
 
                             <span class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 block leading-relaxed">
 
-                                Hanya menutup rentang jam tertentu pada satu tanggal (misal: tutup sesi sore 15:00 - 19:00).
+                                Tutup rentang jam tertentu pada satu tanggal.
 
                             </span>
 
@@ -128,7 +140,7 @@
 
             <!-- 2A. Field jika Seharian Penuh -->
 
-            <div x-show="tipeBlokir === 'all_day'" class="space-y-5 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+            <div x-show="tipeBlokir === 'all_day'" class="space-y-5">
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
@@ -185,7 +197,7 @@
 
             <!-- 2B. Field jika Tutup Jam Tertentu -->
 
-            <div x-show="tipeBlokir === 'time_slot'" x-cloak class="space-y-5 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+            <div x-show="tipeBlokir === 'time_slot'" x-cloak class="space-y-5">
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
 
@@ -220,14 +232,14 @@
 
                         </label>
 
-                        <input type="time" 
-                               name="jam_mulai" 
-                               x-ref="fieldJamMulai"
-                               x-model="form.jam_mulai"
-                               @input="touched.jam_mulai = true; validateJamMulai()"
-                               @blur="touched.jam_mulai = true; validateJamMulai()"
-                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
-                               :class="touched.jam_mulai && errors.jam_mulai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                        <x-time-dropdown
+                            model="form.jam_mulai"
+                            name="jam_mulai"
+                            trigger-ref="fieldJamMulai"
+                            error="touched.jam_mulai && errors.jam_mulai"
+                            on-select="touched.jam_mulai = true; validateJamMulai()"
+                            trigger-class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                        />
 
                         <p x-show="touched.jam_mulai && errors.jam_mulai" x-text="errors.jam_mulai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
@@ -243,14 +255,15 @@
 
                         </label>
 
-                        <input type="time" 
-                               name="jam_selesai" 
-                               x-ref="fieldJamSelesai"
-                               x-model="form.jam_selesai"
-                               @input="touched.jam_selesai = true; validateJamSelesai()"
-                               @blur="touched.jam_selesai = true; validateJamSelesai()"
-                               class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
-                               :class="touched.jam_selesai && errors.jam_selesai ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
+                        <x-time-dropdown
+                            model="form.jam_selesai"
+                            name="jam_selesai"
+                            trigger-ref="fieldJamSelesai"
+                            error="touched.jam_selesai && errors.jam_selesai"
+                            on-select="touched.jam_selesai = true; validateJamSelesai()"
+                            align="right"
+                            trigger-class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                        />
 
                         <p x-show="touched.jam_selesai && errors.jam_selesai" x-text="errors.jam_selesai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
@@ -268,17 +281,17 @@
 
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
 
-                    Alasan / Keterangan Penutupan (Opsional)
+                    Keterangan (Opsional)
 
                 </label>
 
                 <textarea name="keterangan" 
 
-                          rows="3" 
+                          rows="4" 
 
-                          placeholder="Contoh: Sudah capai 2 booking harian, istirahat sesi sore, pemeliharaan kamera, atau ada acara mendadak..." 
+                          placeholder="Masukkan keterangan libur jika diperlukan" 
 
-                          class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-none @error('keterangan') border-rose-500 @enderror">{{ old('keterangan') }}</textarea>
+                          class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition resize-y @error('keterangan') border-rose-500 @enderror">{{ old('keterangan') }}</textarea>
 
                 @error('keterangan')
 
@@ -290,12 +303,10 @@
 
 
 
-            <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol kuning, rata kanan gap-3) -->
-
             <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol submit, rata kanan gap-3, Rule #41: No border-t Divider) -->
             <div class="flex items-center justify-end gap-3 pt-4">
 
-                <a href="{{ route('photographer.availability') }}" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition text-center shadow-2xs cursor-pointer">
+                <a href="{{ route('photographer.availability', ['tab' => 'overrides']) }}" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition text-center shadow-2xs cursor-pointer">
 
                     Batal
 
@@ -436,7 +447,10 @@ function availabilityFormApp() {
             if (hasError) {
                 e.preventDefault();
                 if (firstInvalidRef) {
-                    firstInvalidRef.focus();
+                    const focusEl = firstInvalidRef.matches('button,input,select,textarea')
+                        ? firstInvalidRef
+                        : (firstInvalidRef.querySelector('[data-time-trigger]') || firstInvalidRef);
+                    focusEl.focus();
                     firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }

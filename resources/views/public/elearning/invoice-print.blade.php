@@ -129,13 +129,13 @@ Status Akses Pembelajaran
 <tbody class="divide-y divide-gray-100">
 <tr>
 <td class="py-4 pr-4">
-<strong class="font-bold text-gray-900 text-sm block">{{ $transaction->elearning->judul ?? 'Kursus Fotografi' }}</strong>
-<span class="text-[11px] text-gray-500">Akses video pembelajaran, kuis evaluasi kurikulum, dan sertifikat kelulusan digital</span>
+<strong class="font-bold text-gray-900 text-xs block">{{ $transaction->elearning->judul ?? 'Kursus Fotografi' }}</strong>
+<span class="text-xs text-gray-500">Akses video pembelajaran, kuis evaluasi kurikulum, dan sertifikat kelulusan digital</span>
 </td>
 <td class="py-4 px-4 text-center capitalize font-bold text-gray-700">
 {{ $transaction->elearning->tingkat ?? 'Semua Tingkat' }}
 </td>
-<td class="py-4 pl-4 text-right font-black text-gray-900 font-mono text-sm">
+<td class="py-4 pl-4 text-right font-black text-gray-900 font-mono text-xs">
 Rp {{ number_format($transaction->nominal, 0, ',', '.') }}
 </td>
 </tr>

@@ -56,16 +56,22 @@ class DashboardController extends Controller
             $totalNetRevenue = (int)(Contract::where('id_photographer', $photographerId)->sum('jumlah') * 0.9);
         }
 
-        // Card 2: Total Order Booking Masuk & Selesai
+        // Card 2: Total Order Booking Masuk & Selesai (Tervalidasi Klien)
         $totalBookingsCount = Contract::where('id_photographer', $photographerId)->count();
         $completedBookingsCount = Contract::where('id_photographer', $photographerId)
             ->where('status_contract', 'completed')
+            ->where('is_validated_client', true)
             ->count();
 
-        // Card 3: Rating & Kepuasan Klien
-        $testimonials = Testimonial::where('id_photographer', $photographerId)->get();
+        // Card 3: Rating & Kepuasan Klien (Hanya Ulasan Klien Aktif / Tidak Disembunyikan)
+        $testimonials = Testimonial::where('id_photographer', $photographerId)
+            ->where('is_hidden', false)
+            ->get();
         $totalReviews = $testimonials->count();
         $avgRating = $totalReviews > 0 ? round($testimonials->avg('rating'), 1) : 0;
+
+        // Metrik Kecepatan Respon terhadap Klien (Chat + Ketepatan Konfirmasi Booking)
+        $responseStats = $photographer->getClientResponseStats();
 
         // Card 4: Katalog & Portofolio Aktif
         $totalServices = PhotographerService::where('id_photographer', $photographerId)->count();
@@ -165,6 +171,7 @@ class DashboardController extends Controller
             'completedBookingsCount',
             'avgRating',
             'totalReviews',
+            'responseStats',
             'totalServices',
             'totalPortfolios',
             'months',

@@ -33,9 +33,9 @@ class PhotographerWorkingHour extends Model
     }
 
     /**
-     * Inisialisasi jadwal default 7 hari jika fotografer belum memiliki konfigurasi jam kerja.
+     * Inisialisasi jadwal default 7 hari (default libur/OFF sampai fotografer mengaktifkannya).
      */
-    public static function initializeDefaults(int $photographerId): array
+    public static function initializeDefaults(int $photographerId, bool $defaultOpen = false): array
     {
         $days = [
             1 => 'Senin',
@@ -56,7 +56,7 @@ class PhotographerWorkingHour extends Model
                 ],
                 [
                     'day_name' => $dayName,
-                    'is_open' => true,
+                    'is_open' => $defaultOpen,
                     'is_24_hours' => false,
                     'jam_buka' => '08:00:00',
                     'jam_tutup' => '17:00:00',

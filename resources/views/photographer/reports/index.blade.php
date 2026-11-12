@@ -29,26 +29,26 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Net Income -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Omzet Bersih Fotografer</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalNetIncome, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Omzet Bersih Fotografer</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalNetIncome, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 2: Dana Tertahan -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Dana Tertahan</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowPending, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Dana Tertahan</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($totalEscrowPending, 0, ',', '.') }}</h2>
         </div>
 
         <!-- Card 3: Completed Count -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Foto Selesai</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $completedCount }} Sesi</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Foto Selesai</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $completedCount }} Sesi</h2>
         </div>
 
         <!-- Card 4: Avg Revenue per Session -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rata-Rata / Sesi</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($avgRevenuePerSession, 0, ',', '.') }}</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rata-Rata / Sesi</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">Rp {{ number_format($avgRevenuePerSession, 0, ',', '.') }}</h2>
         </div>
     </div>
 
@@ -122,10 +122,10 @@
     </div>
 
     <!-- Transaction List Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Table Header & Status Filter Tabs -->
-        <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-5 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Riwayat Pencairan Dana</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Daftar lengkap pendapatan per pesanan sesi foto</p>
@@ -174,13 +174,13 @@
                             <!-- Invoice Code -->
                             <td class="py-4 px-4 sm:px-6">
                                 <span class="font-extrabold text-gray-900 dark:text-white font-mono">{{ $invCode }}</span>
-                                <div class="text-[10px] text-gray-400 mt-0.5">{{ $c->created_at->format('d M Y, H:i') }}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">{{ $c->created_at->format('d M Y, H:i') }}</div>
                             </td>
 
                             <!-- Klien & Layanan -->
                             <td class="py-4 px-4 sm:px-6">
                                 <div class="font-bold text-gray-900 dark:text-white">{{ $c->client->nama ?? 'Klien' }}</div>
-                                <div class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">
                                     {{ $c->bookingDetail->service->nama_layanan ?? 'Paket Foto Custom' }}
                                 </div>
                             </td>
@@ -201,7 +201,7 @@
                             </td>
 
                             <!-- Pendapatan Bersih -->
-                            <td class="py-4 px-4 sm:px-6 font-black text-gray-900 dark:text-white text-sm">
+                            <td class="py-4 px-4 sm:px-6 font-black text-gray-900 dark:text-white">
                                 Rp {{ number_format($netPayout, 0, ',', '.') }}
                             </td>
 
@@ -212,7 +212,7 @@
                                         Sudah Ditransfer
                                     </span>
                                     @if($c->payout_at)
-                                        <p class="text-[10px] text-gray-400 mt-0.5">{{ $c->payout_at->format('d M Y, H:i') }}</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">{{ $c->payout_at->format('d M Y, H:i') }}</p>
                                     @endif
                                 @elseif($c->status_payout === 'ready')
                                     @if($c->payout_requested_at)
@@ -220,7 +220,7 @@
                                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                                                 Menunggu Transfer Admin
                                             </span>
-                                            <p class="text-[10px] text-gray-400">Diajukan {{ $c->payout_requested_at->format('d M, H:i') }}</p>
+                                            <p class="text-xs text-gray-400">Diajukan {{ $c->payout_requested_at->format('d M, H:i') }}</p>
                                         </div>
                                     @else
                                         <div class="space-y-1.5">
@@ -237,7 +237,7 @@
                                                         'bank_holder' => $photographer->atas_nama_rekening,
                                                         'action_url' => route('photographer.reports.request-payout', $c->id)
                                                     ]) }})"
-                                                    class="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-[11px] rounded-lg shadow-2xs transition inline-block cursor-pointer">
+                                                    class="px-2.5 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition inline-block cursor-pointer">
                                                 Tarik Saldo
                                             </button>
                                         </div>
@@ -282,17 +282,17 @@
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
          style="display: none;">
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-5"
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col gap-5"
              @click.away="closePayoutModal()">
             
             <!-- Modal Title & Subtitle (Centered, No Icon on Title - Rule #59) -->
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
                 <h3 class="text-lg font-black text-gray-900 dark:text-white">Ajukan Pencairan Dana Payout</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Pastikan informasi rekening bank Anda sudah sesuai sebelum melanjutkan pengajuan.</p>
             </div>
 
             <!-- Details Box -->
-            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 space-y-3 text-xs">
+            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 flex flex-col gap-3 text-xs">
                 <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
                     <span class="text-gray-500 dark:text-gray-400">Nomor Kontrak:</span>
                     <span class="font-bold text-gray-900 dark:text-white font-mono" x-text="payoutData.contract_code"></span>
@@ -301,7 +301,7 @@
                     <span class="text-gray-500 dark:text-gray-400">Nominal Bersih (90%):</span>
                     <span class="font-black text-emerald-600 dark:text-emerald-400 text-sm" x-text="payoutData.amount"></span>
                 </div>
-                <div class="space-y-1 pt-1">
+                <div class="flex flex-col gap-1">
                     <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Rekening Bank Tujuan:</span>
                     <template x-if="payoutData.bank_name && payoutData.bank_account">
                         <div class="font-semibold text-gray-900 dark:text-white leading-relaxed">
@@ -320,7 +320,7 @@
             <!-- Modal Action Buttons (Centered, Max 2 Buttons - Rule #59) -->
             <form :action="payoutData.action_url" method="POST" novalidate>
                 @csrf
-                <div class="flex items-center justify-center gap-3 pt-2">
+                <div class="flex items-center justify-center gap-3">
                     <button type="button" 
                             @click="closePayoutModal()"
                             class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">

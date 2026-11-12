@@ -53,32 +53,39 @@
                         Kategori <span class="text-rose-500">*</span>
                     </label>
                     @php
-                        $selectedCatId = old('id_kategori', '');
+                        $categoriesCount = $categories->count();
+                        $defaultCatId = $categoriesCount === 1 ? $categories->first()->id : '';
+                        $rawCatId = old('id_kategori', $defaultCatId);
+                        $selectedCatId = '';
                         $selectedCatName = '';
                         foreach($categories as $cat) {
-                            if ($cat->id == $selectedCatId) {
+                            if ((string) $cat->id === (string) $rawCatId) {
+                                $selectedCatId = $cat->id;
                                 $selectedCatName = $cat->nama_kategori;
                                 break;
                             }
                         }
                         if (!$selectedCatName) {
-                            $selectedCatName = '-- Pilih Kategori --';
+                            $selectedCatName = $categoriesCount === 0 ? 'Belum ada kategori di profil' : '-- Pilih Kategori --';
                         }
                     @endphp
                     <div class="relative w-full">
                         <input type="hidden" name="id_kategori" :value="form.id_kategori">
-                        <button @click="catOpen = !catOpen" type="button" 
+                        <button @click="if (hasCategories) catOpen = !catOpen" type="button" 
                                 x-ref="fieldKategori"
-                                class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs cursor-pointer transition outline-none"
-                                :class="touched.id_kategori && errors.id_kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'">
+                                :disabled="!hasCategories"
+                                class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs transition outline-none"
+                                :class="!hasCategories
+                                    ? 'opacity-60 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                                    : (touched.id_kategori && errors.id_kategori ? 'border-red-400 focus:ring-red-400 cursor-pointer' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer')">
                             <span x-text="form.selectedCatName" :class="form.id_kategori ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
                             <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="catOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <div x-show="catOpen" @click.away="catOpen = false" x-transition 
+                        <div x-show="catOpen && hasCategories" @click.away="catOpen = false" x-transition 
                              class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
                             @foreach($categories as $cat)
                                 <button type="button" 
-                                        @click="selectCategory('{{ $cat->id }}', '{{ addslashes($cat->nama_kategori) }}')" 
+                                        @click="selectCategory('{{ $cat->id }}', @js($cat->nama_kategori))" 
                                         class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
                                         :class="form.id_kategori == '{{ $cat->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
                                     <span>{{ $cat->nama_kategori }}</span>
@@ -87,6 +94,11 @@
                             @endforeach
                         </div>
                     </div>
+                    @if($categoriesCount === 0)
+                        <p class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-1">
+                            Pilih kategori di <a href="{{ route('photographer.profile') }}" class="text-amber-600 dark:text-amber-400 font-bold hover:underline">Profil</a> terlebih dahulu.
+                        </p>
+                    @endif
                     <p x-show="touched.id_kategori && errors.id_kategori" x-text="errors.id_kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
             </div>
@@ -145,9 +157,11 @@
                                accept="image/png, image/jpeg, image/webp"
                                @change="filesChosen"
                                class="sr-only">
-                        <p class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
-                            <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto dari perangkat</span>
-                            <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                        <svg class="w-7 h-7 sm:w-8 sm:h-8 transition-colors" :class="isDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        <p class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">
+                            Seret dan lepas di sini
                         </p>
                         <p class="text-xs text-gray-400 dark:text-gray-500 font-medium max-w-md leading-relaxed">
                             Minimal 4 foto sekaligus atau bertahap. Format JPG, PNG, WEBP maksimal 20 MB per file.
@@ -237,14 +251,15 @@ function portfolioFormApp() {
         uploadNotice: '',
         isDragging: false,
         catOpen: false,
+        hasCategories: {{ $categoriesCount > 0 ? 'true' : 'false' }},
         lightboxOpen: false,
         lightboxIdx: 0,
         lightboxUrl: '',
         lightboxCaption: '',
         form: {
             judul: @js(old('judul', '')),
-            id_kategori: @js(old('id_kategori', '')),
-            selectedCatName: @js($selectedCatName ?? '-- Pilih Kategori --'),
+            id_kategori: @js($selectedCatId),
+            selectedCatName: @js($selectedCatName),
             deskripsi: @js(old('deskripsi', ''))
         },
         touched: {
@@ -254,10 +269,10 @@ function portfolioFormApp() {
             foto: {{ $errors->has('foto_files') ? 'true' : 'false' }}
         },
         errors: {
-            judul: '{{ $errors->first('judul') ?: '' }}',
-            id_kategori: '{{ $errors->first('id_kategori') ?: '' }}',
-            deskripsi: '{{ $errors->first('deskripsi') ?: '' }}',
-            foto: '{{ $errors->first('foto_files') ?: '' }}'
+            judul: @js($errors->first('judul') ?: ''),
+            id_kategori: @js($errors->first('id_kategori') ?: ''),
+            deskripsi: @js($errors->first('deskripsi') ?: ''),
+            foto: @js($errors->first('foto_files') ?: '')
         },
         filesChosen(event) {
             this.addFiles(event.target.files);
@@ -357,7 +372,9 @@ function portfolioFormApp() {
             }
         },
         validateCategory() {
-            if (!this.form.id_kategori) {
+            if (!this.hasCategories) {
+                this.errors.id_kategori = 'Pilih kategori di profil terlebih dahulu.';
+            } else if (!this.form.id_kategori) {
                 this.errors.id_kategori = 'Kategori portofolio wajib dipilih.';
             } else {
                 this.errors.id_kategori = '';

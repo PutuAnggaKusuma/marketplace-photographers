@@ -374,13 +374,9 @@
               
               <!-- Rating Badge Top-Right -->
               <div class="absolute top-4 right-4 bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                @if($rating)
-                  <svg class="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                  <span>{{ $rating }}</span>
-                  <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
-                @else
-                  <span class="text-amber-500 text-[11px] font-bold">Baru</span>
-                @endif
+                <svg class="w-3.5 h-3.5 {{ $rating ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600' }} fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <span>{{ $rating ?? 0 }}</span>
+                <span class="text-[10px] text-gray-400 font-medium">({{ $reviewCount }})</span>
               </div>
             </div>
 
@@ -433,9 +429,7 @@
                     @endif
                     @if($m['type'] === 'rating')
                       <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                        @if($rating)
-                          <span class="text-amber-500">★</span>
-                        @endif
+                        <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
                         <span>{{ $m['text'] }}</span>
                       </span>
                     @elseif($m['type'] === 'fast_response')
@@ -526,7 +520,7 @@
          aria-modal="true">
       <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeLoginModal()"></div>
       <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 space-y-4" @click.stop>
+        <div class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-center shadow-xl transition-all sm:my-8 w-full max-w-[420px] border border-gray-200 dark:border-gray-700 p-7 sm:p-8 flex flex-col gap-4" @click.stop>
           
           <!-- Plain Close Button Absolute Top Right (SVG Vector per Rule #6 & #59) -->
           <button type="button" @click="closeLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-white transition cursor-pointer p-1" aria-label="Tutup">
@@ -543,7 +537,7 @@
           </p>
 
           <!-- Action Button -->
-          <div class="pt-1">
+          <div>
             <a :href="loginRedirectUrl ? '{{ route('login') }}?redirect=' + encodeURIComponent(loginRedirectUrl) : '{{ route('login') }}'" class="w-full py-3 px-4 bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs sm:text-sm rounded-xl shadow-xs transition hover:scale-[1.01] flex items-center justify-center cursor-pointer">
               Masuk ke Akun
             </a>

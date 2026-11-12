@@ -125,16 +125,9 @@
                 </div>
               @endif
               <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate">
-                    {{ $photographer->nama }}
-                  </a>
-                  @if($photographer->is_verified || ($photographer->status_verifikasi ?? null) === 'verified')
-                    <span title="Mitra Terverifikasi" class="text-amber-500 inline-flex items-center">
-                      <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    </span>
-                  @endif
-                </div>
+                <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate block">
+                  {{ $photographer->nama }}
+                </a>
               </div>
             </div>
 
@@ -157,7 +150,7 @@
                   @endif
                   @if($m['type'] === 'rating')
                     <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                      <span class="text-amber-500">★</span>
+                      <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
                       <span>{{ $m['text'] }}</span>
                     </span>
                   @elseif($m['type'] === 'fast_response')
@@ -169,8 +162,8 @@
               </div>
             @else
               <div class="flex items-center gap-1 text-xs font-bold text-gray-900 dark:text-white">
-                <span class="text-amber-500">★</span>
-                <span>{{ $rating }} ({{ $reviewCount }} ulasan)</span>
+                <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
+                <span>{{ number_format((float) ($rating ?? 0), 1) }} ({{ $reviewCount }} ulasan)</span>
               </div>
             @endif
 

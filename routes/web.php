@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    $testimonials = \App\Models\Testimonial::with(['client.user', 'photographer'])->latest()->take(10)->get();
+    $testimonials = \App\Models\Testimonial::where('is_hidden', false)->with(['client.user', 'photographer'])->latest()->take(10)->get();
     $categories = \App\Models\Category::all();
-    $featuredPhotographers = \App\Models\RolePhotographer::published()->with(['user', 'province', 'city', 'categories', 'services', 'portfolios.medias', 'testimonials'])
+    $featuredPhotographers = \App\Models\RolePhotographer::featuredThisMonth()->with([
+        'user', 'province', 'city', 'categories', 'services', 'portfolios.medias',
+        'testimonials' => fn($q) => $q->where('is_hidden', false),
+    ])
         ->take(4)
         ->get();
     $totalPhotographers = \App\Models\RolePhotographer::published()->count();
@@ -30,7 +33,7 @@ Route::get('/', function () {
     if ($totalSessions === 0) {
         $totalSessions = \App\Models\Contract::count();
     }
-    $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
+    $avgRating = \App\Models\Testimonial::where('is_hidden', false)->count() > 0 ? number_format(\App\Models\Testimonial::where('is_hidden', false)->avg('rating'), 1) : '-';
     $heroPhotos = \App\Models\PortfolioMedia::whereHas('portfolio.photographer', function ($q) {
         $q->published();
     })->take(5)->pluck('media')->toArray();

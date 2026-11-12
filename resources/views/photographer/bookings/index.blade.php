@@ -384,11 +384,11 @@
 
 
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Semua Order</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Semua Order</span>
 
 
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Order</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Order</div>
 
 
 
@@ -408,11 +408,11 @@
 
 
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Konfirmasi</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Konfirmasi</span>
 
 
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Order</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Order</div>
 
 
 
@@ -432,11 +432,11 @@
 
 
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Dikonfirmasi</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Dikonfirmasi</span>
 
 
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['confirmed'] ?? 0 }} Order</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['confirmed'] ?? 0 }} Order</div>
 
 
 
@@ -456,11 +456,11 @@
 
 
 
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Selesai</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Selesai</span>
 
 
 
-            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Order</div>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Order</div>
 
 
 
@@ -484,7 +484,7 @@
 
 
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
 
 
@@ -496,7 +496,7 @@
 
 
 
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
 
 
@@ -764,21 +764,21 @@
 
 
 
-                                        <span class="text-[10px] font-mono font-bold text-gray-400">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
+                                        <span class="text-xs font-mono font-bold text-gray-400">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
 
 
 
-                                        <h4 class="font-black text-gray-900 dark:text-white text-sm tracking-tight">{{ $client->nama ?? 'Klien' }}</h4>
+                                        <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight">{{ $client->nama ?? 'Klien' }}</h4>
 
 
 
-                                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $client->nomor_telepon ?: '-' }}</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 font-medium">{{ $client->nomor_telepon ?: '-' }}</p>
 
                                         @if($client && $client->receivedPhotographerReviews && $client->receivedPhotographerReviews->count() > 0)
 
-                                            <div class="flex items-center gap-1 text-[10px] font-extrabold text-amber-600 dark:text-amber-400 pt-0.5" title="Reputasi Klien berdasarkan {{ $client->receivedPhotographerReviews->count() }} penilaian fotografer">
+                                            <div class="flex items-center gap-1 text-xs font-extrabold text-amber-600 dark:text-amber-400 pt-0.5" title="Reputasi Klien berdasarkan {{ $client->receivedPhotographerReviews->count() }} penilaian fotografer">
 
-                                                <svg class="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                <svg class="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
 
                                                 <span>{{ $client->averagePhotographerRating }} ({{ $client->receivedPhotographerReviews->count() }} ulasan)</span>
 
@@ -814,7 +814,7 @@
 
 
 
-                                        <div class="text-[11px] text-gray-500 dark:text-gray-400 space-y-0.5">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
 
 
 
@@ -858,7 +858,7 @@
 
 
 
-                                                <div class="mt-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-[11px] font-medium space-y-0.5">
+                                                <div class="mt-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs font-medium space-y-0.5">
 
 
 
@@ -866,11 +866,11 @@
 
 
 
-                                                    <span class="block text-[10px] text-gray-600 dark:text-gray-400">Jadwal baru: {{ \Carbon\Carbon::parse($detail->reschedule_date)->translatedFormat('d F Y') }} • {{ substr($detail->reschedule_time, 0, 5) }} WIB</span>
+                                                    <span class="block text-xs text-gray-600 dark:text-gray-400">Jadwal baru: {{ \Carbon\Carbon::parse($detail->reschedule_date)->translatedFormat('d F Y') }} • {{ substr($detail->reschedule_time, 0, 5) }} WIB</span>
 
 
 
-                                                    <span class="block text-[10px] text-gray-500 italic">"{{ $detail->reschedule_reason }}"</span>
+                                                    <span class="block text-xs text-gray-500 italic">"{{ $detail->reschedule_reason }}"</span>
 
 
 
@@ -882,7 +882,7 @@
 
 
 
-                                                <div class="mt-2 p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-[11px] space-y-1.5">
+                                                <div class="mt-2 p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-xs space-y-1.5">
 
 
 
@@ -898,7 +898,7 @@
 
 
 
-                                                        <span class="text-[10px] text-gray-600 dark:text-gray-400 block mt-0.5">Alasan: "{{ $detail->reschedule_reason }}"</span>
+                                                        <span class="text-xs text-gray-600 dark:text-gray-400 block mt-0.5">Alasan: "{{ $detail->reschedule_reason }}"</span>
 
 
 
@@ -922,7 +922,7 @@
 
 
 
-                                                            <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-[10px] rounded-lg shadow-2xs transition cursor-pointer">
+                                                            <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
 
 
 
@@ -950,7 +950,7 @@
 
 
 
-                                                            <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-[10px] rounded-lg transition cursor-pointer">
+                                                            <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
 
 
 
@@ -1002,7 +1002,7 @@
 
 
 
-                                    <span class="text-sm font-black text-gray-900 dark:text-white">
+                                    <span class="text-xs font-black text-gray-900 dark:text-white">
 
 
 
@@ -1014,7 +1014,7 @@
 
 
 
-                                    <span class="text-[11px] text-gray-400 block mt-0.5">
+                                    <span class="text-xs text-gray-400 block mt-0.5">
 
 
 
@@ -1389,11 +1389,7 @@
 
 
 
-         <div class="bg-white dark:bg-gray-800 max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6">
-
-
-
-             
+         <div class="bg-white dark:bg-gray-800 max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6">
 
 
 
@@ -1401,7 +1397,7 @@
 
 
 
-             <div class="space-y-1 text-center">
+             <div class="flex flex-col gap-1 text-center">
 
 
 
@@ -1458,7 +1454,7 @@
                        }"
                        @submit="submitGallery($event)"
                        novalidate
-                       class="space-y-4">
+                       class="flex flex-col gap-4">
                  @csrf
                  <div>
                      <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Tautan URL Google Drive / Cloud Gallery <span class="text-rose-500">*</span></label>
@@ -1492,7 +1488,7 @@
 
 
 
-                 <div class="flex items-center justify-center gap-3 pt-2">
+                 <div class="flex items-center justify-center gap-3">
 
 
 
@@ -1668,7 +1664,7 @@
 
 
 
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white text-center">
 
 
 
@@ -1732,7 +1728,7 @@
                       }"
                       @submit="submitCancel($event)"
                       novalidate
-                      class="mt-5 space-y-4">
+                      class="mt-5 flex flex-col gap-4">
                     @csrf
                     <input type="hidden" name="status" value="cancelled">
                     
@@ -1762,7 +1758,7 @@
 
 
 
-                    <div class="pt-2 flex items-center justify-center gap-3">
+                    <div class="flex items-center justify-center gap-3">
 
 
 
@@ -1946,7 +1942,7 @@
 
 
 
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white text-center">
 
 
 
@@ -2035,7 +2031,7 @@
                       }"
                       @submit="submitReschedule($event)"
                       novalidate
-                      class="mt-5 space-y-4 text-left">
+                      class="mt-5 flex flex-col gap-4 text-left">
                     @csrf
                     
                     <!-- Grid 2 Kolom untuk Field Pendek (Rule #73) -->
@@ -2232,7 +2228,7 @@
 
                     <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59, #74, #76) -->
 
-                    <div class="pt-2 flex items-center justify-center gap-3">
+                    <div class="flex items-center justify-center gap-3">
 
 
 
@@ -2420,7 +2416,7 @@
 
 
 
-                <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center" id="rate-client-title">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white text-center" id="rate-client-title">
 
 
 
@@ -2452,7 +2448,7 @@
 
 
 
-                <form :action="'/photographer/bookings/' + rateContractId + '/rate-client'" method="POST" novalidate @submit="submitRateClient($event)" class="mt-5 space-y-4 text-left">
+                <form :action="'/photographer/bookings/' + rateContractId + '/rate-client'" method="POST" novalidate @submit="submitRateClient($event)" class="mt-5 flex flex-col gap-4 text-left">
 
 
 
@@ -2468,7 +2464,7 @@
 
 
 
-                    <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-center space-y-2">
+                    <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-center flex flex-col gap-2">
 
 
 
@@ -2548,7 +2544,7 @@
 
 
 
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 space-y-1.5"
+                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
 
                              x-data="{
 
@@ -2676,7 +2672,7 @@
 
 
 
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 space-y-1.5"
+                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
 
                              x-data="{
 
@@ -2804,7 +2800,7 @@
 
 
 
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 space-y-1.5"
+                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
 
                              x-data="{
 
@@ -2984,7 +2980,7 @@
 
                     <p x-show="rateFormError" x-text="rateFormError" x-cloak class="text-[11px] font-bold text-red-500 text-center"></p>
 
-                    <div class="pt-2 flex items-center justify-center gap-3">
+                    <div class="flex items-center justify-center gap-3">
 
 
 

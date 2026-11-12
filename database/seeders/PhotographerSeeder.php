@@ -75,7 +75,10 @@ class PhotographerSeeder extends Seeder
 
         $portAlex1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $alexPhoto->id, 'judul' => 'Romantic Sunset at Melasti Beach'],
-            ['deskripsi' => 'Sesi prewedding momen matahari terbenam dengan gaun putih dan pemandangan tebing Melasti Bali.']
+            [
+                'id_kategori' => $catWedding->id,
+                'deskripsi' => 'Sesi prewedding momen matahari terbenam dengan gaun putih dan pemandangan tebing Melasti Bali.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portAlex1->id, 'media' => 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80']);
@@ -126,7 +129,10 @@ class PhotographerSeeder extends Seeder
 
         $portBudi1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $budiPhoto->id, 'judul' => 'Jakarta Live Music Festival 2025'],
-            ['deskripsi' => 'Aksi panggung musisi papan atas Indonesia dalam konser musik outdoor skala besar.']
+            [
+                'id_kategori' => $catEvent->id,
+                'deskripsi' => 'Aksi panggung musisi papan atas Indonesia dalam konser musik outdoor skala besar.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi1->id, 'media' => 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80']);
@@ -135,7 +141,10 @@ class PhotographerSeeder extends Seeder
 
         $portBudi2 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $budiPhoto->id, 'judul' => 'Nusantara Tech Summit dan Gala Dinner 2025'],
-            ['deskripsi' => 'Dokumentasi konferensi teknologi nasional dan malam apresiasi tahunan di Jakarta Convention Center.']
+            [
+                'id_kategori' => $catEvent->id,
+                'deskripsi' => 'Dokumentasi konferensi teknologi nasional dan malam apresiasi tahunan di Jakarta Convention Center.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi2->id, 'media' => 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80']);
@@ -144,7 +153,10 @@ class PhotographerSeeder extends Seeder
 
         $portBudi3 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $budiPhoto->id, 'judul' => 'Soundwave Indie Showcase Senayan'],
-            ['deskripsi' => 'Sorotan aksi panggung intim musisi indie dan ekspresi otentik penonton di Senayan Park.']
+            [
+                'id_kategori' => $catEvent->id,
+                'deskripsi' => 'Sorotan aksi panggung intim musisi indie dan ekspresi otentik penonton di Senayan Park.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBudi3->id, 'media' => 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80']);
@@ -194,7 +206,10 @@ class PhotographerSeeder extends Seeder
 
         $portClara1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $claraPhoto->id, 'judul' => 'Culinary Product Shoot for Bu Lilik'],
-            ['deskripsi' => 'Pencahayaan makanan natural untuk kemasan kuliner tradisional Indonesia.']
+            [
+                'id_kategori' => $catProduct->id,
+                'deskripsi' => 'Pencahayaan makanan natural untuk kemasan kuliner tradisional Indonesia.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portClara1->id, 'media' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80']);
@@ -243,7 +258,10 @@ class PhotographerSeeder extends Seeder
 
         $portDewa1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $dewaPhoto->id, 'judul' => 'Portrait Wisuda & Keluarga Taman Sari'],
-            ['deskripsi' => 'Dokumentasi potret wisuda dan keluarga di Yogyakarta dengan pencahayaan alami dan komposisi klasik.']
+            [
+                'id_kategori' => $catPortrait->id,
+                'deskripsi' => 'Dokumentasi potret wisuda dan keluarga di Yogyakarta dengan pencahayaan alami dan komposisi klasik.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portDewa1->id, 'media' => 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1200&q=80']);
@@ -292,7 +310,10 @@ class PhotographerSeeder extends Seeder
 
         $portBali1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $baliPhoto->id, 'judul' => 'Exploring Nusa Penida & Uluwatu Cliff'],
-            ['deskripsi' => 'Sesi foto liburan santai di pesisir Bali dengan komposisi lanskap tropis dan warna natural.']
+            [
+                'id_kategori' => $catTravel->id,
+                'deskripsi' => 'Sesi foto liburan santai di pesisir Bali dengan komposisi lanskap tropis dan warna natural.',
+            ]
         );
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80']);
         PortfolioMedia::firstOrCreate(['id_portofolio' => $portBali1->id, 'media' => 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=1200&q=80']);
@@ -301,7 +322,7 @@ class PhotographerSeeder extends Seeder
 
         // Tandai 5 fotografer demo sebagai terverifikasi profil, jadwal terkonfirmasi, dan disetujui tayang
         foreach ([$alexPhoto, $budiPhoto, $claraPhoto, $dewaPhoto, $baliPhoto] as $seededPhoto) {
-            PhotographerWorkingHour::initializeDefaults($seededPhoto->id);
+            PhotographerWorkingHour::initializeDefaults($seededPhoto->id, true);
             $seededPhoto->update([
                 'is_onboarded' => true,
                 'is_verified' => true,
@@ -316,42 +337,32 @@ class PhotographerSeeder extends Seeder
             ]);
         }
 
-        // Seed professional FAQs for each photographer in database (Rule #94 Compliant)
+        // Seed photographer-specific FAQs for demo photographers (platform rules are auto-injected via Opsi A)
         $defaultFaqs = [
             [
-                'pertanyaan' => 'Bagaimana alur reservasi sesi foto di LensMatch?',
-                'jawaban' => 'Pilih paket layanan yang sesuai di profil fotografer ini, tentukan tanggal yang tersedia pada kalender, lalu kirimkan rincian reservasi. Fotografer akan mengonfirmasi jadwal pemotretan Anda maksimal 1x24 jam.',
+                'pertanyaan' => 'Berapa lama estimasi proses editing dan pengiriman hasil foto?',
+                'jawaban' => 'Editing dasar dan pemilihan warna umumnya selesai dalam 3 hingga 5 hari kerja. Tautan galeri resolusi tinggi dikirim langsung setelah proses editing tuntas.',
                 'urutan' => 1,
             ],
             [
-                'pertanyaan' => 'Bagaimana sistem pembayaran dan keamanan transaksi?',
-                'jawaban' => 'Pembayaran dilakukan secara resmi melalui transfer bank yang diverifikasi otomatis oleh sistem. Dana pembayaran Anda diamankan oleh sistem platform LensMatch dan baru diteruskan ke fotografer setelah sesi pemotretan selesai.',
+                'pertanyaan' => 'Apakah tarif paket sudah termasuk tiket masuk lokasi atau izin pemotretan?',
+                'jawaban' => 'Tarif paket hanya mencakup jasa pemotretan dan editing sesuai rincian paket. Biaya tiket masuk area wisata, izin lokasi berbayar, atau sewa properti tambahan ditanggung oleh klien.',
                 'urutan' => 2,
             ],
             [
-                'pertanyaan' => 'Kapan jadwal sesi foto saya dinyatakan resmi terkonfirmasi?',
-                'jawaban' => 'Jadwal pemotretan resmi terkonfirmasi setelah fotografer menyetujui tanggal reservasi Anda dan pembayaran uang muka (DP 30%) atau pembayaran penuh berhasil terverifikasi oleh sistem.',
+                'pertanyaan' => 'Bagaimana ketentuan biaya transportasi untuk lokasi di luar kota?',
+                'jawaban' => 'Pemotretan di dalam area kota domisili fotografer tidak dikenakan biaya tambahan. Untuk lokasi luar kota atau luar pulau, biaya akomodasi dapat didiskusikan terlebih dahulu melalui fitur Chat sebelum memesan.',
                 'urutan' => 3,
             ],
             [
-                'pertanyaan' => 'Apakah saya bisa berdiskusi mengenai konsep atau tema pemotretan sebelum booking?',
-                'jawaban' => 'Tentu saja. Anda dapat menekan tombol Chat pada profil ini untuk mendiskusikan konsep visual, referensi moodboard, busana, maupun rekomendasi spot foto secara langsung sebelum melakukan pemesanan.',
+                'pertanyaan' => 'Berapa kali batas revisi penyesuaian warna pada hasil foto?',
+                'jawaban' => 'Klien mendapatkan kesempatan revisi penyesuaian tone warna atau pencahayaan ringan maksimal 2 kali dalam waktu 7 hari setelah hasil diterima, tanpa perubahan struktur konsep atau manipulasi objek berat.',
                 'urutan' => 4,
             ],
             [
-                'pertanyaan' => 'Bagaimana jika saya perlu mengajukan jadwal ulang (reschedule) sesi foto?',
-                'jawaban' => 'Anda dapat mengajukan permohonan reschedule melalui menu Reservasi Saya dengan memilih tanggal baru yang masih tersedia pada kalender fotografer. Jadwal baru berlaku setelah disepakati kedua belah pihak.',
+                'pertanyaan' => 'Bagaimana ketentuan jika turun hujan saat pemotretan luar ruangan?',
+                'jawaban' => 'Jika cuaca tidak memungkinkan di area terbuka, sesi dapat dialihkan ke area berteduh di sekitar lokasi, digeser jam pelaksanaannya pada hari yang sama, atau diajukan perubahan jadwal sesuai kesepakatan.',
                 'urutan' => 5,
-            ],
-            [
-                'pertanyaan' => 'Berapa lama proses retouching dan bagaimana saya menerima hasil foto?',
-                'jawaban' => 'Proses retouching umumnya memerlukan waktu 3 hingga 7 hari kerja tergantung paket layanan. Setelah selesai, fotografer akan mengunggah tautan album resolusi tinggi yang dapat Anda akses di Galeri Hasil Foto Saya.',
-                'urutan' => 6,
-            ],
-            [
-                'pertanyaan' => 'Bagaimana jika terjadi kendala cuaca buruk pada hari pemotretan outdoor?',
-                'jawaban' => 'Jika terjadi hujan lebat atau cuaca ekstrem pada lokasi outdoor, Anda dan fotografer dapat menyepakati penyesuaian jam pemotretan di hari yang sama atau penjadwalan ulang sesi (reschedule) tanpa biaya tambahan.',
-                'urutan' => 7,
             ],
         ];
 

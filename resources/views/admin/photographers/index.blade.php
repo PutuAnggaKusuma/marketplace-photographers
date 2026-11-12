@@ -27,34 +27,34 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Mitra -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Mitra Fotografer</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStudios }} Fotografer</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Mitra Fotografer</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStudios }} Fotografer</h2>
         </div>
 
         <!-- Card 2: Tayang di Katalog -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Tayang di Katalog</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPublished }} Fotografer</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Tayang di Katalog</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPublished }} Fotografer</h2>
         </div>
 
         <!-- Card 3: Menunggu Review -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Review</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPending }} Fotografer</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Review</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalPending }} Fotografer</h2>
         </div>
 
         <!-- Card 4: Ditolak -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak</span>
-            <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected }} Fotografer</h2>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Ditolak</span>
+            <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalRejected }} Fotografer</h2>
         </div>
     </div>
 
     <!-- Data Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
         <!-- Search Toolbar & Status Filters (Alpine.js Custom Floating Dropdown) -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <!-- Filter Dropdowns di Kiri -->
             <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <!-- 1. Dropdown Filter Status Verifikasi -->
@@ -192,8 +192,8 @@
                                         </div>
                                     @endif
                                     <div class="min-w-0">
-                                        <h4 class="font-extrabold text-gray-900 dark:text-white truncate">{{ $photo->nama }}</h4>
-                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                        <h4 class="text-xs font-extrabold text-gray-900 dark:text-white truncate">{{ $photo->nama }}</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                                             Pemilik: {{ $photo->user->nama ?? '-' }} ({{ $photo->user->email ?? '-' }})
                                         </p>
                                     </div>
@@ -206,7 +206,7 @@
                                     <div class="font-bold text-gray-800 dark:text-gray-200">
                                         {{ $photo->city->name }}
                                     </div>
-                                    <div class="text-[10px] text-gray-400">
+                                    <div class="text-xs text-gray-400">
                                         {{ $photo->province ? $photo->province->name : '' }}
                                     </div>
                                 @else
@@ -217,11 +217,11 @@
                             <!-- Kategori Spesialisasi -->
                             <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
                                 @if($photo->categories && $photo->categories->isNotEmpty())
-                                    <p class="font-medium text-gray-700 text-theme-sm dark:text-gray-300">
+                                    <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
                                         {{ $photo->categories->pluck('nama_kategori')->join(', ') }}
                                     </p>
                                 @else
-                                    <span class="text-gray-400 dark:text-gray-500 font-normal text-theme-sm">
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 font-normal">
                                         Belum diatur
                                     </span>
                                 @endif
@@ -298,9 +298,9 @@
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
          @keydown.escape.window="deleteModalOpen = false">
         <div @click.away="deleteModalOpen = false" 
-             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5">
+             class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-2xl overflow-hidden p-6 sm:p-7 flex flex-col gap-5">
             
-            <div class="text-center space-y-1">
+            <div class="text-center flex flex-col gap-1">
                 <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                     Hapus Fotografer
                 </h3>
@@ -309,7 +309,7 @@
                 </p>
             </div>
 
-            <form :action="deleteActionUrl" method="POST" novalidate class="space-y-4" x-data="{
+            <form :action="deleteActionUrl" method="POST" novalidate class="flex flex-col gap-4" x-data="{
                 categoryOpen: false,
                 selectedCategory: '',
                 alasanText: '',
@@ -431,7 +431,7 @@
                     <p x-show="touched.alasan && errors.alasan" x-text="errors.alasan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 pt-2">
+                <div class="flex items-center justify-end gap-3">
                     <button type="button" @click="deleteModalOpen = false; selectedCategory = ''; alasanText = ''; touched.category = false; touched.alasan = false; errors.category = ''; errors.alasan = ''" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
                         Batal
                     </button>

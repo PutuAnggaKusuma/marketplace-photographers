@@ -339,9 +339,9 @@
 
     <div @click.away="openRevisionModal = null" 
 
-         class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-5">
+         class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-5">
 
-      <div class="space-y-1 text-center">
+      <div class="flex flex-col gap-1 text-center">
 
         <h3 class="text-base font-black text-gray-900 dark:text-white">Ajukan Permintaan Revisi Foto</h3>
 
@@ -378,7 +378,7 @@
             }"
             @submit="submitRevision($event)"
             novalidate
-            class="space-y-4">
+            class="flex flex-col gap-4">
 
         @csrf
 
@@ -399,7 +399,7 @@
 
         </div>
 
-        <div class="flex items-center justify-center gap-3 pt-2">
+        <div class="flex items-center justify-center gap-3">
 
           <button type="button" @click="openRevisionModal = null" class="px-5 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-100 transition cursor-pointer">
 

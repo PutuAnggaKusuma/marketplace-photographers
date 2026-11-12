@@ -92,7 +92,7 @@
               <th class="py-3 pl-4 text-right">Jumlah</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60">
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
             <tr>
               <td class="py-4 pr-4">
                 <span class="font-bold text-gray-900 dark:text-white block">
@@ -105,7 +105,7 @@
               <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
                 <span>{{ $contract->bookingDetail && $contract->bookingDetail->booking_date ? \Carbon\Carbon::parse($contract->bookingDetail->booking_date)->translatedFormat('d F Y') : '-' }}</span>
                 @if($contract->bookingDetail?->jam_mulai)
-                  <span class="block text-gray-400 text-[11px]">{{ $contract->bookingDetail->jam_mulai }} WIB</span>
+                  <span class="block text-gray-400 text-xs">{{ $contract->bookingDetail->jam_mulai }} WIB</span>
                 @endif
               </td>
               <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
@@ -207,9 +207,9 @@
          x-cloak 
          @keydown.escape.window="if (!lightboxOpen) showModal = false" 
          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div @click.away="if (!lightboxOpen) showModal = false" class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl space-y-6 text-center">
+      <div @click.away="if (!lightboxOpen) showModal = false" class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6 text-center">
         
-        <div class="space-y-1">
+        <div class="flex flex-col gap-1">
           <h3 class="text-lg font-black text-gray-900 dark:text-white">Unggah Bukti Transfer</h3>
           <p class="text-xs text-gray-500">Silakan unggah foto struk transfer ke rekening {{ config('app.escrow_bank', 'Bank BCA') }} {{ config('app.escrow_account_number', '8840-1928-3746') }} a.n. {{ config('app.escrow_account_holder', 'PT LensMatch Indonesia') }}</p>
         </div>
@@ -226,7 +226,7 @@
               method="POST" 
               enctype="multipart/form-data" 
               novalidate
-              class="space-y-4 text-left"
+              class="flex flex-col gap-4 text-left"
               x-data="{
                 fileSelected: false,
                 fileName: '',
@@ -300,7 +300,7 @@
           
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Foto Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
-            <div class="space-y-3">
+            <div class="flex flex-col gap-3">
               <div x-ref="proofDropzone"
                    tabindex="0"
                    role="button"
@@ -322,9 +322,11 @@
                        accept="image/jpeg,image/png,image/webp"
                        @change="handleFiles($event.target.files)"
                        class="sr-only">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                  <span class="text-amber-600 dark:text-amber-400 underline underline-offset-4 decoration-amber-400">Pilih foto bukti transfer</span>
-                  <span class="text-gray-600 dark:text-gray-300 font-medium"> atau seret dan lepas di sini</span>
+                <svg class="w-7 h-7 transition-colors" :class="isDragging ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                  Seret dan lepas di sini
                 </p>
                 <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                   Format JPG, PNG, WEBP maksimal 10 MB.
@@ -350,7 +352,7 @@
             <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>
 
-          <div class="flex items-center justify-center gap-3 pt-2">
+          <div class="flex items-center justify-center gap-3">
             <button type="button" @click="showModal = false" class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
               Batal
             </button>

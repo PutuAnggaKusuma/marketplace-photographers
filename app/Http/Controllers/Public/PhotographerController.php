@@ -24,8 +24,8 @@ class PhotographerController extends Controller
         // Pure dynamic database categories with photos and descriptions
         $categories = Category::all();
         
-        // Take top 4 featured photographers published in catalog (Stage 1 + Stage 2 approved)
-        $featuredPhotographers = RolePhotographer::published()->with([
+        // Top 4 fotografer pilihan bulan ini berdasarkan performa sesi & ulasan (dengan fallback rating/ulasan/sesi)
+        $featuredPhotographers = RolePhotographer::featuredThisMonth()->with([
             'user', 'province', 'city', 'categories',
             'services' => function ($q) {
                 $q->whereNotNull('tarif_harga')
@@ -34,19 +34,22 @@ class PhotographerController extends Controller
                   ->where('deskripsi_layanan', '!=', '')
                   ->with('details');
             },
-            'portfolios.medias', 'testimonials'
+            'portfolios.medias', 'portfolios.category',
+            'testimonials' => fn($q) => $q->where('is_hidden', false),
         ])
             ->take(4)
             ->get();
 
         $totalPhotographers = RolePhotographer::published()->count();
         $totalCategories = Category::count();
-        $showcasePortfolios = PhotographerPortfolio::with(['medias', 'photographer.city', 'photographer.user'])
+        $showcasePortfolios = PhotographerPortfolio::with(['medias', 'category', 'photographer.city', 'photographer.user'])
             ->whereHas('photographer', fn($q) => $q->published())
             ->has('medias')
             ->take(4)
             ->get();
-        $avgRating = \App\Models\Testimonial::count() > 0 ? number_format(\App\Models\Testimonial::avg('rating'), 1) : '-';
+        $avgRating = \App\Models\Testimonial::where('is_hidden', false)->count() > 0
+            ? number_format(\App\Models\Testimonial::where('is_hidden', false)->avg('rating'), 1)
+            : '-';
         $totalCompletedBookings = \App\Models\Contract::whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count();
         if ($totalCompletedBookings === 0) {
             $totalCompletedBookings = \App\Models\Contract::count();
@@ -105,12 +108,13 @@ class PhotographerController extends Controller
                   ->where('deskripsi_layanan', '!=', '')
                   ->with('details');
             },
-            'portfolios.medias', 'testimonials'
+            'portfolios.medias', 'portfolios.category',
+            'testimonials' => fn($q) => $q->where('is_hidden', false),
         ]);
 
-        // Subqueries for Real Sorting & Minimum Rating Filter
-        $query->withAvg('testimonials', 'rating')
-              ->withCount('testimonials')
+        // Subqueries for Real Sorting & Minimum Rating Filter (hanya ulasan klien aktif / tidak disembunyikan)
+        $query->withAvg(['testimonials as testimonials_avg_rating' => fn($q) => $q->where('is_hidden', false)], 'rating')
+              ->withCount(['testimonials as testimonials_count' => fn($q) => $q->where('is_hidden', false)])
               ->withCount('contracts')
               ->withMin(['services' => function ($sq) {
                   $sq->whereNotNull('tarif_harga')
@@ -264,20 +268,27 @@ class PhotographerController extends Controller
                   ->with('details');
             },
             'portfolios.medias',
+            'portfolios.category',
             'availabilities',
             'faqs' => function ($q) {
                 $q->where('is_active', true)->orderBy('urutan', 'asc');
             },
-            'testimonials.client.user'
+            'testimonials' => function ($q) {
+                $q->where('is_hidden', false)->with('client.user');
+            }
         ])->findOrFail($id);
 
         if (!$photographer->isPublishedToCatalog() && (!Auth::check() || (Auth::id() !== $photographer->id_user && !in_array(Auth::user()->role, ['admin', 'super_admin'])))) {
             abort(404, 'Etalase fotografer ini belum aktif di katalog publik.');
         }
 
-        $testimonials = $photographer->testimonials()->with('client.user')->orderBy('created_at', 'desc')->get();
+        $testimonials = $photographer->visibleTestimonials()->with('client.user')->orderBy('created_at', 'desc')->get();
         $totalReviews = $testimonials->count();
-        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : null;
+        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : '0.0';
+        $completedSessionsCount = $photographer->contracts()
+            ->where('status_contract', 'completed')
+            ->where('is_validated_client', true)
+            ->count();
 
         $starCounts = [
             5 => $testimonials->where('rating', 5)->count(),
@@ -337,19 +348,22 @@ class PhotographerController extends Controller
             }
         }
 
-        // Ambil daftar Tanya Jawab (FAQ) resmi fotografer dari database (Rule #94)
+        // Ambil daftar Tanya Jawab Fotografer dari database dan Ketentuan Sistem dari config terpusat (Opsi A)
         $faqs = $photographer->faqs()->where('is_active', true)->orderBy('urutan', 'asc')->get();
+        $systemFaqs = config('lensmatch_faqs.profile_system_faqs', []);
 
         return view('public.photographers.show', compact(
             'photographer', 
             'testimonials', 
             'totalReviews', 
             'avgRating', 
+            'completedSessionsCount',
             'starCounts',
             'blockedDates',
             'bookedDates',
             'isFavorited',
-            'faqs'
+            'faqs',
+            'systemFaqs'
         ));
     }
 

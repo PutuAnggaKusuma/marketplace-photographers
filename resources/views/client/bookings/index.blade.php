@@ -76,9 +76,9 @@
 
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Reservasi</span>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Reservasi</span>
 
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Sesi</h2>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['all'] ?? 0 }} Sesi</h2>
 
       </div>
 
@@ -88,9 +88,9 @@
 
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Konfirmasi</span>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Perlu Konfirmasi</span>
 
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Sesi</h2>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending'] ?? 0 }} Sesi</h2>
 
       </div>
 
@@ -100,9 +100,9 @@
 
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Dikonfirmasi</span>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Dikonfirmasi</span>
 
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['confirmed'] ?? 0 }} Sesi</h2>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['confirmed'] ?? 0 }} Sesi</h2>
 
       </div>
 
@@ -112,9 +112,9 @@
 
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
 
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Selesai & Galeri</span>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Selesai & Galeri</span>
 
-        <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Sesi</h2>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Sesi</h2>
 
       </div>
 
@@ -124,13 +124,13 @@
 
     <!-- Booking Table Card (Following Dashboard Table Standards) -->
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
 
       
 
       <!-- Toolbar: Status Filter di Kiri, Search Bar di Kanan -->
 
-      <div class="p-4 border-b border-gray-100 dark:border-gray-700/80 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
         
 
@@ -272,11 +272,11 @@
 
                     <div class="space-y-0.5">
 
-                      <span class="text-[10px] font-mono font-bold text-gray-400 block">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
+                      <span class="text-xs font-mono font-bold text-gray-400 block">KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}</span>
 
-                      <h4 class="font-extrabold text-gray-900 dark:text-white text-sm tracking-tight">{{ $photographer->nama ?? 'Fotografer' }}</h4>
+                      <h4 class="font-extrabold text-gray-900 dark:text-white text-xs tracking-tight">{{ $photographer->nama ?? 'Fotografer' }}</h4>
 
-                      <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
 
                         {{ $photographer->city->name ?? $photographer->alamat ?? '-' }}
 
@@ -296,9 +296,9 @@
 
                   <div class="space-y-1">
 
-                    <span class="font-bold text-gray-800 dark:text-gray-200 block text-sm">{{ $detail->service->nama_layanan ?? 'Paket Fotografi' }}</span>
+                    <span class="font-bold text-gray-800 dark:text-gray-200 block text-xs">{{ $detail->service->nama_layanan ?? 'Paket Fotografi' }}</span>
 
-                    <div class="text-[11px] text-gray-500 dark:text-gray-400 space-y-0.5">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
 
                       <div class="font-medium text-gray-700 dark:text-gray-300">
 
@@ -320,7 +320,7 @@
 
                     @if($c->photographerClientReview)
 
-                      <div class="mt-2 p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/50 text-[11px] space-y-1">
+                      <div class="mt-2 p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/50 text-xs space-y-1">
 
                         <div class="flex items-center justify-between text-amber-900 dark:text-amber-200">
 
@@ -330,7 +330,7 @@
 
                         </div>
 
-                        <div class="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
 
                           <span>Waktu: {{ $c->photographerClientReview->ketepatan_waktu }}/5</span>
 
@@ -342,7 +342,7 @@
 
                         @if($c->photographerClientReview->ulasan)
 
-                          <p class="text-[10px] text-gray-600 dark:text-gray-300 italic pt-0.5">
+                          <p class="text-xs text-gray-600 dark:text-gray-300 italic pt-0.5">
 
                             "{{ $c->photographerClientReview->ulasan }}"
 
@@ -362,19 +362,19 @@
 
                       @if($detail->reschedule_by === 'client')
 
-                        <div class="mt-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-[11px] font-medium space-y-0.5">
+                        <div class="mt-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs font-medium space-y-0.5">
 
                           <span class="font-bold block text-amber-900 dark:text-amber-200">Pengajuan Jadwal Ulang Dikirim</span>
 
-                          <span class="block text-[10px] text-gray-600 dark:text-gray-400">Jadwal baru: {{ \Carbon\Carbon::parse($detail->reschedule_date)->translatedFormat('d F Y') }} • {{ substr($detail->reschedule_time, 0, 5) }} WIB</span>
+                          <span class="block text-xs text-gray-600 dark:text-gray-400">Jadwal baru: {{ \Carbon\Carbon::parse($detail->reschedule_date)->translatedFormat('d F Y') }} • {{ substr($detail->reschedule_time, 0, 5) }} WIB</span>
 
-                          <span class="block text-[10px] text-gray-500 italic">"{{ $detail->reschedule_reason }}"</span>
+                          <span class="block text-xs text-gray-500 italic">"{{ $detail->reschedule_reason }}"</span>
 
                         </div>
 
                       @elseif($detail->reschedule_by === 'photographer')
 
-                        <div class="mt-2 p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-[11px] space-y-1.5">
+                        <div class="mt-2 p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-blue-300 text-xs space-y-1.5">
 
                           <div>
 
@@ -382,7 +382,7 @@
 
                             <span class="font-black text-gray-900 dark:text-white block mt-0.5">{{ \Carbon\Carbon::parse($detail->reschedule_date)->translatedFormat('d F Y') }} • {{ substr($detail->reschedule_time, 0, 5) }} WIB</span>
 
-                            <span class="text-[10px] text-gray-600 dark:text-gray-400 block mt-0.5">Alasan: "{{ $detail->reschedule_reason }}"</span>
+                            <span class="text-xs text-gray-600 dark:text-gray-400 block mt-0.5">Alasan: "{{ $detail->reschedule_reason }}"</span>
 
                           </div>
 
@@ -394,7 +394,7 @@
 
                               <input type="hidden" name="action" value="accept">
 
-                              <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-[10px] rounded-lg shadow-2xs transition cursor-pointer">
+                              <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
 
                                 Setujui Jadwal Baru
 
@@ -408,7 +408,7 @@
 
                               <input type="hidden" name="action" value="reject">
 
-                              <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-[10px] rounded-lg transition cursor-pointer">
+                              <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
 
                                 Tolak
 
@@ -434,7 +434,7 @@
 
                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
 
-                  <span class="text-sm font-black text-gray-900 dark:text-white block">
+                  <span class="text-xs font-black text-gray-900 dark:text-white block">
 
                     Rp {{ number_format($c->jumlah, 0, ',', '.') }}
 
@@ -680,7 +680,7 @@
 
                 <td colspan="5" class="py-12 text-center space-y-3">
 
-                  <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Belum Ada Reservasi Sesi Foto</h3>
+                  <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Belum Ada Reservasi Sesi Foto</h3>
 
                   <p class="text-xs text-gray-500">Temukan fotografer impian Anda dan abadikan momen berharga bersama LensMatch.</p>
 
@@ -782,7 +782,7 @@
 
         <!-- Judul Rata Tengah Tanpa Ikon (Rule #59) -->
 
-        <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center">
+        <h3 class="text-lg font-black text-gray-900 dark:text-white text-center">
 
           Batalkan Reservasi Sesi Foto?
 
@@ -805,7 +805,7 @@
         <form :action="'/client/bookings/' + cancelContractId + '/cancel'" 
               method="POST" 
               novalidate
-              class="mt-5 space-y-4"
+              class="mt-5 flex flex-col gap-4"
               x-data="{
                 form: { alasan: '' },
                 touched: { alasan: false },
@@ -860,7 +860,7 @@
 
           <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59) -->
 
-          <div class="pt-2 flex items-center justify-center gap-3">
+          <div class="flex items-center justify-center gap-3">
 
             <button type="button" 
 
@@ -950,7 +950,7 @@
 
         <!-- Judul Rata Tengah Tanpa Ikon (Rule #59) -->
 
-        <h3 class="text-lg font-black text-gray-900 dark:text-white mt-1 text-center">
+        <h3 class="text-lg font-black text-gray-900 dark:text-white text-center">
 
           Ajukan Jadwal Ulang Sesi
 
@@ -973,7 +973,7 @@
         <form :action="'/client/bookings/' + rescheduleContractId + '/reschedule'" 
               method="POST" 
               novalidate
-              class="mt-5 space-y-4 text-left"
+              class="mt-5 flex flex-col gap-4 text-left"
               x-data="{
                 form: {
                   reschedule_date: rescheduleDefaultDate || '',
@@ -1155,7 +1155,7 @@
 
           <!-- Tombol Aksi di Tengah Maksimal 2 Tombol (Rule #59, #74, #76) -->
 
-          <div class="pt-2 flex items-center justify-center gap-3">
+          <div class="flex items-center justify-center gap-3">
 
             <button type="button" 
 
