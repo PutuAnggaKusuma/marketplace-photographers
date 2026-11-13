@@ -20,6 +20,26 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-13 22:01 WITA] — Eliminasi Boks Abu Pratinjau Katalog Publik dan Teks Redundan pada Dashboard Fotografer (Anti-AI Slop Box)
+
+* **Modul / Fitur**:
+  - Dashboard Fotografer (`resources/views/photographer/dashboard.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Pratinjau metrik reputasi katalog publik (`★ 5.0 (3 ulasan) • 3 Sesi Selesai`) dibungkus dalam boks kartu abu-abu (`p-4 rounded-xl bg-gray-50/70 border border-gray-100`).
+    - Terdapat teks keterangan redundan di sebelah kanan: `Tampil otomatis di profil dan kartu katalog publik`.
+  * **After**:
+    - **Zero Card Box & Pure Clean Layout**: Menghapus kartu pembungkus boks abu (`bg-gray-50/70` dan `border-gray-100`) sehingga teks pratinjau berdiri secara alami dan bersih di atas latar kartu utama tanpa sekat artifisial.
+    - **Eliminasi Teks Redundan**: Menghapus teks penjelas `Tampil otomatis di profil dan kartu katalog publik` sehingga informasi menjadi padat, to-the-point, dan elegan.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #51** (Anti-AI Slop Microcopy & Fluff Elimination), **Rule #58** (Eliminasi Pembatas & Boks Artifisial), serta **Rule #101** (Zero Badge, Zero Box, Murni Tipografi).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Uji Render Controller Fotografer: **PASS**.
+
 ### [2026-11-13 21:58 WITA] — Standarisasi Monokrom Bersih Compact Status Chips (Eliminasi Warna-Warni Latar Belakang / Anti-AI Slop Pelangi)
 
 * **Modul / Fitur**:

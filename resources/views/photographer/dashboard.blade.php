@@ -306,30 +306,27 @@
       </div>
     </div>
 
-    <!-- Live Preview Tampilan Publik (Format Metrik Inline Teks) -->
-    <div class="p-4 rounded-xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between flex-wrap gap-3">
-      <div class="space-y-1">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Pratinjau di Katalog Publik:</span>
-        <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-xs text-gray-600 dark:text-gray-300 font-medium">
-          @php $metrics = $photographer->editorial_metrics; @endphp
-          @foreach($metrics as $idx => $m)
-            @if($idx > 0)
-              <span class="text-gray-300 dark:text-gray-600 select-none">•</span>
-            @endif
-            @if($m['type'] === 'rating')
-              <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                <span class="{{ $m['highlight'] ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
-                <span>{{ $m['text'] }}</span>
-              </span>
-            @elseif($m['type'] === 'fast_response')
-              <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $m['text'] }}</span>
-            @else
+    <!-- Live Preview Tampilan Publik (Format Metrik Inline Teks Tanpa Boks Abu) -->
+    <div class="space-y-1 pt-1">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block">Pratinjau di Katalog Publik:</span>
+      <div class="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-xs text-gray-600 dark:text-gray-300 font-medium">
+        @php $metrics = $photographer->editorial_metrics; @endphp
+        @foreach($metrics as $idx => $m)
+          @if($idx > 0)
+            <span class="text-gray-300 dark:text-gray-600 select-none">•</span>
+          @endif
+          @if($m['type'] === 'rating')
+            <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
+              <span class="{{ $m['highlight'] ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
               <span>{{ $m['text'] }}</span>
-            @endif
-          @endforeach
-        </div>
+            </span>
+          @elseif($m['type'] === 'fast_response')
+            <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $m['text'] }}</span>
+          @else
+            <span>{{ $m['text'] }}</span>
+          @endif
+        @endforeach
       </div>
-      <span class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Tampil otomatis di profil dan kartu katalog publik</span>
     </div>
   </div>
 
