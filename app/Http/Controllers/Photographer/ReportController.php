@@ -76,6 +76,7 @@ class ReportController extends Controller
         return view('photographer.reports.index', compact(
             'photographer',
             'contracts',
+            'allContracts',
             'statusFilter',
             'sort',
             'selectedYear',

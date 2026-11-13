@@ -122,27 +122,34 @@
     </div>
 
     <!-- Transaction List Table Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
+    <div id="dashboard-table-container" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden">
         
-        <!-- Table Header & Status Filter Tabs -->
-        <div class="p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <!-- Table Header & Status Filter Tabs (Rule #78 Compliant) -->
+        <div class="p-5 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-gray-100 dark:border-gray-700/60">
             <div>
                 <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Riwayat Pencairan Dana</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Daftar lengkap pendapatan per pesanan sesi foto</p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-6 overflow-x-auto pb-1">
                 @php
+                    $countAll = $allContracts->count();
+                    $countPaid = $allContracts->where('status_payout', 'paid')->count();
+                    $countHolding = $allContracts->whereIn('status_payout', ['holding', 'ready'])->count();
                     $tTabs = [
-                        'all' => 'Semua Transaksi',
-                        'paid' => 'Pencairan Selesai',
-                        'holding' => 'Dana Tertahan'
+                        'all' => ['label' => 'Semua Transaksi', 'count' => $countAll],
+                        'paid' => ['label' => 'Pencairan Selesai', 'count' => $countPaid],
+                        'holding' => ['label' => 'Dana Tertahan', 'count' => $countHolding],
                     ];
                 @endphp
-                @foreach($tTabs as $k => $l)
+                @foreach($tTabs as $k => $tab)
+                    @php $isActive = ($statusFilter === $k); @endphp
                     <a href="{{ route('photographer.reports', ['status' => $k, 'year' => $selectedYear]) }}" 
-                       class="px-3 py-1.5 rounded-xl text-xs font-extrabold transition {{ $statusFilter === $k ? 'bg-amber-500 text-white shadow-xs' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' }}">
-                        {{ $l }}
+                       class="py-2 text-xs sm:text-sm transition flex items-center gap-2 cursor-pointer shrink-0 {{ $isActive ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+                        <span class="{{ $isActive ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">{{ $tab['label'] }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ $isActive ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
+                            {{ $tab['count'] }}
+                        </span>
                     </a>
                 @endforeach
             </div>
@@ -154,7 +161,7 @@
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         <th class="py-3.5 px-4 sm:px-6">Kode Invoice</th>
-                        <th class="py-3.5 px-4 sm:px-6">Klien & Layanan</th>
+                        <th class="py-3.5 px-4 sm:px-6">Klien dan Layanan</th>
                         <th class="py-3.5 px-4 sm:px-6">Tanggal Sesi</th>
                         <th class="py-3.5 px-4 sm:px-6">Total Tarif</th>
                         <th class="py-3.5 px-4 sm:px-6">Fee Platform (10%)</th>
@@ -265,7 +272,7 @@
             </table>
         </div>
 
-        @if($contracts->hasPages())
+        @if($contracts->total() > 0)
             <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
                 {{ $contracts->links('partials.dashboard.pagination') }}
             </div>
