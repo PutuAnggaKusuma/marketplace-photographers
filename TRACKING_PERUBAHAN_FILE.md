@@ -250,6 +250,123 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-12 21:45 WITA] — Penyelarasan Penuh Tabel Pratinjau Dashboard Admin dengan Monitoring Transaksi (Sinkronisasi TH, TD, Sorting Deterministik, dan Status Anti-AI Slop)
+
+* **Modul / Fitur**:
+  - Tabel Pratinjau Dashboard Admin (`resources/views/partials/table/table-01.blade.php`, `resources/views/admin/dashboard.blade.php`, `app/Http/Controllers/Admin/DashboardController.php`).
+  - Halaman Monitoring Transaksi Penuh (`resources/views/admin/transactions/index.blade.php`, `app/Http/Controllers/Admin/TransactionController.php`).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `app/Http/Controllers/Admin/DashboardController.php`
+  * `resources/views/partials/table/table-01.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - **Perbedaan Kolom TH & TD**: Tabel pratinjau dashboard (`table-01.blade.php`) menggunakan struktur kolom yang sama sekali tidak serasi dengan tabel aslinya (`admin/transactions/index.blade.php`). Di preview terdapat kolom `Paket & Fotografer` (menggunakan simbol `&` alay), `Kategori Sesi`, `Total Biaya`, dan `Status Transaksi`, sementara tabel aslinya memiliki kolom `Invoice`, `Klien`, `Fotografer`, `Rincian Nominal`, `Status Pembayaran`, dan `Aksi`.
+    - **Inkonsistensi Urutan Data (Sorting Flaw)**: Kontrak ID 16 dan ID 17 memiliki timestamp `created_at` yang identik (`2026-11-06 13:09:27`). Tanpa kolom penentu sekunder (`tie-breaker`), MySQL mengembalikan ID 17 duluan di preview dashboard, namun memunculkan ID 16 duluan di halaman Monitoring Transaksi.
+    - **Inkonsistensi Status Pembayaran**: Kontrak ID 12 dan 13 yang belum dibayar (`status_contract = pending_payment`) tampil sebagai "Menunggu Pembayaran" di preview dashboard, tetapi tampil sebagai "Dana Ditahan" di tabel monitoring transaksi karena tabel monitoring hanya memeriksa status payout tanpa mengecek status kontrak `pending_payment`.
+    - **Judul Berpola AI Slop**: Judul preview tabel menggunakan kata redundan bersimbol `&` (`Transaksi Booking & Verifikasi Terkini`) dan subtitle menggunakan jargon buzzword AI (`Monitoring pemesanan sesi foto & status pembayaran real-time`).
+  * **After**:
+    - **Penyelarasan Mutlak TH & TD**: Struktur kolom tabel preview pada dashboard diselaraskan 100% dengan tabel aslinya:
+      `Invoice` | `Klien` | `Fotografer` | `Rincian Nominal` | `Status Pembayaran` | `Aksi`
+      Lengkap dengan format TD yang identik (kode invoice & tanggal, nama & email klien, fotografer & nama layanan, rincian nominal total/komisi/pendapatan bersih, dan tombol aksi `Lihat` murni teks amber).
+    - **Pengurutan Deterministik (Tie-Breaker ID)**: Menambahkan `->orderBy('id', 'desc')` setelah `orderBy('created_at', 'desc')` pada `TransactionController.php`, `DashboardController.php`, dan query `table-01.blade.php`, memastikan urutan transaksi selalu konsisten dan deterministik di seluruh sistem.
+    - **Koreksi & Sinkronisasi Logika Status**: Memperbaiki pengecekan status pada `admin/transactions/index.blade.php` dan modal detailnya untuk memprioritaskan `pending_payment` sebagai teks kuning amber `"Menunggu Pembayaran"` dan membersihkan teks label `"Refund Transaksi"` menjadi murni `"Refund"` sesuai Rule #14 & Rule #70.
+    - **Pembersihan Copywriting Anti-AI Slop**: Judul tabel preview disederhanakan menjadi `"Transaksi Booking Terkini"` dan deskripsi menjadi `"Monitoring pemesanan sesi foto dan pembayaran terbaru"` tanpa simbol `&` dan tanpa kata alay (Rule #51 & Rule #70).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #10 & #13** (Tombol Aksi Murni Teks Tanpa Icon), **Rule #14 & #68** (Status Pembayaran Teks Murni Berwarna Netral), **Rule #51** (Anti-AI Slop Copywriting), **Rule #69** (Standarisasi Aksi Tabel), **Rule #70** (Larangan Simbol '&', No Buzzwords / Payout Jargon), dan **Rule #94** (100% Data Dinamis).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (100% compiled & cached).
+  * Uji Tinker Sorting Konsistensi: Row 1-6 terbukti 100% identik antara preview table query dan pagination controller (ID 17 -> 16 -> 13 -> 12 -> 11 -> 10).
+
+---
+
+### [2026-11-12 21:05 WITA] — Standarisasi Compact Status Chips, Koreksi Sinkronisasi Data KPI, dan Eliminasi Visual Dummy pada Dashboard Fotografer
+
+* **Modul / Fitur**:
+  - Dashboard Mitra Fotografer (`/photographer/dashboard`, [DashboardController.php](app/Http/Controllers/Photographer/DashboardController.php), [resources/views/photographer/dashboard.blade.php](resources/views/photographer/dashboard.blade.php)).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Photographer/DashboardController.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Bagian atas 4 KPI card menampilkan 3 kartu horizontal besar pola AI slop lama dengan icon kuning pastel dan istilah terlarang Rule #70 (`Payout Dalam Proses`).
+    - Label pada KPI Card ke-4 tertulis `Galeri Portofolio Aktif`, namun menampilkan nilai `$totalServices Paket` (Paket Layanan), menciptakan ketidaksinkronan data dan label.
+    - Grafik batang omzet fotografer memaksakan tinggi bar minimal 12% (`max(12, ...)`) sehingga bulan yang omzetnya Rp 0 tetap digambar memiliki penjualan secara fiktif (*fake visual fallback*).
+    - Persentase pesanan paket layanan di-hardcode dibagi rata (misal 50% - 50%) saat belum ada booking sama sekali.
+    - Judul dan heading memuat penggabungan kata dengan simbol `&` redundan (`Reputasi & Metrik Keunggulan`, `Order Booking Masuk Terkini`, `Daftar tarif & porsi penawaran aktif`).
+  * **After**:
+    - **Compact Status Chips**: Mengubah 3 kartu besar menjadi baris ringkas teks murni `Antrean Kerja`:
+      `[ Konfirmasi Order (count) ]` `[ Kirim Hasil Foto (count) ]` `[ Pencairan Dana (count) ]`
+      tanpa boks abu pada angka dan mengganti kata *Payout* menjadi *Pencairan Dana* sesuai Rule #70.
+    - **Sinkronisasi Data KPI**: Memperbaiki label KPI Card ke-4 menjadi `Total Paket Layanan` dengan nilai `{{ $totalServices }}` murni angka tanpa akhiran redundan (Rule #64).
+    - **Eliminasi Batang Grafik Fiktif**: Skala grafik diselaraskan dengan `$chartMax = max($maxMonthlyRevenue, 1)`. Bulan dengan omzet Rp 0 murni bernilai 2% (base stub), tidak lagi dipalsukan setinggi 12% (Rule #94 & #104).
+    - **Porsi Layanan 100% Riil**: Menghilangkan pembagian rata fiktif saat 0 booking (murni bernilai 0%).
+    - **Pembersihan Copywriting Anti-AI Slop**: Judul seksi disederhanakan menjadi `Pencapaian Reputasi`, `Tren Pendapatan Bulanan`, `Paket Layanan`, dan `Order Masuk Terkini` (Rule #51 & #70).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22** (Strict Icon Constraint), **Rule #49** (Strict Scope), **Rule #51** (Anti-AI Slop Copywriting), **Rule #64** (KPI Metric Cards Preserved), **Rule #70** (Natural Human Text, No '&', No Payout Jargon), **Rule #94** (100% Dynamic Data), serta **Rule #104** (Nullable Safe Data).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Uji Render Controller Fotografer: `Photographer\DashboardController::index()` **PASS** (`RENDER SUCCESS: 108348` bytes).
+
+---
+
+### [2026-11-12 20:15 WITA] — Eliminasi Total Hardcoded Data, Skala Dinamis Grafik Batang, dan Pemurnian Tipografi Status Chips Dashboard Admin
+
+* **Modul / Fitur**:
+  - Dashboard Utama Administrator (`/admin`, [DashboardController.php](app/Http/Controllers/Admin/DashboardController.php), [resources/views/admin/dashboard.blade.php](resources/views/admin/dashboard.blade.php)).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/DashboardController.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Angka antrean kerja pada status chips dibungkus kotak abu-abu kaku (`bg-gray-100`) di dalam pill.
+    - Seksi *Kategori Sesi Terlaris* memuat badge hardcoded statis `Wedding & Prewedding (54%)` dengan border dan background, padahal data pesanan riil database saat ini dimenangkan oleh kategori `Studio & Portrait (53%)`.
+    - Grafik batang omzet membagi nilai dengan angka statis `75`, membuat visual grafik tampak kerdil/ceper (~15% canvas) karena omzet tertinggi riil adalah Rp 11,9 Juta.
+    - Judul grafik memuat penggabungan sinonim AI-slop `Tren Omzet & Transaksi Bulanan`, jargon asing `Gross Merchandise Value (GMV)`, serta legend abu-abu fiktif `Komisi Platform (10%)` tanpa adanya visual bar batang di diagram.
+  * **After**:
+    - **Anti-Card Inner Numbers**: Menghapus kotak abu-abu pembungkus nomor pada chips antrean kerja, menampilkan angka murni dalam kurung `Verifikasi Fotografer (0)` yang bersih dan to-the-point.
+    - **Pure Dynamic Text Pangsa Pasar**: Menghapus badge boks pada kategori terlaris, menggantikannya dengan teks murni dinamis `Kategori terbanyak: Studio & Portrait (53%)` yang dihitung langsung dari urutan kontrak tertinggi di database (Rule #94 & #104).
+    - **Dynamic Chart Scale**: Skala tinggi batang grafik dihitung proporsional terhadap nilai omzet bulanan tertinggi riil di database (`$chartMax = max($maxMonthlyRevenue, 1)`), sehingga visual grafik tampil proporsional dan dinamis.
+    - **Copywriting Bersih & Anti-AI Slop**: Judul disederhanakan menjadi `Tren Omzet Bulanan` tanpa simbol `&` yang mubazir, subtitle diubah ke bahasa Indonesia wajar `Total transaksi per bulan dalam juta rupiah` tanpa jargon GMV, serta menyelaraskan legend murni pada `Total Omzet` (Rule #51 & #70).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22** (Strict Icon Constraint), **Rule #49** (Strict Scope), **Rule #51** (Anti-AI Slop Copywriting), **Rule #70** (Natural Human Text & No '&'), **Rule #94** (100% Dynamic Data), serta **Rule #104** (Nullable Safe Data).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Simulasi render `DashboardController::index()`: **PASS** (`RENDER SUCCESS: 107271` bytes, `Kategori terbanyak: Studio & Portrait (53%)` ter-render dinamis dan akurat).
+
+---
+
+### [2026-11-12 20:05 WITA] — Refaktorisasi UI Antrean Operasional Dashboard Admin Menjadi Compact Status Chips (Shopify Polaris Inspired)
+
+* **Modul / Fitur**:
+  - Dashboard Utama Administrator (`/admin`, [resources/views/admin/dashboard.blade.php](resources/views/admin/dashboard.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/admin/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Bagian atas 4 KPI card menampilkan 3 kartu horizontal berukuran besar dengan icon lingkaran kuning pastel, font kecil, dan panah chevron kanan (`>`) statis (`0 Verifikasi Fotografer`, `0 Dana Siap Tarik`, `0 Submisi Lomba`).
+    - Desain tersebut memakan ruang vertikal secara berlebihan, terkesan template generik/AI slop, serta tidak fungsional saat angka antrean `0`.
+  * **After**:
+    - Merefaktor 3 kartu menjadi baris horizontal ringkas berisi **Compact Status Chips / Action Pills** (terinspirasi oleh Shopify Polaris):
+      - `[ Antrean Kerja: ]`
+      - `[ Verifikasi Fotografer (count) ]`
+      - `[ Dana Siap Tarik (count) ]`
+      - `[ Submisi Lomba (count) ]`
+    - Menggunakan teks murni (*pure text*) tanpa icon bloat sesuai **Rule #22**, badge jumlah antrean ber-kontras tinggi, serta status dinamis (netral abu-abu saat `0`, beraksen warna semantik amber/emerald/blue saat antrean `> 0`).
+    - Menghemat ruang vertikal layar sehingga 4 KPI Cards utama (`Total User Registrasi`, `Fotografer Terverifikasi`, `Total Kontrak Booking`, `Total Omzet Transaksi`) langsung terlihat jelas dan proporsional.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22** (Strict Icon Constraint: Pure Text Default), **Rule #49** (Strict Scope), **Rule #51** (Anti-AI Slop & Human-Crafted Microcopy), **Rule #61** (Hierarki Warna Sistem), serta **Rule #64** (KPI Metric Cards Preserved).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Struktur Blade dan dark mode classes terverifikasi rapi dan responsif.
+
+---
+
 ### [2026-11-12 16:50 WITA] — Pembatasan Visibilitas Tombol Preview (`Lihat Lebih Banyak` / `Lihat Semua`) Berdasarkan Batas Jumlah Data
 
 * **Modul / Fitur**:

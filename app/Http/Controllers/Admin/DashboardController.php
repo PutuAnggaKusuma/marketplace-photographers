@@ -83,7 +83,7 @@ class DashboardController extends Controller
         $palette = ['bg-amber-400', 'bg-gray-800 dark:bg-gray-200', 'bg-amber-600', 'bg-gray-500', 'bg-gray-400'];
         $categoryStats = [];
 
-        foreach ($categories as $idx => $cat) {
+        foreach ($categories as $cat) {
             $catCount = Contract::whereHas('photographer.categories', function ($q) use ($cat) {
                 $q->where('categories.id', $cat->id);
             })->count();
@@ -93,9 +93,19 @@ class DashboardController extends Controller
                 'name' => $cat->nama_kategori,
                 'share' => $share,
                 'count' => $catCount,
-                'color' => $palette[$idx % count($palette)],
             ];
         }
+
+        // Urutkan berdasarkan jumlah pesanan terbanyak secara dinamis
+        usort($categoryStats, fn($a, $b) => $b['count'] <=> $a['count']);
+
+        // Berikan warna palet setelah pengurutan
+        foreach ($categoryStats as $idx => &$cStat) {
+            $cStat['color'] = $palette[$idx % count($palette)];
+        }
+        unset($cStat);
+
+        $topCategory = (!empty($categoryStats) && $categoryStats[0]['count'] > 0) ? $categoryStats[0] : null;
 
         // 5. Top 4 Performing Photographers
         $topPhotographers = RolePhotographer::with([
@@ -108,6 +118,18 @@ class DashboardController extends Controller
             }])
             ->orderByDesc('completed_orders_count')
             ->take(4)
+            ->get();
+
+        // 6. Recent 6 Transactions for Dashboard Preview Table (Rule #94 Dynamic & Deterministic Sort)
+        $recentTransactions = Contract::with([
+            'client.user',
+            'photographer.user',
+            'bookingDetail.service',
+            'payments'
+        ])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->take(6)
             ->get();
 
         return view('admin.dashboard', compact(
@@ -129,7 +151,9 @@ class DashboardController extends Controller
             'maxMonthlyRevenue',
             'totalCommission',
             'categoryStats',
-            'topPhotographers'
+            'topCategory',
+            'topPhotographers',
+            'recentTransactions'
         ));
     }
 }

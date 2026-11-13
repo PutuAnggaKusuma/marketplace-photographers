@@ -1,7 +1,11 @@
 @php
   $contractsList = isset($recentTransactions) && $recentTransactions->isNotEmpty() 
     ? $recentTransactions 
-    : \App\Models\Contract::with(['client.user', 'photographer.user', 'photographer.categories', 'bookingDetail.service', 'payments'])->orderBy('created_at', 'desc')->take(6)->get();
+    : \App\Models\Contract::with(['client.user', 'photographer.user', 'bookingDetail.service', 'payments'])
+        ->orderBy('created_at', 'desc')
+        ->orderBy('id', 'desc')
+        ->take(6)
+        ->get();
   $totalContractsCount = $totalContracts ?? \App\Models\Contract::count();
 @endphp
 
@@ -9,9 +13,9 @@
   <div class="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h3 class="text-base sm:text-lg font-bold text-gray-800 dark:text-white/90">
-        Transaksi Booking & Verifikasi Terkini
+        Transaksi Booking Terkini
       </h3>
-      <p class="text-xs text-gray-400 mt-0.5">Monitoring pemesanan sesi foto & status pembayaran real-time</p>
+      <p class="text-xs text-gray-400 mt-0.5">Monitoring pemesanan sesi foto dan pembayaran terbaru</p>
     </div>
 
     @if($totalContractsCount > 6)
@@ -29,71 +33,65 @@
     <table class="min-w-full text-left">
       <thead>
         <tr class="border-gray-100 border-y dark:border-gray-800 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/40">
-          <th class="py-3 px-3 sm:px-4">Paket & Fotografer</th>
-          <th class="py-3 px-3 sm:px-4">Kategori Sesi</th>
-          <th class="py-3 px-3 sm:px-4">Total Biaya</th>
-          <th class="py-3 px-3 sm:px-4">Status Transaksi</th>
+          <th class="py-3.5 px-3 sm:px-4">Invoice</th>
+          <th class="py-3.5 px-3 sm:px-4">Klien</th>
+          <th class="py-3.5 px-3 sm:px-4">Fotografer</th>
+          <th class="py-3.5 px-3 sm:px-4">Rincian Nominal</th>
+          <th class="py-3.5 px-3 sm:px-4">Status Pembayaran</th>
+          <th class="py-3.5 px-3 sm:px-4 text-center">Aksi</th>
         </tr>
       </thead>
 
       <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
         @forelse($contractsList as $item)
           @php
+            $invoiceCode = $item->invoice_code;
+            $feeAmount = $item->fee_marketplace > 0 ? $item->fee_marketplace : ($item->jumlah * 0.10);
+            $netPayout = $item->payout_amount > 0 ? $item->payout_amount : ($item->jumlah - $feeAmount);
             $service = $item->bookingDetail->service ?? null;
-            $serviceName = $service ? $service->nama_layanan : ($item->bookingDetail->service_name ?? 'Sesi Pemotretan');
-            
-            $catName = ($item->photographer && $item->photographer->categories && $item->photographer->categories->isNotEmpty())
-                ? $item->photographer->categories->first()->nama_kategori
-                : '-';
-
-            $photoImg = ($item->photographer && $item->photographer->foto) 
-                ? (str_starts_with($item->photographer->foto, 'http') ? $item->photographer->foto : asset('storage/' . $item->photographer->foto)) 
-                : null;
+            $serviceName = $service ? $service->nama_layanan : ($item->bookingDetail->service_name ?? 'Paket Foto Custom');
           @endphp
           <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
-            <!-- Paket & Fotografer -->
-            <td class="py-3.5 px-3 sm:px-4">
-              <div class="flex items-center gap-3 min-w-[200px]">
-                @if($photoImg)
-                  <div class="h-11 w-11 overflow-hidden rounded-xl shrink-0 border border-gray-100 dark:border-gray-700 shadow-2xs">
-                    <img src="{{ $photoImg }}" class="w-full h-full object-cover" alt="{{ $serviceName }}" />
-                  </div>
-                @else
-                  <div class="h-11 w-11 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
-                    {{ strtoupper(substr($item->photographer?->nama ?? 'F', 0, 2)) }}
-                  </div>
-                @endif
-                <div class="min-w-0">
-                  <p class="font-extrabold text-gray-900 dark:text-white truncate max-w-[220px]">
-                    {{ $serviceName }}
-                  </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[220px]">
-                    Fotografer: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $item->photographer->nama ?? '-' }}</span> • Klien: {{ $item->client->nama ?? '-' }}
-                  </p>
-                </div>
+            <!-- Invoice -->
+            <td class="py-3.5 px-3 sm:px-4 align-middle whitespace-nowrap">
+              <div class="font-extrabold text-gray-900 dark:text-white">{{ $invoiceCode }}</div>
+              <div class="text-xs text-gray-400 mt-0.5">{{ $item->created_at ? $item->created_at->format('d M Y, H:i') : '-' }}</div>
+            </td>
+
+            <!-- Klien -->
+            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
+              <div class="font-bold text-gray-900 dark:text-white">{{ $item->client->nama ?? 'Klien' }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $item->client->user->email ?? '-' }}</div>
+            </td>
+
+            <!-- Fotografer -->
+            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
+              <div class="font-bold text-gray-900 dark:text-white">{{ $item->photographer->nama ?? 'Fotografer' }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 max-w-[200px] truncate">
+                {{ $serviceName }}
               </div>
             </td>
 
-            <!-- Kategori Sesi (Plain Text without Card Badge) -->
-            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                {{ $catName }}
-              </p>
+            <!-- Rincian Nominal -->
+            <td class="py-3.5 px-3 sm:px-4 space-y-0.5 whitespace-nowrap">
+              <div class="font-extrabold text-gray-900 dark:text-white">Total: Rp {{ number_format($item->jumlah, 0, ',', '.') }}</div>
+              <div class="text-xs text-gray-500">
+                Komisi Platform (10%): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($feeAmount, 0, ',', '.') }}</span>
+              </div>
+              <div class="text-xs font-bold text-gray-900 dark:text-white">
+                Pendapatan Bersih: Rp {{ number_format($netPayout, 0, ',', '.') }}
+              </div>
             </td>
 
-            <!-- Total Biaya -->
-            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <p class="text-xs font-extrabold text-gray-900 dark:text-white">
-                Rp {{ number_format($item->jumlah, 0, ',', '.') }}
-              </p>
-            </td>
-
-            <!-- Status Transaksi -->
-            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              @if($item->status_payout === 'paid' || $item->status_contract === 'completed')
+            <!-- Status Pembayaran -->
+            <td class="py-3.5 px-3 sm:px-4 align-middle whitespace-nowrap">
+              @if($item->status_payout === 'paid')
                 <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                   Sudah Ditransfer
                 </span>
+                @if($item->payout_at)
+                  <p class="text-xs text-gray-400 mt-0.5">{{ $item->payout_at->format('d M Y, H:i') }}</p>
+                @endif
               @elseif($item->status_payout === 'ready')
                 <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
                   Siap Dicairkan
@@ -106,16 +104,28 @@
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                   Menunggu Pembayaran
                 </span>
+              @elseif($item->status_contract === 'cancelled')
+                <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
+                  Dibatalkan
+                </span>
               @else
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                   Dana Ditahan
                 </span>
               @endif
             </td>
+
+            <!-- Aksi -->
+            <td class="py-3.5 px-3 sm:px-4 align-middle text-center whitespace-nowrap">
+              <a href="{{ route('admin.transactions', ['search' => $invoiceCode]) }}" 
+                 class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition inline-block">
+                Lihat
+              </a>
+            </td>
           </tr>
         @empty
           <tr>
-            <td colspan="4" class="py-8 text-center text-gray-400 font-bold text-xs">
+            <td colspan="6" class="py-8 text-center text-gray-400 font-bold text-xs">
               Belum ada data transaksi booking aktif.
             </td>
           </tr>

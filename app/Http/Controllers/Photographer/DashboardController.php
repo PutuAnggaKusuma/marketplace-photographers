@@ -108,17 +108,24 @@ class DashboardController extends Controller
             $totalBookingsForShare += $cnt;
         }
 
-        foreach ($services as $idx => $srv) {
+        foreach ($services as $srv) {
             $cnt = $srvBookingCounts[$srv->id] ?? 0;
-            $share = $totalBookingsForShare > 0 ? round(($cnt / $totalBookingsForShare) * 100) : (round(100 / max(1, $services->count())));
+            // Jika belum ada booking, share murni 0% (Rule #94 & #104: Zero Fake Fallback)
+            $share = $totalBookingsForShare > 0 ? round(($cnt / $totalBookingsForShare) * 100) : 0;
             $serviceStats[] = [
                 'name' => $srv->nama_layanan,
                 'price' => $srv->tarif_harga,
                 'share' => $share,
                 'count' => $cnt,
-                'color' => $palette[$idx % count($palette)],
             ];
         }
+
+        // Urutkan paket berdasarkan jumlah pesanan terbanyak
+        usort($serviceStats, fn($a, $b) => $b['count'] <=> $a['count']);
+        foreach ($serviceStats as $idx => &$srvStat) {
+            $srvStat['color'] = $palette[$idx % count($palette)];
+        }
+        unset($srvStat);
 
         // 5. Recent Booking Contracts (100% Dynamic)
         $recentBookings = Contract::where('id_photographer', $photographerId)

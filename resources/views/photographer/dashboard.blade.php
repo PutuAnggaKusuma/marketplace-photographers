@@ -143,54 +143,30 @@
 
 
 
-  <!-- 2. Actionable Operational Queue (3 Alert Cards Sesuai Standar Proyek) -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    
-    <!-- Action 1: Booking Masuk Perlu Konfirmasi -->
-    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingBookingsCount }} Order Perlu Konfirmasi</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Permintaan booking baru dari klien</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+  <!-- 2. Actionable Operational Queue (Compact Status Chips) -->
+  <div class="flex flex-wrap items-center gap-2.5">
+    <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
+
+    <!-- Chip 1: Booking Masuk Perlu Konfirmasi -->
+    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingBookingsCount > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Konfirmasi Order</span>
+      <span class="{{ $pendingBookingsCount > 0 ? 'text-amber-700 dark:text-amber-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingBookingsCount }})</span>
     </a>
 
-    <!-- Action 2: Galeri Foto Harus Diunggah -->
-    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $needGalleryUploadCount }} Sesi Siap Kirim Foto</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Unggah link Google Drive hasil edit</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    <!-- Chip 2: Galeri Foto Perlu Diunggah -->
+    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $needGalleryUploadCount > 0 ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700/60 text-blue-900 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Kirim Hasil Foto</span>
+      <span class="{{ $needGalleryUploadCount > 0 ? 'text-blue-700 dark:text-blue-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $needGalleryUploadCount }})</span>
     </a>
 
-    <!-- Action 3: Dana Siap Ditarik -->
-    <a href="{{ route('photographer.reports') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $readyPayoutCount }} Payout Dalam Proses</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Saldo siap dicairkan</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    <!-- Chip 3: Dana Siap Dicairkan (Rule #70) -->
+    <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $readyPayoutCount > 0 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Pencairan Dana</span>
+      <span class="{{ $readyPayoutCount > 0 ? 'text-emerald-700 dark:text-emerald-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $readyPayoutCount }})</span>
     </a>
-
   </div>
 
-  <!-- 3. Top 4 Core Financial & Performance Metric Cards (Strictly Following Rules #7, #8, #9, #18) -->
+  <!-- 3. Top 4 Core Financial & Performance Metric Cards (Strictly Following Rules #7, #8, #9, #18, #64) -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     
     <!-- Card 1: Total Omzet Bersih -->
@@ -202,10 +178,10 @@
     <!-- Card 2: Total Kontrak Booking -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Kontrak Booking</span>
-      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalBookingsCount }} Order</p>
+      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalBookingsCount, 0, ',', '.') }}</p>
     </div>
 
-    <!-- Card 3: Kepuasan Klien Klien -->
+    <!-- Card 3: Kepuasan Klien -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
       <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Kepuasan Klien</span>
       <div class="flex items-center gap-1.5">
@@ -216,10 +192,10 @@
       </div>
     </div>
 
-    <!-- Card 4: Katalog & Portofolio Aktif -->
+    <!-- Card 4: Total Paket Layanan (Sinkron dengan $totalServices) -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-2">
-      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Galeri Portofolio Aktif</span>
-      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalServices }} Paket</p>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider block">Total Paket Layanan</span>
+      <p class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalServices, 0, ',', '.') }}</p>
     </div>
 
   </div>
@@ -228,8 +204,8 @@
   <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Reputasi & Metrik Keunggulan Fotografer</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pantau pencapaian indikator performa akun Anda untuk meningkatkan reputasi di katalog publik.</p>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Pencapaian Reputasi</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Indikator performa akun untuk katalog publik</p>
       </div>
       @if($photographer->isPublishedToCatalog())
         <a href="{{ route('public.photographers.show', $photographer->id) }}" target="_blank" class="text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-amber-500 transition inline-flex items-center gap-1.5 shrink-0">
@@ -364,14 +340,12 @@
     <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Pendapatan Bersih Bulanan</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perkembangan pemasukan bersih fotografer per bulan (dalam Juta Rupiah)</p>
+          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Pendapatan Bulanan</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pendapatan bersih per bulan dalam juta rupiah</p>
         </div>
-        <div class="flex items-center gap-4 text-xs font-bold">
-          <div class="flex items-center gap-1.5 text-gray-900 dark:text-white">
-            <span class="w-3.5 h-2 rounded-xs bg-amber-400"></span>
-            <span>Pendapatan Bersih (90%)</span>
-          </div>
+        <div class="flex items-center gap-2 text-xs font-bold text-gray-900 dark:text-white shrink-0">
+          <span class="w-3.5 h-2 rounded-xs bg-amber-400"></span>
+          <span>Pendapatan Bersih</span>
         </div>
       </div>
 
@@ -388,11 +362,13 @@
           </div>
 
           <!-- 12 Monthly Bar Columns -->
+          @php
+            $chartMax = max($maxMonthlyRevenue ?? 0, 1);
+          @endphp
           @foreach($months as $idx => $m)
             @php
               $val = $monthlyRevenue[$idx] ?? 0;
-              $maxRef = max(array_values($monthlyRevenue)) ?: 20;
-              $heightPercent = min(100, max(12, ($val / $maxRef) * 100));
+              $heightPercent = $val > 0 ? min(100, max(8, round(($val / $chartMax) * 100))) : 2;
             @endphp
             <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
               <!-- Tooltip on Hover -->
@@ -431,8 +407,8 @@
     <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs flex flex-col justify-between">
       <div class="space-y-4">
         <div>
-          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Katalog Paket Layanan</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar tarif & porsi penawaran aktif</p>
+          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Paket Layanan</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Distribusi pesanan per paket aktif</p>
         </div>
 
         <!-- Service Progress Bars -->
@@ -468,8 +444,8 @@
     <div class="lg:col-span-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs overflow-hidden p-6 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Order Booking Masuk Terkini</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pemantauan reservasi & status transaksi klien</p>
+          <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Order Masuk Terkini</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar reservasi sesi pemotretan terbaru</p>
         </div>
         @if(($totalBookingsCount ?? 0) > 5)
           <a href="{{ route('photographer.bookings') }}" class="text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline inline-flex items-center gap-1 transition">

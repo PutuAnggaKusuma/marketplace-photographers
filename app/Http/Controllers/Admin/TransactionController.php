@@ -26,11 +26,25 @@ class TransactionController extends Controller
         ]);
 
         if ($statusFilter !== 'all') {
-            $query->where('status_payout', $statusFilter);
+            if ($statusFilter === 'pending_payment') {
+                $query->where('status_contract', 'pending_payment');
+            } else {
+                $query->where('status_payout', $statusFilter);
+                if ($statusFilter === 'holding') {
+                    $query->where('status_contract', '!=', 'pending_payment');
+                }
+            }
         }
 
         if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
+            $extractedId = null;
+            if (preg_match('/INV-LM-\d+-0*(\d+)/i', $search, $matches)) {
+                $extractedId = (int) $matches[1];
+            } elseif (is_numeric($search)) {
+                $extractedId = (int) $search;
+            }
+
+            $query->where(function ($q) use ($search, $extractedId) {
                 $q->whereHas('client', function ($cq) use ($search) {
                     $cq->where('nama', 'like', "%{$search}%");
                 })->orWhereHas('photographer', function ($pq) use ($search) {
@@ -38,17 +52,21 @@ class TransactionController extends Controller
                 })->orWhereHas('payments', function ($payq) use ($search) {
                     $payq->where('external_id', 'like', "%{$search}%");
                 });
+
+                if ($extractedId) {
+                    $q->orWhere('id', $extractedId);
+                }
             });
         }
 
         if ($sort === 'oldest') {
-            $query->orderBy('created_at', 'asc');
+            $query->orderBy('created_at', 'asc')->orderBy('id', 'asc');
         } elseif ($sort === 'highest') {
-            $query->orderBy('jumlah', 'desc');
+            $query->orderBy('jumlah', 'desc')->orderBy('id', 'desc');
         } elseif ($sort === 'lowest') {
-            $query->orderBy('jumlah', 'asc');
+            $query->orderBy('jumlah', 'asc')->orderBy('id', 'asc');
         } else {
-            $query->orderBy('created_at', 'desc');
+            $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
         }
 
         $perPage = (int) $request->query('per_page', 10);
