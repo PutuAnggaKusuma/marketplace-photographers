@@ -21,48 +21,26 @@
     </div>
   </div>
 
-  <!-- 2. Actionable Operational Queue (Alert Cards) -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <!-- Action 1: Pending Photographer Verification -->
-    <a href="{{ route('admin.photographers') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingVerifications }} Verifikasi Fotografer</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Menunggu persetujuan Admin</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+  <!-- 2. Actionable Operational Queue (Compact Status Chips) -->
+  <div class="flex flex-wrap items-center gap-2.5">
+    <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
+
+    <!-- Chip 1: Pending Photographer Verification -->
+    <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingVerifications > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Verifikasi Fotografer</span>
+      <span class="{{ $pendingVerifications > 0 ? 'text-amber-700 dark:text-amber-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingVerifications }})</span>
     </a>
 
-    <!-- Action 2: Ready Payouts -->
-    <a href="{{ route('admin.transactions') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingPayouts }} Dana Siap Tarik</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Sesi selesai & verifikasi Klien</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    <!-- Chip 2: Ready Payouts -->
+    <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingPayouts > 0 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Dana Siap Tarik</span>
+      <span class="{{ $pendingPayouts > 0 ? 'text-emerald-700 dark:text-emerald-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingPayouts }})</span>
     </a>
 
-    <!-- Action 3: Contest Submissions to Review -->
-    <a href="{{ route('admin.contests') }}" class="group p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs hover:border-amber-400 dark:hover:border-amber-500 transition flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007-7.5V4.875a1.875 1.875 0 00-1.875-1.875h-1.5a1.875 1.875 0 00-1.875 1.875V6.75m6.75 0a3 3 0 00-3-3h-1.5a3 3 0 00-3 3m6.75 0v3.375c0 .621-.504 1.125-1.125 1.125h-.871M7.5 6.75v3.375c0 .621.504 1.125 1.125 1.125h.872"/></svg>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{{ $pendingContestReviews }} Submisi Lomba</p>
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Penjurian karya peserta foto</span>
-        </div>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    <!-- Chip 3: Contest Submissions to Review -->
+    <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingContestReviews > 0 ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700/60 text-blue-900 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+      <span>Submisi Lomba</span>
+      <span class="{{ $pendingContestReviews > 0 ? 'text-blue-700 dark:text-blue-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingContestReviews }})</span>
     </a>
   </div>
 
@@ -93,22 +71,16 @@
     </div>
   </div>
 
-  <!-- 4. Section: Tren Omzet & Transaksi Bulanan -->
+  <!-- 4. Section: Tren Omzet Bulanan -->
   <div class="w-full bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-gray-100 dark:border-gray-700/60">
       <div>
-        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Omzet & Transaksi Bulanan</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Perkembangan Gross Merchandise Value (GMV) per bulan (dalam Juta Rupiah)</p>
+        <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Tren Omzet Bulanan</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Total transaksi per bulan dalam juta rupiah</p>
       </div>
-      <div class="flex items-center gap-4 text-xs font-bold shrink-0">
-        <div class="flex items-center gap-1.5 text-gray-900 dark:text-white">
-          <span class="w-3.5 h-2 rounded-xs bg-amber-400"></span>
-          <span>Total Omzet (GMV)</span>
-        </div>
-        <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-          <span class="w-3.5 h-2 rounded-xs bg-gray-800 dark:bg-gray-300"></span>
-          <span>Komisi Platform (10%)</span>
-        </div>
+      <div class="flex items-center gap-2 text-xs font-bold shrink-0 text-gray-900 dark:text-white">
+        <span class="w-3.5 h-2 rounded-xs bg-amber-400"></span>
+        <span>Total Omzet</span>
       </div>
     </div>
 
@@ -125,11 +97,14 @@
         </div>
 
         <!-- 12 Monthly Bar Columns -->
+        @php
+          $chartMax = max($maxMonthlyRevenue ?? 0, 1);
+        @endphp
         @foreach($months as $idx => $m)
           @php
             $val = $monthlyRevenue[$idx] ?? 0;
             $fee = $monthlyCommission[$idx] ?? 0;
-            $heightPercent = $val > 0 ? min(100, max(10, ($val / 75) * 100)) : 3;
+            $heightPercent = $val > 0 ? min(100, max(8, round(($val / $chartMax) * 100))) : 2;
           @endphp
           <div class="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
             <!-- Tooltip on Hover -->
@@ -165,19 +140,19 @@
     </div>
   </div>
 
-  <!-- 5. Section: Kategori Sesi Terlaris (Dedicated Section Below Chart) -->
+  <!-- 5. Section: Kategori Sesi Terlaris -->
   <div class="w-full bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60">
       <div>
         <h2 class="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">Kategori Sesi Terlaris</h2>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pangsa pasar & minat pesanan sesi foto klien</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Distribusi pesanan berdasarkan kategori layanan</p>
       </div>
 
-      <!-- Pangsa Pasar Tertinggi Badge -->
-      <div class="px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 self-start sm:self-auto">
-        <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">Pangsa Pasar Tertinggi:</span>
-        <span class="text-xs text-gray-800 dark:text-gray-200 font-bold">Wedding & Prewedding (54%)</span>
-      </div>
+      @if($topCategory)
+        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          Kategori terbanyak: <span class="font-bold text-gray-900 dark:text-white">{{ $topCategory['name'] }} ({{ $topCategory['share'] }}%)</span>
+        </p>
+      @endif
     </div>
 
     <!-- Categories Progress Bars Responsive Grid (3 Columns) -->

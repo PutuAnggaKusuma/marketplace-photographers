@@ -408,7 +408,9 @@
 
                         'paid' => 'Sudah Ditransfer',
 
-                        'refunded' => 'Refund Transaksi'
+                        'pending_payment' => 'Menunggu Pembayaran',
+
+                        'refunded' => 'Refund'
 
                     ];
 
@@ -642,15 +644,7 @@
 
                             <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
 
-                                @if($c->status_payout === 'ready')
-
-                                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
-
-                                        Siap Dicairkan
-
-                                    </span>
-
-                                @elseif($c->status_payout === 'paid')
+                                @if($c->status_payout === 'paid')
 
                                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
 
@@ -664,11 +658,35 @@
 
                                     @endif
 
+                                @elseif($c->status_payout === 'ready')
+
+                                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
+
+                                        Siap Dicairkan
+
+                                    </span>
+
                                 @elseif($c->status_payout === 'refunded')
 
                                     <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
 
                                         Refund
+
+                                    </span>
+
+                                @elseif($c->status_contract === 'pending_payment')
+
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+
+                                        Menunggu Pembayaran
+
+                                    </span>
+
+                                @elseif($c->status_contract === 'cancelled')
+
+                                    <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
+
+                                        Dibatalkan
 
                                     </span>
 
@@ -1676,13 +1694,15 @@
 
                                       'text-blue-600': activeContract.status_payout === 'ready',
 
-                                      'text-amber-600': activeContract.status_payout === 'holding',
+                                      'text-rose-600': activeContract.status_payout === 'refunded',
 
-                                      'text-rose-600': activeContract.status_payout === 'refunded'
+                                      'text-gray-400': activeContract.status_contract === 'cancelled',
+
+                                      'text-amber-600': activeContract.status_payout === 'holding' || activeContract.status_contract === 'pending_payment'
 
                                   }"
 
-                                  x-text="activeContract.status_payout === 'paid' ? 'Sudah Ditransfer' : (activeContract.status_payout === 'ready' ? 'Siap Dicairkan' : (activeContract.status_payout === 'refunded' ? 'Refund Transaksi' : 'Dana Ditahan'))">
+                                  x-text="activeContract.status_payout === 'paid' ? 'Sudah Ditransfer' : (activeContract.status_payout === 'ready' ? 'Siap Dicairkan' : (activeContract.status_payout === 'refunded' ? 'Refund' : (activeContract.status_contract === 'pending_payment' ? 'Menunggu Pembayaran' : (activeContract.status_contract === 'cancelled' ? 'Dibatalkan' : 'Dana Ditahan'))))">
 
                             </span>
 
