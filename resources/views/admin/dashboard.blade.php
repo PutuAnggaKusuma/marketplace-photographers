@@ -26,21 +26,21 @@
     <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
 
     <!-- Chip 1: Pending Photographer Verification -->
-    <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingVerifications > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Verifikasi Fotografer</span>
-      <span class="{{ $pendingVerifications > 0 ? 'text-amber-700 dark:text-amber-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingVerifications }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingVerifications }})</span>
     </a>
 
     <!-- Chip 2: Ready Payouts -->
-    <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingPayouts > 0 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Dana Siap Tarik</span>
-      <span class="{{ $pendingPayouts > 0 ? 'text-emerald-700 dark:text-emerald-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingPayouts }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingPayouts }})</span>
     </a>
 
     <!-- Chip 3: Contest Submissions to Review -->
-    <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingContestReviews > 0 ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700/60 text-blue-900 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Submisi Lomba</span>
-      <span class="{{ $pendingContestReviews > 0 ? 'text-blue-700 dark:text-blue-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingContestReviews }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingContestReviews }})</span>
     </a>
   </div>
 

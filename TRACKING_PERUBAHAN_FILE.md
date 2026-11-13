@@ -20,6 +20,33 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-13 21:58 WITA] — Standarisasi Monokrom Bersih Compact Status Chips (Eliminasi Warna-Warni Latar Belakang / Anti-AI Slop Pelangi)
+
+* **Modul / Fitur**:
+  - Dashboard Fotografer (`resources/views/photographer/dashboard.blade.php`).
+  - Dashboard Admin (`resources/views/admin/dashboard.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Ketika jumlah antrean > 0, chips berubah warna-warni ala "AI slop pelangi": chip 1 berwarna kuning (`bg-amber-50 text-amber-900 border-amber-300`), chip 2 berwarna biru (`bg-blue-50 text-blue-900 border-blue-300`), dan chip 3 berwarna hijau (`bg-emerald-50 text-emerald-900 border-emerald-300`).
+    - Hal ini membuat tampilan dashboard fotografer terlihat alay, mencolok, dan tidak profesional saat terdapat antrean aktif.
+  * **After**:
+    - **Monokrom & Netral 100%**: Menghilangkan seluruh warna-warni latar belakang, border, dan teks pada status chips.
+    - Semua chips kini seragam menggunakan gaya bersih monokrom seperti pada dashboard admin:
+      - Latar: `bg-white dark:bg-gray-800`
+      - Border: `border-gray-200 dark:border-gray-700/80`
+      - Teks label: `text-gray-700 dark:text-gray-300`
+      - Angka antrean: `text-gray-400 dark:text-gray-500 font-bold`
+    - Tampilan tetap tenang, elegan, minimalis, dan profesional tanpa efek pelangi terlepas dari apakah antrean bernilai 0 atau > 0.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22** (Strict Icon Constraint: Pure Text Default), **Rule #51** (Anti-AI Slop Microcopy & Clean UI), **Rule #61** (Hierarki Warna Sistem), serta **Rule #68** (Anti-AI Slop Table & Card Color Standard / Zero Rainbow Tint).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Uji Render Controller Fotografer & Admin: **PASS**.
+
 ### [2026-11-12 22:28 WITA] — Perubahan Fundamental Tarif Per Jam, Spare Time Opsional Per Paket, Auto-Bypass 500m, dan Booking Custom Multi-Hari via Chat
 
 * **Modul / Fitur**:

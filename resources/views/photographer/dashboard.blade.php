@@ -148,21 +148,21 @@
     <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
 
     <!-- Chip 1: Booking Masuk Perlu Konfirmasi -->
-    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $pendingBookingsCount > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700/60 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Konfirmasi Order</span>
-      <span class="{{ $pendingBookingsCount > 0 ? 'text-amber-700 dark:text-amber-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $pendingBookingsCount }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingBookingsCount }})</span>
     </a>
 
     <!-- Chip 2: Galeri Foto Perlu Diunggah -->
-    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $needGalleryUploadCount > 0 ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700/60 text-blue-900 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Kirim Hasil Foto</span>
-      <span class="{{ $needGalleryUploadCount > 0 ? 'text-blue-700 dark:text-blue-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $needGalleryUploadCount }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $needGalleryUploadCount }})</span>
     </a>
 
     <!-- Chip 3: Dana Siap Dicairkan (Rule #70) -->
-    <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border transition text-xs font-bold {{ $readyPayoutCount > 0 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/60 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/50' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700/80 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs' }}">
+    <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Pencairan Dana</span>
-      <span class="{{ $readyPayoutCount > 0 ? 'text-emerald-700 dark:text-emerald-300 font-black' : 'text-gray-400 dark:text-gray-500 font-bold' }}">({{ $readyPayoutCount }})</span>
+      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $readyPayoutCount }})</span>
     </a>
   </div>
 
