@@ -3862,3 +3862,16 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian**:
   * Kompilasi Blade (`artisan view:clear` lalu `view:cache` via PHP 8.4.24) dan keseimbangan `<div>` (`stage-stepper` `7/7`, `profile/index` `68/68`, `dashboard` `100/100`): **PASS**.
   * Uji render HTTP (`dashboard`, `profile`, `availability`, `services`) dan simulasi transaksional DB Rollback 4 skenario (tanpa penolakan, profil ditolak Tahap 1, etalase ditolak 2/3, etalase ditolak 3/3 siap ajukan ulang): **27/27 asersi PASS** (catatan muncul tepat sekali per halaman, nol divider garis, nol kotak berlapis, nol `&` berlebih).
+
+
+---
+
+### [2026-11-13] Standardisasi Warna Ikon Kalender Tahun Operasional Dashboard
+* **Modul / Fitur**: Dashboard Fotografer & Dashboard Admin.
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+* **Rincian Perubahan**:
+  * Mengganti warna ikon kalender pada chip/badge "Tahun Operasional: {{ date('Y') }}" dari warna amber (`text-amber-500`) menjadi warna hitam netral (`text-gray-900 dark:text-white`) di kedua dashboard (Fotografer dan Admin) agar konsisten dan rapi (anti AI slop).
+* **Hasil Pengujian**:
+  * `php artisan view:clear`: **PASS**.
