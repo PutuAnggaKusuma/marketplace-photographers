@@ -20,6 +20,28 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-13 22:04 WITA] — Penyeragaman Warna Teks Angka dan Tanda Kurung pada Status Chips Dashboard Admin & Fotografer
+
+* **Modul / Fitur**:
+  - Dashboard Fotografer (`resources/views/photographer/dashboard.blade.php`).
+  - Dashboard Admin (`resources/views/admin/dashboard.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Teks label seperti `Konfirmasi Order` berwarna gelap (`text-gray-800`), tetapi teks angka dan tanda kurungnya `(1)` menggunakan warna abu-abu pudar berbeda (`text-gray-400 font-bold`).
+  * **After**:
+    - **Warna Teks 100% Selaras & Menyatu**: Teks label, tanda kurung, dan angka kini menggunakan warna yang sama persis (`text-gray-800 dark:text-gray-200 font-bold`) secara utuh:
+      `Konfirmasi Order (1)`, `Kirim Hasil Foto (1)`, `Pencairan Dana (2)`
+      serta pada admin: `Verifikasi Fotografer (0)`, `Dana Siap Tarik (0)`, `Submisi Lomba (0)`.
+    - Menghilangkan diskoneksi visual antara label dan angka antrean.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #22** (Pure Text Default), **Rule #51** (Clean UI), serta **Rule #68** (Anti-AI Slop Typography Standard).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+
 ### [2026-11-13 22:01 WITA] — Eliminasi Boks Abu Pratinjau Katalog Publik dan Teks Redundan pada Dashboard Fotografer (Anti-AI Slop Box)
 
 * **Modul / Fitur**:

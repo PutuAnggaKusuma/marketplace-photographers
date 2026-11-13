@@ -26,21 +26,21 @@
     <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
 
     <!-- Chip 1: Pending Photographer Verification -->
-    <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Verifikasi Fotografer</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingVerifications }})</span>
+      <span>({{ $pendingVerifications }})</span>
     </a>
 
     <!-- Chip 2: Ready Payouts -->
-    <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Dana Siap Tarik</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingPayouts }})</span>
+      <span>({{ $pendingPayouts }})</span>
     </a>
 
     <!-- Chip 3: Contest Submissions to Review -->
-    <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Submisi Lomba</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingContestReviews }})</span>
+      <span>({{ $pendingContestReviews }})</span>
     </a>
   </div>
 

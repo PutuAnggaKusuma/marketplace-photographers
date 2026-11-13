@@ -148,21 +148,21 @@
     <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mr-1">Antrean Kerja:</span>
 
     <!-- Chip 1: Booking Masuk Perlu Konfirmasi -->
-    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Konfirmasi Order</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $pendingBookingsCount }})</span>
+      <span>({{ $pendingBookingsCount }})</span>
     </a>
 
     <!-- Chip 2: Galeri Foto Perlu Diunggah -->
-    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Kirim Hasil Foto</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $needGalleryUploadCount }})</span>
+      <span>({{ $needGalleryUploadCount }})</span>
     </a>
 
     <!-- Chip 3: Dana Siap Dicairkan (Rule #70) -->
-    <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
+    <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Pencairan Dana</span>
-      <span class="text-gray-400 dark:text-gray-500 font-bold">({{ $readyPayoutCount }})</span>
+      <span>({{ $readyPayoutCount }})</span>
     </a>
   </div>
 
