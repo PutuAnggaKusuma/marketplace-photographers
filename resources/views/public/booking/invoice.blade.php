@@ -103,9 +103,13 @@
                 </span>
               </td>
               <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
-                <span>{{ $contract->bookingDetail && $contract->bookingDetail->booking_date ? \Carbon\Carbon::parse($contract->bookingDetail->booking_date)->translatedFormat('d F Y') : '-' }}</span>
+                <span>{{ $contract->bookingDetail ? $contract->bookingDetail->date_range_label : '-' }}</span>
                 @if($contract->bookingDetail?->jam_mulai)
-                  <span class="block text-gray-400 text-xs">{{ $contract->bookingDetail->jam_mulai }} WIB</span>
+                  @php
+                    $invStart = substr($contract->bookingDetail->jam_mulai, 0, 5);
+                    $invEnd = $contract->bookingDetail->jam_selesai ? substr($contract->bookingDetail->jam_selesai, 0, 5) : null;
+                  @endphp
+                  <span class="block text-gray-400 text-xs">{{ $invEnd ? "{$invStart} - {$invEnd} WIB" : "{$invStart} WIB" }} ({{ $contract->bookingDetail->effective_duration_hours }} Jam)</span>
                 @endif
               </td>
               <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">

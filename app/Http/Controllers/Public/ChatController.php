@@ -8,9 +8,11 @@ use App\Models\ChatMessage;
 use App\Models\RoleClient;
 use App\Models\RolePhotographer;
 use App\Models\User;
+use App\Services\BookingScheduleService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
@@ -176,16 +178,49 @@ class ChatController extends Controller
         $customOfferData = null;
         if ($msg->customOffer && !$deletedForAll) {
             $offer = $msg->customOffer;
+            $startTimeStr = $offer->booking_time ? substr($offer->booking_time, 0, 5) : null;
+            $endTimeStr = $offer->jam_selesai
+                ? substr($offer->jam_selesai, 0, 5)
+                : ($offer->booking_time ? date('H:i', strtotime($offer->booking_time . ' +' . ($offer->durasi_jam ?: 4) . ' hours')) : null);
+
+            $startDate = $offer->booking_date;
+            $endDate = $offer->effective_end_date;
+            $isMultiDay = (bool) $offer->is_multi_day;
+            $dayCount = (int) $offer->day_count;
+
+            if ($startDate && $isMultiDay && $endDate) {
+                $sameMonthYear = $startDate->format('Y-m') === $endDate->format('Y-m');
+                $dateLabel = $sameMonthYear
+                    ? $startDate->translatedFormat('d') . ' - ' . $endDate->translatedFormat('d M Y') . " ({$dayCount} hari)"
+                    : $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y') . " ({$dayCount} hari)";
+            } else {
+                $dateLabel = $startDate ? $startDate->translatedFormat('d F Y') : '-';
+            }
+
+            $timeRangeLabel = ($startTimeStr && $endTimeStr)
+                ? "{$startTimeStr} - {$endTimeStr} WIB"
+                : ($startTimeStr ? "{$startTimeStr} WIB" : '-');
+
+            $dpAmount = (float) round((float) $offer->harga * 0.30);
+
             $customOfferData = [
                 'id' => $offer->id,
                 'judul_penawaran' => $offer->judul_penawaran,
                 'deskripsi' => $offer->deskripsi,
-                'booking_date' => $offer->booking_date ? \Carbon\Carbon::parse($offer->booking_date)->translatedFormat('d F Y') : '-',
-                'booking_time' => $offer->booking_time ? substr($offer->booking_time, 0, 5) . ' WIB' : '-',
+                'booking_date' => $dateLabel,
+                'booking_date_raw' => $startDate ? $startDate->format('Y-m-d') : null,
+                'booking_end_date_raw' => $endDate ? $endDate->format('Y-m-d') : null,
+                'is_multi_day' => $isMultiDay,
+                'day_count' => $dayCount,
+                'booking_time' => $startTimeStr ? "{$startTimeStr} WIB" : '-',
+                'jam_selesai' => $endTimeStr ? "{$endTimeStr} WIB" : null,
+                'booking_time_range' => $timeRangeLabel,
                 'durasi_jam' => $offer->durasi_jam,
                 'lokasi' => $offer->lokasi,
                 'harga' => (float) $offer->harga,
                 'formatted_harga' => 'Rp ' . number_format($offer->harga, 0, ',', '.'),
+                'dp_amount' => $dpAmount,
+                'formatted_dp_amount' => 'Rp ' . number_format($dpAmount, 0, ',', '.'),
                 'status' => $offer->status,
                 'id_contract' => $offer->id_contract,
                 'invoice_url' => $offer->id_contract ? route('booking.invoice', $offer->id_contract) : null,
@@ -747,17 +782,22 @@ class ChatController extends Controller
             'id_chat_booking' => ['required', 'exists:chat_bookings,id'],
             'judul_penawaran' => ['required', 'string', 'min:3', 'max:200'],
             'booking_date' => ['required', 'date', 'after_or_equal:today'],
-            'booking_time' => ['required'],
-            'durasi_jam' => ['required', 'integer', 'min:1', 'max:48'],
+            'booking_end_date' => ['nullable', 'date', 'after_or_equal:booking_date'],
+            'booking_time' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'jam_selesai' => ['required', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'durasi_jam' => ['nullable', 'integer', 'min:1', 'max:720'],
             'lokasi' => ['required', 'string', 'max:255'],
             'harga' => ['required', 'numeric', 'min:50000'],
             'deskripsi' => ['required', 'string', 'max:2000'],
         ], [
             'judul_penawaran.required' => 'Judul paket penawaran khusus wajib diisi.',
-            'booking_date.required' => 'Tanggal rencana sesi pemotretan wajib ditentukan.',
+            'booking_date.required' => 'Tanggal mulai rencana sesi pemotretan wajib ditentukan.',
             'booking_date.after_or_equal' => 'Tanggal sesi minimal hari ini atau mendatang.',
+            'booking_end_date.after_or_equal' => 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.',
             'booking_time.required' => 'Jam mulai pemotretan wajib ditentukan.',
-            'durasi_jam.required' => 'Estimasi durasi sesi wajib ditentukan.',
+            'booking_time.regex' => 'Format jam mulai tidak valid.',
+            'jam_selesai.required' => 'Jam selesai pemotretan wajib ditentukan.',
+            'jam_selesai.regex' => 'Format jam selesai tidak valid.',
             'lokasi.required' => 'Lokasi pemotretan wajib diisi.',
             'harga.required' => 'Total tarif penawaran khusus wajib diisi.',
             'harga.min' => 'Tarif penawaran khusus minimal Rp 50.000.',
@@ -772,15 +812,65 @@ class ChatController extends Controller
             return response()->json(['success' => false, 'message' => 'Hanya fotografer pemilik obrolan yang dapat membuat penawaran khusus.'], 403);
         }
 
+        $startDate = $request->booking_date;
+        $endDate = $request->filled('booking_end_date') ? $request->booking_end_date : $startDate;
+        $startTime = substr($request->booking_time, 0, 5);
+        $endTime = substr($request->jam_selesai, 0, 5);
+
+        $startMin = BookingScheduleService::parseTimeToMinutes($startTime);
+        $endMin = BookingScheduleService::parseEndTimeToMinutes($endTime);
+        if ($startMin === null || $endMin === null || $startMin >= $endMin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jam selesai harus lebih akhir daripada jam mulai.',
+                'errors' => ['jam_selesai' => ['Jam selesai harus lebih akhir daripada jam mulai.']],
+            ], 422);
+        }
+
+        if ($startDate === Carbon::now()->toDateString()) {
+            $nowMinutes = (Carbon::now()->hour * 60) + Carbon::now()->minute;
+            if ($startMin <= $nowMinutes) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jam mulai hari ini tidak boleh sudah terlewat dari waktu sekarang.',
+                    'errors' => ['booking_time' => ['Jam mulai hari ini sudah terlewat.']],
+                ], 422);
+            }
+        }
+
+        // Validasi bentrok kalender (jam bebas melewati jam tutup reguler, hanya cek libur & pesanan aktif)
+        $conflictError = BookingScheduleService::validateCustomOfferSchedule(
+            $photographer->id,
+            $startDate,
+            $endDate,
+            $startMin,
+            $endMin
+        );
+        if ($conflictError !== null) {
+            return response()->json([
+                'success' => false,
+                'message' => $conflictError,
+                'errors' => ['booking_date' => [$conflictError]],
+            ], 422);
+        }
+
+        $dayCount = max(1, (int) Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate)) + 1);
+        $dailyHours = max(1, (int) ceil(($endMin - $startMin) / 60));
+        $computedDurasi = $request->filled('durasi_jam')
+            ? (int) $request->durasi_jam
+            : ($dailyHours * $dayCount);
+
         $offer = \App\Models\ChatCustomOffer::create([
             'id_chat_booking' => $thread->id,
             'id_photographer' => $photographer->id,
             'id_client' => $thread->id_client,
             'judul_penawaran' => trim($request->judul_penawaran),
             'deskripsi' => trim($request->deskripsi),
-            'booking_date' => $request->booking_date,
-            'booking_time' => $request->booking_time,
-            'durasi_jam' => (int) $request->durasi_jam,
+            'booking_date' => $startDate,
+            'booking_end_date' => $endDate,
+            'booking_time' => $startTime,
+            'jam_selesai' => $endTime,
+            'durasi_jam' => $computedDurasi,
             'lokasi' => trim($request->lokasi),
             'harga' => $request->harga,
             'status' => 'pending',
@@ -831,72 +921,134 @@ class ChatController extends Controller
      */
     public function acceptCustomOffer(Request $request, $id)
     {
+        $request->validate([
+            'payment_type' => ['nullable', 'in:full,dp'],
+        ]);
+
         $user = Auth::user();
-        $offer = \App\Models\ChatCustomOffer::with(['chatBooking', 'photographer.user', 'client'])->findOrFail($id);
-
         $client = RoleClient::where('id_user', $user->id)->first();
-        if (!$client || $offer->id_client !== $client->id) {
-            return response()->json(['success' => false, 'message' => 'Hanya klien penerima yang berhak menyetujui penawaran ini.'], 403);
+
+        try {
+            $result = DB::transaction(function () use ($request, $id, $user, $client) {
+                $offer = \App\Models\ChatCustomOffer::with(['chatBooking', 'photographer.user', 'client'])
+                    ->where('id', $id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (!$client || $offer->id_client !== $client->id) {
+                    return ['error' => 'Hanya klien penerima yang berhak menyetujui penawaran ini.', 'status' => 403];
+                }
+
+                if ($offer->status !== 'pending') {
+                    return ['error' => 'Penawaran ini sudah diproses sebelumnya.', 'status' => 400];
+                }
+
+                $startDate = $offer->booking_date ? $offer->booking_date->format('Y-m-d') : null;
+                $endDate = $offer->effective_end_date ? $offer->effective_end_date->format('Y-m-d') : $startDate;
+                $startTimeStr = $offer->booking_time ? substr($offer->booking_time, 0, 5) : '08:00';
+                $endTimeStr = $offer->jam_selesai
+                    ? substr($offer->jam_selesai, 0, 5)
+                    : date('H:i', strtotime($startTimeStr . ' +' . ($offer->durasi_jam ?: 4) . ' hours'));
+
+                $startMin = BookingScheduleService::parseTimeToMinutes($startTimeStr);
+                $endMin = BookingScheduleService::parseEndTimeToMinutes($endTimeStr);
+
+                if ($startDate && $endDate) {
+                    $conflictError = BookingScheduleService::validateCustomOfferSchedule(
+                        $offer->id_photographer,
+                        $startDate,
+                        $endDate,
+                        $startMin,
+                        $endMin
+                    );
+                    if ($conflictError !== null) {
+                        return [
+                            'error' => 'Jadwal penawaran ini sudah tidak tersedia: ' . $conflictError,
+                            'status' => 422,
+                        ];
+                    }
+                }
+
+                $paymentType = $request->input('payment_type', 'full') === 'dp' ? 'dp' : 'full';
+                $totalHarga = (float) $offer->harga;
+                $jumlahDp = $paymentType === 'dp' ? (float) round($totalHarga * 0.30) : null;
+                $initialAmount = $paymentType === 'dp' ? $jumlahDp : $totalHarga;
+                $feeMarketplace = round($totalHarga * 0.10);
+                $netPayout = $totalHarga - $feeMarketplace;
+
+                // 1. Buat Contract Resmi
+                $contract = \App\Models\Contract::create([
+                    'id_photographer' => $offer->id_photographer,
+                    'id_client' => $offer->id_client,
+                    'jumlah' => $totalHarga,
+                    'payment_type' => $paymentType,
+                    'jumlah_dp' => $jumlahDp,
+                    'fee_marketplace' => $feeMarketplace,
+                    'payout_amount' => $netPayout,
+                    'status_contract' => 'pending_payment',
+                    'status_payout' => 'holding',
+                    'is_validated_client' => true,
+                    'is_validated_photographer' => true,
+                    'payout_notes' => 'Pemesanan Penawaran Khusus Chat: ' . $offer->judul_penawaran,
+                ]);
+
+                // 2. Buat ContractBooking Detail
+                \App\Models\ContractBooking::create([
+                    'id_contract' => $contract->id,
+                    'id_service' => null,
+                    'booking_date' => $startDate,
+                    'booking_end_date' => $endDate,
+                    'jam_mulai' => strlen($startTimeStr) === 5 ? $startTimeStr . ':00' : $startTimeStr,
+                    'jam_selesai' => strlen($endTimeStr) === 5 ? $endTimeStr . ':00' : $endTimeStr,
+                    'durasi' => max(1, (int) $offer->durasi_jam),
+                    'spare_before_minutes' => 0,
+                    'spare_after_minutes' => 0,
+                    'allow_same_location_bypass' => false,
+                    'lokasi' => $offer->lokasi,
+                    'catatan_khusus' => "Penawaran Khusus Chat: {$offer->judul_penawaran}. " . $offer->deskripsi,
+                    'status_booking' => 'pending',
+                ]);
+
+                // 3. Buat Payment Record Awal (Penuh atau DP 30%)
+                \App\Models\Payment::create([
+                    'id_contract' => $contract->id,
+                    'payment_amount' => $initialAmount,
+                    'payment_status' => 'pending',
+                    'contract_payment_type' => $paymentType,
+                    'payment_type' => 'transfer',
+                    'external_id' => ($paymentType === 'dp' ? 'INV-ODP-' : 'INV-OFR-') . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
+                ]);
+
+                // 4. Update Status Penawaran Khusus
+                $offer->update([
+                    'status' => 'accepted',
+                    'id_contract' => $contract->id,
+                ]);
+
+                return [
+                    'offer' => $offer,
+                    'contract' => $contract,
+                    'payment_type' => $paymentType,
+                ];
+            });
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Penawaran khusus tidak ditemukan.'], 404);
         }
 
-        if ($offer->status !== 'pending') {
-            return response()->json(['success' => false, 'message' => 'Penawaran ini sudah diproses sebelumnya.'], 400);
+        if (isset($result['error'])) {
+            return response()->json(['success' => false, 'message' => $result['error']], $result['status']);
         }
 
-        $feeMarketplace = $offer->harga * 0.10;
-        $netPayout = $offer->harga - $feeMarketplace;
-
-        // 1. Buat Contract Resmi
-        $contract = \App\Models\Contract::create([
-            'id_photographer' => $offer->id_photographer,
-            'id_client' => $offer->id_client,
-            'jumlah' => $offer->harga,
-            'payment_type' => 'full',
-            'fee_marketplace' => $feeMarketplace,
-            'payout_amount' => $netPayout,
-            'status_contract' => 'pending_payment',
-            'status_payout' => 'holding',
-            'is_validated_client' => true,
-            'is_validated_photographer' => true,
-            'payout_notes' => 'Pemesanan Penawaran Khusus Chat: ' . $offer->judul_penawaran,
-        ]);
-
-        // 2. Buat ContractBooking Detail
-        \App\Models\ContractBooking::create([
-            'id_contract' => $contract->id,
-            'id_service' => null,
-            'booking_date' => $offer->booking_date,
-            'jam_mulai' => $offer->booking_time,
-            'jam_selesai' => date('H:i', strtotime($offer->booking_time . ' +' . ($offer->durasi_jam ?: 4) . ' hours')),
-            'durasi' => "{$offer->durasi_jam} Jam",
-            'lokasi' => $offer->lokasi,
-            'catatan_khusus' => "Penawaran Khusus Chat: {$offer->judul_penawaran}. " . $offer->deskripsi,
-            'status_booking' => 'pending',
-        ]);
-
-        // 3. Buat Payment Record Awal
-        \App\Models\Payment::create([
-            'id_contract' => $contract->id,
-            'payment_amount' => $offer->harga,
-            'payment_status' => 'pending',
-            'contract_payment_type' => 'full',
-            'payment_type' => 'transfer',
-            'external_id' => 'INV-OFR-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
-        ]);
-
-        // 4. Update Status Penawaran Khusus
-        $offer->update([
-            'status' => 'accepted',
-            'id_contract' => $contract->id,
-        ]);
-
+        $offer = $result['offer'];
+        $contract = $result['contract'];
+        $paymentLabel = $result['payment_type'] === 'dp' ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh';
         $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
         // 5. Kirim Pesan Konfirmasi di Chat
         ChatMessage::create([
             'id_chat_booking' => $offer->id_chat_booking,
             'id_sender' => $user->id,
-            'message' => "Saya telah menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}). Menuju pembayaran invoice...",
+            'message' => "Saya telah menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}) dengan skema {$paymentLabel}. Menuju pembayaran invoice...",
             'is_read' => false,
         ]);
 
@@ -907,7 +1059,7 @@ class ChatController extends Controller
             \App\Models\Notification::send(
                 $offer->photographer->id_user,
                 'Penawaran Khusus Disetujui',
-                "Klien {$client->nama} telah menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}). Klien diarahkan untuk melakukan pembayaran transfer.",
+                "Klien {$client->nama} telah menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}). Klien diarahkan untuk melakukan {$paymentLabel}.",
                 'custom_offer_accepted',
                 route('photographer.bookings')
             );
@@ -915,7 +1067,7 @@ class ChatController extends Controller
 
         \App\Models\ActivityLog::record(
             'custom_offer_accepted',
-            "Klien {$client->nama} menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode})",
+            "Klien {$client->nama} menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}) dengan {$paymentLabel}",
             $contract
         );
 

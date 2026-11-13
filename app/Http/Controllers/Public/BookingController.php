@@ -7,25 +7,21 @@ namespace App\Http\Controllers\Public;
 
 
 use App\Http\Controllers\Controller;
-
+use App\Models\ChatBooking;
+use App\Models\ChatMessage;
 use App\Models\Contract;
-
 use App\Models\ContractBooking;
-
+use App\Models\Notification;
 use App\Models\Payment;
-
 use App\Models\PhotographerService;
-
 use App\Models\RoleClient;
-
 use App\Models\RolePhotographer;
-
-use App\Models\ServiceDetail;
-
+use App\Services\BookingScheduleService;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
 use Laravolt\Indonesia\Models\Province;
 
 
@@ -81,7 +77,7 @@ class BookingController extends Controller
 
 
 
-        $preselectedDate = $request->input('tanggal', date('Y-m-d', strtotime('+2 days')));
+        $preselectedDate = $request->input('tanggal', '');
 
 
 
@@ -117,414 +113,315 @@ class BookingController extends Controller
 
 
 
-        // Full-day and partial-day blocks
+        // Full-day unavailable dates (manual full-day blocks + multi-day custom bookings)
+        $blockedDates = BookingScheduleService::getFullDayUnavailableDates($photographer->id, date('Y-m-d'));
 
-        $availabilities = \App\Models\PhotographerAvailability::where('id_photographer', $photographer->id)
+        return view('public.booking.create', compact(
+            'photographer',
+            'service',
+            'allServices',
+            'provinces',
+            'preselectedDate',
+            'blockedDates',
+            'workingHours'
+        ));
+    }
 
-            ->where('tanggal', '>=', date('Y-m-d'))
+    /**
+     * Endpoint JSON untuk mengambil matrix jam mulai & jam selesai bulat
+     * sesuai paket (spare time + bypass 500m), tanggal, dan koordinat venue acara.
+     */
+    public function availableSlots(Request $request)
+    {
+        $request->validate([
+            'photographer_id' => 'required|exists:role_photographers,id',
+            'date' => 'required|date_format:Y-m-d',
+            'service_id' => 'nullable|exists:photographer_services,id',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+        ]);
 
-            ->get()
+        $photographer = RolePhotographer::findOrFail($request->input('photographer_id'));
+        if (!$photographer->isPublishedToCatalog()) {
+            return response()->json(['message' => 'Etalase fotografer tidak aktif.'], 404);
+        }
 
-            ->map(function ($a) {
+        $service = $request->filled('service_id')
+            ? PhotographerService::where('id_photographer', $photographer->id)->find($request->input('service_id'))
+            : null;
 
-                $isFullDay = !$a->jam_mulai || !$a->jam_selesai || ($a->jam_mulai == '00:00:00' && $a->jam_selesai == '23:59:59');
+        $targetOptions = [
+            'spare_before_minutes' => $service ? $service->getEffectiveSpareBeforeMinutes() : 0,
+            'spare_after_minutes' => $service ? $service->getEffectiveSpareAfterMinutes() : 0,
+            'allow_same_location_bypass' => $service ? (bool) $service->allow_same_location_bypass : false,
+            'latitude' => $request->filled('latitude') ? (float) $request->input('latitude') : null,
+            'longitude' => $request->filled('longitude') ? (float) $request->input('longitude') : null,
+        ];
 
-                return [
+        $matrix = BookingScheduleService::getAvailableTimeMatrix(
+            $photographer->id,
+            $request->input('date'),
+            $targetOptions
+        );
 
-                    'tanggal' => $a->tanggal,
-
-                    'is_full_day' => $isFullDay,
-
-                    'jam_mulai' => $a->jam_mulai ? substr($a->jam_mulai, 0, 5) : null,
-
-                    'jam_selesai' => $a->jam_selesai ? substr($a->jam_selesai, 0, 5) : null,
-
-                    'keterangan' => $a->keterangan ?: 'Libur / Tutup',
-
-                ];
-
-            });
-
-
-
-        // Blocked full-day dates
-
-        $blockedDates = $availabilities->where('is_full_day', true)->pluck('tanggal')->values()->toArray();
-
-
-
-        // Booked sessions with times
-
-        $bookedSlots = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
-
-            $q->where('id_photographer', $photographer->id)
-
-              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
-
-        })->where('booking_date', '>=', date('Y-m-d'))
-
-          ->get()
-
-          ->map(function ($b) {
-
-              $start = substr($b->jam_mulai ?: '08:00', 0, 5);
-
-              $end = $b->jam_selesai ? substr($b->jam_selesai, 0, 5) : null;
-
-              return [
-
-                  'date' => $b->booking_date,
-
-                  'jam_mulai' => $start,
-
-                  'jam_selesai' => $end,
-
-                  'durasi' => (int) $b->durasi ?: 2,
-
-              ];
-
-          });
-
-
-
-        // Booked dates
-
-        $bookedDates = $bookedSlots->pluck('date')->unique()->values()->toArray();
-
-
-
-        return view('public.booking.create', compact('photographer', 'service', 'allServices', 'provinces', 'preselectedDate', 'blockedDates', 'bookedDates', 'workingHours', 'availabilities', 'bookedSlots'));
-
+        return response()->json($matrix);
     }
 
 
 
     /**
-
      * Store New Booking Reservation & Generate Payment Invoice.
-
      */
-
     public function store(Request $request)
-
     {
-
         $request->validate([
-
             'photographer_id' => 'required|exists:role_photographers,id',
-
             'service_id' => 'required|exists:photographer_services,id',
-
             'tanggal_sesi' => 'required|date|after_or_equal:today',
-
-            'jam_mulai' => 'required',
-
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_selesai' => 'required|date_format:H:i',
             'lokasi_acara' => 'required|string|max:500',
-
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'province_code' => 'nullable|string',
-
             'city_code' => 'nullable|string',
-
             'catatan_khusus' => 'nullable|string',
-
-            'selected_features' => 'nullable|array',
-
+        ], [
+            'jam_mulai.required' => 'Jam mulai sesi wajib dipilih.',
+            'jam_mulai.date_format' => 'Format jam mulai tidak valid.',
+            'jam_selesai.required' => 'Jam selesai sesi wajib dipilih.',
+            'jam_selesai.date_format' => 'Format jam selesai tidak valid.',
+            'lokasi_acara.required' => 'Alamat lokasi acara wajib diisi.',
         ]);
 
-
-
         $tanggalSesi = $request->input('tanggal_sesi');
-
-        $photographerId = $request->input('photographer_id');
+        $photographerId = (int) $request->input('photographer_id');
 
         $targetPhotographer = RolePhotographer::findOrFail($photographerId);
         if (!$targetPhotographer->isPublishedToCatalog()) {
             return redirect()->back()->withInput()->with('error', 'Etalase fotografer belum aktif untuk menerima pemesanan.');
         }
 
+        $service = PhotographerService::with('details')
+            ->where('id_photographer', $photographerId)
+            ->findOrFail($request->input('service_id'));
 
+        $startMin = BookingScheduleService::parseTimeToMinutes($request->input('jam_mulai'));
+        $endMin = BookingScheduleService::parseEndTimeToMinutes($request->input('jam_selesai'));
 
-        $jamMulai = $request->input('jam_mulai', '08:00');
-
-
-
-        // Validasi 0: Jam Kerja Mingguan / Harian Fotografer (Weekly Recurring Schedule)
-
-        $dow = (int) \Carbon\Carbon::parse($tanggalSesi)->dayOfWeekIso; // 1 = Senin, ..., 7 = Minggu
-
-        $workingHour = \App\Models\PhotographerWorkingHour::where('id_photographer', $photographerId)
-
-            ->where('day_of_week', $dow)
-
-            ->first();
-
-
-
-        if ($workingHour) {
-
-            if (!$workingHour->is_open) {
-
-                return redirect()->back()->withInput()->with('error', "Fotografer tidak beroperasi pada hari {$workingHour->day_name}. Silakan pilih hari operasional lainnya.");
-
-            }
-
-            if (!$workingHour->is_24_hours) {
-
-                $buka = substr($workingHour->jam_buka, 0, 5);
-
-                $tutup = substr($workingHour->jam_tutup, 0, 5);
-
-                $bookingTime = substr($jamMulai, 0, 5);
-
-                if ($bookingTime < $buka || $bookingTime > $tutup) {
-
-                    return redirect()->back()->withInput()->with('error', "Fotografer beroperasi dari jam {$buka} s/d {$tutup} WIB pada hari {$workingHour->day_name}. Jam {$bookingTime} WIB berada di luar jam operasional.");
-
-                }
-
-            }
-
+        if ($startMin === null || $endMin === null) {
+            return redirect()->back()->withInput()->with('error', 'Format jam mulai atau jam selesai tidak valid.');
         }
 
+        $lat = $request->filled('latitude') ? (float) $request->input('latitude') : null;
+        $lng = $request->filled('longitude') ? (float) $request->input('longitude') : null;
 
+        $targetOptions = [
+            'spare_before_minutes' => $service->getEffectiveSpareBeforeMinutes(),
+            'spare_after_minutes' => $service->getEffectiveSpareAfterMinutes(),
+            'allow_same_location_bypass' => (bool) $service->allow_same_location_bypass,
+            'latitude' => $lat,
+            'longitude' => $lng,
+        ];
 
-        $durasi = (int) $request->input('durasi', 2);
+        $conflictError = BookingScheduleService::validateRegularBookingSlot(
+            $photographerId,
+            $tanggalSesi,
+            $startMin,
+            $endMin,
+            $targetOptions
+        );
 
-        if ($durasi < 1) $durasi = 2;
-
-        $bookingStart = substr($jamMulai, 0, 5);
-
-        $bookingEnd = date('H:i', strtotime($bookingStart . ' +' . $durasi . ' hours'));
-
-
-
-        // Validasi 1: Fotografer memblokir jadwal (seharian atau slot jam tertentu - interval overlap check)
-
-        $blockedAvailabilities = \App\Models\PhotographerAvailability::where('id_photographer', $photographerId)
-
-            ->where('tanggal', $tanggalSesi)
-
-            ->get();
-
-
-        foreach ($blockedAvailabilities as $blk) {
-
-            // Jika blokir seharian penuh
-
-            if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai == '00:00:00' && $blk->jam_selesai == '23:59:59')) {
-
-                return redirect()->back()->withInput()->with('error', 'Fotografer sedang libur / tidak menerima sesi foto pada tanggal tersebut (' . ($blk->keterangan ?: 'Libur Penuh') . '). Silakan pilih tanggal lain.');
-
-            }
-
-            // Jika blokir jam tertentu (interval overlap check)
-
-            $blkStart = substr($blk->jam_mulai, 0, 5);
-
-            $blkEnd = substr($blk->jam_selesai, 0, 5);
-
-            if ($bookingStart < $blkEnd && $bookingEnd > $blkStart) {
-
-                return redirect()->back()->withInput()->with('error', 'Sesi jam ' . $bookingStart . ' - ' . $bookingEnd . ' WIB pada tanggal tersebut berbenturan dengan penutupan jadwal fotografer (' . ($blk->keterangan ?: 'Tutup Sesi: ' . $blkStart . '-' . $blkEnd) . '). Silakan pilih jam atau tanggal lain.');
-
-            }
-
+        if ($conflictError !== null) {
+            return redirect()->back()->withInput()->with('error', $conflictError);
         }
 
-
-
-        // Validasi 2: Jadwal fotografer sudah terisi oleh pesanan booking lain (interval overlap check)
-
-        $existingBookings = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographerId) {
-
-            $q->where('id_photographer', $photographerId)
-
-              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
-
-        })->where('booking_date', $tanggalSesi)->get();
-
-
-
-        foreach ($existingBookings as $eb) {
-
-            $ebStart = substr($eb->jam_mulai ?: '08:00', 0, 5);
-
-            $ebEnd = $eb->jam_selesai ? substr($eb->jam_selesai, 0, 5) : date('H:i', strtotime($ebStart . ' +' . ((int) $eb->durasi ?: 4) . ' hours'));
-
-            if ($bookingStart < $ebEnd && $bookingEnd > $ebStart) {
-
-                return redirect()->back()->withInput()->with('error', 'Jadwal sesi foto jam ' . $bookingStart . ' - ' . $bookingEnd . ' WIB berbenturan dengan pesanan klien lain (' . $ebStart . ' - ' . $ebEnd . ' WIB). Silakan pilih jam lain.');
-
-            }
-
+        $durasi = (int) (($endMin - $startMin) / 60);
+        if ($durasi < 1) {
+            return redirect()->back()->withInput()->with('error', 'Durasi pemesanan minimal 1 jam.');
         }
 
+        $bookingStart = BookingScheduleService::formatMinutesToTime($startMin);
+        $bookingEnd = BookingScheduleService::formatMinutesToTime($endMin);
 
-
-        $service = PhotographerService::with('details')->findOrFail($request->input('service_id'));
-
-        $totalAmount = $service->tarif_harga;
-
-
-
-        // Calculate total amount with extra add-ons
-
-        $selectedFeatures = $request->input('selected_features', []);
-
-        if (!empty($selectedFeatures)) {
-
-            $extraCost = ServiceDetail::whereIn('id', $selectedFeatures)->sum('tarif_harga');
-
-            $totalAmount += $extraCost;
-
-        }
-
-
-
-        // Get or Create Client Profile Record for Foreign Key Integrity
+        $totalAmount = (float) $service->tarif_harga * $durasi;
+        $feeMarketplace = round($totalAmount * 0.10);
+        $payoutAmount = max(0, $totalAmount - $feeMarketplace);
 
         $clientProfile = RoleClient::firstOrCreate(
-
             ['id_user' => auth()->id()],
-
             [
-
                 'nama' => auth()->user()->nama,
-
                 'nomor_telepon' => auth()->user()->nomor_telepon ?? null,
-
                 'alamat' => $request->input('lokasi_acara'),
-
             ]
-
         );
-
-
 
         $paymentType = $request->input('payment_type', 'full');
-
-        if (!in_array($paymentType, ['full', 'dp'])) {
-
+        if (!in_array($paymentType, ['full', 'dp'], true)) {
             $paymentType = 'full';
-
         }
-
-
 
         $jumlahDp = 0;
-
         $initialPaymentAmount = $totalAmount;
-
         $paymentExternalId = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
-
-
         if ($paymentType === 'dp') {
-
-            $jumlahDp = round($totalAmount * 0.30); // Uang Muka 30%
-
+            $jumlahDp = round($totalAmount * 0.30);
             $initialPaymentAmount = $jumlahDp;
-
             $paymentExternalId = 'INV-DP-' . date('Ymd') . '-' . strtoupper(Str::random(6));
-
         }
 
-
-
-        // 1. Create Contract (Matches enum: draft, approved, pending_payment, active, completed, cancelled)
-
         $contract = Contract::create([
-
             'id_client' => $clientProfile->id,
-
-            'id_photographer' => $request->input('photographer_id'),
-
+            'id_photographer' => $photographerId,
             'jumlah' => $totalAmount,
-
             'payment_type' => $paymentType,
-
             'jumlah_dp' => $jumlahDp,
-
+            'fee_marketplace' => $feeMarketplace,
+            'payout_amount' => $payoutAmount,
             'is_validated_photographer' => false,
-
             'is_validated_client' => true,
-
             'expired_at' => now()->addDays(1),
-
             'status_contract' => 'pending_payment',
-
         ]);
-
-
-
-        // 2. Create Contract Booking Detail (Matches enum: pending, confirmed, completed)
 
         ContractBooking::create([
-
             'id_contract' => $contract->id,
-
             'id_service' => $service->id,
-
-            'booking_date' => $request->input('tanggal_sesi'),
-
-            'jam_mulai' => $bookingStart . ':00',
-
-            'jam_selesai' => $bookingEnd . ':00',
-
+            'booking_date' => $tanggalSesi,
+            'booking_end_date' => $tanggalSesi,
+            'jam_mulai' => BookingScheduleService::formatMinutesToDbTime($startMin),
+            'jam_selesai' => BookingScheduleService::formatMinutesToDbTime($endMin),
             'lokasi' => $request->input('lokasi_acara'),
-
+            'latitude' => $lat,
+            'longitude' => $lng,
             'province_code' => $request->input('province_code'),
-
             'city_code' => $request->input('city_code'),
-
             'catatan_khusus' => $request->input('catatan_khusus'),
-
             'durasi' => $durasi,
-
+            'spare_before_minutes' => $service->getEffectiveSpareBeforeMinutes(),
+            'spare_after_minutes' => $service->getEffectiveSpareAfterMinutes(),
+            'allow_same_location_bypass' => (bool) $service->allow_same_location_bypass,
             'status_booking' => 'pending',
-
         ]);
-
-
-
-        // 3. Create Payment Invoice (Matches enum: transfer, payment gateway)
 
         Payment::create([
-
             'id_contract' => $contract->id,
-
             'payment_amount' => $initialPaymentAmount,
-
             'payment_status' => 'pending',
-
             'contract_payment_type' => $paymentType,
-
             'payment_type' => 'transfer',
-
             'external_id' => $paymentExternalId,
-
         ]);
 
-
-
-        // Record Activity Log
-
         \App\Models\ActivityLog::record(
-
             'booking_created',
-
-            "Klien {$clientProfile->nama} membuat reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'Uang Muka DP 30%' : 'Bayar Penuh') . ")",
-
+            "Klien {$clientProfile->nama} membuat reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " ({$bookingStart}-{$bookingEnd} WIB, {$durasi} jam) untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'DP 30%' : 'Bayar Penuh') . ")",
             $contract,
-
-            ['total_amount' => $totalAmount, 'payment_type' => $paymentType, 'jumlah_dp' => $jumlahDp, 'tanggal_sesi' => $request->input('tanggal_sesi')]
-
+            [
+                'total_amount' => $totalAmount,
+                'durasi' => $durasi,
+                'payment_type' => $paymentType,
+                'jumlah_dp' => $jumlahDp,
+                'tanggal_sesi' => $tanggalSesi,
+            ]
         );
 
+        return redirect()->route('booking.invoice', $contract->id)
+            ->with('success', 'Reservasi sesi foto berhasil diajukan. Silakan lanjutkan pembayaran invoice.');
+    }
 
+    /**
+     * Kirim pengajuan Booking Custom (multi-hari berurutan atau jam khusus) sebagai pesan pembuka Chat.
+     */
+    public function sendCustomPlanRequest(Request $request)
+    {
+        $request->validate([
+            'photographer_id' => 'required|exists:role_photographers,id',
+            'tanggal_mulai' => 'required|date|after_or_equal:today',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'jam_mulai' => 'nullable|date_format:H:i',
+            'jam_selesai' => 'nullable|date_format:H:i',
+            'lokasi' => 'required|string|max:500',
+            'kebutuhan' => 'required|string|max:2000',
+        ], [
+            'tanggal_mulai.required' => 'Tanggal mulai acara wajib diisi.',
+            'tanggal_selesai.required' => 'Tanggal selesai acara wajib diisi.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.',
+            'lokasi.required' => 'Lokasi acara wajib diisi.',
+            'kebutuhan.required' => 'Rincian kebutuhan acara wajib diisi.',
+        ]);
 
-        return redirect()->route('booking.invoice', $contract->id)->with('success', 'Reservasi sesi foto berhasil diajukan! Silakan lakukan pembayaran invoice.');
+        $photographer = RolePhotographer::findOrFail($request->input('photographer_id'));
+        if (!$photographer->isPublishedToCatalog()) {
+            return redirect()->back()->withInput()->with('error', 'Etalase fotografer belum aktif menerima pemesanan.');
+        }
 
+        if (
+            $request->input('tanggal_mulai') === $request->input('tanggal_selesai')
+            && $request->filled('jam_mulai')
+            && $request->filled('jam_selesai')
+            && $request->input('jam_selesai') <= $request->input('jam_mulai')
+        ) {
+            return redirect()->back()->withInput()->with('error', 'Jam selesai harus lebih akhir daripada jam mulai.');
+        }
+
+        $clientProfile = RoleClient::firstOrCreate(
+            ['id_user' => auth()->id()],
+            [
+                'nama' => auth()->user()->nama,
+                'nomor_telepon' => auth()->user()->nomor_telepon ?? null,
+                'alamat' => $request->input('lokasi'),
+            ]
+        );
+
+        $thread = ChatBooking::firstOrCreate([
+            'id_client' => $clientProfile->id,
+            'id_photographer' => $photographer->id,
+        ]);
+
+        $startCarbon = Carbon::parse($request->input('tanggal_mulai'));
+        $endCarbon = Carbon::parse($request->input('tanggal_selesai'));
+        $dayCount = (int) $startCarbon->diffInDays($endCarbon) + 1;
+
+        $dateLine = $startCarbon->isSameDay($endCarbon)
+            ? $startCarbon->translatedFormat('d M Y')
+            : $startCarbon->translatedFormat('d M Y') . ' s/d ' . $endCarbon->translatedFormat('d M Y') . " ({$dayCount} hari)";
+
+        $timeLine = ($request->filled('jam_mulai') && $request->filled('jam_selesai'))
+            ? $request->input('jam_mulai') . ' - ' . $request->input('jam_selesai') . ' WIB'
+            : ($request->filled('jam_mulai')
+                ? 'Mulai ' . $request->input('jam_mulai') . ' WIB'
+                : 'Menyesuaikan kesepakatan');
+
+        $openingMessage = "Permintaan Booking Custom\n"
+            . "Tanggal: {$dateLine}\n"
+            . "Perkiraan Jam: {$timeLine}\n"
+            . "Lokasi: " . trim($request->input('lokasi')) . "\n"
+            . "Kebutuhan: " . trim($request->input('kebutuhan'));
+
+        ChatMessage::create([
+            'id_chat_booking' => $thread->id,
+            'id_sender' => auth()->id(),
+            'message' => $openingMessage,
+            'is_read' => false,
+        ]);
+
+        $thread->touch();
+
+        if ($photographer->id_user) {
+            Notification::send(
+                $photographer->id_user,
+                'Permintaan Booking Custom',
+                "Klien {$clientProfile->nama} mengirimkan rencana Booking Custom ({$dateLine}) melalui chat.",
+                'custom_offer_request',
+                route('photographer.chat', ['thread' => $thread->id])
+            );
+        }
+
+        return redirect()->route('client.chat', ['thread' => $thread->id])
+            ->with('success', 'Permintaan Booking Custom terkirim ke ruang chat fotografer.');
     }
 
 

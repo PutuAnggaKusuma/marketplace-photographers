@@ -544,10 +544,10 @@
           <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/80 space-y-1">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-black text-amber-600 dark:text-amber-400">
-                {{ \Carbon\Carbon::parse($sched->booking_date)->translatedFormat('d M Y') }}
+                {{ $sched->date_range_label }}
               </span>
               <span class="text-[10px] font-bold text-gray-500">
-                {{ $sched->jam_mulai }} - {{ $sched->jam_selesai }} WITA
+                {{ substr((string) $sched->jam_mulai, 0, 5) }} - {{ substr((string) $sched->jam_selesai, 0, 5) }} WIB
               </span>
             </div>
             <p class="text-xs font-black text-gray-900 dark:text-white">{{ $sched->contract->client->nama ?? 'Klien' }}</p>

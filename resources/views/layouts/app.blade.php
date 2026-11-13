@@ -35,6 +35,7 @@
             }
         }, true);
     </script>
+    @stack('styles')
 </head>
   <body
     x-data="{ page: 'public', loaded: true, darkMode: false, classroomSidebarOpen: true }"

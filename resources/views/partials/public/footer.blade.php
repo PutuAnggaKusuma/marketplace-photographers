@@ -32,13 +32,13 @@
         </ul>
       </div>
 
-      <!-- Bantuan & Syarat Links -->
+      <!-- Bantuan Links -->
       <div>
-        <h4 class="text-white text-xs font-bold uppercase tracking-wider mb-4 border-b border-zinc-700/60 pb-2">Bantuan & Syarat</h4>
+        <h4 class="text-white text-xs font-bold uppercase tracking-wider mb-4 border-b border-zinc-700/60 pb-2">Bantuan</h4>
         <ul class="space-y-2.5 text-xs">
-          <li><a href="{{ route('public.faq') }}" class="hover:text-amber-400 transition">Pusat Bantuan & FAQ</a></li>
-          <li><a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Kebijakan Privasi & Keamanan Pembayaran</a></li>
-          <li><a href="{{ route('public.terms') }}" class="hover:text-amber-400 transition">Syarat & Ketentuan Platform</a></li>
+          <li><a href="{{ route('public.faq') }}" class="hover:text-amber-400 transition">Pusat Bantuan</a></li>
+          <li><a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Kebijakan Privasi</a></li>
+          <li><a href="{{ route('public.terms') }}" class="hover:text-amber-400 transition">Syarat Ketentuan</a></li>
         </ul>
       </div>
     </div>
@@ -46,8 +46,8 @@
     <div class="border-t border-zinc-800 mt-12 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-zinc-500 gap-4">
       <p>&copy; 2026 LensMatch Platform Booking Fotografer — All rights reserved.</p>
       <div class="flex gap-6">
-        <a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Privacy Policy</a>
-        <a href="{{ route('public.terms') }}" class="hover:text-amber-400 transition">Terms of Service</a>
+        <a href="{{ route('public.privacy') }}" class="hover:text-amber-400 transition">Kebijakan Privasi</a>
+        <a href="{{ route('public.terms') }}" class="hover:text-amber-400 transition">Syarat Ketentuan</a>
       </div>
     </div>
   </div>

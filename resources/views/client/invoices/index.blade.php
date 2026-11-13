@@ -171,10 +171,10 @@
                 <td class="py-4 px-4 sm:px-6 align-middle">
                   <div class="space-y-0.5">
                     <span class="font-bold text-gray-900 dark:text-white block text-xs">
-                      {{ $c->bookingDetail->service->nama_layanan ?? 'Sesi Fotografi' }}
+                      {{ $c->bookingDetail->service->nama_layanan ?? 'Paket Kustom' }}
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400 block">
-                      Jadwal: {{ $c->bookingDetail && $c->bookingDetail->booking_date ? \Carbon\Carbon::parse($c->bookingDetail->booking_date)->translatedFormat('d M Y') : '-' }}
+                      Jadwal: {{ $c->bookingDetail ? $c->bookingDetail->date_range_label : '-' }}
                     </span>
                   </div>
                 </td>

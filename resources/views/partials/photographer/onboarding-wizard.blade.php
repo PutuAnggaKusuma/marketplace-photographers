@@ -309,7 +309,7 @@
 
               <div class="flex flex-col gap-1.5">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                  Tarif Harga Sesi (Rp) <span class="text-rose-500">*</span>
+                  Tarif Per Jam (Rp) <span class="text-rose-500">*</span>
                 </label>
                 <input type="number" 
                        name="tarif_harga" 
@@ -318,17 +318,17 @@
                        @input="touched.tarif_harga = true; validateTarif()"
                        @blur="touched.tarif_harga = true; validateTarif()"
                        step="10000"
-                       placeholder="Masukkan nominal tarif paket (min. 10000)" 
+                       placeholder="Masukkan nominal tarif per jam (min. 10000)" 
                        :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                        class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium" />
                 <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500"></p>
               </div>
             </div>
 
-            <!-- Uraian Deskripsi Fasilitas Paket -->
+            <!-- Uraian Deskripsi Paket -->
             <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                Deskripsi & Fasilitas Paket <span class="text-rose-500">*</span>
+                Deskripsi Paket Layanan <span class="text-rose-500">*</span>
               </label>
               <textarea name="deskripsi_layanan" 
                         x-ref="descLayananInput"
@@ -336,7 +336,7 @@
                         @input="touched.deskripsi_layanan = true; validateDescLayanan()"
                         @blur="touched.deskripsi_layanan = true; validateDescLayanan()"
                         rows="3" 
-                        placeholder="Contoh: Sesi pemotretan 2 jam, 30 foto high-res edited, seluruh file raw dikirimkan via Google Drive dalam 3 hari kerja."
+                        placeholder="Contoh: Pengarahan gaya, foto resolusi tinggi hasil edit warna, dan seluruh file asli dikirim via Google Drive."
                         :class="touched.deskripsi_layanan && errors.deskripsi_layanan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'"
                         class="w-full px-4 py-3 text-xs sm:text-sm rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition shadow-2xs font-medium leading-relaxed"></textarea>
               <p x-show="touched.deskripsi_layanan && errors.deskripsi_layanan" x-text="errors.deskripsi_layanan" x-cloak class="text-[11px] font-bold text-red-500"></p>

@@ -761,17 +761,17 @@
 
                                                     <span class="font-bold block truncate" x-text="m.custom_offer.booking_date"></span>
 
-                                                    <span class="text-[10px] block opacity-80" x-text="m.custom_offer.booking_time"></span>
+                                                    <span class="text-[10px] block opacity-80" x-text="m.custom_offer.booking_time_range || m.custom_offer.booking_time"></span>
 
                                                 </div>
 
                                                 <div>
 
-                                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block font-semibold">Durasi & Lokasi</span>
+                                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block font-semibold">Lokasi</span>
 
-                                                    <span class="font-bold block truncate" x-text="m.custom_offer.durasi_jam + ' Jam'"></span>
+                                                    <span class="font-bold block truncate" x-text="m.custom_offer.lokasi"></span>
 
-                                                    <span class="text-[10px] block truncate opacity-80" x-text="m.custom_offer.lokasi"></span>
+                                                    <span class="text-[10px] block opacity-80" x-text="'Total ' + m.custom_offer.durasi_jam + ' Jam'"></span>
 
                                                 </div>
 
@@ -793,7 +793,7 @@
 
                                                      :class="m.is_me ? 'border-amber-400/30' : 'border-amber-200/60 dark:border-gray-700'">
 
-                                                    <button type="button" 
+                                                    <button type="button"
 
                                                             @click="rejectOffer(m.custom_offer.id)"
 
@@ -801,15 +801,19 @@
 
                                                         Tolak
 
-                                                                                <button type="button" 
+                                                    </button>
 
-                                                            @click="acceptOffer(m.custom_offer.id)"
+                                                    <button type="button"
+
+                                                            @click="acceptOffer(m.custom_offer)"
 
                                                             class="flex-1 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs transition shadow-xs cursor-pointer text-center">
 
-                                                        Setujui & Bayar
+                                                        Setujui
 
-                                                                            </div>
+                                                    </button>
+
+                                                </div>
 
                                             </template>
 
@@ -821,13 +825,13 @@
 
                                                 <div class="pt-1">
 
-                                                    <a :href="m.custom_offer.invoice_url" 
+                                                    <a :href="m.custom_offer.invoice_url"
 
                                                        class="inline-flex items-center gap-1.5 text-xs font-extrabold underline underline-offset-4"
 
                                                        :class="m.is_me ? 'text-amber-200 hover:text-white' : 'text-amber-600 dark:text-amber-400 hover:underline'">
 
-                                                        <span>Buka Halaman Invoice & Pembayaran</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                                                        <span>Buka Halaman Invoice</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
 
                                                     </a>
 
@@ -1417,22 +1421,37 @@
                             <p x-show="offerTouched.durasi_jam && offerErrors.durasi_jam" x-text="offerErrors.durasi_jam" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
-                        <!-- Tanggal Sesi -->
+                        <!-- Tanggal Mulai & Tanggal Selesai -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                Tanggal Sesi <span class="text-rose-500">*</span>
+                                Tanggal Mulai <span class="text-rose-500">*</span>
                             </label>
                             <input type="date"
                                    x-ref="offerDate"
                                    x-model="offerForm.booking_date"
-                                   @input="offerTouched.booking_date = true; validateOfferField('booking_date')"
+                                   @change="if (!offerForm.booking_end_date || offerForm.booking_end_date < offerForm.booking_date) offerForm.booking_end_date = offerForm.booking_date; syncOfferDuration(); offerTouched.booking_date = true; validateOfferField('booking_date'); validateOfferField('booking_end_date')"
                                    @blur="offerTouched.booking_date = true; validateOfferField('booking_date')"
                                    :class="offerTouched.booking_date && offerErrors.booking_date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                                    class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                             <p x-show="offerTouched.booking_date && offerErrors.booking_date" x-text="offerErrors.booking_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
-                        <!-- Jam Mulai Sesi -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                Tanggal Selesai
+                            </label>
+                            <input type="date"
+                                   x-ref="offerEndDate"
+                                   x-model="offerForm.booking_end_date"
+                                   :min="offerForm.booking_date"
+                                   @change="syncOfferDuration(); offerTouched.booking_end_date = true; validateOfferField('booking_end_date')"
+                                   @blur="offerTouched.booking_end_date = true; validateOfferField('booking_end_date')"
+                                   :class="offerTouched.booking_end_date && offerErrors.booking_end_date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.booking_end_date && offerErrors.booking_end_date" x-text="offerErrors.booking_end_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        </div>
+
+                        <!-- Jam Mulai & Jam Selesai (Bebas Jam Operasional) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Jam Mulai <span class="text-rose-500">*</span>
@@ -1441,13 +1460,32 @@
                                 model="offerForm.booking_time"
                                 trigger-ref="offerTime"
                                 error="offerTouched.booking_time && offerErrors.booking_time"
-                                on-select="offerTouched.booking_time = true; validateOfferField('booking_time')"
-                                align="right"
+                                on-select="syncOfferDuration(); offerTouched.booking_time = true; validateOfferField('booking_time'); validateOfferField('jam_selesai')"
+                                align="left"
                                 trigger-class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
                             />
                             <p x-show="offerTouched.booking_time && offerErrors.booking_time" x-text="offerErrors.booking_time" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                Jam Selesai <span class="text-rose-500">*</span>
+                            </label>
+                            <x-time-dropdown
+                                model="offerForm.jam_selesai"
+                                trigger-ref="offerEndTime"
+                                error="offerTouched.jam_selesai && offerErrors.jam_selesai"
+                                on-select="syncOfferDuration(); offerTouched.jam_selesai = true; validateOfferField('jam_selesai')"
+                                align="right"
+                                trigger-class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                            />
+                            <p x-show="offerTouched.jam_selesai && offerErrors.jam_selesai" x-text="offerErrors.jam_selesai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        </div>
                     </div>
+
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 -mt-1">
+                        Rentang multi-hari otomatis menutup seluruh tanggal berurutan. Jam mulai dan selesai bebas melewati jam tutup reguler selama tidak bentrok pesanan aktif.
+                    </p>
 
                     <!-- Lokasi Pemotretan -->
                     <div>
@@ -1459,7 +1497,7 @@
                                x-model="offerForm.lokasi"
                                @input="offerTouched.lokasi = true; validateOfferField('lokasi')"
                                @blur="offerTouched.lokasi = true; validateOfferField('lokasi')"
-                               placeholder="Contoh: Pantai Melasti & Tebing Karang Boma, Uluwatu"
+                               placeholder="Contoh: Pantai Melasti, Tebing Karang Boma, Uluwatu"
                                :class="offerTouched.lokasi && offerErrors.lokasi ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                                class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                         <p x-show="offerTouched.lokasi && offerErrors.lokasi" x-text="offerErrors.lokasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
@@ -1468,7 +1506,7 @@
                     <!-- Deskripsi Rincian -->
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                            Rincian Layanan & Catatan Khusus <span class="text-rose-500">*</span>
+                            Rincian Layanan <span class="text-rose-500">*</span>
                         </label>
                         <textarea x-ref="offerDeskripsi"
                                   x-model="offerForm.deskripsi"
@@ -1520,6 +1558,99 @@
     </div>
 
 
+
+    <!-- Accept Custom Offer Modal: Bayar Penuh atau DP 30% (Rule #59) -->
+    <div x-show="acceptOfferModalOpen"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="accept-offer-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="acceptOfferModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="if (!acceptOfferSubmitting) acceptOfferModalOpen = false"
+                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="acceptOfferModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative inline-block align-bottom bg-white dark:bg-gray-850 rounded-2xl p-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-100 dark:border-gray-700">
+
+                <h3 id="accept-offer-title" class="text-base sm:text-lg font-black text-gray-900 dark:text-white text-center">
+                    Konfirmasi Persetujuan Penawaran
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 text-center" x-text="acceptOfferTarget ? acceptOfferTarget.judul_penawaran : ''"></p>
+
+                <div class="mt-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-xs space-y-1">
+                    <div class="flex justify-between gap-2">
+                        <span class="text-gray-500 dark:text-gray-400">Jadwal</span>
+                        <span class="font-bold text-gray-900 dark:text-white text-right" x-text="acceptOfferTarget ? acceptOfferTarget.booking_date : '-'"></span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span class="text-gray-500 dark:text-gray-400">Jam</span>
+                        <span class="font-bold text-gray-900 dark:text-white text-right" x-text="acceptOfferTarget ? (acceptOfferTarget.booking_time_range || acceptOfferTarget.booking_time) : '-'"></span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span class="text-gray-500 dark:text-gray-400">Total Biaya</span>
+                        <span class="font-black text-gray-900 dark:text-amber-400 text-right" x-text="acceptOfferTarget ? acceptOfferTarget.formatted_harga : '-'"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4 space-y-2">
+                    <span class="block text-xs font-bold text-gray-700 dark:text-gray-300">Pilih Skema Pembayaran</span>
+                    <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition"
+                           :class="acceptOfferPaymentType === 'full' ? 'border-amber-400 bg-amber-50/70 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                        <div class="flex items-center gap-2.5">
+                            <input type="radio" x-model="acceptOfferPaymentType" value="full" class="text-amber-500 focus:ring-amber-400">
+                            <div>
+                                <div class="text-xs font-extrabold text-gray-900 dark:text-white">Bayar Penuh (100%)</div>
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400">Langsung lunas via Escrow</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-gray-900 dark:text-amber-400" x-text="acceptOfferTarget ? acceptOfferTarget.formatted_harga : '-'"></span>
+                    </label>
+
+                    <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition"
+                           :class="acceptOfferPaymentType === 'dp' ? 'border-amber-400 bg-amber-50/70 dark:bg-amber-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                        <div class="flex items-center gap-2.5">
+                            <input type="radio" x-model="acceptOfferPaymentType" value="dp" class="text-amber-500 focus:ring-amber-400">
+                            <div>
+                                <div class="text-xs font-extrabold text-gray-900 dark:text-white">Uang Muka (DP 30%)</div>
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400">Pelunasan 70% menyusul di invoice</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-gray-900 dark:text-amber-400" x-text="acceptOfferTarget ? acceptOfferTarget.formatted_dp_amount : '-'"></span>
+                    </label>
+                </div>
+
+                <div class="mt-5 flex items-center justify-center gap-3">
+                    <button type="button"
+                            @click="acceptOfferModalOpen = false"
+                            :disabled="acceptOfferSubmitting"
+                            class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-bold text-xs transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button"
+                            @click="doAcceptOffer()"
+                            :disabled="acceptOfferSubmitting"
+                            class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs shadow-xs transition cursor-pointer disabled:opacity-60">
+                        <span x-show="!acceptOfferSubmitting">Lanjut Pembayaran</span>
+                        <span x-show="acceptOfferSubmitting">Memproses...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Delete Message Modal (Compliant with Project Rule #59) -->
 
@@ -1820,10 +1951,16 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
         // State for Custom Offer
         openOfferModal: false,
         offerSubmitting: false,
+        acceptOfferModalOpen: false,
+        acceptOfferTarget: null,
+        acceptOfferPaymentType: 'full',
+        acceptOfferSubmitting: false,
         offerForm: {
             judul_penawaran: '',
             booking_date: new Date().toISOString().split('T')[0],
+            booking_end_date: new Date().toISOString().split('T')[0],
             booking_time: '09:00',
+            jam_selesai: '12:00',
             durasi_jam: 3,
             lokasi: '',
             harga: '',
@@ -1834,7 +1971,9 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             harga: false,
             durasi_jam: false,
             booking_date: false,
+            booking_end_date: false,
             booking_time: false,
+            jam_selesai: false,
             lokasi: false,
             deskripsi: false
         },
@@ -1843,12 +1982,12 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             harga: '',
             durasi_jam: '',
             booking_date: '',
+            booking_end_date: '',
             booking_time: '',
+            jam_selesai: '',
             lokasi: '',
             deskripsi: ''
         },
-
-
 
         // State for Quote Reply & Photo Attachments
 
@@ -3012,6 +3151,21 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
 
 
+        syncOfferDuration() {
+            const f = this.offerForm;
+            if (!f.booking_time || !f.jam_selesai || !f.booking_date) return;
+            const [sh, sm] = f.booking_time.split(':').map(Number);
+            const [eh, em] = f.jam_selesai.split(':').map(Number);
+            const sMin = (sh * 60) + (sm || 0);
+            const eMin = (eh * 60) + (em || 0);
+            if (isNaN(sMin) || isNaN(eMin) || eMin <= sMin) return;
+            const dailyHrs = Math.max(1, Math.ceil((eMin - sMin) / 60));
+            const startD = new Date(f.booking_date + 'T00:00:00');
+            const endD = new Date((f.booking_end_date || f.booking_date) + 'T00:00:00');
+            const dayDiff = Math.max(1, Math.round((endD - startD) / 86400000) + 1);
+            f.durasi_jam = dailyHrs * dayDiff;
+        },
+
         validateOfferField(field) {
             const f = this.offerForm;
             if (field === 'judul_penawaran') {
@@ -3022,25 +3176,39 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
                 this.offerErrors.harga = (f.harga === '' || f.harga === null) ? 'Total biaya penawaran wajib diisi.' : (isNaN(n) || n < 50000 ? 'Total biaya penawaran minimal Rp 50.000.' : '');
             } else if (field === 'durasi_jam') {
                 const n = Number(f.durasi_jam);
-                this.offerErrors.durasi_jam = (f.durasi_jam === '' || f.durasi_jam === null) ? 'Durasi sesi wajib diisi.' : (!Number.isInteger(n) || n < 1 || n > 48 ? 'Durasi sesi harus antara 1 hingga 48 jam.' : '');
+                this.offerErrors.durasi_jam = (f.durasi_jam === '' || f.durasi_jam === null) ? 'Durasi sesi wajib diisi.' : (!Number.isInteger(n) || n < 1 || n > 720 ? 'Durasi sesi harus antara 1 hingga 720 jam.' : '');
             } else if (field === 'booking_date') {
                 const today = new Date().toISOString().split('T')[0];
-                this.offerErrors.booking_date = !f.booking_date ? 'Tanggal sesi wajib diisi.' : (f.booking_date < today ? 'Tanggal sesi minimal hari ini atau mendatang.' : '');
+                this.offerErrors.booking_date = !f.booking_date ? 'Tanggal mulai wajib diisi.' : (f.booking_date < today ? 'Tanggal mulai minimal hari ini atau mendatang.' : '');
+            } else if (field === 'booking_end_date') {
+                this.offerErrors.booking_end_date = (f.booking_end_date && f.booking_date && f.booking_end_date < f.booking_date)
+                    ? 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.' : '';
             } else if (field === 'booking_time') {
                 this.offerErrors.booking_time = !f.booking_time ? 'Jam mulai wajib ditentukan.' : '';
+            } else if (field === 'jam_selesai') {
+                if (!f.jam_selesai) {
+                    this.offerErrors.jam_selesai = 'Jam selesai wajib ditentukan.';
+                } else if (f.booking_time && f.jam_selesai <= f.booking_time) {
+                    this.offerErrors.jam_selesai = 'Jam selesai harus lebih akhir daripada jam mulai.';
+                } else {
+                    this.offerErrors.jam_selesai = '';
+                }
             } else if (field === 'lokasi') {
                 this.offerErrors.lokasi = !(f.lokasi || '').trim() ? 'Lokasi pemotretan wajib diisi.' : '';
             } else if (field === 'deskripsi') {
-                this.offerErrors.deskripsi = !(f.deskripsi || '').trim() ? 'Rincian layanan dan catatan wajib diisi.' : '';
+                this.offerErrors.deskripsi = !(f.deskripsi || '').trim() ? 'Rincian layanan wajib diisi.' : '';
             }
         },
 
         closeOfferModal() {
             this.openOfferModal = false;
+            const todayStr = new Date().toISOString().split('T')[0];
             this.offerForm = {
                 judul_penawaran: '',
-                booking_date: new Date().toISOString().split('T')[0],
+                booking_date: todayStr,
+                booking_end_date: todayStr,
                 booking_time: '09:00',
+                jam_selesai: '12:00',
                 durasi_jam: 3,
                 lokasi: '',
                 harga: '',
@@ -3051,7 +3219,7 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
         },
 
         submitCustomOffer() {
-            const fields = ['judul_penawaran', 'harga', 'durasi_jam', 'booking_date', 'booking_time', 'lokasi', 'deskripsi'];
+            const fields = ['judul_penawaran', 'harga', 'durasi_jam', 'booking_date', 'booking_end_date', 'booking_time', 'jam_selesai', 'lokasi', 'deskripsi'];
             fields.forEach(k => {
                 this.offerTouched[k] = true;
                 this.validateOfferField(k);
@@ -3061,7 +3229,9 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
                 harga: this.$refs.offerHarga,
                 durasi_jam: this.$refs.offerDurasi,
                 booking_date: this.$refs.offerDate,
+                booking_end_date: this.$refs.offerEndDate,
                 booking_time: this.$refs.offerTime,
+                jam_selesai: this.$refs.offerEndTime,
                 lokasi: this.$refs.offerLokasi,
                 deskripsi: this.$refs.offerDeskripsi
             };
@@ -3126,44 +3296,47 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
 
 
-        acceptOffer(offerId) {
-            if (!offerId) return;
-            window.dispatchEvent(new CustomEvent('open-confirm-modal', {
-                detail: {
-                    title: 'Setujui Penawaran Khusus?',
-                    message: 'Apakah Anda setuju dengan rincian penawaran khusus ini dan ingin melanjutkan ke pembayaran invoice?',
-                    confirmText: 'Ya, Setujui & Bayar',
-                    type: 'primary',
-                    buttonClass: 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs',
-                    onConfirm: () => this.doAcceptOffer(offerId)
-                }
-            }));
+        acceptOffer(offer) {
+            if (!offer || !offer.id) return;
+            this.acceptOfferTarget = offer;
+            this.acceptOfferPaymentType = 'full';
+            this.acceptOfferModalOpen = true;
         },
 
-        doAcceptOffer(offerId) {
+        doAcceptOffer() {
+            if (!this.acceptOfferTarget || !this.acceptOfferTarget.id || this.acceptOfferSubmitting) return;
+            this.acceptOfferSubmitting = true;
             const tokenEl = document.querySelector('meta[name=csrf-token]');
             const csrfToken = tokenEl ? tokenEl.content : '';
 
-            fetch('/chat/custom-offer/' + offerId + '/accept', {
+            fetch('/chat/custom-offer/' + this.acceptOfferTarget.id + '/accept', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    payment_type: this.acceptOfferPaymentType || 'full'
+                })
             })
             .then(res => res.json())
             .then(data => {
+                this.acceptOfferSubmitting = false;
                 const targetUrl = data.redirect_url || data.invoice_url;
                 if (data.success && targetUrl) {
                     window.location.href = targetUrl;
                 } else {
+                    this.acceptOfferModalOpen = false;
                     window.dispatchEvent(new CustomEvent('show-toast', {
                         detail: { type: 'error', message: data.message || 'Gagal menyetujui penawaran' }
                     }));
                 }
             })
-            .catch(err => console.error('Accept offer error:', err));
+            .catch(err => {
+                this.acceptOfferSubmitting = false;
+                console.error('Accept offer error:', err);
+            });
         },
 
         rejectOffer(offerId) {

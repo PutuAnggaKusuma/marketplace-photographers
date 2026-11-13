@@ -146,7 +146,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Nama Paket & Fasilitas</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Nama Paket</th>
                             <th class="py-3.5 px-4 sm:px-6 w-4/12">Deskripsi Layanan</th>
                             <th class="py-3.5 px-4 sm:px-6 w-2/12">Tarif Harga (Rp)</th>
                             <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Status</th>
@@ -157,29 +157,27 @@
                         @forelse($services as $srv)
                             <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                                 
-                                <!-- Nama Paket & Fasilitas -->
+                                <!-- Nama Paket -->
                                 <td class="py-4 px-4 sm:px-6 align-top">
-                                    <div class="space-y-1">
-                                        <h4 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $srv->nama_layanan }}</h4>
-                                        @if($srv->details->count() > 0)
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{{ $srv->details->pluck('nama_fitur')->implode(' • ') }}</p>
-                                        @else
-                                            <p class="text-xs italic text-gray-400 dark:text-gray-500">Belum ada rincian fasilitas</p>
-                                        @endif
-                                    </div>
+                                    <h4 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $srv->nama_layanan }}</h4>
                                 </td>
 
                                 <!-- Deskripsi -->
-                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    {{ $srv->deskripsi_layanan ?: '-' }}
+                                <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 leading-relaxed space-y-1">
+                                    <div>{{ $srv->deskripsi_layanan ?: '-' }}</div>
+                                    @if($srv->spare_time_enabled && ($srv->spare_before_minutes > 0 || $srv->spare_after_minutes > 0))
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 font-semibold">
+                                            Spare time: {{ $srv->spare_summary }}{{ $srv->allow_same_location_bypass ? ' • Sambung 1 lokasi (500 m)' : '' }}
+                                        </div>
+                                    @endif
                                 </td>
 
-                                <!-- Tarif Harga (Rp) -->
+                                <!-- Tarif Per Jam (Rp) -->
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
                                     <span class="text-xs font-black text-gray-900 dark:text-white">
                                         Rp {{ number_format($srv->tarif_harga, 0, ',', '.') }}
                                     </span>
-                                    <span class="text-xs text-gray-400 block mt-0.5">/ sesi foto</span>
+                                    <span class="text-xs text-gray-400 block mt-0.5">/ jam</span>
                                 </td>
 
                                 <!-- Status -->

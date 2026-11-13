@@ -139,7 +139,7 @@
                   <span class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                     Rp {{ number_format($lowestPrice, 0, ',', '.') }}
                   </span>
-                  <span class="text-xs font-normal text-gray-400">/ sesi pemotretan</span>
+                  <span class="text-xs font-normal text-gray-400">/ jam</span>
                 @else
                   <span class="text-xs sm:text-sm font-semibold text-gray-400 dark:text-gray-500 italic">
                     Belum ada paket layanan
@@ -356,20 +356,25 @@
                   <!-- Kolom Kiri: Identitas Paket, Deskripsi & Tarif Sesi -->
                   <div class="lg:col-span-5 space-y-4">
                     <div class="space-y-1.5">
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">Paket Sesi</span>
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">Paket Layanan</span>
                       <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white leading-snug">
                         {{ $srv->nama_layanan }}
                       </h3>
                       <p class="text-xs sm:text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed">
                         {{ $srv->deskripsi_layanan }}
                       </p>
+                      @if($srv->spare_summary)
+                        <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                          Jeda persiapan: {{ $srv->spare_summary }}{{ $srv->allow_same_location_bypass ? ' · Bebas jeda satu lokasi' : '' }}
+                        </p>
+                      @endif
                     </div>
 
                     <div class="pt-1">
-                      <span class="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Tarif Paket Sesi</span>
+                      <span class="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">Tarif Per Jam</span>
                       <p class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mt-0.5">
                         Rp {{ number_format((float) ($srv->tarif_harga ?? 0), 0, ',', '.') }}
-                        <span class="text-xs font-normal text-gray-400 ml-1">/ sesi pemotretan</span>
+                        <span class="text-xs font-normal text-gray-400 ml-1">/ jam</span>
                       </p>
                     </div>
                   </div>
@@ -408,9 +413,9 @@
                 </div>
               </div>
             @empty
-              <div class="col-span-full bg-white dark:bg-gray-800 p-8 sm:p-10 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
+              <div class="col-span-full bg-white dark:bg-gray-800 px-6 py-14 sm:px-10 sm:py-16 min-h-[190px] sm:min-h-[210px] flex flex-col items-center justify-center text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
                 <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Paket Layanan</h4>
-                <p class="text-xs text-gray-400">Fotografer ini belum mempublikasikan paket layanan harga.</p>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">Fotografer ini belum mempublikasikan paket layanan harga.</p>
               </div>
             @endforelse
           </div>
@@ -437,7 +442,7 @@
               <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-7 border border-gray-200/80 dark:border-gray-700/80 shadow-none hover:border-amber-400 dark:hover:border-amber-500 transition space-y-5">
                 
                 @if(!$mainPhoto)
-                  <div class="p-6 text-center text-xs text-gray-400">Album ini belum memiliki foto.</div>
+                  <div class="px-6 py-12 text-center text-xs sm:text-sm text-gray-400">Album ini belum memiliki foto.</div>
                 @elseif($thumbList->count() === 0)
                   <!-- 1 Foto Tunggal: Full Width -->
                   <div class="relative w-full overflow-hidden bg-gray-100 dark:bg-gray-900 rounded-xl aspect-[16/9] sm:aspect-[2.2/1] cursor-pointer group shadow-none"
@@ -557,12 +562,12 @@
 
               </div>
             @empty
-              <div class="col-span-full bg-white dark:bg-gray-800 p-8 sm:p-10 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
-                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 flex items-center justify-center mx-auto">
+              <div class="col-span-full bg-white dark:bg-gray-800 px-6 py-14 sm:px-10 sm:py-16 min-h-[190px] sm:min-h-[210px] flex flex-col items-center justify-center text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 flex items-center justify-center mx-auto mb-1">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z"></path></svg>
                 </div>
                 <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Portofolio</h4>
-                <p class="text-xs text-gray-400">Fotografer ini belum menambahkan album karya portofolio.</p>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">Fotografer ini belum menambahkan album karya portofolio.</p>
               </div>
             @endforelse
           </div>
@@ -908,9 +913,9 @@
                 </p>
               </div>
             @empty
-              <div class="bg-white dark:bg-gray-800 p-8 sm:p-10 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
+              <div class="bg-white dark:bg-gray-800 px-6 py-14 sm:px-10 sm:py-16 min-h-[190px] sm:min-h-[210px] flex flex-col items-center justify-center text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
                 <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Ulasan Klien</h4>
-                <p class="text-xs text-gray-400">Ulasan resmi dari Klien yang telah mereservasi sesi foto akan ditampilkan di sini.</p>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">Ulasan resmi dari Klien yang telah mereservasi sesi foto akan ditampilkan di sini.</p>
               </div>
             @endforelse
           </div>
@@ -965,9 +970,9 @@
                   </div>
                 </div>
               @empty
-                <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-1.5">
-                  <h4 class="text-sm font-bold text-gray-900 dark:text-white">Belum Ada Tanya Jawab</h4>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ $photographer->nama }} belum menambahkan pertanyaan khusus. Gunakan tombol Chat untuk bertanya langsung.</p>
+                <div class="bg-white dark:bg-gray-800 px-6 py-14 sm:px-10 sm:py-16 min-h-[190px] sm:min-h-[210px] flex flex-col items-center justify-center text-center rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-none space-y-2">
+                  <h4 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Belum Ada Tanya Jawab</h4>
+                  <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">{{ $photographer->nama }} belum menambahkan pertanyaan khusus. Gunakan tombol Chat untuk bertanya langsung.</p>
                 </div>
               @endforelse
             </div>

@@ -65,13 +65,18 @@ class PhotographerSeeder extends Seeder
         $srvAlex1 = PhotographerService::updateOrCreate(
             ['id_photographer' => $alexPhoto->id, 'nama_layanan' => 'Prewedding Outdoor Sesi Sunset Beach'],
             [
-                'tarif_harga' => 3500000,
-                'deskripsi_layanan' => 'Paket sesi foto prewedding durasi 4 jam di lokasi pantai pilihan di Bali dengan 20 foto ter-retouch halus & semua file mentah.',
+                'tarif_harga' => 850000,
+                'deskripsi_layanan' => 'Layanan foto prewedding per jam di lokasi pantai pilihan di Bali dengan hasil edit halus dan file mentah lengkap.',
+                'spare_time_enabled' => true,
+                'spare_before_minutes' => 30,
+                'spare_after_minutes' => 60,
+                'allow_same_location_bypass' => false,
             ]
         );
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => 'Durasi 4 Jam Fotografi', 'tarif_harga' => 0]);
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => '20 Hi-Res Edited Photos', 'tarif_harga' => 0]);
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => 'Termasuk Cetak Canvas 40x60cm', 'tarif_harga' => 500000]);
+        ServiceDetail::where('id_p_service', $srvAlex1->id)->where('nama_fitur', 'like', 'Durasi%')->delete();
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => '1 Fotografer Utama Berpengalaman', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => '20 Hi-Res Edited Photos per Sesi', 'tarif_harga' => 0]);
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvAlex1->id, 'nama_fitur' => 'Semua File Original via Cloud Drive', 'tarif_harga' => 0]);
 
         $portAlex1 = PhotographerPortfolio::updateOrCreate(
             ['id_photographer' => $alexPhoto->id, 'judul' => 'Romantic Sunset at Melasti Beach'],
@@ -117,11 +122,15 @@ class PhotographerSeeder extends Seeder
         $srvBudi1 = PhotographerService::updateOrCreate(
             ['id_photographer' => $budiPhoto->id, 'nama_layanan' => 'Dokumentasi Konser Musik & Festival Stage'],
             [
-                'tarif_harga' => 2800000,
-                'deskripsi_layanan' => 'Liputan panggung musik dari soundcheck hingga main performer dengan kamera dual-body.',
+                'tarif_harga' => 750000,
+                'deskripsi_layanan' => 'Liputan panggung musik per jam menggunakan kamera dual-body lensa wide dan telefoto.',
+                'spare_time_enabled' => true,
+                'spare_before_minutes' => 60,
+                'spare_after_minutes' => 60,
+                'allow_same_location_bypass' => false,
             ]
         );
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Durasi Liputan Sesi Konser hingga 6 Jam (Soundcheck s/d Main Show)', 'tarif_harga' => 0]);
+        ServiceDetail::where('id_p_service', $srvBudi1->id)->where('nama_fitur', 'like', 'Durasi%')->delete();
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Fotografer Dual-Body Camera (Lensa Wide 16-35mm & Tele 70-200mm f/2.8)', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => '50 Foto Retouched & Color Graded Resolusi Tinggi', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBudi1->id, 'nama_fitur' => 'Semua File Original Mentah via Google Drive Cloud Max 48 Jam', 'tarif_harga' => 0]);
@@ -195,8 +204,12 @@ class PhotographerSeeder extends Seeder
         $srvClara1 = PhotographerService::updateOrCreate(
             ['id_photographer' => $claraPhoto->id, 'nama_layanan' => 'Katalog Foto Produk UMKM Kuliner & Fashion'],
             [
-                'tarif_harga' => 1500000,
-                'deskripsi_layanan' => 'Sesi foto 15 varian produk dengan lighting studio & props pendukung.',
+                'tarif_harga' => 500000,
+                'deskripsi_layanan' => 'Sesi foto produk studio per jam lengkap dengan lighting studio dan properti pendukung.',
+                'spare_time_enabled' => false,
+                'spare_before_minutes' => 0,
+                'spare_after_minutes' => 0,
+                'allow_same_location_bypass' => false,
             ]
         );
         ServiceDetail::firstOrCreate(['id_p_service' => $srvClara1->id, 'nama_fitur' => 'Sesi Foto Studio / On-Location hingga 15 Varian Produk', 'tarif_harga' => 0]);
@@ -247,11 +260,16 @@ class PhotographerSeeder extends Seeder
         $srvDewa1 = PhotographerService::updateOrCreate(
             ['id_photographer' => $dewaPhoto->id, 'nama_layanan' => 'Sesi Portrait Wisuda & Keluarga Exclusive'],
             [
-                'tarif_harga' => 2200000,
-                'deskripsi_layanan' => 'Sesi foto indoor studio 2 jam untuk keluarga & wisudawan dengan 10 foto cetak 10R.',
+                'tarif_harga' => 600000,
+                'deskripsi_layanan' => 'Sesi foto portrait wisuda atau keluarga per jam di area kampus atau studio dengan hasil cetak pilihan.',
+                'spare_time_enabled' => true,
+                'spare_before_minutes' => 30,
+                'spare_after_minutes' => 30,
+                'allow_same_location_bypass' => true,
             ]
         );
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Sesi Studio Indoor Eksklusif Durasi 2 Jam', 'tarif_harga' => 0]);
+        ServiceDetail::where('id_p_service', $srvDewa1->id)->where('nama_fitur', 'like', 'Sesi Studio Indoor Eksklusif%')->delete();
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Sesi Foto Wisuda Outdoor Kampus atau Studio Indoor', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Maksimal hingga 8 Anggota Keluarga', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => '10 Foto Pilihan Cetak Ukuran 10R Berkualitas Premium', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvDewa1->id, 'nama_fitur' => 'Semua File Foto Master Resolusi Penuh via Cloud Drive', 'tarif_harga' => 0]);
@@ -299,11 +317,16 @@ class PhotographerSeeder extends Seeder
         $srvBali1 = PhotographerService::updateOrCreate(
             ['id_photographer' => $baliPhoto->id, 'nama_layanan' => 'Holiday Vacation Photo Session'],
             [
-                'tarif_harga' => 1800000,
-                'deskripsi_layanan' => 'Foto jalan-jalan santai 2.5 jam di spot ikonik Bali dengan proses edit warna cepat di hari yang sama.',
+                'tarif_harga' => 550000,
+                'deskripsi_layanan' => 'Foto jalan-jalan santai per jam di spot ikonik Bali dengan proses edit warna cepat.',
+                'spare_time_enabled' => true,
+                'spare_before_minutes' => 0,
+                'spare_after_minutes' => 60,
+                'allow_same_location_bypass' => false,
             ]
         );
-        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Sesi Foto Santai Durasi 2.5 Jam di 2 Spot Ikonik Bali', 'tarif_harga' => 0]);
+        ServiceDetail::where('id_p_service', $srvBali1->id)->where('nama_fitur', 'like', '%2.5 Jam%')->delete();
+        ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Sesi Foto Santai Keliling Spot Ikonik Bali', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Bebas Ganti Kostum (Maksimal 2 Pakaian)', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => '40 Foto Edit Warna Khas Liburan (Selesai dalam 24 Jam)', 'tarif_harga' => 0]);
         ServiceDetail::firstOrCreate(['id_p_service' => $srvBali1->id, 'nama_fitur' => 'Semua File Original Dikirim via Cloud Drive', 'tarif_harga' => 0]);

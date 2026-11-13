@@ -316,28 +316,38 @@ class PhotographerController extends Controller
         $contractBookings = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
             $q->where('id_photographer', $photographer->id)
               ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
-        })->where('booking_date', '>=', date('Y-m-d'))
+        })->whereRaw('COALESCE(booking_end_date, booking_date) >= ?', [date('Y-m-d')])
           ->with(['service'])
           ->get();
 
         $bookedDates = [];
         foreach ($contractBookings as $b) {
-            $d = $b->booking_date;
-            if (!isset($bookedDates[$d])) {
-                $bookedDates[$d] = [];
-            }
-            $serviceName = $b->service->nama_layanan ?? 'Sesi Foto Terjadwal';
+            $serviceName = $b->service->nama_layanan ?? ($b->is_multi_day ? 'Booking Custom Multi-Hari' : 'Sesi Foto Terjadwal');
             $jamMulai = substr($b->jam_mulai ?: '08:00', 0, 5);
-            $jamSelesai = substr($b->jam_selesai ?: '12:00', 0, 5);
-            $durasi = $b->durasi ?: '4 Jam';
-            
-            $bookedDates[$d][] = [
-                'jam_mulai' => $jamMulai,
-                'jam_selesai' => $jamSelesai,
-                'durasi' => $durasi,
-                'service_name' => $serviceName,
-                'time_formatted' => "{$jamMulai} — {$jamSelesai} WIB",
-            ];
+            $jamSelesai = substr($b->jam_selesai ?: '17:00', 0, 5);
+            $durasiHours = $b->effective_duration_hours;
+            $durasi = $b->is_multi_day ? ($b->day_count . ' Hari') : ($durasiHours . ' Jam');
+
+            $period = \Carbon\CarbonPeriod::create(
+                max(date('Y-m-d'), $b->booking_date),
+                $b->effective_end_date
+            );
+
+            foreach ($period as $dt) {
+                $d = $dt->format('Y-m-d');
+                if (!isset($bookedDates[$d])) {
+                    $bookedDates[$d] = [];
+                }
+                $bookedDates[$d][] = [
+                    'jam_mulai' => $jamMulai,
+                    'jam_selesai' => $jamSelesai,
+                    'durasi' => $durasi,
+                    'service_name' => $serviceName,
+                    'time_formatted' => $b->is_multi_day
+                        ? "Multi-Hari ({$b->date_range_label}, {$jamMulai} - {$jamSelesai} WIB)"
+                        : "{$jamMulai} - {$jamSelesai} WIB",
+                ];
+            }
         }
 
         $isFavorited = false;

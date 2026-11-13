@@ -146,7 +146,9 @@ Route::get('/client', fn() => redirect('/'));
 */
 Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
+    Route::get('/booking/available-slots', [BookingController::class, 'availableSlots'])->name('booking.available-slots');
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
+    Route::post('/booking/custom-request', [BookingController::class, 'sendCustomPlanRequest'])->name('booking.custom-request');
     Route::get('/pembayaran/{id}', [BookingController::class, 'showInvoice'])->name('booking.invoice');
     Route::get('/pembayaran/{id}/cetak', [BookingController::class, 'printInvoice'])->name('booking.invoice.print');
     Route::post('/pembayaran/{id}/konfirmasi', [BookingController::class, 'confirmPayment'])->name('booking.pay.confirm');
@@ -347,4 +349,4 @@ Route::middleware('auth')->group(function () {
 // Public Help, FAQ & Privacy Routes
 Route::get('/faq', [\App\Http\Controllers\Public\HelpController::class, 'faq'])->name('public.faq');
 Route::get('/kebijakan-privasi', [\App\Http\Controllers\Public\HelpController::class, 'privacy'])->name('public.privacy');
-Route::get('/syarat-ketentuan', [\App\Http\Controllers\Public\HelpController::class, 'privacy'])->name('public.terms');
+Route::get('/syarat-ketentuan', [\App\Http\Controllers\Public\HelpController::class, 'terms'])->name('public.terms');

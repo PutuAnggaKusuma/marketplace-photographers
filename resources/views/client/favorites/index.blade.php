@@ -179,7 +179,7 @@
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Mulai Dari</span>
               <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">
                 Rp {{ number_format($lowestPrice, 0, ',', '.') }}
-                <span class="text-xs font-normal text-gray-400">/ sesi</span>
+                <span class="text-xs font-normal text-gray-400">/ jam</span>
               </p>
             </div>
 

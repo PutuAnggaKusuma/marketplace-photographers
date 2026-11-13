@@ -48,8 +48,8 @@ class OnboardingController extends Controller
             'deskripsi_bio.required' => 'Bio singkat perkenalan fotografer wajib diisi.',
             'deskripsi_bio.min' => 'Bio perkenalan minimal 15 karakter.',
             'nama_layanan.required' => 'Nama paket layanan perdana wajib diisi.',
-            'tarif_harga.required' => 'Tarif harga paket perdana wajib diisi.',
-            'tarif_harga.min' => 'Tarif harga minimal Rp 10.000.',
+            'tarif_harga.required' => 'Tarif per jam paket perdana wajib diisi.',
+            'tarif_harga.min' => 'Tarif per jam minimal Rp 10.000.',
             'deskripsi_layanan.required' => 'Uraian fasilitas paket layanan perdana wajib diisi.',
             'deskripsi_layanan.min' => 'Deskripsi layanan minimal 10 karakter.',
             'nama_bank.required' => 'Nama bank pencairan wajib dipilih atau diisi.',
@@ -87,6 +87,10 @@ class OnboardingController extends Controller
                 'nama_layanan' => $request->nama_layanan,
                 'tarif_harga' => $request->tarif_harga,
                 'deskripsi_layanan' => $request->deskripsi_layanan,
+                'spare_time_enabled' => false,
+                'spare_before_minutes' => 0,
+                'spare_after_minutes' => 0,
+                'allow_same_location_bypass' => false,
             ]);
         });
 

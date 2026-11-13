@@ -1555,7 +1555,7 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
    - **Seksi 4**: **Catatan Khusus**. Catatan tema, busana, preferensi konsep, atau instruksi khusus untuk fotografer.
 3. **Reaktivitas Kolom Kanan (Ringkasan Pesanan Tanpa Reload / Zero-Reload Reactive State)**:
    - Sebelum paket dipilih (`!selectedServiceId`): Kolom kanan menampilkan panduan ramah (*"Pilih Paket Layanan: Silakan tentukan paket layanan sesi foto pada formulir di sebelah kiri terlebih dahulu"*), total bayar Rp 0, dan tombol aksi dinonaktifkan (*disabled*).
-   - Setelah paket dipilih: Rincian paket terisi otomatis, fitur tambahan opsional (*add-ons*) sesuai paket langsung muncul, dan simulasi skema pembayaran (Bayar Penuh vs DP 30%) terkalkulasi secara instan via Alpine.js.
+   - Setelah paket dipilih: Rincian paket terpilih terisi otomatis, seluruh detail layanan tampil informatif sebagai fasilitas bawaan paket (tanpa checkbox fitur tambahan fiktif), dan simulasi skema pembayaran (Bayar Penuh vs DP 30%) terkalkulasi secara instan via Alpine.js.
 4. **Kepatuhan Anti-AI Slop & Zero Dividers**:
    - **Tanpa Breadcrumb Palsu (Rule #72)**: Menghapus custom breadcrumb navigasi palsu di atas judul halaman.
    - **Zero Dividers (Rule #67)**: Tidak ada garis pembatas horizontal (`0 border-t / border-b`) yang membelah kartu di dalam seksi input maupun ringkasan tagihan.
@@ -1722,13 +1722,13 @@ Berdasarkan prioritas arsitektur marketplace, berikut adalah urutan rekomendasi 
 
 ---
 
-### Rule #106: Standarisasi Tipografi Seragam `text-xs` Isi Tabel (`<tbody>` / `<td>`), Daftar Ringkas Fasilitas Layanan, dan Proporsi Header `<th>` Tabel FAQ
+### Rule #106: Standarisasi Tipografi Seragam `text-xs` Isi Tabel (`<tbody>` / `<td>`), Kolom Ringkas Nama Paket, dan Proporsi Header `<th>` Tabel FAQ
 1. **Keseragaman Ukuran Font `text-xs` di Seluruh Sel Isi Tabel (`<tbody>` / `<td>`)**:
    - Seluruh teks judul sel, nama layanan, nominal harga/kontrak, kode referensi, subteks keterangan, status teks, tombol teks inline, serta teks empty state di dalam `<tbody>` pada seluruh tabel antarmuka aplikasi (Admin, Fotografer, Klien, partial `table-01.blade.php`, dan faktur online `public/booking/invoice.blade.php`) **WAJIB menggunakan ukuran font seragam `text-xs`**.
    - **DILARANG** memberi ukuran yang melonjak lebih besar pada salah satu kolom (`text-sm`, `text-base`, `text-xs sm:text-sm`, `text-theme-sm`) maupun memperkecil subteks (`text-[10px]`, `text-[11px]`). Hierarki visual antarbaris di dalam sel tabel murni dibangun menggunakan ketebalan huruf (`font-bold`, `font-extrabold`, `font-black`) dan kontras warna (`text-gray-900 dark:text-white` vs `text-gray-500 dark:text-gray-400`).
    - Pengecualian terbatas pada template dokumen cetak A4 PDF (`photographer/reports/export.blade.php`) yang memang memerlukan tipografi terkompresi agar 8 kolom muat dalam satu lebar kertas cetak.
-2. **Daftar Fasilitas Layanan Ringkas tanpa Pill Kapsul (`photographer/services/index.blade.php`)**:
-   - Rincian fasilitas pada tabel Paket Layanan disajikan sebagai baris teks ringkas dipisah pemisah titik tengah (`•`) berukuran `text-xs text-gray-500 dark:text-gray-400 leading-relaxed` (`{{ $srv->details->pluck('nama_fitur')->implode(' • ') }}`), menggantikan tumpukan pill badge kapsul abu-abu di dalam kolom tabel.
+2. **Kolom Fokus Nama Paket pada Tabel Kelola Paket Layanan (`photographer/services/index.blade.php`)**:
+   - Header `<th>` kolom pertama menggunakan judul ringkas **`Nama Paket`** (tanpa `& Fasilitas`), dan isi sel `<td>` hanya menampilkan `{{ $srv->nama_layanan }}` agar baris tabel tetap bersih dan terfokus pada nama paket (rincian fasilitas tetap dikelola pada form edit serta metrik atas).
 3. **Proporsi Alami Header `<th>` pada Tabel Tanya Jawab Fotografer (`photographer/faqs/index.blade.php`)**:
    - Menghapus fraksi lebar kolom paksa yang timpang (`w-1/12`, `w-5/12`, `w-4/12`) pada header `<th>` halaman `photographer/faqs/index.blade.php` sehingga kelima kolom (*Urutan*, *Pertanyaan*, *Jawaban Singkat*, *Status*, *Aksi*) membagi ruang horizontal secara alami dan proporsional selaras patokan tabel sistem (`admin/photographers/index.blade.php`), dilengkapi `whitespace-nowrap` pada header dan `<p class="line-clamp-2">` di dalam sel jawaban agar batas baris tidak mematahkan layout `<td>`. Proporsi `<th>` pada tabel halaman lain yang sudah seimbang dibiarkan utuh tanpa modifikasi.
 

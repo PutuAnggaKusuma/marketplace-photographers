@@ -17,10 +17,18 @@ class HelpController extends Controller
     }
 
     /**
-     * Tampilkan Halaman Kebijakan Privasi & Syarat Ketentuan.
+     * Tampilkan Halaman Kebijakan Privasi.
      */
     public function privacy()
     {
         return view('public.help.privacy');
+    }
+
+    /**
+     * Tampilkan Halaman Syarat Ketentuan Platform.
+     */
+    public function terms()
+    {
+        return view('public.help.terms');
     }
 }

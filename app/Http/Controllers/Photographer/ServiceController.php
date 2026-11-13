@@ -112,21 +112,25 @@ class ServiceController extends Controller
             'deskripsi_layanan' => 'required|string|min:15|max:1000',
             'fitur' => 'required|array|min:1',
             'fitur.*' => 'required|string|min:3|max:255',
+            'spare_time_enabled' => 'nullable|boolean',
+            'spare_before_minutes' => 'nullable|integer|in:0,30,60,90,120,180',
+            'spare_after_minutes' => 'nullable|integer|in:0,30,60,90,120,180',
+            'allow_same_location_bypass' => 'nullable|boolean',
         ], [
             'nama_layanan.required' => 'Nama paket layanan wajib diisi.',
             'nama_layanan.min' => 'Nama paket layanan minimal 3 karakter.',
             'nama_layanan.max' => 'Nama paket layanan maksimal 100 karakter.',
-            'tarif_harga.required' => 'Tarif harga paket wajib diisi.',
-            'tarif_harga.numeric' => 'Tarif harga harus berupa nominal angka valid.',
-            'tarif_harga.min' => 'Tarif harga paket minimal Rp 10.000.',
+            'tarif_harga.required' => 'Tarif per jam wajib diisi.',
+            'tarif_harga.numeric' => 'Tarif per jam harus berupa nominal angka valid.',
+            'tarif_harga.min' => 'Tarif per jam minimal Rp 10.000.',
             'deskripsi_layanan.required' => 'Deskripsi paket layanan wajib diisi.',
             'deskripsi_layanan.min' => 'Deskripsi paket layanan minimal 15 karakter agar informatif bagi calon klien.',
             'deskripsi_layanan.max' => 'Deskripsi paket layanan maksimal 1.000 karakter.',
-            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
-            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
-            'fitur.*.required' => 'Rincian benefit/fasilitas paket tidak boleh kosong.',
-            'fitur.*.min' => 'Rincian benefit/fasilitas minimal 3 karakter.',
-            'fitur.*.max' => 'Rincian benefit/fasilitas maksimal 255 karakter.',
+            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit paket layanan.',
+            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit paket layanan.',
+            'fitur.*.required' => 'Rincian benefit paket tidak boleh kosong.',
+            'fitur.*.min' => 'Rincian benefit minimal 3 karakter.',
+            'fitur.*.max' => 'Rincian benefit maksimal 255 karakter.',
         ]);
 
         $validFiturs = array_values(array_filter(
@@ -135,7 +139,16 @@ class ServiceController extends Controller
         ));
 
         if (empty($validFiturs)) {
-            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas layanan yang terisi.'])->withInput();
+            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit layanan yang terisi.'])->withInput();
+        }
+
+        $spareEnabled = $request->boolean('spare_time_enabled');
+        $spareBefore = $spareEnabled ? (int) $request->input('spare_before_minutes', 0) : 0;
+        $spareAfter = $spareEnabled ? (int) $request->input('spare_after_minutes', 0) : 0;
+        $allowBypass = $spareEnabled && $request->boolean('allow_same_location_bypass');
+
+        if ($spareEnabled && $spareBefore === 0 && $spareAfter === 0) {
+            return back()->withErrors(['spare_before_minutes' => 'Pilih minimal salah satu durasi jeda sebelum atau sesudah sesi.'])->withInput();
         }
 
         $service = PhotographerService::create([
@@ -143,6 +156,10 @@ class ServiceController extends Controller
             'nama_layanan' => trim($request->nama_layanan),
             'tarif_harga' => (int) $request->tarif_harga,
             'deskripsi_layanan' => trim($request->deskripsi_layanan),
+            'spare_time_enabled' => $spareEnabled,
+            'spare_before_minutes' => $spareBefore,
+            'spare_after_minutes' => $spareAfter,
+            'allow_same_location_bypass' => $allowBypass,
         ]);
 
         foreach ($validFiturs as $item) {
@@ -172,21 +189,25 @@ class ServiceController extends Controller
             'deskripsi_layanan' => 'required|string|min:15|max:1000',
             'fitur' => 'required|array|min:1',
             'fitur.*' => 'required|string|min:3|max:255',
+            'spare_time_enabled' => 'nullable|boolean',
+            'spare_before_minutes' => 'nullable|integer|in:0,30,60,90,120,180',
+            'spare_after_minutes' => 'nullable|integer|in:0,30,60,90,120,180',
+            'allow_same_location_bypass' => 'nullable|boolean',
         ], [
             'nama_layanan.required' => 'Nama paket layanan wajib diisi.',
             'nama_layanan.min' => 'Nama paket layanan minimal 3 karakter.',
             'nama_layanan.max' => 'Nama paket layanan maksimal 100 karakter.',
-            'tarif_harga.required' => 'Tarif harga paket wajib diisi.',
-            'tarif_harga.numeric' => 'Tarif harga harus berupa nominal angka valid.',
-            'tarif_harga.min' => 'Tarif harga paket minimal Rp 10.000.',
+            'tarif_harga.required' => 'Tarif per jam wajib diisi.',
+            'tarif_harga.numeric' => 'Tarif per jam harus berupa nominal angka valid.',
+            'tarif_harga.min' => 'Tarif per jam minimal Rp 10.000.',
             'deskripsi_layanan.required' => 'Deskripsi paket layanan wajib diisi.',
             'deskripsi_layanan.min' => 'Deskripsi paket layanan minimal 15 karakter agar informatif bagi calon klien.',
             'deskripsi_layanan.max' => 'Deskripsi paket layanan maksimal 1.000 karakter.',
-            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
-            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas paket layanan.',
-            'fitur.*.required' => 'Rincian benefit/fasilitas paket tidak boleh kosong.',
-            'fitur.*.min' => 'Rincian benefit/fasilitas minimal 3 karakter.',
-            'fitur.*.max' => 'Rincian benefit/fasilitas maksimal 255 karakter.',
+            'fitur.required' => 'Wajib menyertakan minimal 1 rincian benefit paket layanan.',
+            'fitur.min' => 'Wajib menyertakan minimal 1 rincian benefit paket layanan.',
+            'fitur.*.required' => 'Rincian benefit paket tidak boleh kosong.',
+            'fitur.*.min' => 'Rincian benefit minimal 3 karakter.',
+            'fitur.*.max' => 'Rincian benefit maksimal 255 karakter.',
         ]);
 
         $validFiturs = array_values(array_filter(
@@ -195,13 +216,26 @@ class ServiceController extends Controller
         ));
 
         if (empty($validFiturs)) {
-            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit/fasilitas layanan yang terisi.'])->withInput();
+            return back()->withErrors(['fitur' => 'Wajib menyertakan minimal 1 rincian benefit layanan yang terisi.'])->withInput();
+        }
+
+        $spareEnabled = $request->boolean('spare_time_enabled');
+        $spareBefore = $spareEnabled ? (int) $request->input('spare_before_minutes', 0) : 0;
+        $spareAfter = $spareEnabled ? (int) $request->input('spare_after_minutes', 0) : 0;
+        $allowBypass = $spareEnabled && $request->boolean('allow_same_location_bypass');
+
+        if ($spareEnabled && $spareBefore === 0 && $spareAfter === 0) {
+            return back()->withErrors(['spare_before_minutes' => 'Pilih minimal salah satu durasi jeda sebelum atau sesudah sesi.'])->withInput();
         }
 
         $service->update([
             'nama_layanan' => trim($request->nama_layanan),
             'tarif_harga' => (int) $request->tarif_harga,
             'deskripsi_layanan' => trim($request->deskripsi_layanan),
+            'spare_time_enabled' => $spareEnabled,
+            'spare_before_minutes' => $spareBefore,
+            'spare_after_minutes' => $spareAfter,
+            'allow_same_location_bypass' => $allowBypass,
         ]);
 
         // Sync service details

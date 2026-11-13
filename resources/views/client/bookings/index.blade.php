@@ -296,13 +296,17 @@
 
                   <div class="space-y-1">
 
-                    <span class="font-bold text-gray-800 dark:text-gray-200 block text-xs">{{ $detail->service->nama_layanan ?? 'Paket Fotografi' }}</span>
+                    <span class="font-bold text-gray-800 dark:text-gray-200 block text-xs">{{ $detail->service->nama_layanan ?? 'Paket Kustom' }}</span>
 
                     <div class="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
 
                       <div class="font-medium text-gray-700 dark:text-gray-300">
 
-                        {{ $detail && $detail->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d F Y') : '-' }} • {{ $detail->jam_mulai ?? '-' }} WIB
+                        @php
+                          $cStart = $detail?->jam_mulai ? substr($detail->jam_mulai, 0, 5) : null;
+                          $cEnd = $detail?->jam_selesai ? substr($detail->jam_selesai, 0, 5) : null;
+                        @endphp
+                        {{ $detail ? $detail->date_range_label : '-' }} • {{ $cStart ? ($cEnd ? "{$cStart} - {$cEnd} WIB" : "{$cStart} WIB") : '-' }} ({{ $detail ? $detail->effective_duration_hours : 1 }} Jam)
 
                       </div>
 
@@ -1065,14 +1069,11 @@
 
             <div x-data="{
               openTimeDropdown: false,
-              selectedTime: '16:00',
-              times: {
-                '08:00': '08:00 WIB (Pagi)',
-                '10:00': '10:00 WIB (Pagi)',
-                '14:00': '14:00 WIB (Siang)',
-                '16:00': '16:00 WIB (Sore)',
-                '19:00': '19:00 WIB (Malam)'
-              }
+              selectedTime: '09:00',
+              times: Array.from({ length: 24 }, (_, h) => {
+                const hh = String(h).padStart(2, '0') + ':00';
+                return { val: hh, label: hh + ' WIB' };
+              })
             }">
 
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
@@ -1089,7 +1090,7 @@
                         @click="openTimeDropdown = !openTimeDropdown"
                         class="w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none transition font-semibold cursor-pointer">
 
-                  <span x-text="times[selectedTime] || 'Pilih Jam Mulai'"></span>
+                  <span x-text="selectedTime ? (selectedTime + ' WIB') : 'Pilih Jam Mulai'"></span>
 
                   <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openTimeDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 
@@ -1102,16 +1103,16 @@
                 <div x-show="openTimeDropdown"
                      @click.outside="openTimeDropdown = false"
                      x-transition
-                     class="absolute z-50 top-full mt-1.5 left-0 w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
+                     class="absolute z-50 top-full mt-1.5 left-0 w-full max-h-52 overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5"
                      style="display: none;">
 
-                  <template x-for="(label, val) in times" :key="val">
+                  <template x-for="item in times" :key="item.val">
 
                     <button type="button"
-                            @click="selectedTime = val; openTimeDropdown = false"
+                            @click="selectedTime = item.val; openTimeDropdown = false"
                             class="w-full text-left px-3 py-2 text-xs font-bold rounded-lg text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
-                            :class="selectedTime === val ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
-                            x-text="label">
+                            :class="selectedTime === item.val ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
+                            x-text="item.label">
 
                     </button>
 

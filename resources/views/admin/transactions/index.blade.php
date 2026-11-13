@@ -732,11 +732,11 @@
 
                                         'photographer_bank_holder' => $c->photographer->atas_nama_rekening ?? null,
 
-                                        'service_name' => $c->bookingDetail->service->nama_layanan ?? 'Paket Foto',
+                                        'service_name' => $c->bookingDetail->service->nama_layanan ?? 'Paket Kustom',
 
-                                        'booking_date' => $c->bookingDetail && $c->bookingDetail->booking_date ? date('d M Y', strtotime($c->bookingDetail->booking_date)) : '-',
+                                        'booking_date' => $c->bookingDetail ? $c->bookingDetail->date_range_label : '-',
 
-                                        'booking_time' => $c->bookingDetail && $c->bookingDetail->jam_mulai ? ($c->bookingDetail->jam_mulai . ' WIB') : '-',
+                                        'booking_time' => ($c->bookingDetail && $c->bookingDetail->jam_mulai) ? (substr($c->bookingDetail->jam_mulai, 0, 5) . ($c->bookingDetail->jam_selesai ? ' - ' . substr($c->bookingDetail->jam_selesai, 0, 5) . ' WIB' : ' WIB')) : '-',
 
                                         'location' => $c->bookingDetail->lokasi ?? '-',
 

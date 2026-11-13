@@ -68,7 +68,7 @@ return [
                 ],
                 [
                     'q' => 'Apakah ada biaya layanan platform bagi klien?',
-                    'a' => 'Tidak ada biaya layanan platform bagi klien. Nominal tagihan pada invoice merupakan total tarif paket layanan dan fitur tambahan yang Anda pilih.',
+                    'a' => 'Tidak ada biaya layanan platform bagi klien. Nominal tagihan pada invoice sesuai dengan tarif paket layanan yang Anda pilih.',
                 ],
             ],
         ],

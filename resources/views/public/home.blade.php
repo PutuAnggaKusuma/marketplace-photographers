@@ -353,7 +353,7 @@
             <div class="space-y-0.5">
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Tarif Layanan</span>
               @if($lowestPrice)
-                <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">Rp {{ number_format($lowestPrice, 0, ',', '.') }}</p>
+                <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">Mulai Rp {{ number_format($lowestPrice, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">/ jam</span></p>
               @else
                 <p class="text-gray-400 dark:text-gray-500 font-semibold text-xs leading-tight">Belum ada paket</p>
               @endif

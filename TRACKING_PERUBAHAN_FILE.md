@@ -20,6 +20,236 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-12 22:28 WITA] — Perubahan Fundamental Tarif Per Jam, Spare Time Opsional Per Paket, Auto-Bypass 500m, dan Booking Custom Multi-Hari via Chat
+
+* **Modul / Fitur**:
+  - Skema Database (`photographer_services`, `contract_bookings`, `chat_custom_offers`), Mesin Validasi Jadwal (`BookingScheduleService`), Paket Layanan Fotografer & Onboarding, Form Reservasi Klien (`/booking/create`), Etalase Katalog & Profil Fotografer, Penawaran Khusus Chat (Multi-Hari, Jam Fleksibel, DP 30%), Reschedule, Invoice, serta Seeder Layanan Demo.
+* **File yang Diubah**:
+  * `database/migrations/2026_11_12_000002_add_hourly_spare_time_and_multiday_fields.php` *(baru)*
+  * `app/Services/BookingScheduleService.php` *(baru)*
+  * `app/Models/PhotographerService.php`
+  * `app/Models/ContractBooking.php`
+  * `app/Models/ChatCustomOffer.php`
+  * `app/Http/Controllers/Photographer/ServiceController.php`
+  * `app/Http/Controllers/Photographer/OnboardingController.php`
+  * `app/Http/Controllers/Photographer/AvailabilityController.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `routes/web.php`
+  * `resources/views/layouts/app.blade.php`
+  * `resources/views/photographer/services/create.blade.php`
+  * `resources/views/photographer/services/edit.blade.php`
+  * `resources/views/photographer/services/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/photographer/chat/index.blade.php`
+  * `resources/views/partials/photographer/onboarding-wizard.blade.php`
+  * `resources/views/partials/shared/upcoming-session-banner.blade.php`
+  * `resources/views/public/booking/create.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/booking/invoice-print.blade.php`
+  * `resources/views/public/photographers/index.blade.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/home.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/client/favorites/index.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `database/seeders/PhotographerSeeder.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Harga paket fotografer dihitung flat per paket tanpa opsi rentang jam klien, daftar jam memakai slot tetap terbatas, belum ada jeda persiapan (*spare time*) per paket, belum ada pengecualian jarak lokasi, serta penawaran khusus di chat hanya mendukung satu hari dengan opsi bayar penuh dan validasi jadwal reschedule masih mematok `+4 hours` secara hardcoded.
+  * **After**:
+    - **Tarif Per Jam & Slot Jam Bulat**: Harga `photographer_services.tarif_harga` ditetapkan per 1 jam (`/ jam`). Klien memilih `Jam Mulai` dan `Jam Selesai` (minimal 1 jam, kelipatan `:00`) lewat dua Custom Alpine Floating Dropdown dinamis dari `/booking/available-slots` dengan total `tarif_harga * (jam_selesai - jam_mulai)`, menutup jam lewat pada hari ini, tetap mengizinkan jam buka kosong maupun sesi yang berakhir tepat di jam tutup operasional.
+    - **Spare Time Opsional Per Paket & Bypass 500m**: Fotografer dapat mengaktifkan jeda sebelum/sesudah (`0, 30, 60, 90, 120, 180` menit) serta opsi lewati jeda untuk lokasi berjarak ≤ 500 meter (Haversine via pin peta Leaflet OSM opsional; koordinat kosong aman dianggap lokasi berbeda). Jeda hanya aktif di sekitar pesanan yang sudah masuk dan dicek dua arah via `BookingScheduleService`.
+    - **Booking Custom Multi-Hari & Chat**: Modal `Ajukan Booking Custom` mengirim pesan pembuka terstruktur ke ruang chat (`/booking/custom-request`). Fotografer mengirim Penawaran Khusus beruntun (`booking_date` sampai `booking_end_date`) dengan jam mulai/selesai fleksibel melewati jam tutup reguler, klien dapat menyetujui dengan `Bayar Penuh (100%)` atau `Uang Muka (DP 30%)`, dan seluruh tanggal dalam rentang otomatis terkunci dari booking reguler.
+    - **Reschedule, UI & Seeder**: Reschedule di sisi klien dan fotografer memakai `BookingScheduleService::validateReschedule()` agar durasi asli, multi-hari, dan aturan spare/bypass tetap konsisten. Seluruh tampilan jadwal, invoice, dan seeder demo disinkronkan ke format rentang tanggal/jam serta satuan `/ jam`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41, #46, #58, #59, #67, #68, #70, #73, #74, #88, #89, #90, #91, #94, #100–#108**.
+* **Hasil Pengujian & Verifikasi**:
+  * Lint PHP (`php -l`) seluruh 15 file PHP terkait: **PASS**.
+  * `php artisan view:clear`, `php artisan view:cache`, `npm run build` (`vite v8.2.1`, `815ms`): **PASS**.
+  * Suite pengujian integrasi Laravel HTTP, `BookingScheduleService`, dan transaksi database rollback-safe (`26/26` skenario termasuk `/booking/available-slots`, `/booking/store` hitung per jam + blokir spare + bypass ≤ 500m, `/booking/custom-request`, `/chat/custom-offer` multi-hari fleksibel + `/accept` DP 30%, kunci kalender multi-hari, serta HTTP `200` rute Public/Client/Fotografer/Admin): **PASS (26/26)**.
+
+---
+
+### [2026-11-12 20:06 WITA] — Penjajaran Vertikal Daftar Fasilitas Paket Layanan dengan Judul Paket pada Form Reservasi
+
+* **Modul / Fitur**:
+  - Seksi `Pilih Paket Layanan` pada Form Reservasi (`/booking/create`, [create.blade.php](resources/views/public/booking/create.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Grid daftar fasilitas (`✓ Durasi Sesi 1 Jam`, dll.) dimulai tepat di bawah bulatan radio button (`padding-left: 0`) sehingga tidak sejajar vertikal dengan judul dan deskripsi paket (`w-4` + `gap-3` = `1.75rem`).
+  * **After**:
+    - Menambahkan `pl-7` pada grid fasilitas paket (`pt-2 pl-7 grid grid-cols-1 sm:grid-cols-2 gap-1.5`) sehingga ikon centang dan teks fasilitas sejajar vertikal tepat dengan awal judul nama paket di atasnya.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49** dan **Rule #98**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, 857ms): **PASS**.
+  * Validasi keseimbangan tag `<div>`, render HTTP `200` `/booking/create`, dan pengecekan kelas `pl-7`: **PASS** (`3/3 PASSED`).
+
+---
+
+### [2026-11-12 20:01 WITA] — Penghapusan Blok & Kalkulasi `Fitur Tambahan (Opsional)` pada Form Reservasi (`ServiceDetail` Murni Fasilitas Paket)
+
+* **Modul / Fitur**:
+  - Form Reservasi Sesi Foto (`/booking/create`, [create.blade.php](resources/views/public/booking/create.blade.php) & [BookingController.php](app/Http/Controllers/Public/BookingController.php)), seeder [PhotographerSeeder.php](database/seeders/PhotographerSeeder.php), FAQ [lensmatch_faqs.php](config/lensmatch_faqs.php), serta dokumentasi Rule #98 di [README.md](README.md).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `database/seeders/PhotographerSeeder.php`
+  * `config/lensmatch_faqs.php`
+  * `README.md`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Kolom kanan `Ringkasan Pesanan` pada `booking/create.blade.php` mengambil seluruh `selectedService.details` (padahal berisi rincian fasilitas inklusi paket yang dibuat fotografer dengan `tarif_harga = 0`) lalu menampilkannya sebagai checkbox `FITUR TAMBAHAN (OPSIONAL):` beserta baris kalkulasi `Tarif Paket Dasar`, `Fitur Tambahan: Rp 0`, dan `Total Nilai Sesi`.
+    - `BookingController::store()` ikut memvalidasi `selected_features` dan menghitung ulang `ServiceDetail::sum('tarif_harga')`, sementara `PhotographerSeeder.php` masih menyisipkan `500000` pada item `Termasuk Cetak Canvas 40x60cm`.
+  * **After**:
+    - Menghapus blok checkbox `FITUR TAMBAHAN (OPSIONAL)`, state/input `selectedFeatures`, dan baris `Fitur Tambahan: Rp 0` di `booking/create.blade.php` serta meringkas baris tarif menjadi `Tarif Paket`.
+    - Membersihkan parameter `selected_features` dan import `ServiceDetail` dari `BookingController.php` sehingga `$totalAmount` langsung memakai `$service->tarif_harga`.
+    - Menyeragamkan `tarif_harga => 0` di `PhotographerSeeder.php` (serta menormalisasi 1 baris lama di DB live), menyesuaikan kalimat FAQ di `config/lensmatch_faqs.php`, dan memperbarui Rule #98 di `README.md`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #51**, **Rule #94**, serta **Rule #98**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` pada `BookingController.php`, `PhotographerSeeder.php`, dan `lensmatch_faqs.php`, `php artisan config:clear`, `php artisan view:clear`, `php artisan view:cache`, serta `npm run build` (`vite v8.2.1`, 811ms): **PASS**.
+  * Normalisasi DB live, validasi tag `<div>`, serta render HTTP `200` `/booking/create` dan `/faq` via HTTP Kernel: **PASS** (`7/7 PASSED`).
+
+---
+
+### [2026-11-12 19:54 WITA] — Perbaikan Pre-Selected Tanggal Libur Kalender, Warna Rincian DP/Jadwal, dan Penghapusan Subteks Seksi Form Reservasi
+
+* **Modul / Fitur**:
+  - Form Reservasi Sesi Foto (`/booking/create`, [BookingController.php](app/Http/Controllers/Public/BookingController.php) dan [create.blade.php](resources/views/public/booking/create.blade.php)).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - `BookingController@create` dan `create.blade.php` memaksa tanggal terpilih awal (`selectedDate`) menjadi `date('Y-m-d', strtotime('+2 days'))` tanpa mengecek jadwal libur fotografer, dan kelas sorot kuning tanggal terpilih belum menyaring `!day.isPast && !day.isFullDayBlocked` sehingga tanggal `Libur` (misal tanggal 14) tertampil memiliki border kuning.
+    - Baris `Tagihan DP (30%) Sekarang` memakai warna primary amber (`text-amber-600`) dan `Sisa Pelunasan Nanti (70%)` memakai teks kecil abu-abu (`text-[11px]` `font-medium`), tidak seragam hitam/tebal seperti `Total Nilai Sesi` di atasnya.
+    - Teks `Jadwal: ...` di atas slot jam memakai `text-amber-600 dark:text-amber-400`.
+    - Setiap judul seksi kartu (`Pilih Paket Layanan`, `Jadwal Pelaksanaan Sesi Foto`, `Lokasi Pemotretan`, `Catatan Khusus`, `Ringkasan Pesanan`) masih menampilkan subteks penjelas `<p>` di bawahnya.
+  * **After**:
+    - `BookingController@create` mengatur `$preselectedDate = $request->input('tanggal', '')` sehingga tidak memaksa tanggal awal; `create.blade.php` menambahkan inisialisasi aman bulan kalender, fungsi `init()` untuk membersihkan tanggal libur/lampau, penjagaan `!day.isPast && !day.isFullDayBlocked` pada class tanggal terpilih, serta pesan ajakan saat tanggal belum dipilih.
+    - Baris `Tagihan DP (30%) Sekarang` dan `Sisa Pelunasan Nanti (70%)` diseragamkan memakai label netral `text-xs text-gray-500 dark:text-gray-400 font-medium` dan nominal hitam tegas (`font-bold text-gray-900 dark:text-white` / `text-gray-800 dark:text-gray-200`).
+    - Teks tanggal `Jadwal:` diubah ke warna normal `font-bold text-gray-900 dark:text-white`.
+    - Seluruh subteks `<p>` di bawah judul kelima seksi kartu dihapus.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #51**, **Rule #98**, dan **Rule #99**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l BookingController.php`, `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, 818ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` `booking/create.blade.php` serta render HTTP `200` `/booking/create` terautentikasi via HTTP Kernel: **PASS** (`9/9 PASSED`).
+
+---
+
+### [2026-11-12 19:46 WITA] — Toggle Uncheck Radio Paket Layanan & Penyeragaman Ikon Lokasi Netral pada Form Reservasi
+
+* **Modul / Fitur**:
+  - Form Reservasi Sesi Foto (`/booking/create`, [create.blade.php](resources/views/public/booking/create.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - `selectService(id)` selalu langsung menimpa `this.selectedServiceId = id;` sehingga paket layanan yang sudah dipilih (tampilan radio button lingkaran) tidak dapat di-uncheck ketika diklik ulang.
+    - Ikon pin lokasi fotografer di kartu `Ringkasan Pesanan` memakai warna kuning `text-amber-500` dengan SVG berbeda dari halaman publik lain, serta belum memiliki fallback `'-'`.
+  * **After**:
+    - Tampilan radio button lingkaran dipertahankan utuh, sementara `selectService(id)` diubah menjadi `this.selectedServiceId = (this.selectedServiceId === id ? null : id);` sehingga klik ulang pada paket aktif akan meng-uncheck pilihan, mereset `selectedFeatures`, mengembalikan kolom kanan ke state `Pilih Paket Layanan`, dan menjalankan validasi wajib pilih paket (`:value="selectedServiceId || ''"`).
+    - Ikon pin lokasi di `Ringkasan Pesanan` diseragamkan memakai SVG Heroicons v2 abu-abu netral (`w-3.5 h-3.5 text-gray-400 dark:text-gray-400 shrink-0`) serta fallback `'-'` agar selaras dengan beranda, katalog, profil publik, dan halaman favorit.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #98**, serta **Rule #104**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, 880ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` `booking/create.blade.php` dan render HTTP `200` `/booking/create` terautentikasi sebagai klien via HTTP Kernel: **PASS** (`6/6 PASSED`).
+
+---
+
+### [2026-11-12 19:38 WITA] — Penyederhanaan Kolom `Nama Paket` Tanpa Rincian Fasilitas pada Tabel Paket Layanan Fotografer
+
+* **Modul / Fitur**:
+  - Tabel Paket Layanan pada dashboard fotografer (`/photographer/services`, [services/index.blade.php](resources/views/photographer/services/index.blade.php)) beserta pembaruan standar dokumentasi pada [README.md](README.md) (Rule #106 poin 2).
+* **File yang Diubah**:
+  * `resources/views/photographer/services/index.blade.php`
+  * `README.md`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Header kolom pertama memakai `Nama Paket & Fasilitas` dan sel `<td>` menampilkan daftar teks fasilitas (`$srv->details->pluck('nama_fitur')->implode(' • ')` / `Belum ada rincian fasilitas`) di bawah nama layanan.
+  * **After**:
+    - Header `<th>` disederhanakan menjadi `Nama Paket` dan sel `<td>` hanya merender `{{ $srv->nama_layanan }}` agar tampilan tabel bersih dan terfokus pada nama paket. Standar pada `README.md` (Rule #106 poin 2) ikut diselaraskan.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49**, **Rule #70**, dan **Rule #106**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, 953ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` `services/index.blade.php` dan render HTTP `200` `/photographer/services` terautentikasi via HTTP Kernel: **PASS** (`6/6 PASSED`).
+
+---
+
+### [2026-11-12 19:33 WITA] — Penambahan Tinggi & Ruang Napas Card Empty State di Profil Publik Fotografer
+
+* **Modul / Fitur**:
+  - Card empty state (`Belum Ada Paket Layanan`, `Belum Ada Portofolio`, `Belum Ada Ulasan Klien`, `Belum Ada Tanya Jawab`, dan empty state album tanpa foto) pada halaman profil publik fotografer (`/fotografer/{id}`, [show.blade.php](resources/views/public/photographers/show.blade.php)).
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - Card `Belum Ada Tanya Jawab` memakai `p-6 sm:p-7` dan card empty state lain (`Belum Ada Paket Layanan`, `Belum Ada Portofolio`, `Belum Ada Ulasan Klien`) memakai `p-8 sm:p-10` tanpa tinggi minimum sehingga tampak pipih dan sempit secara vertikal pada lebar kontainer penuh `max-w-7xl`.
+  * **After**:
+    - Seluruh keempat card empty state tab diseragamkan memakai `px-6 py-14 sm:px-10 sm:py-16 min-h-[190px] sm:min-h-[210px] flex flex-col items-center justify-center` serta tipografi seimbang (`text-sm sm:text-base font-bold` untuk judul dan `text-xs sm:text-sm max-w-lg mx-auto` untuk subteks), sedangkan empty state album tanpa foto memakai `px-6 py-12 text-xs sm:text-sm`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #51**, **Rule #70**, dan **Rule #100**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear`, `php artisan view:cache`, dan `npm run build` (`vite v8.2.1`, 834ms): **PASS**.
+  * Validasi keseimbangan tag `<div>` `show.blade.php` dan HTTP `200` pada `/fotografer/6` via HTTP Kernel: **PASS** (`5/5 PASSED`).
+
+---
+
+### [2026-11-12 19:31 WITA] — Penyeragaman Lebar Kontainer & Anti-Slop pada Halaman Pusat Bantuan, Kebijakan Privasi, Syarat Ketentuan, serta Footer
+
+* **Modul / Fitur**:
+  - Halaman `/faq` ([faq.blade.php](resources/views/public/help/faq.blade.php)), `/kebijakan-privasi` ([privacy.blade.php](resources/views/public/help/privacy.blade.php)), `/syarat-ketentuan` ([terms.blade.php](resources/views/public/help/terms.blade.php)), controller [HelpController.php](app/Http/Controllers/Public/HelpController.php), routing [routes/web.php](routes/web.php), serta footer publik ([footer.blade.php](resources/views/partials/public/footer.blade.php)).
+* **File yang Diubah**:
+  * `routes/web.php`
+  * `app/Http/Controllers/Public/HelpController.php`
+  * `resources/views/partials/public/footer.blade.php`
+  * `resources/views/public/help/faq.blade.php`
+  * `resources/views/public/help/privacy.blade.php`
+  * `resources/views/public/help/terms.blade.php` *(baru)*
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**:
+    - `public/help/faq.blade.php` memakai `max-w-5xl` dan `public/help/privacy.blade.php` memakai `max-w-4xl` sehingga tidak sejajar dengan lebar navbar dan footer (`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`).
+    - Rute `/syarat-ketentuan` (`public.terms`) masih diarahkan ke `HelpController@privacy` sehingga belum memiliki halaman terpisah.
+    - `faq.blade.php` memuat banner gradien gelap, blok dukungan fiktif (`24/7`, `support@lensmatch.com`, tombol WhatsApp yang mengarah ke `/forum`), tab terpusat, serta garis pembatas `border-b`/`border-t` internal.
+    - `privacy.blade.php` memuat tanggal statis (`15 Agustus 2026`), istilah `Escrow`/`Rekber`, teks markdown mentah `(*intellectual property*)`, typo `milikFotografer`, dan `border-b` pada judul.
+    - `footer.blade.php` kolom ke-4 menggunakan judul `Bantuan & Syarat` serta label bertumpuk (`Pusat Bantuan & FAQ`, `Kebijakan Privasi & Keamanan Pembayaran`, `Syarat & Ketentuan Platform`).
+  * **After**:
+    - Ketiga halaman (`/faq`, `/kebijakan-privasi`, `/syarat-ketentuan`) diseragamkan menggunakan `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` agar sejajar penuh dengan navbar dan footer publik.
+    - `HelpController::terms()` dan `resources/views/public/help/terms.blade.php` ditambahkan serta dihubungkan ke `route('public.terms')` (`/syarat-ketentuan`).
+    - `faq.blade.php` dibersihkan menjadi header kiri ringkas, tab horizontal bergaris bawah dengan badge jumlah item (Rule #78), dan akordion murni dari `config('lensmatch_faqs.help_categories')` tanpa banner gradien, tanpa blok kontak/24/7 fiktif, dan tanpa divider internal.
+    - `privacy.blade.php` dan `terms.blade.php` ditulis ringkas sesuai perilaku nyata sistem (1 email 1 akun 1 peran, verifikasi mitra, pembayaran DP 30% atau penuh, pencairan 90%/10%, pembatalan 24 jam, hak cipta karya, moderasi komunitas) tanpa `Escrow`/`Rekber`, tanggal fiktif, maupun `border-b`.
+    - `footer.blade.php` kolom ke-4 disederhanakan menjadi `Bantuan` dengan tautan `Pusat Bantuan`, `Kebijakan Privasi`, dan `Syarat Ketentuan`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41**, **Rule #49**, **Rule #50**, **Rule #51**, **Rule #58**, **Rule #70**, **Rule #72**, **Rule #78**, **Rule #89**, **Rule #100**, dan **Rule #104**.
+* **Hasil Pengujian & Verifikasi**:
+  * `php -l` pada `routes/web.php` dan `HelpController.php`, `php artisan route:clear`, `php artisan view:clear`, `php artisan view:cache`, serta `npm run build` (`vite v8.2.1`, 1.04s): **PASS**.
+  * Validasi keseimbangan tag `<div>` (4 view), HTTP `200` dan asersi DOM/anti-slop via HTTP Kernel pada `/faq`, `/kebijakan-privasi`, `/syarat-ketentuan`, dan `/`: **PASS** (`47/47 PASSED`).
+
+---
+
 ### [2026-11-12 16:50 WITA] — Pembatasan Visibilitas Tombol Preview (`Lihat Lebih Banyak` / `Lihat Semua`) Berdasarkan Batas Jumlah Data
 
 * **Modul / Fitur**:

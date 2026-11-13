@@ -127,9 +127,9 @@
             <!-- Waktu -->
             <div class="flex items-center gap-1.5 font-bold text-gray-900 dark:text-white">
               <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
-              <span>{{ \Carbon\Carbon::parse($urgentSession->booking_date)->translatedFormat('l, d F Y') }}</span>
+              <span>{{ $urgentSession->is_multi_day ? $urgentSession->date_range_label : \Carbon\Carbon::parse($urgentSession->booking_date)->translatedFormat('l, d F Y') }}</span>
               <span class="text-gray-400">•</span>
-              <span>{{ substr($urgentSession->jam_mulai, 0, 5) }} - {{ substr($urgentSession->jam_selesai, 0, 5) }} WITA</span>
+              <span>{{ substr($urgentSession->jam_mulai, 0, 5) }} - {{ substr($urgentSession->jam_selesai, 0, 5) }} WIB</span>
             </div>
 
             <!-- Kontak Telepon / WA jika ada -->

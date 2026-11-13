@@ -46,13 +46,21 @@
 
     @php
         $existingFiturs = $service->details->pluck('nama_fitur')->toArray();
-        $initialFiturs = old('fitur', !empty($existingFiturs) ? $existingFiturs : ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing']);
+        $initialFiturs = old('fitur', !empty($existingFiturs) ? $existingFiturs : ['']);
         if (!is_array($initialFiturs) || count($initialFiturs) === 0) {
-            $initialFiturs = ['Durasi Sesi 3 Jam', '25 Foto Retouched & Full Editing'];
+            $initialFiturs = [''];
         } else {
             $initialFiturs = array_values($initialFiturs);
         }
         $fiturError = $errors->first('fitur') ?: ($errors->first('fitur.*') ?: '');
+        $spareOptions = [
+            0 => '0 Menit',
+            30 => '30 Menit',
+            60 => '1 Jam',
+            90 => '1 Jam 30 Menit',
+            120 => '2 Jam',
+            180 => '3 Jam',
+        ];
     @endphp
 
     <!-- Main Vertical Form Card -->
@@ -100,7 +108,7 @@
 
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
 
-                    Tarif Harga (Rp) <span class="text-rose-500">*</span>
+                    Tarif Per Jam (Rp) <span class="text-rose-500">*</span>
 
                 </label>
 
@@ -111,10 +119,10 @@
                        @input="touched.tarif_harga = true; validateTarif()"
                        @blur="touched.tarif_harga = true; validateTarif()"
                        step="1000"
-                       placeholder="Masukkan nominal tarif paket (min. 10000)" 
+                       placeholder="Masukkan nominal tarif per jam (min. 10000)" 
                        class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                        :class="touched.tarif_harga && errors.tarif_harga ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
-                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Masukkan nominal angka murni tanpa titik atau koma.</p>
+                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Harga berlaku untuk setiap 1 jam pemotretan. Masukkan angka murni tanpa titik.</p>
                 <p x-show="touched.tarif_harga && errors.tarif_harga" x-text="errors.tarif_harga" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
             </div>
@@ -150,7 +158,7 @@
 
 
 
-            <!-- 4. Rincian Fasilitas / Fitur Poin -->
+            <!-- 4. Benefit Paket Layanan -->
 
             <div>
 
@@ -158,7 +166,7 @@
 
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
 
-                        Rincian Benefit & Fasilitas yang Didapat Klien <span class="text-rose-500">*</span>
+                        Benefit Paket Layanan <span class="text-rose-500">*</span>
 
                     </label>
 
@@ -220,7 +228,89 @@
 
 
 
-            <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol aksi utama, rata kanan gap-3) -->
+            <!-- 5. Pengaturan Spare Time (Opsional) -->
+            <div class="p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 space-y-4">
+                <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <input type="checkbox"
+                           name="spare_time_enabled"
+                           value="1"
+                           x-model="form.spare_time_enabled"
+                           @change="validateSpare()"
+                           class="mt-0.5 w-4 h-4 rounded accent-amber-500 cursor-pointer shrink-0">
+                    <div class="space-y-0.5">
+                        <span class="block text-xs font-bold text-gray-900 dark:text-white">Aktifkan Spare Time</span>
+                        <span class="block text-[11px] text-gray-500 dark:text-gray-400">Menambahkan waktu jeda persiapan sebelum dan sesudah sesi agar jadwal pesanan baru tidak terlalu mepet.</span>
+                    </div>
+                </label>
+
+                <div x-show="form.spare_time_enabled" x-cloak class="space-y-4 pt-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="relative" x-data="{ open: false }">
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                                Jeda Sebelum Sesi
+                            </label>
+                            <input type="hidden" name="spare_before_minutes" :value="form.spare_before_minutes">
+                            <button type="button"
+                                    @click="open = !open"
+                                    class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                                    :class="touched.spare && errors.spare ? 'border-red-400' : (open ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400')">
+                                <span x-text="spareLabels[form.spare_before_minutes] || '0 Menit'"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition
+                                 class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+                                @foreach($spareOptions as $mins => $label)
+                                    <button type="button"
+                                            @click="form.spare_before_minutes = {{ $mins }}; touched.spare = true; validateSpare(); open = false"
+                                            class="w-full px-4 py-2.5 text-xs font-bold text-left hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition border-b border-gray-100 dark:border-gray-700/60 last:border-0 cursor-pointer"
+                                            :class="Number(form.spare_before_minutes) === {{ $mins }} ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : 'text-gray-700 dark:text-gray-200'">
+                                        {{ $label }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="relative" x-data="{ open: false }">
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                                Jeda Sesudah Sesi
+                            </label>
+                            <input type="hidden" name="spare_after_minutes" :value="form.spare_after_minutes">
+                            <button type="button"
+                                    @click="open = !open"
+                                    class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold text-gray-900 dark:text-white flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                                    :class="touched.spare && errors.spare ? 'border-red-400' : (open ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400')">
+                                <span x-text="spareLabels[form.spare_after_minutes] || '0 Menit'"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition
+                                 class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+                                @foreach($spareOptions as $mins => $label)
+                                    <button type="button"
+                                            @click="form.spare_after_minutes = {{ $mins }}; touched.spare = true; validateSpare(); open = false"
+                                            class="w-full px-4 py-2.5 text-xs font-bold text-left hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition border-b border-gray-100 dark:border-gray-700/60 last:border-0 cursor-pointer"
+                                            :class="Number(form.spare_after_minutes) === {{ $mins }} ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : 'text-gray-700 dark:text-gray-200'">
+                                        {{ $label }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <p x-show="touched.spare && errors.spare" x-text="errors.spare" x-cloak class="text-[11px] font-bold text-red-500"></p>
+
+                    <label class="flex items-start gap-3 cursor-pointer select-none">
+                        <input type="checkbox"
+                               name="allow_same_location_bypass"
+                               value="1"
+                               x-model="form.allow_same_location_bypass"
+                               class="mt-0.5 w-4 h-4 rounded accent-amber-500 cursor-pointer shrink-0">
+                        <div class="space-y-0.5">
+                            <span class="block text-xs font-bold text-gray-800 dark:text-gray-200">Izinkan sambung langsung tanpa jeda di lokasi sama (radius 500 m)</span>
+                            <span class="block text-[11px] text-gray-500 dark:text-gray-400">Berguna untuk paket wisuda atau event di satu area kampus yang memungkinkan sesi berurutan tanpa jeda perjalanan.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
 
             <!-- Action Button Footer (Rule #74 Standard: Batal di samping kiri tombol submit, rata kanan gap-3, Rule #41: No border-t Divider) -->
             <div class="flex items-center justify-end gap-3 pt-4">
@@ -255,22 +345,37 @@ function serviceFormApp() {
     fiturs: @js($initialFiturs),
     addFitur() { this.fiturs.push(''); },
     removeFitur(index) { if (this.fiturs.length > 1) this.fiturs.splice(index, 1); },
+    spareLabels: @js($spareOptions),
     form: {
       nama_layanan: @js(old('nama_layanan', $service->nama_layanan)),
       tarif_harga: @js(old('tarif_harga', (int)$service->tarif_harga)),
       deskripsi_layanan: @js(old('deskripsi_layanan', $service->deskripsi_layanan)),
+      spare_time_enabled: @js((bool) old('spare_time_enabled', $service->spare_time_enabled)),
+      spare_before_minutes: @js((int) old('spare_before_minutes', $service->spare_before_minutes ?? 0)),
+      spare_after_minutes: @js((int) old('spare_after_minutes', $service->spare_after_minutes ?? 0)),
+      allow_same_location_bypass: @js((bool) old('allow_same_location_bypass', $service->allow_same_location_bypass)),
     },
     touched: {
       nama_layanan: {{ $errors->has('nama_layanan') ? 'true' : 'false' }},
       tarif_harga: {{ $errors->has('tarif_harga') ? 'true' : 'false' }},
       deskripsi_layanan: {{ $errors->has('deskripsi_layanan') ? 'true' : 'false' }},
       fitur: {{ ($errors->has('fitur') || $errors->has('fitur.*')) ? 'true' : 'false' }},
+      spare: {{ $errors->has('spare_before_minutes') ? 'true' : 'false' }},
     },
     errors: {
       nama_layanan: @js($errors->first('nama_layanan') ?: ''),
       tarif_harga: @js($errors->first('tarif_harga') ?: ''),
       deskripsi_layanan: @js($errors->first('deskripsi_layanan') ?: ''),
       fitur: @js($fiturError),
+      spare: @js($errors->first('spare_before_minutes') ?: ''),
+    },
+    validateSpare() {
+      if (this.form.spare_time_enabled && Number(this.form.spare_before_minutes) === 0 && Number(this.form.spare_after_minutes) === 0) {
+        this.errors.spare = 'Pilih minimal salah satu durasi jeda sebelum atau sesudah sesi.';
+        return false;
+      }
+      this.errors.spare = '';
+      return true;
     },
     validateNama() {
       const val = (this.form.nama_layanan || '').trim();
@@ -315,11 +420,13 @@ function serviceFormApp() {
       this.touched.tarif_harga = true;
       this.touched.deskripsi_layanan = true;
       this.touched.fitur = true;
+      this.touched.spare = true;
       this.validateNama();
       this.validateTarif();
       this.validateDeskripsi();
       this.validateFitur();
-      if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan || this.errors.fitur) {
+      this.validateSpare();
+      if (this.errors.nama_layanan || this.errors.tarif_harga || this.errors.deskripsi_layanan || this.errors.fitur || this.errors.spare) {
         e.preventDefault();
         let targetEl = null;
         if (this.errors.nama_layanan) targetEl = this.$refs.fieldNama;

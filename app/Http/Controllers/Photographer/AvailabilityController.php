@@ -107,11 +107,11 @@ class AvailabilityController extends Controller
 
         $nearestBlocked = $allAvailabilities->where('tanggal', '>=', $todayDate)->sortBy('tanggal')->first();
         $nextBooking = $activeBookings->filter(function ($b) use ($todayDate) {
-            return $b->bookingDetail && $b->bookingDetail->booking_date >= $todayDate;
+            return $b->bookingDetail && $b->bookingDetail->effective_end_date >= $todayDate;
         })->sortBy(function ($b) {
             return $b->bookingDetail->booking_date;
         })->first();
-        $nextBookingDate = $nextBooking ? date('d M Y', strtotime($nextBooking->bookingDetail->booking_date)) : 'Belum Ada';
+        $nextBookingDate = $nextBooking ? $nextBooking->bookingDetail->date_range_label : 'Belum Ada';
 
         // Calendar event lists
         $calendarEvents = [];
@@ -126,12 +126,24 @@ class AvailabilityController extends Controller
             ];
         }
         foreach ($activeBookings as $b) {
-            if ($b->bookingDetail) {
-                $calendarEvents[] = [
-                    'title' => 'Booking: ' . ($b->client->nama ?? 'Klien'),
-                    'date' => $b->bookingDetail->booking_date,
-                    'type' => 'booked'
-                ];
+            if ($b->bookingDetail && $b->bookingDetail->booking_date) {
+                $clientTitle = 'Booking: ' . ($b->client->nama ?? 'Klien');
+                if ($b->bookingDetail->is_multi_day) {
+                    $period = \Carbon\CarbonPeriod::create($b->bookingDetail->booking_date, $b->bookingDetail->effective_end_date);
+                    foreach ($period as $dt) {
+                        $calendarEvents[] = [
+                            'title' => $clientTitle . ' (Custom Multi-Hari)',
+                            'date' => $dt->format('Y-m-d'),
+                            'type' => 'booked'
+                        ];
+                    }
+                } else {
+                    $calendarEvents[] = [
+                        'title' => $clientTitle,
+                        'date' => $b->bookingDetail->booking_date,
+                        'type' => 'booked'
+                    ];
+                }
             }
         }
 
@@ -184,15 +196,25 @@ class AvailabilityController extends Controller
         $upcomingContracts = Contract::where('id_photographer', $photographer->id)
             ->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
             ->whereHas('bookingDetail', function ($q) {
-                $q->where('booking_date', '>=', date('Y-m-d'));
+                $q->whereRaw('COALESCE(booking_end_date, booking_date) >= ?', [date('Y-m-d')]);
             })
             ->with(['bookingDetail', 'client'])
             ->get();
 
         foreach ($upcomingContracts as $c) {
+            if (!$c->bookingDetail) {
+                continue;
+            }
+            // Penawaran khusus custom (id_service === null) berjam fleksibel di luar jam reguler,
+            // sehingga tidak mengunci perubahan jam buka/tutup mingguan selama bukan blokir libur tanggal.
+            if ($c->bookingDetail->id_service === null) {
+                continue;
+            }
+
             $bDate = $c->bookingDetail->booking_date;
             $dow = (int) Carbon::parse($bDate)->dayOfWeekIso; // 1 = Senin, ..., 7 = Minggu
-            $bJamMulai = substr($c->bookingDetail->jam_mulai, 0, 5);
+            $bJamMulai = substr($c->bookingDetail->jam_mulai ?: '08:00', 0, 5);
+            $bJamSelesai = substr($c->bookingDetail->jam_selesai ?: $bJamMulai, 0, 5);
             $code = 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT);
             $clientName = $c->client->nama ?? 'Klien';
 
@@ -209,8 +231,8 @@ class AvailabilityController extends Controller
                 $newBuka = substr(trim((string) ($newDayConfig['jam_buka'] ?? '08:00')), 0, 5);
                 $newTutup = substr(trim((string) ($newDayConfig['jam_tutup'] ?? '17:00')), 0, 5);
 
-                if ($bJamMulai < $newBuka || $bJamMulai > $newTutup) {
-                    return redirect()->back()->withInput()->with('error', "Gagal menyimpan jadwal: Pesanan aktif ({$code}) pada {$dayName} (" . date('d M Y', strtotime($bDate)) . ") jam {$bJamMulai} WIB berada di luar jam operasional baru ({$newBuka} - {$newTutup} WIB). Ajukan jadwal ulang terlebih dahulu.");
+                if ($bJamMulai < $newBuka || $bJamSelesai > $newTutup) {
+                    return redirect()->back()->withInput()->with('error', "Gagal menyimpan jadwal: Pesanan aktif ({$code}) pada {$dayName} (" . date('d M Y', strtotime($bDate)) . ") jam {$bJamMulai} - {$bJamSelesai} WIB berada di luar jam operasional baru ({$newBuka} - {$newTutup} WIB). Ajukan jadwal ulang terlebih dahulu.");
                 }
             }
         }
@@ -292,13 +314,19 @@ class AvailabilityController extends Controller
             $startTimeDb = $startSlot . ':00';
             $endTimeDb = $endSlot . ':00';
 
-            // Zero-Break Guard: Cek apakah ada pesanan aktif pada rentang jam tersebut
+            // Zero-Break Guard: Cek apakah ada pesanan aktif pada tanggal/rentang jam tersebut (termasuk multi-hari)
             $conflict = Contract::where('id_photographer', $photographer->id)
                 ->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
                 ->whereHas('bookingDetail', function ($q) use ($request, $startTimeDb, $endTimeDb) {
-                    $q->where('booking_date', $request->tanggal)
-                      ->where('jam_mulai', '<=', $endTimeDb)
-                      ->where('jam_selesai', '>=', $startTimeDb);
+                    $q->whereDate('booking_date', '<=', $request->tanggal)
+                      ->whereRaw('COALESCE(booking_end_date, booking_date) >= ?', [$request->tanggal])
+                      ->where(function ($sub) use ($startTimeDb, $endTimeDb) {
+                          $sub->whereColumn('booking_end_date', '>', 'booking_date')
+                              ->orWhere(function ($timeQ) use ($startTimeDb, $endTimeDb) {
+                                  $timeQ->where('jam_mulai', '<', $endTimeDb)
+                                        ->where('jam_selesai', '>', $startTimeDb);
+                              });
+                      });
                 })
                 ->with(['bookingDetail', 'client'])
                 ->first();
@@ -344,7 +372,8 @@ class AvailabilityController extends Controller
                 $conflict = Contract::where('id_photographer', $photographer->id)
                     ->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
                     ->whereHas('bookingDetail', function ($q) use ($curDate) {
-                        $q->where('booking_date', $curDate);
+                        $q->whereDate('booking_date', '<=', $curDate)
+                          ->whereRaw('COALESCE(booking_end_date, booking_date) >= ?', [$curDate]);
                     })
                     ->with(['bookingDetail', 'client'])
                     ->first();

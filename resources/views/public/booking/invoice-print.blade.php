@@ -137,11 +137,15 @@
                 </div>
                 <div>
                     <span class="text-gray-400 block text-[10px]">Tanggal Sesi:</span>
-                    <strong class="font-bold text-gray-900">{{ $contract->bookingDetail && $contract->bookingDetail->booking_date ? date('d F Y', strtotime($contract->bookingDetail->booking_date)) : '-' }}</strong>
+                    <strong class="font-bold text-gray-900">{{ $contract->bookingDetail ? $contract->bookingDetail->date_range_label : '-' }}</strong>
                 </div>
                 <div>
                     <span class="text-gray-400 block text-[10px]">Waktu Pemotretan:</span>
-                    <strong class="font-bold text-gray-900">{{ $contract->bookingDetail && $contract->bookingDetail->jam_mulai ? ($contract->bookingDetail->jam_mulai . ' WIB') : '-' }}</strong>
+                    @php
+                        $prtStart = $contract->bookingDetail?->jam_mulai ? substr($contract->bookingDetail->jam_mulai, 0, 5) : null;
+                        $prtEnd = $contract->bookingDetail?->jam_selesai ? substr($contract->bookingDetail->jam_selesai, 0, 5) : null;
+                    @endphp
+                    <strong class="font-bold text-gray-900">{{ $prtStart ? ($prtEnd ? "{$prtStart} - {$prtEnd} WIB" : "{$prtStart} WIB") . ' (' . ($contract->bookingDetail->effective_duration_hours ?? 1) . ' Jam)' : '-' }}</strong>
                 </div>
                 <div>
                     <span class="text-gray-400 block text-[10px]">Lokasi Acara:</span>

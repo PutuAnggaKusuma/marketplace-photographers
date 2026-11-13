@@ -19,7 +19,9 @@ class ChatCustomOffer extends Model
         'judul_penawaran',
         'deskripsi',
         'booking_date',
+        'booking_end_date',
         'booking_time',
+        'jam_selesai',
         'durasi_jam',
         'lokasi',
         'harga',
@@ -29,9 +31,32 @@ class ChatCustomOffer extends Model
 
     protected $casts = [
         'booking_date' => 'date',
+        'booking_end_date' => 'date',
         'harga' => 'decimal:2',
         'durasi_jam' => 'integer',
     ];
+
+    public function getEffectiveEndDateAttribute()
+    {
+        return $this->booking_end_date ?: $this->booking_date;
+    }
+
+    public function getIsMultiDayAttribute(): bool
+    {
+        if (!$this->booking_date || !$this->booking_end_date) {
+            return false;
+        }
+        return $this->booking_end_date->gt($this->booking_date);
+    }
+
+    public function getDayCountAttribute(): int
+    {
+        if (!$this->booking_date) {
+            return 1;
+        }
+        $end = $this->booking_end_date ?: $this->booking_date;
+        return max(1, (int) $this->booking_date->diffInDays($end) + 1);
+    }
 
     public function chatBooking()
     {

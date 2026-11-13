@@ -818,11 +818,15 @@
 
 
 
-                                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $detail && $detail->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d F Y') : '-' }}</div>
+                                            <div class="font-medium text-gray-700 dark:text-gray-300">{{ $detail ? $detail->date_range_label : '-' }}</div>
 
 
 
-                                            <div>{{ $detail && ($detail->jam_mulai || $detail->jam_selesai) ? $detail->jam_mulai . ' - ' . $detail->jam_selesai . ' WITA' : '-' }}</div>
+                                            @php
+                                                $pStart = $detail?->jam_mulai ? substr($detail->jam_mulai, 0, 5) : null;
+                                                $pEnd = $detail?->jam_selesai ? substr($detail->jam_selesai, 0, 5) : null;
+                                            @endphp
+                                            <div>{{ $pStart ? ($pEnd ? "{$pStart} - {$pEnd} WIB" : "{$pStart} WIB") . ' (' . ($detail->effective_duration_hours ?? 1) . ' Jam)' : '-' }}</div>
 
 
 
@@ -2061,21 +2065,15 @@
 
                             openTimeDropdown: false,
 
-                            selectedTime: '16:00',
+                            selectedTime: '09:00',
 
-                            times: {
+                            times: Array.from({ length: 24 }, (_, h) => {
 
-                                '08:00': '08:00 WITA / WIB (Pagi)',
+                                const hh = String(h).padStart(2, '0') + ':00';
 
-                                '10:00': '10:00 WITA / WIB (Pagi)',
+                                return { val: hh, label: hh + ' WIB' };
 
-                                '14:00': '14:00 WITA / WIB (Siang)',
-
-                                '16:00': '16:00 WITA / WIB (Sore)',
-
-                                '19:00': '19:00 WITA / WIB (Malam)'
-
-                            }
+                            })
 
                         }">
 
@@ -2109,7 +2107,7 @@
 
 
 
-                                    <span x-text="times[selectedTime] || 'Pilih Jam Mulai'"></span>
+                                    <span x-text="selectedTime ? (selectedTime + ' WIB') : 'Pilih Jam Mulai'"></span>
 
 
 
@@ -2135,25 +2133,25 @@
 
                                      x-transition
 
-                                     class="absolute z-50 top-full mt-1.5 left-0 w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
+                                     class="absolute z-50 top-full mt-1.5 left-0 w-full max-h-52 overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5"
 
                                      style="display: none;">
 
 
 
-                                    <template x-for="(label, val) in times" :key="val">
+                                    <template x-for="item in times" :key="item.val">
 
 
 
                                         <button type="button"
 
-                                                @click="selectedTime = val; openTimeDropdown = false"
+                                                @click="selectedTime = item.val; openTimeDropdown = false"
 
                                                 class="w-full text-left px-3 py-2 text-xs font-bold rounded-lg text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
 
-                                                :class="selectedTime === val ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
+                                                :class="selectedTime === item.val ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
 
-                                                x-text="label">
+                                                x-text="item.label">
 
 
 

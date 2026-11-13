@@ -373,12 +373,12 @@
                                                 <div>
                                                     <span class="text-[9px] uppercase tracking-wider opacity-70 block font-semibold">Jadwal Sesi</span>
                                                     <span class="font-bold block truncate" x-text="m.custom_offer.booking_date"></span>
-                                                    <span class="text-[10px] block opacity-80" x-text="m.custom_offer.booking_time"></span>
+                                                    <span class="text-[10px] block opacity-80" x-text="m.custom_offer.booking_time_range || m.custom_offer.booking_time"></span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block font-semibold">Durasi & Lokasi</span>
-                                                    <span class="font-bold block truncate" x-text="m.custom_offer.durasi_jam + ' Jam'"></span>
-                                                    <span class="text-[10px] block truncate opacity-80" x-text="m.custom_offer.lokasi"></span>
+                                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block font-semibold">Lokasi</span>
+                                                    <span class="font-bold block truncate" x-text="m.custom_offer.lokasi"></span>
+                                                    <span class="text-[10px] block opacity-80" x-text="'Total ' + m.custom_offer.durasi_jam + ' Jam'"></span>
                                                 </div>
                                             </div>
 
@@ -703,22 +703,37 @@
                             <p x-show="offerTouched.durasi_jam && offerErrors.durasi_jam" x-text="offerErrors.durasi_jam" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
-                        <!-- Tanggal Sesi -->
+                        <!-- Tanggal Mulai & Tanggal Selesai (Multi-Hari Berurutan) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                Tanggal Sesi <span class="text-rose-500">*</span>
+                                Tanggal Mulai <span class="text-rose-500">*</span>
                             </label>
                             <input type="date"
                                    x-ref="offerDate"
                                    x-model="offerForm.booking_date"
-                                   @input="offerTouched.booking_date = true; validateOfferField('booking_date')"
+                                   @change="if (!offerForm.booking_end_date || offerForm.booking_end_date < offerForm.booking_date) offerForm.booking_end_date = offerForm.booking_date; syncOfferDuration(); offerTouched.booking_date = true; validateOfferField('booking_date'); validateOfferField('booking_end_date')"
                                    @blur="offerTouched.booking_date = true; validateOfferField('booking_date')"
                                    :class="offerTouched.booking_date && offerErrors.booking_date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                                    class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                             <p x-show="offerTouched.booking_date && offerErrors.booking_date" x-text="offerErrors.booking_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
 
-                        <!-- Jam Mulai Sesi -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                Tanggal Selesai
+                            </label>
+                            <input type="date"
+                                   x-ref="offerEndDate"
+                                   x-model="offerForm.booking_end_date"
+                                   :min="offerForm.booking_date"
+                                   @change="syncOfferDuration(); offerTouched.booking_end_date = true; validateOfferField('booking_end_date')"
+                                   @blur="offerTouched.booking_end_date = true; validateOfferField('booking_end_date')"
+                                   :class="offerTouched.booking_end_date && offerErrors.booking_end_date ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
+                            <p x-show="offerTouched.booking_end_date && offerErrors.booking_end_date" x-text="offerErrors.booking_end_date" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        </div>
+
+                        <!-- Jam Mulai & Jam Selesai (Bebas Jam Operasional) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
                                 Jam Mulai <span class="text-rose-500">*</span>
@@ -727,13 +742,32 @@
                                 model="offerForm.booking_time"
                                 trigger-ref="offerTime"
                                 error="offerTouched.booking_time && offerErrors.booking_time"
-                                on-select="offerTouched.booking_time = true; validateOfferField('booking_time')"
-                                align="right"
+                                on-select="syncOfferDuration(); offerTouched.booking_time = true; validateOfferField('booking_time'); validateOfferField('jam_selesai')"
+                                align="left"
                                 trigger-class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
                             />
                             <p x-show="offerTouched.booking_time && offerErrors.booking_time" x-text="offerErrors.booking_time" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                         </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                Jam Selesai <span class="text-rose-500">*</span>
+                            </label>
+                            <x-time-dropdown
+                                model="offerForm.jam_selesai"
+                                trigger-ref="offerEndTime"
+                                error="offerTouched.jam_selesai && offerErrors.jam_selesai"
+                                on-select="syncOfferDuration(); offerTouched.jam_selesai = true; validateOfferField('jam_selesai')"
+                                align="right"
+                                trigger-class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs flex items-center justify-between gap-2 outline-none transition cursor-pointer"
+                            />
+                            <p x-show="offerTouched.jam_selesai && offerErrors.jam_selesai" x-text="offerErrors.jam_selesai" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                        </div>
                     </div>
+
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 -mt-1">
+                        Rentang multi-hari otomatis menutup seluruh tanggal berurutan. Jam mulai dan selesai bebas melewati jam tutup reguler selama tidak bentrok pesanan aktif.
+                    </p>
 
                     <!-- Lokasi Pemotretan -->
                     <div>
@@ -745,7 +779,7 @@
                                x-model="offerForm.lokasi"
                                @input="offerTouched.lokasi = true; validateOfferField('lokasi')"
                                @blur="offerTouched.lokasi = true; validateOfferField('lokasi')"
-                               placeholder="Contoh: Pantai Melasti & Tebing Karang Boma, Uluwatu"
+                               placeholder="Contoh: Pantai Melasti, Tebing Karang Boma, Uluwatu"
                                :class="offerTouched.lokasi && offerErrors.lokasi ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
                                class="w-full px-3.5 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:ring-2 outline-none transition">
                         <p x-show="offerTouched.lokasi && offerErrors.lokasi" x-text="offerErrors.lokasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
@@ -754,7 +788,7 @@
                     <!-- Deskripsi Rincian -->
                     <div>
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
-                            Rincian Layanan & Catatan Khusus <span class="text-rose-500">*</span>
+                            Rincian Layanan <span class="text-rose-500">*</span>
                         </label>
                         <textarea x-ref="offerDeskripsi"
                                   x-model="offerForm.deskripsi"
@@ -940,7 +974,9 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
         offerForm: {
             judul_penawaran: '',
             booking_date: new Date().toISOString().split('T')[0],
+            booking_end_date: new Date().toISOString().split('T')[0],
             booking_time: '09:00',
+            jam_selesai: '12:00',
             durasi_jam: 3,
             lokasi: '',
             harga: '',
@@ -951,7 +987,9 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             harga: false,
             durasi_jam: false,
             booking_date: false,
+            booking_end_date: false,
             booking_time: false,
+            jam_selesai: false,
             lokasi: false,
             deskripsi: false
         },
@@ -960,7 +998,9 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             harga: '',
             durasi_jam: '',
             booking_date: '',
+            booking_end_date: '',
             booking_time: '',
+            jam_selesai: '',
             lokasi: '',
             deskripsi: ''
         },
@@ -1552,6 +1592,21 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             return box.scrollHeight - box.scrollTop - box.clientHeight < 100;
         },
 
+        syncOfferDuration() {
+            const f = this.offerForm;
+            if (!f.booking_time || !f.jam_selesai || !f.booking_date) return;
+            const [sh, sm] = f.booking_time.split(':').map(Number);
+            const [eh, em] = f.jam_selesai.split(':').map(Number);
+            const sMin = (sh * 60) + (sm || 0);
+            const eMin = (eh * 60) + (em || 0);
+            if (isNaN(sMin) || isNaN(eMin) || eMin <= sMin) return;
+            const dailyHrs = Math.max(1, Math.ceil((eMin - sMin) / 60));
+            const startD = new Date(f.booking_date + 'T00:00:00');
+            const endD = new Date((f.booking_end_date || f.booking_date) + 'T00:00:00');
+            const dayDiff = Math.max(1, Math.round((endD - startD) / 86400000) + 1);
+            f.durasi_jam = dailyHrs * dayDiff;
+        },
+
         validateOfferField(field) {
             const f = this.offerForm;
             if (field === 'judul_penawaran') {
@@ -1562,25 +1617,39 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 this.offerErrors.harga = (f.harga === '' || f.harga === null) ? 'Total biaya penawaran wajib diisi.' : (isNaN(n) || n < 50000 ? 'Total biaya penawaran minimal Rp 50.000.' : '');
             } else if (field === 'durasi_jam') {
                 const n = Number(f.durasi_jam);
-                this.offerErrors.durasi_jam = (f.durasi_jam === '' || f.durasi_jam === null) ? 'Durasi sesi wajib diisi.' : (!Number.isInteger(n) || n < 1 || n > 48 ? 'Durasi sesi harus antara 1 hingga 48 jam.' : '');
+                this.offerErrors.durasi_jam = (f.durasi_jam === '' || f.durasi_jam === null) ? 'Durasi sesi wajib diisi.' : (!Number.isInteger(n) || n < 1 || n > 720 ? 'Durasi sesi harus antara 1 hingga 720 jam.' : '');
             } else if (field === 'booking_date') {
                 const today = new Date().toISOString().split('T')[0];
-                this.offerErrors.booking_date = !f.booking_date ? 'Tanggal sesi wajib diisi.' : (f.booking_date < today ? 'Tanggal sesi minimal hari ini atau mendatang.' : '');
+                this.offerErrors.booking_date = !f.booking_date ? 'Tanggal mulai wajib diisi.' : (f.booking_date < today ? 'Tanggal mulai minimal hari ini atau mendatang.' : '');
+            } else if (field === 'booking_end_date') {
+                this.offerErrors.booking_end_date = (f.booking_end_date && f.booking_date && f.booking_end_date < f.booking_date)
+                    ? 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.' : '';
             } else if (field === 'booking_time') {
                 this.offerErrors.booking_time = !f.booking_time ? 'Jam mulai wajib ditentukan.' : '';
+            } else if (field === 'jam_selesai') {
+                if (!f.jam_selesai) {
+                    this.offerErrors.jam_selesai = 'Jam selesai wajib ditentukan.';
+                } else if (f.booking_time && f.jam_selesai <= f.booking_time) {
+                    this.offerErrors.jam_selesai = 'Jam selesai harus lebih akhir daripada jam mulai.';
+                } else {
+                    this.offerErrors.jam_selesai = '';
+                }
             } else if (field === 'lokasi') {
                 this.offerErrors.lokasi = !(f.lokasi || '').trim() ? 'Lokasi pemotretan wajib diisi.' : '';
             } else if (field === 'deskripsi') {
-                this.offerErrors.deskripsi = !(f.deskripsi || '').trim() ? 'Rincian layanan dan catatan wajib diisi.' : '';
+                this.offerErrors.deskripsi = !(f.deskripsi || '').trim() ? 'Rincian layanan wajib diisi.' : '';
             }
         },
 
         closeOfferModal() {
             this.openOfferModal = false;
+            const todayStr = new Date().toISOString().split('T')[0];
             this.offerForm = {
                 judul_penawaran: '',
-                booking_date: new Date().toISOString().split('T')[0],
+                booking_date: todayStr,
+                booking_end_date: todayStr,
                 booking_time: '09:00',
+                jam_selesai: '12:00',
                 durasi_jam: 3,
                 lokasi: '',
                 harga: '',
@@ -1591,7 +1660,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
         },
 
         submitCustomOffer() {
-            const fields = ['judul_penawaran', 'harga', 'durasi_jam', 'booking_date', 'booking_time', 'lokasi', 'deskripsi'];
+            const fields = ['judul_penawaran', 'harga', 'durasi_jam', 'booking_date', 'booking_end_date', 'booking_time', 'jam_selesai', 'lokasi', 'deskripsi'];
             fields.forEach(k => {
                 this.offerTouched[k] = true;
                 this.validateOfferField(k);
@@ -1601,7 +1670,9 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 harga: this.$refs.offerHarga,
                 durasi_jam: this.$refs.offerDurasi,
                 booking_date: this.$refs.offerDate,
+                booking_end_date: this.$refs.offerEndDate,
                 booking_time: this.$refs.offerTime,
+                jam_selesai: this.$refs.offerEndTime,
                 lokasi: this.$refs.offerLokasi,
                 deskripsi: this.$refs.offerDeskripsi
             };

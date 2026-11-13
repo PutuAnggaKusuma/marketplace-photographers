@@ -573,7 +573,7 @@
                                     @endif
                                 </div>
                                 <span class="text-sm font-black text-gray-900 dark:text-white shrink-0">
-                                    Rp {{ number_format((int) $service->tarif_harga, 0, ',', '.') }}
+                                    Rp {{ number_format((int) $service->tarif_harga, 0, ',', '.') }} / jam
                                 </span>
                             </div>
 

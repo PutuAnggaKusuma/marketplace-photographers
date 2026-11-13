@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Contract;
 
 use App\Models\RoleClient;
-
+use App\Services\BookingScheduleService;
 use Illuminate\Http\Request;
 
 
@@ -877,115 +877,10 @@ class ClientBookingController extends Controller
 
         $newTime = substr($request->input('reschedule_time'), 0, 5);
 
-        $photographerId = $contract->id_photographer;
-
-
-
-        // Validasi 0: Jam Kerja Mingguan Fotografer (Weekly Recurring Schedule)
-
-        $dow = (int) \Carbon\Carbon::parse($newDate)->dayOfWeekIso;
-
-        $workingHour = \App\Models\PhotographerWorkingHour::where('id_photographer', $photographerId)
-
-            ->where('day_of_week', $dow)
-
-            ->first();
-
-
-
-        if ($workingHour) {
-
-            if (!$workingHour->is_open) {
-
-                return redirect()->back()->with('error', "Fotografer tidak beroperasi pada hari {$workingHour->day_name}. Silakan pilih hari operasional lainnya.");
-
-            }
-
-            if (!$workingHour->is_24_hours) {
-
-                $buka = substr($workingHour->jam_buka, 0, 5);
-
-                $tutup = substr($workingHour->jam_tutup, 0, 5);
-
-                if ($newTime < $buka || $newTime > $tutup) {
-
-                    return redirect()->back()->with('error', "Fotografer beroperasi dari jam {$buka} s/d {$tutup} WIB pada hari {$workingHour->day_name}. Jam {$newTime} WIB berada di luar jam operasional.");
-
-                }
-
-            }
-
+        $rescheduleCheck = BookingScheduleService::validateReschedule($contract, $newDate, $newTime);
+        if ($rescheduleCheck['error'] !== null) {
+            return redirect()->back()->with('error', $rescheduleCheck['error']);
         }
-
-
-
-        $newStart = substr($newTime, 0, 5);
-
-        $newEnd = date('H:i', strtotime($newStart . ' +4 hours'));
-
-
-
-        // Validasi 1: Apakah tanggal/jam diblokir fotografer (interval overlap check)
-
-        $blockedAvailabilities = \App\Models\PhotographerAvailability::where('id_photographer', $photographerId)
-
-            ->where('tanggal', $newDate)
-
-            ->get();
-
-
-
-        foreach ($blockedAvailabilities as $blk) {
-
-            if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai == '00:00:00' && $blk->jam_selesai == '23:59:59')) {
-
-                return redirect()->back()->with('error', 'Fotografer sedang libur penuh pada tanggal ' . \Carbon\Carbon::parse($newDate)->translatedFormat('d F Y') . '. Silakan pilih tanggal lain.');
-
-            }
-
-            $blkStart = substr($blk->jam_mulai, 0, 5);
-
-            $blkEnd = substr($blk->jam_selesai, 0, 5);
-
-            if ($newStart < $blkEnd && $newEnd > $blkStart) {
-
-                return redirect()->back()->with('error', 'Sesi jam ' . $newStart . ' - ' . $newEnd . ' WIB pada tanggal tersebut berbenturan dengan penutupan jadwal fotografer (' . ($blk->keterangan ?: 'Tutup Sesi: ' . $blkStart . '-' . $blkEnd) . '). Silakan pilih jam lain.');
-
-            }
-
-        }
-
-
-
-        // Validasi 2: Apakah fotografer sudah ada pesanan lain pada rentang jam tersebut (interval overlap check)
-
-        $existingBookings = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographerId, $contract) {
-
-            $q->where('id_photographer', $photographerId)
-
-              ->where('id', '!=', $contract->id)
-
-              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
-
-        })->where('booking_date', $newDate)->get();
-
-
-
-        foreach ($existingBookings as $eb) {
-
-            $ebStart = substr($eb->jam_mulai ?: '08:00', 0, 5);
-
-            $ebEnd = $eb->jam_selesai ? substr($eb->jam_selesai, 0, 5) : date('H:i', strtotime($ebStart . ' +' . ((int) $eb->durasi ?: 4) . ' hours'));
-
-            if ($newStart < $ebEnd && $newEnd > $ebStart) {
-
-                return redirect()->back()->with('error', 'Jadwal sesi jam ' . $newStart . ' - ' . $newEnd . ' WIB berbenturan dengan pesanan klien lain (' . $ebStart . ' - ' . $ebEnd . ' WIB). Silakan pilih jam lain.');
-
-            }
-
-        }
-
-
 
         $contract->bookingDetail->update([
 
@@ -1098,58 +993,20 @@ class ClientBookingController extends Controller
         if ($action === 'accept') {
 
             $newDate = $booking->reschedule_date;
+            $newTime = substr((string) $booking->reschedule_time, 0, 5);
 
-            $newTime = $booking->reschedule_time;
-
-            $newStart = substr($newTime, 0, 5);
-
-            $newEnd = date('H:i', strtotime($newStart . ' +4 hours'));
-
-
-
-            // Validasi benturan sebelum menyetujui
-
-            $conflict = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($contract) {
-
-                $q->where('id_photographer', $contract->id_photographer)
-
-                  ->where('id', '!=', $contract->id)
-
-                  ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
-
-            })->where('booking_date', $newDate)->get()->first(function ($eb) use ($newStart, $newEnd) {
-
-                $ebStart = substr($eb->jam_mulai ?: '08:00', 0, 5);
-
-                $ebEnd = $eb->jam_selesai ? substr($eb->jam_selesai, 0, 5) : date('H:i', strtotime($ebStart . ' +' . ((int) $eb->durasi ?: 4) . ' hours'));
-
-                return $newStart < $ebEnd && $newEnd > $ebStart;
-
-            });
-
-
-
-            if ($conflict) {
-
-                return redirect()->back()->with('error', 'Jadwal yang diajukan telah terisi oleh pesanan klien lain. Silakan tolak atau ajukan waktu lain.');
-
+            $rescheduleCheck = BookingScheduleService::validateReschedule($contract, $newDate, $newTime);
+            if ($rescheduleCheck['error'] !== null) {
+                return redirect()->back()->with('error', $rescheduleCheck['error']);
             }
 
-
-
             $booking->update([
-
                 'booking_date' => $newDate,
-
-                'jam_mulai' => $newTime,
-
-                'jam_selesai' => date('H:i', strtotime($newTime . ' +4 hours')),
-
+                'booking_end_date' => $rescheduleCheck['new_end_date'],
+                'jam_mulai' => $rescheduleCheck['new_start_time'],
+                'jam_selesai' => $rescheduleCheck['new_end_time'],
                 'reschedule_status' => 'accepted',
-
             ]);
-
-
 
             if ($contract->photographer && $contract->photographer->id_user) {
 
