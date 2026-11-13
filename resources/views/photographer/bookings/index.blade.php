@@ -528,11 +528,11 @@
 
 
 
-                        'confirmed' => 'Jadwal Dikonfirmasi',
+                        'confirmed' => 'Dikonfirmasi',
 
 
 
-                        'completed' => 'Selesai & Dikirim'
+                        'completed' => 'Selesai'
 
 
 
@@ -692,11 +692,11 @@
 
 
 
-                            <th class="py-3.5 px-4 sm:px-6 w-3/12">ID Kontrak & Klien</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">ID Kontrak dan Klien</th>
 
 
 
-                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Layanan & Jadwal Sesi</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-3/12">Layanan dan Jadwal</th>
 
 
 
@@ -1067,225 +1067,135 @@
 
 
 
-                                <!-- Aksi (Pure Text Buttons) -->
-
-
-
+                                <!-- Aksi (Pure Text Buttons per Rule #10, #69 & #80) -->
                                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    <div class="flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
 
-
-
-                                    <div class="flex flex-col items-center gap-1.5">
-
-
-
+                                        {{-- 1. TOMBOL UTAMA (PRIMARY ACTION) --}}
                                         @if($detail && $detail->status_booking === 'pending')
-
-
-
-                                            <form action="{{ route('photographer.bookings.status', $c->id) }}" method="POST" class="w-full">
-
-
-
+                                            <form action="{{ route('photographer.bookings.status', $c->id) }}" method="POST" class="inline">
                                                 @csrf
-
-
-
                                                 <input type="hidden" name="status" value="confirmed">
-
-
-
-                                                <button type="submit" class="w-full px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-bold text-xs transition">
-
-
-
+                                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
                                                     Konfirmasi
-
-
-
                                                 </button>
-
-
-
                                             </form>
-
-
-
-                                            <button type="button" 
-
-
-
-                                                    @click="cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
-
-
-
-                                                    class="w-full px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition text-center cursor-pointer">
-
-
-
-                                                Tolak Sesi
-
-
-
-                                            </button>
-
-
-
                                         @elseif($detail && $detail->status_booking === 'confirmed')
-
-
-
-                                            <button type="button" @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" class="w-full px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 font-bold text-xs transition">
-
-
-
-                                                Simpan Data
-
-
-
-                                            </button>
-
-
-
                                             <button type="button" 
-
-
-
-                                                    @click="cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
-
-
-
-                                                    class="w-full px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition text-center cursor-pointer">
-
-
-
-                                                Batalkan Sesi
-
-
-
+                                                    @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
+                                                    class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
+                                                Upload Hasil Foto
                                             </button>
-
-
-
                                         @elseif($c->status_contract === 'completed' || ($detail && $detail->status_booking === 'completed'))
-
-
-
-                                            @if($detail && $detail->hasil_foto_url)
-
-
-
-                                                <a href="{{ $detail->hasil_foto_url }}" target="_blank" class="w-full px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 font-bold text-xs transition text-center block">
-
-
-
-                                                    Buka Link Drive
-
-
-
-                                                </a>
-
-
-
-                                                <button type="button" @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" class="w-full px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition text-center cursor-pointer">
-
-
-
-                                                    Perbarui Link
-
-                                                </button>
-
-                                            @endif
-
-
-
-                                            @if($c->photographerClientReview)
-
+                                            @if(!$c->photographerClientReview)
                                                 <button type="button" 
-
-                                                        @click="openRateModal({{ $c->id }}, '{{ addslashes($client->nama ?? 'Klien') }}', {{ $c->photographerClientReview->rating }}, '{{ addslashes($c->photographerClientReview->ulasan ?? '') }}', {{ $c->photographerClientReview->ketepatan_waktu }}, {{ $c->photographerClientReview->komunikasi }}, {{ $c->photographerClientReview->kerjasama }})" 
-
-                                                        class="w-full px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition text-center cursor-pointer flex items-center justify-center gap-1">
-
-                                                    <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-400 shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-
-                                                    <span>Ubah Nilai Klien ({{ $c->photographerClientReview->rating }}/5)</span>
-
-                                                </button>
-
-                                            @else
-
-                                                <button type="button" 
-
                                                         @click="openRateModal({{ $c->id }}, '{{ addslashes($client->nama ?? 'Klien') }}', 5, '', 5, 5, 5)" 
+                                                        class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
+                                                    Nilai Klien
+                                                </button>
+                                            @elseif($detail && $detail->hasil_foto_url)
+                                                <a href="{{ $detail->hasil_foto_url }}" target="_blank" 
+                                                   class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
+                                                    Buka Link Drive
+                                                </a>
+                                            @else
+                                                <button type="button" 
+                                                        @click="openRateModal({{ $c->id }}, '{{ addslashes($client->nama ?? 'Klien') }}', {{ $c->photographerClientReview->rating }}, '{{ addslashes($c->photographerClientReview->ulasan ?? '') }}', {{ $c->photographerClientReview->ketepatan_waktu }}, {{ $c->photographerClientReview->komunikasi }}, {{ $c->photographerClientReview->kerjasama }})" 
+                                                        class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
+                                                    Ubah Ulasan
+                                                </button>
+                                            @endif
+                                        @else
+                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                               class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
+                                                Chat Klien
+                                            </a>
+                                        @endif
 
-                                                        class="w-full px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition text-center cursor-pointer flex items-center justify-center gap-1">
-
-                                                    <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
-
-                                                    <span>Beri Nilai Klien</span>
-
+                                        {{-- 2. KEBAB MENU UNTUK AKSI SEKUNDER (>2 AKSI SESUAI RULE #69) --}}
+                                        @if($c->status_contract !== 'cancelled')
+                                            <div class="relative inline-block text-left">
+                                                <button type="button" 
+                                                        @click="menuOpen = !menuOpen" 
+                                                        class="w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition shadow-2xs cursor-pointer">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                        <circle cx="12" cy="5" r="1.75" />
+                                                        <circle cx="12" cy="12" r="1.75" />
+                                                        <circle cx="12" cy="19" r="1.75" />
+                                                    </svg>
                                                 </button>
 
-                                            @endif
+                                                <div x-show="menuOpen" 
+                                                     @click.away="menuOpen = false" 
+                                                     x-transition:enter="transition ease-out duration-100" 
+                                                     x-transition:enter-start="transform opacity-0 scale-95" 
+                                                     x-transition:enter-end="transform opacity-100 scale-100" 
+                                                     x-transition:leave="transition ease-in duration-75" 
+                                                     x-transition:leave-start="transform opacity-100 scale-100" 
+                                                     x-transition:leave-end="transform opacity-0 scale-95" 
+                                                     class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50 text-left" 
+                                                     style="display: none;">
 
+                                                    <!-- Chat Klien -->
+                                                    <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                                       class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
+                                                        Chat Klien
+                                                    </a>
+
+                                                    <!-- Ajukan Jadwal Ulang -->
+                                                    @if($detail && !in_array($c->status_contract, ['completed', 'cancelled']) && $detail->reschedule_status !== 'pending')
+                                                        <button type="button" 
+                                                                @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; rescheduleClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; rescheduleModal = true" 
+                                                                class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                            Ajukan Jadwal Ulang
+                                                        </button>
+                                                    @endif
+
+                                                    <!-- Menu Tambahan Status Completed -->
+                                                    @if($c->status_contract === 'completed' || ($detail && $detail->status_booking === 'completed'))
+                                                        @if($detail && $detail->hasil_foto_url)
+                                                            @if(!$c->photographerClientReview)
+                                                                <a href="{{ $detail->hasil_foto_url }}" target="_blank" 
+                                                                   class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
+                                                                    Buka Link Drive
+                                                                </a>
+                                                            @endif
+                                                            <button type="button" 
+                                                                    @click="menuOpen = false; selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
+                                                                    class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                                Perbarui Link
+                                                            </button>
+                                                        @endif
+
+                                                        @if($c->photographerClientReview)
+                                                            <button type="button" 
+                                                                    @click="menuOpen = false; openRateModal({{ $c->id }}, '{{ addslashes($client->nama ?? 'Klien') }}', {{ $c->photographerClientReview->rating }}, '{{ addslashes($c->photographerClientReview->ulasan ?? '') }}', {{ $c->photographerClientReview->ketepatan_waktu }}, {{ $c->photographerClientReview->komunikasi }}, {{ $c->photographerClientReview->kerjasama }})" 
+                                                                    class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                                Ubah Ulasan
+                                                            </button>
+                                                        @endif
+                                                    @endif
+
+                                                    <!-- Aksi Destruktif -->
+                                                    @if($detail && $detail->status_booking === 'pending')
+                                                        <button type="button" 
+                                                                @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
+                                                                class="w-full px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                            Tolak Sesi
+                                                        </button>
+                                                    @elseif($detail && $detail->status_booking === 'confirmed')
+                                                        <button type="button" 
+                                                                @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
+                                                                class="w-full px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                            Batalkan Sesi
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         @endif
 
-
-
-
-
-
-
-                                        @if($detail && !in_array($c->status_contract, ['completed', 'cancelled']) && $detail->reschedule_status !== 'pending')
-
-
-
-                                            <button type="button" 
-
-
-
-                                                    @click="rescheduleContractId = {{ $c->id }}; rescheduleClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; rescheduleModal = true" 
-
-
-
-                                                    class="w-full px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition text-center cursor-pointer">
-
-
-
-                                                Ajukan Jadwal Ulang
-
-
-
-                                            </button>
-
-
-
-                                        @endif
-
-
-
-
-
-
-
-                                        <a href="{{ route('photographer.chat.client', $c->id_client) }}" class="w-full px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition text-center">
-
-
-
-                                             Chat Klien
-
-
-
-                                         </a>
-
-
-
-                                     </div>
-
-
-
-                                 </td>
+                                    </div>
+                                </td>
 
 
 

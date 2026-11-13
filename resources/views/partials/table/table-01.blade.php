@@ -32,17 +32,17 @@
   <div class="w-full overflow-x-auto">
     <table class="min-w-full text-left">
       <thead>
-        <tr class="border-gray-100 border-y dark:border-gray-800 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/40">
-          <th class="py-3.5 px-3 sm:px-4">Invoice</th>
-          <th class="py-3.5 px-3 sm:px-4">Klien</th>
-          <th class="py-3.5 px-3 sm:px-4">Fotografer</th>
-          <th class="py-3.5 px-3 sm:px-4">Rincian Nominal</th>
-          <th class="py-3.5 px-3 sm:px-4">Status Pembayaran</th>
-          <th class="py-3.5 px-3 sm:px-4 text-center">Aksi</th>
+        <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <th class="py-3 px-3 sm:px-3.5">Invoice</th>
+          <th class="py-3 px-3 sm:px-3.5">Klien</th>
+          <th class="py-3 px-3 sm:px-3.5">Fotografer</th>
+          <th class="py-3 px-3 sm:px-3.5">Rincian Nominal</th>
+          <th class="py-3 px-3 sm:px-3.5">Status Pembayaran</th>
+          <th class="py-3 px-3 sm:px-3.5 text-center">Aksi</th>
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+      <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
         @forelse($contractsList as $item)
           @php
             $invoiceCode = $item->invoice_code;
@@ -53,27 +53,27 @@
           @endphp
           <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
             <!-- Invoice -->
-            <td class="py-3.5 px-3 sm:px-4 align-middle whitespace-nowrap">
+            <td class="py-3.5 px-3 sm:px-3.5 align-middle whitespace-nowrap">
               <div class="font-extrabold text-gray-900 dark:text-white">{{ $invoiceCode }}</div>
               <div class="text-xs text-gray-400 mt-0.5">{{ $item->created_at ? $item->created_at->format('d M Y, H:i') : '-' }}</div>
             </td>
 
             <!-- Klien -->
-            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <div class="font-bold text-gray-900 dark:text-white">{{ $item->client->nama ?? 'Klien' }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">{{ $item->client->user->email ?? '-' }}</div>
+            <td class="py-3.5 px-3 sm:px-3.5 align-middle">
+              <div class="font-bold text-gray-900 dark:text-white max-w-[130px] truncate">{{ $item->client->nama ?? 'Klien' }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 max-w-[130px] truncate">{{ $item->client->user->email ?? '-' }}</div>
             </td>
 
             <!-- Fotografer -->
-            <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-              <div class="font-bold text-gray-900 dark:text-white">{{ $item->photographer->nama ?? 'Fotografer' }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 max-w-[200px] truncate">
+            <td class="py-3.5 px-3 sm:px-3.5 align-middle">
+              <div class="font-bold text-gray-900 dark:text-white max-w-[140px] truncate">{{ $item->photographer->nama ?? 'Fotografer' }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 max-w-[140px] truncate">
                 {{ $serviceName }}
               </div>
             </td>
 
             <!-- Rincian Nominal -->
-            <td class="py-3.5 px-3 sm:px-4 space-y-0.5 whitespace-nowrap">
+            <td class="py-3.5 px-3 sm:px-3.5 space-y-0.5 align-middle whitespace-nowrap">
               <div class="font-extrabold text-gray-900 dark:text-white">Total: Rp {{ number_format($item->jumlah, 0, ',', '.') }}</div>
               <div class="text-xs text-gray-500">
                 Komisi Platform (10%): <span class="font-bold text-gray-700 dark:text-gray-300">Rp {{ number_format($feeAmount, 0, ',', '.') }}</span>
@@ -84,7 +84,7 @@
             </td>
 
             <!-- Status Pembayaran -->
-            <td class="py-3.5 px-3 sm:px-4 align-middle whitespace-nowrap">
+            <td class="py-3.5 px-3 sm:px-3.5 align-middle whitespace-nowrap">
               @if($item->status_payout === 'paid')
                 <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                   Sudah Ditransfer
@@ -115,10 +115,10 @@
               @endif
             </td>
 
-            <!-- Aksi -->
-            <td class="py-3.5 px-3 sm:px-4 align-middle text-center whitespace-nowrap">
+            <!-- Aksi (Soft Blue Sesuai Rule #80 & Tabel Monitoring) -->
+            <td class="py-3.5 px-3 sm:px-3.5 align-middle text-center whitespace-nowrap">
               <a href="{{ route('admin.transactions', ['search' => $invoiceCode]) }}" 
-                 class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition inline-block">
+                 class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block shadow-2xs">
                 Lihat
               </a>
             </td>

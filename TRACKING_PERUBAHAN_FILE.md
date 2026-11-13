@@ -20,6 +20,50 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-13 22:30 WITA] — Standardisasi Tabel Pratinjau Dashboard Admin & Fotografer serta Refaktor Kolom Aksi Tabel Bookings (Anti-AI Slop, Anti-Stacked Buttons, Pure Text)
+
+* **Modul / Fitur**:
+  - Dashboard Admin — Pratinjau Tabel Transaksi (`resources/views/partials/table/table-01.blade.php`).
+  - Dashboard Fotografer — Pratinjau Tabel Order Masuk Terkini (`resources/views/photographer/dashboard.blade.php`).
+  - Halaman Bookings Fotografer — Tabel Aktual Reservasi Masuk (`resources/views/photographer/bookings/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/partials/table/table-01.blade.php`
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Dashboard Admin Pratinjau (`table-01.blade.php`)**:
+    - **Before**: Tombol aksi `Lihat` menggunakan warna kuning amber (`bg-amber-50 text-amber-700`) bertentangan dengan tabel aktual Monitoring Transaksi (`bg-blue-50 text-blue-600`) dan terdapat scrollbar horizontal kaku akibat `whitespace-nowrap` pada nama klien dan fotografer.
+    - **After**: Tombol `Lihat` diseragamkan 100% menggunakan Soft Blue (`bg-blue-50 text-blue-600 border-blue-200/80 rounded-lg min-w-[60px] text-center`) sesuai **Rule #80** dan tabel aktual. Sel nama klien & fotografer diberikan `max-w-[130px]` / `max-w-[140px]` dan `truncate` sehingga scrollbar horizontal hilang dan tabel pas di kontainer 8-kolom.
+  * **Dashboard Fotografer Pratinjau (`photographer/dashboard.blade.php`)**:
+    - **Before**: Header kolom tabel bertuliskan `Klien & ID Kontrak` (melanggar **Rule #70** karena ada `&`), hanya memiliki 4 kolom (`Klien & ID Kontrak`, `Paket Layanan`, `Pendapatan Bersih`, `Status`), tidak sinkron dengan tabel aktual `/photographer/bookings`, dan TIDAK MEMILIKI kolom `Aksi`. Penanganan status hanya 3 kondisi (`completed`, `active`, dan fallback `Menunggu`).
+    - **After**: Kolom tabel pratinjau disinkronkan 100% dengan tabel aktual:
+      `ID Kontrak dan Klien` | `Layanan dan Jadwal` | `Nominal Kontrak` | `Status Order` | `Aksi`
+      Lengkap dengan tombol `Lihat` Soft Blue (`bg-blue-50 text-blue-600`) yang mengarahkan ke `route('photographer.bookings')`, serta dukungan status lengkap (`Dibatalkan`, `Selesai`, `Menunggu Konfirmasi Klien`, `Dikonfirmasi`, `Menunggu Pembayaran`, `Menunggu Konfirmasi`) dalam teks murni berwarna sesuai **Rule #14 & Rule #90**.
+  * **Tabel Aktual Bookings Fotografer (`photographer/bookings/index.blade.php`)**:
+    - **Before**: Header tabel menggunakan simbol `&` (`ID Kontrak & Klien` dan `Layanan & Jadwal Sesi`). Filter status memuat kata ganda AI-slop (`Selesai & Dikirim`, `Jadwal Dikonfirmasi`). Kolom `Aksi` menggunakan `<div class="flex flex-col items-center gap-1.5">` yang menumpuk 3 hingga 5 tombol secara vertikal ke bawah (pelanggaran fatal **Rule #69**), tombol ulasan memuat ikon SVG bintang (pelanggaran **Rule #10 & Rule #22**), dan tombol unggah foto menggunakan teks kabur `"Simpan Data"` (pelanggaran **Rule #51**).
+    - **After**:
+      1. Menghilangkan simbol `&` pada header tabel menjadi `ID Kontrak dan Klien` dan `Layanan dan Jadwal` sesuai **Rule #70**.
+      2. Merapikan filter status menjadi ringkas to-the-point: `Menunggu Konfirmasi`, `Dikonfirmasi`, `Selesai`.
+      3. Menerapkan arsitektur **Rule #69**: Maksimal 2 elemen inline horizontal (`flex items-center justify-center gap-1.5`):
+         - **1 Tombol Utama (Primary Action)**:
+           - Status `pending`: `Konfirmasi` (Soft Emerald).
+           - Status `confirmed`: `Upload Hasil Foto` (Soft Amber, menggantikan "Simpan Data").
+           - Status `completed`: `Nilai Klien` (Soft Amber, jika belum diulas) atau `Buka Link Drive` (Soft Blue, jika sudah diulas) atau `Ubah Ulasan`.
+           - Status `cancelled`: `Chat Klien` (Soft Gray).
+         - **1 Tombol Kebab Menu (`⋮`)**: Tombol tiga titik minimalis dengan Floating Dropdown Popover (`z-50`) untuk aksi sekunder (`Chat Klien`, `Ajukan Jadwal Ulang`, `Perbarui Link`) dan aksi destruktif (`Tolak Sesi` / `Batalkan Sesi` berteks rose).
+      4. Menghapus seluruh ikon SVG bintang dari tombol `Nilai Klien` dan `Ubah Ulasan` sehingga 100% berupa teks murni (*pure text*) sesuai **Rule #10**.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #10** (Pure Text Action Buttons), **Rule #14** (Pure Colored Text Status), **Rule #22** (No Icons in Table Actions), **Rule #51** (Anti-AI Slop Clean Copywriting), **Rule #68** (Table Data Standardization), **Rule #69** (Anti-Stacked Buttons & Kebab Menu Architecture), **Rule #70** (Anti-Ampersand Duplication & Clean Terms), **Rule #80** (Standard Table Action Button Colors: Soft Blue Lihat, Soft Amber Edit/Upload/Rate, Soft Rose Cancel/Delete).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Controller simulation rendering:
+    - `Photographer Dashboard`: **PASS** (113,123 bytes).
+    - `Photographer Bookings Index`: **PASS** (186,390 bytes).
+    - `Admin Table-01 Preview`: **PASS** (17,422 bytes).
+
+---
+
 ### [2026-11-13 22:04 WITA] — Penyeragaman Warna Teks Angka dan Tanda Kurung pada Status Chips Dashboard Admin & Fotografer
 
 * **Modul / Fitur**:

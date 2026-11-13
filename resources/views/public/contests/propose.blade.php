@@ -32,13 +32,6 @@
           Formulir Pengajuan Event Lomba Foto
 
         </h1>
-
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-
-          Daftarkan kompetisi fotografi Anda ke LensMatch. Seluruh pengajuan akan direview oleh tim Admin sebelum dipublikasikan.
-
-        </p>
-
       </div>
 
 

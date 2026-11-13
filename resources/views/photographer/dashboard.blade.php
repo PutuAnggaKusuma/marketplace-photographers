@@ -456,10 +456,11 @@
         <table class="min-w-full text-left">
           <thead>
             <tr class="border-gray-100 border-y dark:border-gray-800 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/40">
-              <th class="py-3 px-3 sm:px-4">Klien & ID Kontrak</th>
-              <th class="py-3 px-3 sm:px-4">Paket Layanan</th>
-              <th class="py-3 px-3 sm:px-4">Pendapatan Bersih</th>
-              <th class="py-3 px-3 sm:px-4 text-center">Status</th>
+              <th class="py-3 px-3 sm:px-4">ID Kontrak dan Klien</th>
+              <th class="py-3 px-3 sm:px-4">Layanan dan Jadwal</th>
+              <th class="py-3 px-3 sm:px-4">Nominal Kontrak</th>
+              <th class="py-3 px-3 sm:px-4 text-center">Status Order</th>
+              <th class="py-3 px-3 sm:px-4 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
@@ -471,29 +472,53 @@
               <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
                 <td class="py-3.5 px-3 sm:px-4">
                   <div class="space-y-0.5">
-                    <p class="font-extrabold text-gray-900 dark:text-white">{{ $client->nama ?? ($client->user->nama ?? 'Klien') }}</p>
-                    <span class="text-xs font-mono text-gray-400">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="text-xs font-mono font-bold text-gray-400 block">KTRK-{{ str_pad($b->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <h4 class="font-black text-gray-900 dark:text-white text-xs tracking-tight truncate max-w-[130px] sm:max-w-none">{{ $client->nama ?? ($client->user->nama ?? 'Klien') }}</h4>
                   </div>
                 </td>
-                <td class="py-3.5 px-3 sm:px-4 font-bold text-gray-800 dark:text-gray-200">
-                  {{ $detail->service->nama_layanan ?? 'Paket Kustom' }}
+                <td class="py-3.5 px-3 sm:px-4">
+                  <div class="space-y-0.5">
+                    <span class="font-bold text-gray-800 dark:text-gray-200 block truncate max-w-[140px] sm:max-w-none">{{ $detail->service->nama_layanan ?? 'Paket Kustom' }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">{{ $detail ? $detail->date_range_label : '-' }}</span>
+                  </div>
                 </td>
-                <td class="py-3.5 px-3 sm:px-4 font-black text-gray-900 dark:text-white">
-                  Rp {{ number_format($b->payout_amount ?: ($b->jumlah * 0.9), 0, ',', '.') }}
+                <td class="py-3.5 px-3 sm:px-4 whitespace-nowrap">
+                  <span class="text-xs font-black text-gray-900 dark:text-white block">
+                    Rp {{ number_format($b->jumlah, 0, ',', '.') }}
+                  </span>
+                  <span class="text-xs text-gray-400 block mt-0.5">
+                    Net: Rp {{ number_format($b->payout_amount ?: ($b->jumlah * 0.9), 0, ',', '.') }}
+                  </span>
                 </td>
                 <td class="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
-                  @if($b->status_contract === 'completed')
+                  @php
+                    $hasPhotos = !empty($detail?->hasil_foto_url);
+                    $isValidated = (bool) $b->is_validated_client;
+                  @endphp
+                  @if($b->status_contract === 'cancelled')
+                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">Dibatalkan</span>
+                  @elseif($b->status_contract === 'completed' && $isValidated)
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
-                  @elseif($b->status_contract === 'active')
+                  @elseif($hasPhotos && !$isValidated)
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Menunggu Konfirmasi Klien</span>
+                  @elseif($b->status_contract === 'active' || $detail?->status_booking === 'confirmed')
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Dikonfirmasi</span>
+                  @elseif($b->status_contract === 'pending_payment')
+                    <span class="text-xs font-bold text-amber-500 dark:text-amber-400">Menunggu Pembayaran</span>
                   @else
-                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Menunggu</span>
+                    <span class="text-xs font-bold text-amber-500 dark:text-amber-400">Menunggu Konfirmasi</span>
                   @endif
+                </td>
+                <td class="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
+                  <a href="{{ route('photographer.bookings') }}" 
+                     class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block shadow-2xs">
+                    Lihat
+                  </a>
                 </td>
               </tr>
             @empty
               <tr>
-                <td colspan="4" class="py-8 text-center text-gray-400 font-bold text-xs">
+                <td colspan="5" class="py-8 text-center text-gray-400 font-bold text-xs">
                   Belum ada order booking terbaru.
                 </td>
               </tr>
