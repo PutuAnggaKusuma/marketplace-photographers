@@ -47,71 +47,106 @@
             </a>
             
             <!-- Bookmark Un-Save Icon Button (Top Left) -->
-            <button type="button" 
-                    :disabled="removing"
-                    @click.prevent.stop="
-                      if (removing) return;
-                      window.dispatchEvent(new CustomEvent('open-confirm-modal', {
-                        detail: {
-                          title: 'Hapus dari Favorit?',
-                          message: 'Apakah Anda yakin ingin menghapus {{ addslashes($photographer->nama) }} dari daftar fotografer favorit?',
-                          buttonText: 'Ya, Hapus Favorit',
-                          iconType: 'warning',
-                          buttonClass: 'bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer',
-                          onConfirm: () => {
-                            removing = true;
-                            fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
-                              method: 'POST',
-                              headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                              }
-                            })
-                            .then(async res => {
-                              const data = await res.json().catch(() => ({}));
-                              if (!res.ok) throw new Error(data.message || 'Gagal memproses favorit.');
-                              return data;
-                            })
-                            .then(data => {
-                              if (data.success) {
-                                isFavorited = data.is_favorited;
+            <div class="absolute top-3 left-3 z-10" x-data="{
+              bubbleText: '',
+              bubbleVisible: false,
+              bubbleTimer: null,
+              showBubble(msg) {
+                this.bubbleText = msg;
+                this.bubbleVisible = true;
+                if (this.bubbleTimer) clearTimeout(this.bubbleTimer);
+                this.bubbleTimer = setTimeout(() => {
+                  this.bubbleVisible = false;
+                }, 2200);
+              }
+            }">
+              <!-- Text Bubble Notification (Anti-AI Slop, Auto-Hide after 2.2s) -->
+              <div x-show="bubbleVisible" 
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                   x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                   x-transition:leave="transition ease-in duration-150"
+                   x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                   x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                   style="display: none;"
+                   class="absolute top-full left-0 mt-2 z-30 pointer-events-none select-none">
+                <div class="relative bg-gray-900/95 dark:bg-white/95 text-white dark:text-gray-900 px-3 py-1.5 rounded-xl shadow-xl text-[11px] font-bold whitespace-nowrap flex items-center gap-1.5 border border-white/10 dark:border-gray-200/40">
+                  <span x-text="bubbleText"></span>
+                  <svg class="absolute bottom-full left-3.5 -mb-px w-2.5 h-1.5 text-gray-900/95 dark:text-white/95 fill-current" viewBox="0 0 10 6">
+                    <path d="M0 6 L5 0 L10 6 Z" />
+                  </svg>
+                </div>
+              </div>
+
+              <button type="button" 
+                      :disabled="removing"
+                      @click.prevent.stop="
+                        if (removing) return;
+                        window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                          detail: {
+                            title: 'Hapus dari Favorit?',
+                            message: 'Apakah Anda yakin ingin menghapus {{ addslashes($photographer->nama) }} dari daftar fotografer favorit?',
+                            buttonText: 'Ya, Hapus Favorit',
+                            iconType: 'warning',
+                            buttonClass: 'bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer',
+                            onConfirm: () => {
+                              removing = true;
+                              fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
+                                method: 'POST',
+                                headers: {
+                                  'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                  'Accept': 'application/json',
+                                  'Content-Type': 'application/json',
+                                  'X-Requested-With': 'XMLHttpRequest'
+                                }
+                              })
+                              .then(async res => {
+                                const data = await res.json().catch(() => ({}));
+                                if (!res.ok) throw new Error(data.message || 'Gagal memproses favorit.');
+                                return data;
+                              })
+                              .then(data => {
+                                if (data.success) {
+                                  isFavorited = data.is_favorited;
+                                  showBubble('Dihapus dari Favorit');
+                                  window.dispatchEvent(new CustomEvent('show-toast', { 
+                                    detail: { 
+                                      message: data.message, 
+                                      type: 'success' 
+                                    } 
+                                  }));
+                                  setTimeout(() => {
+                                    removed = true;
+                                    setTimeout(() => {
+                                      if (data.total_favorites === 0) {
+                                        window.location.reload();
+                                      }
+                                    }, 350);
+                                  }, 600);
+                                } else {
+                                  removing = false;
+                                }
+                              })
+                              .catch(err => {
+                                removing = false;
                                 window.dispatchEvent(new CustomEvent('show-toast', { 
                                   detail: { 
-                                    message: data.message, 
-                                    type: 'success' 
+                                    message: err.message || 'Terjadi kesalahan sistem.', 
+                                    type: 'error' 
                                   } 
                                 }));
-                                removed = true;
-                                setTimeout(() => {
-                                  if (data.total_favorites === 0) {
-                                    window.location.reload();
-                                  }
-                                }, 350);
-                              } else {
-                                removing = false;
-                              }
-                            })
-                            .catch(err => {
-                              removing = false;
-                              window.dispatchEvent(new CustomEvent('show-toast', { 
-                                detail: { 
-                                  message: err.message || 'Terjadi kesalahan sistem.', 
-                                  type: 'error' 
-                                } 
-                              }));
-                            });
+                              });
+                            }
                           }
-                        }
-                      }));
-                    "
-                    title="Hapus dari Favorit" 
-                    class="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-gray-900/95 flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-amber-500 disabled:opacity-50">
-              <svg class="w-4 h-4 fill-current text-amber-500 transition-colors" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-              </svg>
-            </button>
+                        }));
+                      "
+                      title="Hapus dari Favorit" 
+                      class="w-8 h-8 rounded-full bg-white/95 dark:bg-gray-900/95 flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-amber-500 disabled:opacity-50">
+                <svg class="w-4 h-4 fill-current text-amber-500 transition-colors" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <!-- Sisi Tengah: Identitas, Lokasi, Kategori & Bio (Anti-AI Slop, Zero Dividers) -->

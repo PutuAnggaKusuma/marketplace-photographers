@@ -304,7 +304,39 @@
               @php
                 $isFav = in_array($photographer->id, $favoritedIds ?? []);
               @endphp
-              <div class="absolute top-4 left-4 z-10" x-data="{ isFavorited: {{ $isFav ? 'true' : 'false' }}, loading: false }">
+              <div class="absolute top-4 left-4 z-10" x-data="{ 
+                isFavorited: {{ $isFav ? 'true' : 'false' }}, 
+                loading: false,
+                bubbleText: '',
+                bubbleVisible: false,
+                bubbleTimer: null,
+                showBubble(msg) {
+                  this.bubbleText = msg;
+                  this.bubbleVisible = true;
+                  if (this.bubbleTimer) clearTimeout(this.bubbleTimer);
+                  this.bubbleTimer = setTimeout(() => {
+                    this.bubbleVisible = false;
+                  }, 2200);
+                }
+              }">
+                <!-- Text Bubble Notification (Anti-AI Slop, Auto-Hide after 2.2s) -->
+                <div x-show="bubbleVisible" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                     style="display: none;"
+                     class="absolute top-full left-0 mt-2 z-30 pointer-events-none select-none">
+                  <div class="relative bg-gray-900/95 dark:bg-white/95 text-white dark:text-gray-900 px-3 py-1.5 rounded-xl shadow-xl text-[11px] font-bold whitespace-nowrap flex items-center gap-1.5 border border-white/10 dark:border-gray-200/40">
+                    <span x-text="bubbleText"></span>
+                    <svg class="absolute bottom-full left-3.5 -mb-px w-2.5 h-1.5 text-gray-900/95 dark:text-white/95 fill-current" viewBox="0 0 10 6">
+                      <path d="M0 6 L5 0 L10 6 Z" />
+                    </svg>
+                  </div>
+                </div>
+
                 <button type="button" 
                         @click.stop="
                           if (!{{ Auth::check() ? 'true' : 'false' }}) {
@@ -347,6 +379,7 @@
                               loading = false;
                               if (data.success) {
                                 isFavorited = data.is_favorited;
+                                showBubble(data.is_favorited ? 'Tersimpan di Favorit' : 'Dihapus dari Favorit');
                                 window.dispatchEvent(new CustomEvent('show-toast', { 
                                   detail: { 
                                     message: data.message, 

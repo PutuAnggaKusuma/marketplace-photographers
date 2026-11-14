@@ -20,6 +20,30 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:30 WITA] — Implementasi Auto-Disappearing Text Bubble Umpan Balik Visual Tombol Save & Unsave Favorit (Rule #70, Rule #51, Rule #93)
+
+* **Modul / Fitur**:
+  - Halaman Detail Profil Fotografer Publik (`resources/views/public/photographers/show.blade.php`)
+  - Halaman Katalog Pencarian Fotografer Publik (`resources/views/public/photographers/katalog.blade.php`)
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Text Bubble Umpan Balik Kontekstual Langsung**:
+    - **Before**: Umpan balik aksi simpan/hapus hanya mengandalkan toast notification di sudut layar atas serta perubahan warna ikon tombol. Pengguna tidak mendapatkan umpan balik langsung (*text bubble*) tepat pada titik klik tombol bookmark.
+    - **After**: Menambahkan elemen *speech bubble* melayang (`x-show="bubbleVisible"`) dengan ekor panah SVG presisi yang menunjuk langsung ke tombol bookmark. Balon teks memunculkan teks to the point tanpa embel-embel alay: `"Tersimpan di Favorit"` saat aksi save berhasil, dan `"Dihapus dari Favorit"` saat aksi unsave berhasil. Balon teks ini beranimasi pop-in halus dan otomatis menghilang (*auto-disappear*) secara mulus setelah 2.2 detik menggunakan timeout Alpine.js tanpa menghalangi klik berikutnya (`pointer-events-none`).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70 & Rule #51** (Anti-AI Slop, Copywriting To-The-Point, Tanpa Simbol Redundan/Alay, Teks Alami Bersih).
+  * **Rule #93** (Standarisasi Tombol Wishlist / Favorit Fotografer & Wajib Feedback Visual).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * `npm run build`: **PASS** (Compiled Vite bundle successfully).
+
+---
+
 ### [2026-11-15 00:10 WITA] — Implementasi Modal Konfirmasi Validasi Pop-up Saat Unsave Fotografer di Seluruh Sistem (Rule #70, Rule #59, Rule #18)
 
 * **Modul / Fitur**:
