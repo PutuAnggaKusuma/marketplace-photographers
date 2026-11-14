@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:00 WITA] — Penegasan Pemusatan Vertikal Blok Kanan (Tarif & Tombol) dengan `self-center`, `my-auto`, dan Inline Style (Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Pemusatan Vertikal Blok Kanan**:
+    - **Before**: Blok kanan menggunakan utility `md:self-center` yang tidak terkompilasi pada bundle CSS pre-built, sehingga browser mengabaikannya dan elemen tetap bertengger di bagian atas container kartu.
+    - **After**: Mengganti class menjadi `self-center my-auto` (yang didukung penuh di bundle CSS) serta menambahkan atribut fallback eksplisit `style="align-self: center; margin-top: auto; margin-bottom: auto;"`. Sekarang blok kanan (tarif dan tombol aksi) dijamin 100% berada tepat di tengah-tengah kartu secara vertikal (*vertical center*).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Layout Proporsional & Rapi), **Rule #91** (Hierarki Aksi Fungsional Transaksional Nyata).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-14 23:56 WITA] — Pemusatan Vertikal Blok Tarif & Tombol Aksi Kanan (Pasted Image 2) pada Card Favorit (Kepatuhan Rule #70)
 
 * **Modul / Fitur**:

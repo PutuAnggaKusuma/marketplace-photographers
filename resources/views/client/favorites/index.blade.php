@@ -175,7 +175,7 @@
           </div>
 
           <!-- Sisi Kanan: Rincian Tarif & 2 Tombol Aksi Nyata (Zero Dividers, Vertically Centered) -->
-          <div class="w-full md:w-64 shrink-0 flex flex-col justify-center md:self-center space-y-3.5">
+          <div class="w-full md:w-64 shrink-0 flex flex-col justify-center self-center my-auto space-y-3.5" style="align-self: center; margin-top: auto; margin-bottom: auto;">
             <div>
               <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Mulai Dari</span>
               <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight mt-1.5">
