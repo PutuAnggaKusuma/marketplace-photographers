@@ -12,14 +12,11 @@
         <h1 class="text-3xl font-black text-gray-900 dark:text-white">
           Fotografer Favorit Saya
         </h1>
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">
-          Koleksi mitra fotografer pilihan yang Anda simpan untuk perbandingan portofolio dan pemesanan mendatang.
-        </p>
       </div>
     </div>
 
     <!-- Photographers List (Horizontal Row Cards - Opsi A) -->
-    <div class="space-y-4 sm:space-y-5">
+    <div class="space-y-5 sm:space-y-6">
       @forelse($favorites as $photographer)
         @php
           $lowestPrice = $photographer->services->where('tarif_harga', '>', 0)->min('tarif_harga');
@@ -34,10 +31,10 @@
              x-transition:leave="transition ease-in duration-300 transform"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+             class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 md:p-8 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 group">
           
           <!-- Sisi Kiri: Cover Foto Portofolio Kompak (Landscape) -->
-          <div class="w-full md:w-60 h-48 md:h-44 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
+          <div class="w-full md:w-64 h-52 md:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
             @if($coverPortfolio)
               <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             @else

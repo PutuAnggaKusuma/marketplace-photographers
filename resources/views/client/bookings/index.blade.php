@@ -54,8 +54,6 @@
 
         <h1 class="text-3xl font-black text-gray-900 dark:text-white">Reservasi Saya</h1>
 
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">Pantau status konfirmasi fotografer, rincian jadwal, dan akses galeri hasil foto Anda.</p>
-
       </div>
 
     </div>

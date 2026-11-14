@@ -44,8 +44,6 @@
 
                 <h2 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Daftar Chat Fotografer</h2>
 
-                <p class="text-[11px] text-gray-500 mt-0.5 truncate">Pesan langsung dengan fotografer</p>
-
             </div>
 
 

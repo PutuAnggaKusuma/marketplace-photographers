@@ -20,12 +20,6 @@
 
         </h1>
 
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">
-
-          Akses seluruh tautan album hasil retouching foto resolusi tinggi dari fotografer mitra LensMatch.
-
-        </p>
-
       </div>
 
     </div>

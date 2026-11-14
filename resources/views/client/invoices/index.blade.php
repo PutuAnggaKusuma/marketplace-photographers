@@ -20,7 +20,6 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-3xl font-black text-gray-900 dark:text-white">Invoice & Pembayaran Saya</h1>
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">Daftar seluruh tagihan pembayaran resmi LensMatch.</p>
       </div>
     </div>
 

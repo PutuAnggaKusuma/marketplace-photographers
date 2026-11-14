@@ -20,6 +20,39 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-14 23:26 WITA] — Perluasan Padding Card Fotografer Favorit & Eliminasi Sub-Text Judul Seluruh Fitur Akun Klien (Kepatuhan Anti-AI Slop & Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+  - Halaman Reservasi Sesi Foto Klien (`resources/views/client/bookings/index.blade.php`).
+  - Halaman Invoice & Tagihan Pembayaran Klien (`resources/views/client/invoices/index.blade.php`).
+  - Halaman Galeri Hasil Foto Klien (`resources/views/client/galleries/index.blade.php`).
+  - Halaman Pesan & Chat Fotografer (`resources/views/public/chat/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/client/galleries/index.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Perluasan Padding Card Fotografer Favorit**:
+    - **Before**: Card fotografer favorit menggunakan padding `p-5 sm:p-6`, jeda baris `space-y-4 sm:space-y-5`, dan jarak `gap-6`. Ruang interior kartu tampak padat dan sempit di layar lebar.
+    - **After**: Padding card diperbesar menjadi `p-6 sm:p-8 md:p-8`, jeda antar kartu `space-y-5 sm:space-y-6`, jarak antar bagian diperluas menjadi `gap-6 md:gap-8`, dan dimensi cover foto portofolio ditingkatkan menjadi `w-full md:w-64 h-52 md:h-48`. Seluruh konten terasa lega, elegan, dan proporsional.
+  * **Eliminasi Sub-Text Judul Bertele-tele (Anti-AI Slop Standard)**:
+    - Menghapus paragraf sub-teks di bawah H1 pada seluruh halaman fitur dropdown akun klien:
+      - `client/favorites/index.blade.php`: Menghapus sub-teks `"Koleksi mitra fotografer pilihan yang Anda simpan untuk perbandingan portofolio dan pemesanan mendatang."`.
+      - `client/bookings/index.blade.php`: Menghapus sub-teks `"Pantau status konfirmasi fotografer, rincian jadwal, dan akses galeri hasil foto Anda."`.
+      - `client/invoices/index.blade.php`: Menghapus sub-teks `"Daftar seluruh tagihan pembayaran resmi LensMatch."`.
+      - `client/galleries/index.blade.php`: Menghapus sub-teks `"Akses seluruh tautan album hasil retouching foto resolusi tinggi dari fotografer mitra LensMatch."`.
+      - `public/chat/index.blade.php`: Menghapus sub-teks `"Pesan langsung dengan fotografer"` pada header sidebar chat.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Zero Verbose Text, Eliminasi Simbol & Kata Redundan), **Prinsip Desain Umum Anti-AI Slop** (Judul tegas to-the-point tanpa penjelasan berulang/alay).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-13 22:42 WITA] — Perbaikan Visibilitas Komponen Pagination Tabel Laporan Fotografer dan Lomba Admin (Kepatuhan Rule #37, Rule #70, & Rule #78)
 
 * **Modul / Fitur**:
