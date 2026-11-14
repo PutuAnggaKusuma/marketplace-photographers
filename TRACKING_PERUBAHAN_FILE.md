@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-14 23:52 WITA] — Penyelarasan Presisi Baseline Tombol Kanan dengan Deskripsi Teks Bio di Kiri (Kepatuhan Rule #70 & Rule #91)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyelarasan Baseline Tombol Kanan vs Deskripsi Teks Bio**:
+    - **Before**: Kolom tengah berdimensi tinggi alami (~150px) tanpa `justify-between`, sedangkan kolom kanan dan cover foto sebelah kiri membentang dengan tinggi 192px (`h-48`). Akibatnya baris tombol `Reservasi` dan `Chat` terdorong ke posisi terbawah kolom kanan (192px), sehingga posisinya turun ~40px lebih rendah dari baris akhir teks deskripsi/bio di kolom tengah.
+    - **After**: Mengubah kolom tengah menjadi `flex flex-col justify-between md:self-stretch`, cover foto kiri menjadi `md:self-stretch min-h-[160px]`, dan kolom kanan menjadi `md:self-stretch flex flex-col justify-between`. Menghilangkan offset `pt-2` pada baris tombol. Sekarang baris tombol `[ Reservasi ] [ Chat ]` berada pada satu garis lurus horizontal (*perfect baseline alignment*) yang sejajar presisi dengan teks deskripsi bio di sebelah kiri.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Human-Crafted Horizontal Rhythm & Alignment), **Rule #91** (Hierarki Aksi Fungsional Transaksional Nyata).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-14 23:45 WITA] — Implementasi Penataan Tombol Berdampingan Horizontal (Opsi A) pada Card Favorit (Kepatuhan Rule #70 & Rule #91)
 
 * **Modul / Fitur**:
