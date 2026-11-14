@@ -34,7 +34,7 @@
              class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 md:p-8 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start justify-between gap-6 md:gap-8 group">
           
           <!-- Sisi Kiri: Cover Foto Portofolio Kompak (Landscape) -->
-          <div class="w-full md:w-64 h-52 md:h-auto md:self-stretch min-h-[160px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
+          <div class="w-full md:w-64 h-52 md:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
             <a href="{{ url('/fotografer/' . $photographer->id) }}" class="w-full h-full block">
               @if($coverPortfolio)
                 <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
@@ -104,80 +104,78 @@
           </div>
 
           <!-- Sisi Tengah: Identitas, Lokasi, Kategori & Bio (Anti-AI Slop, Zero Dividers) -->
-          <div class="flex-1 min-w-0 flex flex-col justify-between md:self-stretch space-y-3">
-            <div class="space-y-2.5">
-              <!-- Lokasi Studio -->
-              <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider leading-none truncate">
-                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
-                </svg>
-                <span>{{ $photographer->city->name ?? ($photographer->alamat ?? '-') }}</span>
-              </div>
-
-              <!-- Avatar & Nama Studio -->
-              <div class="flex items-center gap-3">
-                <a href="{{ url('/fotografer/' . $photographer->id) }}" class="shrink-0 group/avatar">
-                  @if($avatarUrl)
-                    <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition" />
-                  @else
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition">
-                      {{ strtoupper(substr($photographer->nama ?? 'F', 0, 2)) }}
-                    </div>
-                  @endif
-                </a>
-                <div class="min-w-0 flex-1">
-                  <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate block">
-                    {{ $photographer->nama }}
-                  </a>
-                </div>
-              </div>
-
-              <!-- Kategori Spesialisasi (Tipografi Murni, Comma Separated, Tanpa Badge Pill Sesuai Rule #67) -->
-              @if($photographer->categories && $photographer->categories->isNotEmpty())
-                <p class="text-xs font-light text-amber-700 dark:text-amber-300 leading-snug truncate">
-                  {{ $photographer->categories->pluck('nama_kategori')->join(', ') }}
-                </p>
-              @endif
-
-              <!-- Format Metrik Inline Teks (Rating & Sesi Selesai) -->
-              @php
-                $metrics = $photographer->editorial_metrics;
-              @endphp
-              @if(!empty($metrics))
-                <div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  @foreach($metrics as $idx => $m)
-                    @if($idx > 0)
-                      <span class="text-gray-300 dark:text-gray-600 select-none">•</span>
-                    @endif
-                    @if($m['type'] === 'rating')
-                      <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                        <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
-                        <span>{{ $m['text'] }}</span>
-                      </span>
-                    @elseif($m['type'] === 'fast_response')
-                      <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $m['text'] }}</span>
-                    @else
-                      <span>{{ $m['text'] }}</span>
-                    @endif
-                  @endforeach
-                </div>
-              @else
-                <div class="flex items-center gap-1 text-xs font-bold text-gray-900 dark:text-white">
-                  <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
-                  <span>{{ number_format((float) ($rating ?? 0), 1) }} ({{ $reviewCount }} ulasan)</span>
-                </div>
-              @endif
+          <div class="flex-1 min-w-0 space-y-2.5">
+            <!-- Lokasi Studio -->
+            <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider leading-none truncate">
+              <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+              </svg>
+              <span>{{ $photographer->city->name ?? ($photographer->alamat ?? '-') }}</span>
             </div>
 
+            <!-- Avatar & Nama Studio -->
+            <div class="flex items-center gap-3">
+              <a href="{{ url('/fotografer/' . $photographer->id) }}" class="shrink-0 group/avatar">
+                @if($avatarUrl)
+                  <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition" />
+                @else
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition">
+                    {{ strtoupper(substr($photographer->nama ?? 'F', 0, 2)) }}
+                  </div>
+                @endif
+              </a>
+              <div class="min-w-0 flex-1">
+                <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate block">
+                  {{ $photographer->nama }}
+                </a>
+              </div>
+            </div>
+
+            <!-- Kategori Spesialisasi (Tipografi Murni, Comma Separated, Tanpa Badge Pill Sesuai Rule #67) -->
+            @if($photographer->categories && $photographer->categories->isNotEmpty())
+              <p class="text-xs font-light text-amber-700 dark:text-amber-300 leading-snug truncate">
+                {{ $photographer->categories->pluck('nama_kategori')->join(', ') }}
+              </p>
+            @endif
+
+            <!-- Format Metrik Inline Teks (Rating & Sesi Selesai) -->
+            @php
+              $metrics = $photographer->editorial_metrics;
+            @endphp
+            @if(!empty($metrics))
+              <div class="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                @foreach($metrics as $idx => $m)
+                  @if($idx > 0)
+                    <span class="text-gray-300 dark:text-gray-600 select-none">•</span>
+                  @endif
+                  @if($m['type'] === 'rating')
+                    <span class="font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                      <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
+                      <span>{{ $m['text'] }}</span>
+                    </span>
+                  @elseif($m['type'] === 'fast_response')
+                    <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $m['text'] }}</span>
+                  @else
+                    <span>{{ $m['text'] }}</span>
+                  @endif
+                @endforeach
+              </div>
+            @else
+              <div class="flex items-center gap-1 text-xs font-bold text-gray-900 dark:text-white">
+                <span class="{{ $rating ? 'text-amber-500' : 'text-gray-300 dark:text-gray-600' }}">★</span>
+                <span>{{ number_format((float) ($rating ?? 0), 1) }} ({{ $reviewCount }} ulasan)</span>
+              </div>
+            @endif
+
             <!-- Cuplikan Bio Singkat -->
-            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 pt-1">
+            <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 pt-0.5">
               {{ !empty(trim($photographer->deskripsi_bio)) ? \Illuminate\Support\Str::limit($photographer->deskripsi_bio, 180) : 'Fotografer profesional terverifikasi siap mengabadikan momen terbaik Anda.' }}
             </p>
           </div>
 
-          <!-- Sisi Kanan: Rincian Tarif & 2 Tombol Aksi Nyata (Zero Dividers) -->
-          <div class="w-full md:w-64 shrink-0 flex flex-col justify-between md:self-stretch space-y-4">
+          <!-- Sisi Kanan: Rincian Tarif & 2 Tombol Aksi Nyata (Zero Dividers, Vertically Centered) -->
+          <div class="w-full md:w-64 shrink-0 flex flex-col justify-center md:self-center space-y-3.5">
             <div>
               <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Mulai Dari</span>
               <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight mt-1.5">

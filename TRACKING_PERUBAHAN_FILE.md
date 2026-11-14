@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-14 23:56 WITA] — Pemusatan Vertikal Blok Tarif & Tombol Aksi Kanan (Pasted Image 2) pada Card Favorit (Kepatuhan Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Pemusatan Vertikal Blok Kanan (Tarif & Tombol)**:
+    - **Before**: Blok kanan menggunakan `md:self-stretch justify-between` yang memisahkan teks tarif di batas paling atas dan tombol di batas paling bawah kartu.
+    - **After**: Mengubah container blok kanan menjadi `w-full md:w-64 shrink-0 flex flex-col justify-center md:self-center space-y-3.5`. Seluruh blok tarif ("Mulai Dari" + Rp ...) dan tombol aksi ("Reservasi" + "Chat") kini berada tepat di tengah secara vertikal (*vertically centered*) di dalam kartu fotografer, selaras dengan highlight area pada screenshot DevTools pengguna (Pasted Image 2).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Layout Proporsional & Rapi), **Rule #91** (Hierarki Aksi Fungsional Transaksional Nyata).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-14 23:52 WITA] — Penyelarasan Presisi Baseline Tombol Kanan dengan Deskripsi Teks Bio di Kiri (Kepatuhan Rule #70 & Rule #91)
 
 * **Modul / Fitur**:
