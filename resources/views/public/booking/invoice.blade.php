@@ -338,7 +338,7 @@
               </div>
 
               <template x-if="previewUrl">
-                <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xs">
+                <div class="max-w-sm mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xs">
                   <div @click="lightboxUrl = previewUrl; lightboxOpen = true"
                        class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-950 cursor-pointer group">
                     <img :src="previewUrl" alt="Pratinjau Bukti Transfer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">

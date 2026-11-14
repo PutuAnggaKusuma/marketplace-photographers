@@ -1168,7 +1168,7 @@
             </div>
 
             <template x-if="lessonForm.mediaFileName && lessonMediaPreviewUrl">
-              <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs shadow-2xs">
+              <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs mx-auto shadow-2xs">
                 <div @click="lessonLightboxOpen = true" class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
                   <img :src="lessonMediaPreviewUrl" :alt="lessonForm.mediaFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                   <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">

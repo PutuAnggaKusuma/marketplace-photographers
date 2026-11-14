@@ -379,26 +379,28 @@
 
               <!-- Layout Vertikal: Preview di Atas, Dropzone Pure-Text di Bawah (Rule #22, #94, #96, #97) -->
               <div class="space-y-4">
-                <div class="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition cursor-pointer"
-                     :class="uploadErrors.foto_file ? 'border-red-400 border-dashed' : (avatarPreview ? 'border-amber-400 border-solid group' : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-amber-400')"
-                     @click="if (avatarPreview) openImagePreview(avatarPreview, 'Foto Profil'); else $refs.avatarInput.click();">
-                  <img :src="avatarPreview" 
-                       x-show="avatarPreview" 
-                       x-cloak
-                       alt="Preview Foto Profil" 
-                       class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                  <div x-show="avatarPreview" 
-                       x-cloak
-                       class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1">
-                    <svg class="w-5 h-5 text-white mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"/></svg>
-                    <span class="text-[10px] font-bold">Pratinjau</span>
-                  </div>
-                  <div x-show="!avatarPreview" 
-                       class="flex items-center justify-center text-gray-400 dark:text-gray-500">
-                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                    </svg>
+                <div class="flex justify-center">
+                  <div class="relative w-28 h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-2xs flex items-center justify-center transition cursor-pointer"
+                       :class="uploadErrors.foto_file ? 'border-red-400 border-dashed' : (avatarPreview ? 'border-amber-400 border-solid group' : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-amber-400')"
+                       @click="if (avatarPreview) openImagePreview(avatarPreview, 'Foto Profil'); else $refs.avatarInput.click();">
+                    <img :src="avatarPreview" 
+                         x-show="avatarPreview" 
+                         x-cloak
+                         alt="Preview Foto Profil" 
+                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <div x-show="avatarPreview" 
+                         x-cloak
+                         class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1">
+                      <svg class="w-5 h-5 text-white mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"/></svg>
+                      <span class="text-[10px] font-bold">Pratinjau</span>
+                    </div>
+                    <div x-show="!avatarPreview" 
+                         class="flex items-center justify-center text-gray-400 dark:text-gray-500">
+                      <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
                 

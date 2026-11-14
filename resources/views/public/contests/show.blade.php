@@ -807,7 +807,7 @@
                     </div>
 
                     <template x-if="transferPreview">
-                      <div class="max-w-xs rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                      <div class="max-w-xs mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
                         <div @click="openLightbox(transferPreview, transferFileName || 'Bukti Transfer')"
                              class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
                           <img :src="transferPreview" :alt="transferFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -1070,7 +1070,7 @@
                         </div>
 
                         <template x-if="preview">
-                          <div class="max-w-md rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                          <div class="max-w-md mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
                             <div @click="openLightbox(preview, judul_karya || fileName || 'Pratinjau Karya Foto')"
                                  class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
                               <img :src="preview" :alt="fileName || 'Preview Foto Karya'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">

@@ -50,6 +50,36 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-13 22:42 WITA] — Perbaikan Visibilitas Komponen Pagination Tabel Laporan Fotografer dan Lomba Admin (Kepatuhan Rule #37, Rule #70, & Rule #78)
+
+* **Modul / Fitur**:
+  - Halaman Laporan Finansial Fotografer (`resources/views/photographer/reports/index.blade.php`).
+  - Controller Laporan Fotografer (`app/Http/Controllers/Photographer/ReportController.php`).
+  - Halaman Manajemen Lomba Admin (`resources/views/admin/contests/manage.blade.php`).
+  - Halaman Submisi Lomba Admin (`resources/views/admin/contests/submissions.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/photographer/reports/index.blade.php`
+  * `app/Http/Controllers/Photographer/ReportController.php`
+  * `resources/views/admin/contests/manage.blade.php`
+  * `resources/views/admin/contests/submissions.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyebab Pagination Hilang**:
+    - **Before**: Di tabel `Riwayat Pencairan Dana` (`photographer/reports/index.blade.php`) dan tabel pendaftar/submisi lomba, blok pagination dibungkus dengan `@if($contracts->hasPages())`. Karena jumlah data transaksi saat ini berjumlah 5 data ($\le 10$), method `hasPages()` mengembalikan `false` sehingga barisan pagination (Showing page, nomor halaman, dan dropdown *Rows per page*) tidak pernah dirender ke layar sama sekali.
+    - **After**: Mengubah kondisi pembungkus menjadi `@if($contracts->total() > 0)` sesuai **Rule #37** (`README.md`). Sekarang baris pagination selalu tampil selama ada data (`total > 0`), sehingga pengguna tetap dapat melihat status halaman aktif serta mengganti pilihan *Rows per page* (10, 20, 50, 100) kapan saja.
+  * **Penyelarasan Anti-AI Slop pada Tabel Riwayat Pencairan Dana**:
+    - **Header Kolom (Rule #70)**: Menghapus simbol `&` pada kolom `Klien & Layanan` menjadi `Klien dan Layanan`.
+    - **Tab Status Filter (Rule #78 & Rule #45)**: Mengganti tombol pil kotak AI-slop (`bg-amber-500 text-white` vs `bg-gray-100`) menjadi Navigasi Tab Teks Murni Horizontal dengan penanda aktif *Active Text Underline* amber dan *counter badge* bundar di sampingnya (`Semua Transaksi`, `Pencairan Selesai`, `Dana Tertahan`).
+    - **Integrasi AJAX (Rule #18 & Rule #38)**: Menambahkan `id="dashboard-table-container"` pada kartu tabel agar pagination asinkron (*Zero Full Page Refresh*) berjalan mulus.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #18** (Seamless AJAX Pagination), **Rule #37** (Visibilitas Selalu Tampak Pagination `total() > 0`), **Rule #45** (No White Text on Amber), **Rule #70** (Anti-Ampersand Duplication), **Rule #78** (Active Text Underline Tabs Standard).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero errors).
+  * Controller simulation rendering:
+    - `Photographer Reports`: **PASS** (124,544 bytes, `Pagination found: SUCCESS`, `Rows per page found: SUCCESS`).
+
+---
+
 ### [2026-11-13 22:30 WITA] — Standardisasi Tabel Pratinjau Dashboard Admin & Fotografer serta Refaktor Kolom Aksi Tabel Bookings (Anti-AI Slop, Anti-Stacked Buttons, Pure Text)
 
 * **Modul / Fitur**:
@@ -3874,4 +3904,43 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Rincian Perubahan**:
   * Mengganti warna ikon kalender pada chip/badge "Tahun Operasional: {{ date('Y') }}" dari warna amber (`text-amber-500`) menjadi warna hitam netral (`text-gray-900 dark:text-white`) di kedua dashboard (Fotografer dan Admin) agar konsisten dan rapi (anti AI slop).
 * **Hasil Pengujian**:
+  * `php artisan view:clear`: **PASS**.
+
+
+---
+
+### [2026-11-13] Standardisasi Warna Ikon Kalender Tahun Operasional Dashboard
+* **Modul / Fitur**: Dashboard Fotografer & Dashboard Admin.
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/dashboard.blade.php`
+  * `resources/views/admin/dashboard.blade.php`
+* **Rincian Perubahan**:
+  * Mengganti warna ikon kalender pada chip/badge "Tahun Operasional: {{ date('Y') }}" dari warna amber (`text-amber-500`) menjadi warna hitam netral (`text-gray-900 dark:text-white`) di kedua dashboard (Fotografer dan Admin) agar konsisten dan rapi (anti AI slop).
+* **Hasil Pengujian**:
+  * `php artisan view:clear`: **PASS**.
+
+
+---
+
+### [2026-11-14] Standardisasi Posisi Center Pratinjau Foto pada Seluruh Komponen Input Upload Sistem
+* **Modul / Fitur**: Profil Fotografer, Audit Profil Admin, Profil Klien Publik, Event Lomba Foto (Admin & Publik), E-Learning (Admin), Transaksi (Admin), dan Invoice Booking.
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/profile/index.blade.php`
+  * `resources/views/admin/photographers/show.blade.php`
+  * `resources/views/public/profile/index.blade.php`
+  * `resources/views/admin/contests/create.blade.php`
+  * `resources/views/admin/contests/edit.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/admin/elearning/create.blade.php`
+  * `resources/views/admin/elearning/edit.blade.php`
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+* **Rincian Perubahan**:
+  * Mengeliminasi posisi rata kiri (*left-aligned*) pada seluruh pratinjau media/foto tunggal di atas maupun di bawah dropzone.
+  * Memberikan perataan tengah horizontal (`flex justify-center`, `flex flex-col items-center`, dan `mx-auto`) sehingga kotak pratinjau foto profil 1:1, banner lomba, thumbnail materi, dan bukti transfer berada persis di tengah (*center*), seimbang, dan proporsional dengan dropzone di bawahnya.
+  * Mematuhi kaidah copywriting bersih anti-AI slop: tanpa kata berbunga-bunga, tanpa simbol `&` berlebih, tanpa garis pembatas buatan, dan tanpa manipulasi logika data input.
+* **Hasil Pengujian**:
+  * `php artisan view:cache`: **PASS (100% template compiled successfully)**.
   * `php artisan view:clear`: **PASS**.
