@@ -20,6 +20,27 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:55 WITA] — Penerapan Tampilan Google Maps Roadmap & Layer Switcher Satelit pada Peta Booking (Rule #93, Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Pemesanan / Reservasi Booking Klien (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penerapan Tampilan Google Maps Asli**:
+    - **Before**: Peta menggunakan tile layer default OpenStreetMap standar yang tampak kurang familiar dan bernuansa visual kaku bagi pengguna umum Indonesia.
+    - **After**: Mengganti tile base layer dengan **Google Maps Roadmap asli** (`https://{s}.google.com/vt/lyrs=m...`) dengan batas zoom hingga level 20, visual jalan raya, taman, serta tipografi khas Google Maps yang sangat bersih dan familiar.
+  * **Layer Switcher Satelit Modern**:
+    - Menambahkan kontrol layer di pojok kanan atas peta (`topright`) yang memungkinkan pengguna beralih antara tampilan **Peta Jalan (*Google Roadmap*)** dan tampilan foto **Satelit (*Google Hybrid*)**.
+    - Kontrol layer dan bar zoom Leaflet disesuaikan menggunakan gaya rounded modern (`border-radius: 0.75rem`) dan bayangan lembut agar selaras dengan desain LensMatch.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #93 & Rule #70** (Standarisasi Estetika Modern Bersih, Anti-AI Slop, Peningkatan UX Interaktif).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 00:50 WITA] — Implementasi Auto-Geolocation & Real-time Map Pan Berdasarkan Pilihan Provinsi & Kota (Rule #93, Rule #94)
 
 * **Modul / Fitur**:

@@ -5,7 +5,11 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
-  .leaflet-container { font-family: inherit; z-index: 1; }
+  .leaflet-container { font-family: inherit; z-index: 1; border-radius: 1rem; }
+  .leaflet-control-layers { border-radius: 0.75rem !important; border: 1px solid rgba(0,0,0,0.08) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; font-size: 11px !important; font-weight: 700 !important; }
+  .leaflet-bar { border-radius: 0.75rem !important; overflow: hidden; border: 1px solid rgba(0,0,0,0.08) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; }
+  .leaflet-bar a { border-bottom: 1px solid #f3f4f6 !important; }
+  .leaflet-bar a:last-child { border-bottom: none !important; }
 </style>
 @endpush
 
@@ -126,10 +130,25 @@
       const zoomLevel = hasInitial ? 15 : fallbackZoom;
 
       this.mapInstance = L.map(this.$refs.bookingMap).setView([centerLat, centerLng], zoomLevel);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(this.mapInstance);
+
+      const googleRoadmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+      });
+
+      const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+      });
+
+      googleRoadmap.addTo(this.mapInstance);
+
+      L.control.layers({
+        'Peta Jalan': googleRoadmap,
+        'Satelit': googleHybrid
+      }, null, { position: 'topright' }).addTo(this.mapInstance);
 
       if (hasInitial) {
         this.placeMarker(centerLat, centerLng, false);
