@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-14 23:45 WITA] — Implementasi Penataan Tombol Berdampingan Horizontal (Opsi A) pada Card Favorit (Kepatuhan Rule #70 & Rule #91)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penataan Tombol Aksi Kolom Kanan (Opsi A)**:
+    - **Before**: Tombol `Reservasi` dan `Chat` ditumpuk secara vertikal (`space-y-2`) di dalam kolom kanan selebar `w-56`. Penumpukan ini memakan tinggi ~80px, membuat tombol `Reservasi` memotong di samping baris pertama bio (`...momen dramatis dan energi`), dan tombol `Chat` menggantung sendirian di bawahnya di area kosong.
+    - **After**: Mengubah tata letak tombol menjadi berdampingan secara horizontal dalam 1 baris (`flex items-center gap-2 pt-2`) di dalam kolom kanan selebar `md:w-64`. Tombol `Reservasi` menempati porsi utama (`flex-1`) dan tombol `Chat` bersanding rapi di sampingnya (`shrink-0`). Tinggi area tombol berkurang menjadi ~38px dan sejajar rapi (*bottom-aligned*) dengan baris akhir bio serta batas bawah foto portofolio.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Tata Letak Proporsional Human-Crafted), **Rule #91** (Hierarki Aksi Fungsional Transaksional Nyata).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-14 23:40 WITA] — Penyelarasan Kesejajaran Horizontal Lokasi vs Tarif & Penerapan Opsi 1 Profil Fotografer Favorit (Anti-AI Slop & Rule #70)
 
 * **Modul / Fitur**:
