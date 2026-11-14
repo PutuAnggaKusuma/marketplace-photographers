@@ -20,6 +20,30 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:10 WITA] — Implementasi Modal Konfirmasi Validasi Pop-up Saat Unsave Fotografer di Seluruh Sistem (Rule #70, Rule #59, Rule #18)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`)
+  - Katalog Pencarian Fotografer Publik (`resources/views/public/photographers/katalog.blade.php`)
+  - Detail Profil Fotografer Publik (`resources/views/public/photographers/show.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `resources/views/public/photographers/katalog.blade.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Modal Konfirmasi Saat Unsave**:
+    - **Before**: Mengklik tombol bookmark/favorit saat fotografer berstatus tersimpan/favorit langsung mengeksekusi request AJAX toggle dan menghapus fotografer dari daftar tanpa konfirmasi apapun, yang berisiko memicu penghapusan tidak sengaja.
+    - **After**: Menambahkan modal validasi pop-up konfirmasi sistem (`open-confirm-modal`) dengan teks lugas dan tegas anti-AI slop: Judul `"Hapus dari Favorit?"`, pesan `"Apakah Anda yakin ingin menghapus [Nama Fotografer] dari daftar fotografer favorit?"`, tombol konfirmasi bahaya merah `"Ya, Hapus Favorit"`, dan tombol netral `"Batal"`. Aksi un-save hanya dieksekusi setelah pengguna menyetujui dialog konfirmasi. Operasi penambahan ke favorit (save) tetap berlangsung instan tanpa modal untuk menjaga alur browsing cepat dan mulus.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Bahasa Tegas, Lugas, Tanpa Frasa Berbunga-bunga/Alay/Karakter Redundan)
+  * **Rule #59** (Desain Komponen Modal Konfirmasi Terpadu dengan Aksi Destruktif Berwarna Merah)
+  * **Rule #18** (Standar Penanganan Aksi Kritis Pengguna & Validasi Eksplisit)
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (100% blade templates cached successfully).
+
+---
+
 ### [2026-11-15 00:00 WITA] — Penegasan Pemusatan Vertikal Blok Kanan (Tarif & Tombol) dengan `self-center`, `my-auto`, dan Inline Style (Rule #70)
 
 * **Modul / Fitur**:

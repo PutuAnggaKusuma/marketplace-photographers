@@ -51,49 +51,60 @@
                     :disabled="removing"
                     @click.prevent.stop="
                       if (removing) return;
-                      removing = true;
-                      fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
-                        method: 'POST',
-                        headers: {
-                          'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                          'Accept': 'application/json',
-                          'Content-Type': 'application/json',
-                          'X-Requested-With': 'XMLHttpRequest'
+                      window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                        detail: {
+                          title: 'Hapus dari Favorit?',
+                          message: 'Apakah Anda yakin ingin menghapus {{ addslashes($photographer->nama) }} dari daftar fotografer favorit?',
+                          buttonText: 'Ya, Hapus Favorit',
+                          iconType: 'warning',
+                          buttonClass: 'bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer',
+                          onConfirm: () => {
+                            removing = true;
+                            fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
+                              method: 'POST',
+                              headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                              }
+                            })
+                            .then(async res => {
+                              const data = await res.json().catch(() => ({}));
+                              if (!res.ok) throw new Error(data.message || 'Gagal memproses favorit.');
+                              return data;
+                            })
+                            .then(data => {
+                              if (data.success) {
+                                isFavorited = data.is_favorited;
+                                window.dispatchEvent(new CustomEvent('show-toast', { 
+                                  detail: { 
+                                    message: data.message, 
+                                    type: 'success' 
+                                  } 
+                                }));
+                                removed = true;
+                                setTimeout(() => {
+                                  if (data.total_favorites === 0) {
+                                    window.location.reload();
+                                  }
+                                }, 350);
+                              } else {
+                                removing = false;
+                              }
+                            })
+                            .catch(err => {
+                              removing = false;
+                              window.dispatchEvent(new CustomEvent('show-toast', { 
+                                detail: { 
+                                  message: err.message || 'Terjadi kesalahan sistem.', 
+                                  type: 'error' 
+                                } 
+                              }));
+                            });
+                          }
                         }
-                      })
-                      .then(async res => {
-                        const data = await res.json().catch(() => ({}));
-                        if (!res.ok) throw new Error(data.message || 'Gagal memproses favorit.');
-                        return data;
-                      })
-                      .then(data => {
-                        if (data.success) {
-                          isFavorited = data.is_favorited;
-                          window.dispatchEvent(new CustomEvent('show-toast', { 
-                            detail: { 
-                              message: data.message, 
-                              type: 'success' 
-                            } 
-                          }));
-                          removed = true;
-                          setTimeout(() => {
-                            if (data.total_favorites === 0) {
-                              window.location.reload();
-                            }
-                          }, 350);
-                        } else {
-                          removing = false;
-                        }
-                      })
-                      .catch(err => {
-                        removing = false;
-                        window.dispatchEvent(new CustomEvent('show-toast', { 
-                          detail: { 
-                            message: err.message || 'Terjadi kesalahan sistem.', 
-                            type: 'error' 
-                          } 
-                        }));
-                      });
+                      }));
                     "
                     title="Hapus dari Favorit" 
                     class="absolute top-3 left-3 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-gray-900/95 flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer text-amber-500 disabled:opacity-50">

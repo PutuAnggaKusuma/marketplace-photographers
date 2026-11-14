@@ -231,44 +231,62 @@
                             return;
                           @endif
                           if (loading) return;
-                          loading = true;
-                          fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
-                            method: 'POST',
-                            headers: {
-                              'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                              'Accept': 'application/json',
-                              'Content-Type': 'application/json',
-                              'X-Requested-With': 'XMLHttpRequest'
-                            }
-                          })
-                          .then(async res => {
-                            const data = await res.json().catch(() => ({}));
-                            if (!res.ok) {
-                              throw new Error(data.message || 'Gagal memproses favorit.');
-                            }
-                            return data;
-                          })
-                          .then(data => {
-                            loading = false;
-                            if (data.success) {
-                              isFavorited = data.is_favorited;
+                          
+                          const executeToggle = () => {
+                            loading = true;
+                            fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
+                              method: 'POST',
+                              headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                              }
+                            })
+                            .then(async res => {
+                              const data = await res.json().catch(() => ({}));
+                              if (!res.ok) {
+                                throw new Error(data.message || 'Gagal memproses favorit.');
+                              }
+                              return data;
+                            })
+                            .then(data => {
+                              loading = false;
+                              if (data.success) {
+                                isFavorited = data.is_favorited;
+                                window.dispatchEvent(new CustomEvent('show-toast', { 
+                                  detail: { 
+                                    message: data.message, 
+                                    type: 'success' 
+                                  } 
+                                }));
+                              }
+                            })
+                            .catch(err => {
+                              loading = false;
                               window.dispatchEvent(new CustomEvent('show-toast', { 
                                 detail: { 
-                                  message: data.message, 
-                                  type: 'success' 
+                                  message: err.message || 'Terjadi kesalahan sistem.', 
+                                  type: 'warning' 
                                 } 
                               }));
-                            }
-                          })
-                          .catch(err => {
-                            loading = false;
-                            window.dispatchEvent(new CustomEvent('show-toast', { 
-                              detail: { 
-                                message: err.message || 'Terjadi kesalahan sistem.', 
-                                type: 'warning' 
-                              } 
+                            });
+                          };
+
+                          if (isFavorited) {
+                            window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                              detail: {
+                                title: 'Hapus dari Favorit?',
+                                message: 'Apakah Anda yakin ingin menghapus {{ addslashes($photographer->nama) }} dari daftar fotografer favorit?',
+                                buttonText: 'Ya, Hapus Favorit',
+                                iconType: 'warning',
+                                buttonClass: 'bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer',
+                                onConfirm: () => executeToggle()
+                              }
                             }));
-                          });
+                          } else {
+                            executeToggle();
+                          }
                         "
                         :title="isFavorited ? 'Tersimpan di Favorit (Klik untuk menghapus)' : 'Simpan ke Favorit'"
                         class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition shadow-none cursor-pointer focus:outline-none focus:ring-0"
