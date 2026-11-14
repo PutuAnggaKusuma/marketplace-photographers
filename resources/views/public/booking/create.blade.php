@@ -11,7 +11,9 @@
 
 @section('content')
 <section class="py-10 sm:py-14 lg:py-16 bg-white dark:bg-gray-900 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10" x-data="{
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10" 
+       @booking-city-set.window="if ($event.detail.lat && $event.detail.lng) { panMapTo($event.detail.lat, $event.detail.lng, 12); }"
+       x-data="{
     allServices: {{ Illuminate\Support\Js::from($allServices->map(function($s) {
         return [
             'id' => $s->id,
@@ -115,9 +117,13 @@
       if (typeof L === 'undefined' || !this.$refs.bookingMap) return;
 
       const hasInitial = this.latitude !== '' && this.longitude !== '';
-      const centerLat = hasInitial ? parseFloat(this.latitude) : -6.200000;
-      const centerLng = hasInitial ? parseFloat(this.longitude) : 106.816666;
-      const zoomLevel = hasInitial ? 15 : 11;
+      const fallbackLat = {{ !empty($photographer->city?->meta['lat']) ? (float)$photographer->city->meta['lat'] : -6.200000 }};
+      const fallbackLng = {{ !empty($photographer->city?->meta['long']) ? (float)$photographer->city->meta['long'] : 106.816666 }};
+      const fallbackZoom = {{ !empty($photographer->city?->meta['lat']) ? 12 : 11 }};
+
+      const centerLat = hasInitial ? parseFloat(this.latitude) : fallbackLat;
+      const centerLng = hasInitial ? parseFloat(this.longitude) : fallbackLng;
+      const zoomLevel = hasInitial ? 15 : fallbackZoom;
 
       this.mapInstance = L.map(this.$refs.bookingMap).setView([centerLat, centerLng], zoomLevel);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -127,11 +133,35 @@
 
       if (hasInitial) {
         this.placeMarker(centerLat, centerLng, false);
+      } else {
+        // Deteksi otomatis lokasi awal perangkat pengguna via Browser Geolocation API
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              // Jika izin diberikan dan pengguna belum menandai titik pin khusus
+              if (!this.latitude && !this.longitude && !this.provinceCode && this.mapInstance) {
+                this.panMapTo(pos.coords.latitude, pos.coords.longitude, 13);
+              }
+            },
+            () => {
+              // Izin ditolak: peta tetap tenang pada fallback domisili kota fotografer
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        }
       }
 
       this.mapInstance.on('click', (e) => {
         this.placeMarker(e.latlng.lat, e.latlng.lng, true);
       });
+    },
+
+    panMapTo(lat, lng, zoom = 12) {
+      if (!this.mapInstance || lat === '' || lng === '' || lat === null || lng === null) return;
+      const targetLat = parseFloat(lat);
+      const targetLng = parseFloat(lng);
+      if (isNaN(targetLat) || isNaN(targetLng)) return;
+      this.mapInstance.flyTo([targetLat, targetLng], zoom, { duration: 1.0 });
     },
 
     placeMarker(lat, lng, refreshSlots = true) {
@@ -806,7 +836,11 @@
 
                 <div x-show="open" @click.away="open = false" x-transition style="display: none;" class="absolute z-50 w-full mt-1.5 max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-1">
                   @foreach($provinces as $prov)
-                    <div @click="selectedCode = '{{ $prov->code }}'; selectedText = '{{ addslashes($prov->name) }}'; open = false; provinceCode = '{{ $prov->code }}'; touched.province = true; validateProvince(); fetchBookingCities('{{ $prov->code }}');" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
+                    @php
+                      $provLat = !empty($prov->meta['lat']) ? (float)$prov->meta['lat'] : '';
+                      $provLng = !empty($prov->meta['long']) ? (float)$prov->meta['long'] : '';
+                    @endphp
+                    <div @click="selectedCode = '{{ $prov->code }}'; selectedText = '{{ addslashes($prov->name) }}'; open = false; provinceCode = '{{ $prov->code }}'; touched.province = true; validateProvince(); fetchBookingCities('{{ $prov->code }}'); @if($provLat !== '' && $provLng !== '') panMapTo({{ $provLat }}, {{ $provLng }}, 9); @endif" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
                       {{ $prov->name }}
                     </div>
                   @endforeach
@@ -1262,9 +1296,11 @@
           if (preselectCityCode && String(city.code) === String(preselectCityCode)) {
             matchedCity = city;
           }
+          const cityLat = (city.meta && city.meta.lat) ? city.meta.lat : '';
+          const cityLng = (city.meta && city.meta.long) ? city.meta.long : '';
           const escapedName = city.name.replace(/'/g, "\\'");
           html += `
-            <div onclick="selectBookingCity('${city.code}', '${escapedName}')" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
+            <div onclick="selectBookingCity('${city.code}', '${escapedName}', '${cityLat}', '${cityLng}')" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
               ${city.name}
             </div>
           `;
@@ -1272,16 +1308,25 @@
         cityList.innerHTML = html;
 
         if (matchedCity) {
-          selectBookingCity(matchedCity.code, matchedCity.name);
+          const mLat = (matchedCity.meta && matchedCity.meta.lat) ? matchedCity.meta.lat : '';
+          const mLng = (matchedCity.meta && matchedCity.meta.long) ? matchedCity.meta.long : '';
+          selectBookingCity(matchedCity.code, matchedCity.name, mLat, mLng);
         }
       });
   }
 
-  function selectBookingCity(code, name) {
+  function selectBookingCity(code, name, lat = '', lng = '') {
     const input = document.getElementById('bookingCityInput');
     input.value = code;
     input.dispatchEvent(new Event('change'));
-    window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: code, name: name } }));
+    window.dispatchEvent(new CustomEvent('booking-city-set', { 
+      detail: { 
+        code: code, 
+        name: name,
+        lat: lat,
+        lng: lng
+      } 
+    }));
   }
 </script>
 @endsection

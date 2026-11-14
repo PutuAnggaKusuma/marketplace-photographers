@@ -384,7 +384,7 @@ class PhotographerController extends Controller
     {
         $cities = City::where('province_code', $provinceCode)
             ->orderBy('name', 'asc')
-            ->get(['code', 'name']);
+            ->get(['code', 'name', 'meta']);
 
         return response()->json($cities);
     }

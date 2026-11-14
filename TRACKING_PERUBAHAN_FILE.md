@@ -20,6 +20,33 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:50 WITA] — Implementasi Auto-Geolocation & Real-time Map Pan Berdasarkan Pilihan Provinsi & Kota (Rule #93, Rule #94)
+
+* **Modul / Fitur**:
+  - Halaman Pemesanan / Reservasi Booking Klien (`resources/views/public/booking/create.blade.php`).
+  - Endpoint API Data Wilayah Kota (`app/Http/Controllers/Public/PhotographerController.php`).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Default Lokasi Peta Otomatis (Auto Geolocation)**:
+    - **Before**: Peta Leaflet selalu default membuka koordinat statis Jakarta (`-6.2, 106.81`) terlepas dari siapa fotografer yang dipesan atau dari mana user mengakses web.
+    - **After**: Peta Leaflet kini otomatis memanggil Browser Geolocation API (`navigator.geolocation.getCurrentPosition`). Jika diizinkan, peta langsung bergeser (*pan/flyTo*) ke koordinat lokasi pengguna. Jika izin ditolak/tidak tersedia, peta menggunakan fallback cerdas ke koordinat kota domisili fotografer yang sedang dibooking.
+  * **Real-time Map Pan Saat Provinsi & Kota Dipilih**:
+    - **Before**: Memilih dropdown Provinsi atau Kota tidak mempengaruhi tampilan peta, sehingga peta tetap berada di koordinat awal dan tidak relevan dengan wilayah yang dipilih.
+    - **After**: 
+      1. Endpoint `getCities` kini menyertakan kolom `meta` (`lat` dan `long` dari database `indonesia_cities`).
+      2. Saat Provinsi dipilih (misal: BALI), peta otomatis melakukan animasi `flyTo` ke pusat provinsi pada zoom level 9.
+      3. Saat Kota/Kabupaten dipilih (misal: KABUPATEN BADUNG), peta otomatis melakukan `flyTo` ke pusat kota pada zoom level 12 secara real-time tanpa delay.
+      4. Sesuai kesepakatan, proses ini murni menggeser viewport peta tanpa menancapkan pin marker palsu. Pin marker baru ditancapkan saat pengguna secara sadar mengklik titik lokasi acaranya di peta atau memilih hasil pencarian venue.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #93 & Rule #94** (Standarisasi Data Dinamis Riil Database, Zero Dummy Fallback, Presisi Lokasi Sesi Pemesanan).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 00:35 WITA] — Penghapusan Subteks Judul Redundan pada Tab Tanya Jawab Profil Fotografer (Rule #70, Rule #51)
 
 * **Modul / Fitur**:
