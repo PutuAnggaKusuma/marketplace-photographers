@@ -20,6 +20,28 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-14 23:40 WITA] — Penyelarasan Kesejajaran Horizontal Lokasi vs Tarif & Penerapan Opsi 1 Profil Fotografer Favorit (Anti-AI Slop & Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Fotografer Favorit Klien (`resources/views/client/favorites/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/favorites/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Kesejajaran Horizontal Lokasi vs "MULAI DARI"**:
+    - **Before**: Card menggunakan `md:items-center` yang membuat kolom tengah melayang di posisi tengah vertikal, sementara kolom kanan dengan `self-stretch justify-between` menarik teks `MULAI DARI` ke batas paling atas kartu. Akibatnya teks lokasi studio (`KOTA ADMINISTRASI JAKARTA SELATAN`) berada lebih rendah dan tidak sejajar secara horizontal dengan `MULAI DARI`.
+    - **After**: Mengubah pembungkus menjadi `md:items-start` dan menyelaraskan tipografi header baris atas kolom tengah (`leading-none text-[10px] sm:text-[11px] font-bold tracking-wider`) dengan kolom kanan (`leading-none text-[10px] sm:text-[11px] font-bold tracking-wider`). Sekarang kedua teks berada di satu garis lurus horizontal yang presisi (*top-aligned*).
+  * **Penerapan Opsi 1 (Eliminasi Tumpukan Link Profil di Kolom Aksi)**:
+    - Menghapus teks link `"Lihat Profil Lengkap >"` di bawah tombol Chat pada kolom kanan.
+    - Menghubungkan tautan profil fotografer secara natural ke **Cover Portofolio Foto** dan **Avatar Profil** di samping nama fotografer.
+    - Kolom kanan kini bersih, tegas, dan fokus murni pada 2 tombol aksi nyata: **Reservasi** dan **Chat**.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70** (Anti-AI Slop, Zero Clutter), **Rule #91** (Hierarki Aksi Fungsional Transaksional Nyata).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-14 23:26 WITA] — Perluasan Padding Card Fotografer Favorit & Eliminasi Sub-Text Judul Seluruh Fitur Akun Klien (Kepatuhan Anti-AI Slop & Rule #70)
 
 * **Modul / Fitur**:

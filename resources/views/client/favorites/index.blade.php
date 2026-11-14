@@ -31,23 +31,25 @@
              x-transition:leave="transition ease-in duration-300 transform"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 md:p-8 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 group">
+             class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 p-6 sm:p-8 md:p-8 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row items-start justify-between gap-6 md:gap-8 group">
           
           <!-- Sisi Kiri: Cover Foto Portofolio Kompak (Landscape) -->
           <div class="w-full md:w-64 h-52 md:h-48 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0 relative">
-            @if($coverPortfolio)
-              <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            @else
-              <div class="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
-                <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-                <span class="text-[10px] font-semibold">Belum ada portofolio</span>
-              </div>
-            @endif
+            <a href="{{ url('/fotografer/' . $photographer->id) }}" class="w-full h-full block">
+              @if($coverPortfolio)
+                <img src="{{ $coverPortfolio }}" alt="{{ $photographer->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              @else
+                <div class="w-full h-full flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
+                  <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                  <span class="text-[10px] font-semibold">Belum ada portofolio</span>
+                </div>
+              @endif
+            </a>
             
             <!-- Bookmark Un-Save Icon Button (Top Left) -->
             <button type="button" 
                     :disabled="removing"
-                    @click="
+                    @click.prevent.stop="
                       if (removing) return;
                       removing = true;
                       fetch('{{ route('client.favorites.toggle', $photographer->id) }}', {
@@ -102,9 +104,9 @@
           </div>
 
           <!-- Sisi Tengah: Identitas, Lokasi, Kategori & Bio (Anti-AI Slop, Zero Dividers) -->
-          <div class="flex-1 min-w-0 space-y-2">
+          <div class="flex-1 min-w-0 space-y-2.5">
             <!-- Lokasi Studio -->
-            <div class="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-400 font-light uppercase truncate">
+            <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider leading-none truncate">
               <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
@@ -114,13 +116,15 @@
 
             <!-- Avatar & Nama Studio -->
             <div class="flex items-center gap-3">
-              @if($avatarUrl)
-                <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs shrink-0" />
-              @else
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs shrink-0">
-                  {{ strtoupper(substr($photographer->nama ?? 'F', 0, 2)) }}
-                </div>
-              @endif
+              <a href="{{ url('/fotografer/' . $photographer->id) }}" class="shrink-0 group/avatar">
+                @if($avatarUrl)
+                  <img src="{{ $avatarUrl }}" alt="{{ $photographer->nama }}" class="w-10 h-10 rounded-xl object-cover border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition" />
+                @else
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 text-white font-black text-xs flex items-center justify-center border-2 border-amber-400 shadow-xs group-hover/avatar:opacity-90 transition">
+                    {{ strtoupper(substr($photographer->nama ?? 'F', 0, 2)) }}
+                  </div>
+                @endif
+              </a>
               <div class="min-w-0 flex-1">
                 <a href="{{ url('/fotografer/' . $photographer->id) }}" class="font-extrabold text-base sm:text-lg text-gray-900 dark:text-white hover:text-amber-500 transition leading-snug truncate block">
                   {{ $photographer->nama }}
@@ -171,10 +175,10 @@
           </div>
 
           <!-- Sisi Kanan: Rincian Tarif & 2 Tombol Aksi Nyata (Zero Dividers) -->
-          <div class="w-full md:w-56 shrink-0 flex flex-col justify-between space-y-3.5 self-stretch">
+          <div class="w-full md:w-56 shrink-0 flex flex-col justify-between space-y-4 self-stretch">
             <div>
-              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Mulai Dari</span>
-              <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight">
+              <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider block leading-none">Mulai Dari</span>
+              <p class="text-gray-900 dark:text-white font-black text-base sm:text-lg leading-tight mt-1.5">
                 Rp {{ number_format($lowestPrice, 0, ',', '.') }}
                 <span class="text-xs font-normal text-gray-400">/ jam</span>
               </p>
@@ -193,12 +197,6 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <span>Chat</span>
-              </a>
-
-              <a href="{{ url('/fotografer/' . $photographer->id) }}" 
-                 class="pt-1 text-center text-[11px] font-bold text-gray-500 dark:text-gray-400 hover:text-amber-500 dark:hover:text-amber-400 transition flex items-center justify-center gap-1">
-                <span>Lihat Profil Lengkap</span>
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
               </a>
             </div>
           </div>
