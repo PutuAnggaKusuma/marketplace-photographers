@@ -3944,3 +3944,17 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian**:
   * `php artisan view:cache`: **PASS (100% template compiled successfully)**.
   * `php artisan view:clear`: **PASS**.
+
+
+---
+
+### [2026-11-14] Pemulihan 3 Kartu Floating Hero Showcase pada Halaman Utama E-Learning
+* **Modul / Fitur**: Halaman Utama E-Learning Publik.
+* **File yang Dimodifikasi**:
+  * `resources/views/public/elearning/index.blade.php`
+* **Rincian Perubahan**:
+  * Menghapus kondisi pembatas `@if($h0)`, `@if($h1)`, dan `@if($h2)` yang sebelumnya menyebabkan Card 1 (Teknik Lighting Portrait), Card 3 (Mastering Color Grading), dan Card 4 (Bisnis Studio & Keuangan) hilang dari tampilan hero saat tabel kursus database belum memiliki data.
+  * Menerapkan fallback pintar pada ketiga kartu: jika database memiliki data kursus unggulan, sistem akan menampilkan data database; jika database kosong, sistem menampilkan kartu showcase modul asli yang lengkap, rapi, dan simetris sehingga layout hero tidak lagi pincang.
+* **Hasil Pengujian**:
+  * `php artisan view:cache`: **PASS**.
+  * `php artisan view:clear`: **PASS**.
