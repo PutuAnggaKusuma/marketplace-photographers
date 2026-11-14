@@ -229,26 +229,62 @@
       }
     },
 
-    async searchMapLocation() {
+    formatSearchResult(item) {
+      let mainTitle = '';
+      let subTitle = '';
+      if (item.address) {
+        mainTitle = item.address.hotel || item.address.amenity || item.address.building || item.address.tourism || item.address.leisure || item.address.road || item.name || '';
+        const parts = [];
+        if (item.address.suburb) parts.push(item.address.suburb);
+        if (item.address.city || item.address.town || item.address.county) parts.push(item.address.city || item.address.town || item.address.county);
+        if (item.address.state) parts.push(item.address.state);
+        subTitle = parts.join(', ');
+      }
+      if (!mainTitle) {
+        const chunks = (item.display_name || '').split(',');
+        mainTitle = chunks[0] ? chunks[0].trim() : '';
+        subTitle = chunks.slice(1, 4).join(', ').trim();
+      }
+      return {
+        ...item,
+        main_title: mainTitle,
+        sub_title: subTitle || item.display_name
+      };
+    },
+
+    async searchMapLocation(isLive = false) {
       const q = (this.mapQuery || '').trim();
       if (q.length < 3) {
-        this.mapNotice = 'Masukkan minimal 3 huruf untuk mencari lokasi di peta.';
+        this.mapResults = [];
+        if (!isLive) this.mapNotice = 'Masukkan minimal 3 huruf untuk mencari lokasi di peta.';
         return;
       }
       this.mapSearching = true;
       this.mapNotice = '';
-      this.mapResults = [];
       try {
-        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=5&q=' + encodeURIComponent(q), {
-          headers: { 'Accept': 'application/json' }
-        });
+        let viewboxParam = '';
+        if (this.mapInstance) {
+          const center = this.mapInstance.getCenter();
+          const minLon = (center.lng - 0.6).toFixed(4);
+          const maxLat = (center.lat + 0.6).toFixed(4);
+          const maxLon = (center.lng + 0.6).toFixed(4);
+          const minLat = (center.lat - 0.6).toFixed(4);
+          viewboxParam = `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=0`;
+        }
+        const url = 'https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=6&addressdetails=1' + viewboxParam + '&q=' + encodeURIComponent(q);
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
         const data = await res.json();
-        this.mapResults = Array.isArray(data) ? data : [];
-        if (this.mapResults.length === 0) {
-          this.mapNotice = 'Lokasi tidak ditemukan. Coba kata kunci lain atau geser peta secara manual.';
+        if (Array.isArray(data) && data.length > 0) {
+          this.mapResults = data.map(item => this.formatSearchResult(item));
+        } else {
+          this.mapResults = [];
+          if (!isLive) {
+            this.mapNotice = 'Lokasi tidak ditemukan. Coba ketik nama jalan, pantai, atau area sekitar.';
+          }
         }
       } catch (err) {
-        this.mapNotice = 'Gagal mencari lokasi. Anda tetap dapat mengetik alamat secara manual.';
+        this.mapResults = [];
+        if (!isLive) this.mapNotice = 'Gagal mencari lokasi. Anda tetap dapat menandai titik langsung di peta.';
       } finally {
         this.mapSearching = false;
       }
@@ -257,6 +293,7 @@
     pickSearchResult(item) {
       const lat = parseFloat(item.lat);
       const lng = parseFloat(item.lon);
+      this.mapQuery = item.main_title || item.display_name;
       this.mapResults = [];
       this.placeMarker(lat, lng, true);
       if (!this.lokasi_acara || !this.lokasi_acara.trim()) {
@@ -917,33 +954,57 @@
               </div>
             </div>
 
-            <!-- Search Bar Peta (Icon Kaca Pembesar Wajib di Kanan) -->
+            <!-- Search Bar Peta (Live Autocomplete Typeahead Ala Google Maps) -->
             <div class="flex items-center gap-2">
               <div class="relative flex-1">
                 <input type="text"
                        x-model="mapQuery"
-                       @keydown.enter.prevent="searchMapLocation()"
-                       placeholder="Cari gedung, kampus, hotel, atau area acara..."
+                       @input.debounce.350ms="searchMapLocation(true)"
+                       @keydown.enter.prevent="searchMapLocation(false)"
+                       placeholder="Cari jalan, gedung, hotel, atau area acara..."
                        class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition">
-                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                
+                <!-- Right Indicator: Live Spinner or Glass Icon -->
+                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                  <svg x-show="mapSearching" class="w-4 h-4 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <svg x-show="!mapSearching" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                  </svg>
+                </div>
+
+                <!-- Floating Dropdown Hasil Rekomendasi Pintar (Ala Google Maps) -->
+                <div x-show="mapResults.length > 0" 
+                     x-cloak 
+                     @click.away="mapResults = []"
+                     class="absolute top-full left-0 right-0 z-40 mt-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl divide-y divide-gray-100 dark:divide-gray-700/80 max-h-64 overflow-y-auto">
+                  <template x-for="(item, rIdx) in mapResults" :key="rIdx">
+                    <button type="button"
+                            @click="pickSearchResult(item)"
+                            class="w-full text-left px-4 py-2.5 flex items-start gap-3 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition cursor-pointer group">
+                      <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-amber-400 group-hover:text-gray-950 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 truncate" x-text="item.main_title"></p>
+                        <p class="text-[10px] text-gray-400 dark:text-gray-400 truncate mt-0.5" x-text="item.sub_title"></p>
+                      </div>
+                    </button>
+                  </template>
+                </div>
               </div>
+
               <button type="button"
-                      @click="searchMapLocation()"
+                      @click="searchMapLocation(false)"
                       :disabled="mapSearching"
                       class="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-bold text-gray-800 dark:text-white transition shrink-0 cursor-pointer disabled:opacity-50">
                 <span x-text="mapSearching ? 'Mencari...' : 'Cari'"></span>
               </button>
-            </div>
-
-            <!-- Hasil Pencarian Peta -->
-            <div x-show="mapResults.length > 0" x-cloak class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800 max-h-48 overflow-y-auto">
-              <template x-for="(item, rIdx) in mapResults" :key="rIdx">
-                <button type="button"
-                        @click="pickSearchResult(item)"
-                        class="w-full text-left px-4 py-2.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 transition cursor-pointer">
-                  <span class="block font-medium line-clamp-2" x-text="item.display_name"></span>
-                </button>
-              </template>
             </div>
 
             <p x-show="mapNotice" x-text="mapNotice" x-cloak class="text-[11px] text-amber-600 dark:text-amber-400 font-medium"></p>

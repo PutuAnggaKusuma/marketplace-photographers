@@ -20,6 +20,27 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 01:15 WITA] — Implementasi Live Typeahead Autocomplete & Smart Viewbox Biasing pada Kolom Pencarian Peta (Opsi B, Rule #93, Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Pemesanan / Reservasi Booking Klien (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Live Autocomplete Typeahead Real-time**:
+    - **Before**: Pencarian lokasi peta hanya berjalan jika pengguna menekan tombol "Cari" atau tombol Enter. Hasil pencarian memanjang ke bawah dan menggeser posisi peta (*layout shifting*).
+    - **After**: Menerapkan pencarian otomatis saat mengetik (`@input.debounce.350ms`) tanpa perlu menekan tombol Cari. Hasil rekomendasi ditampilkan dalam bentuk *floating dropdown* mengambang modern ala Google Maps tepat di bawah input bar dengan efek bayangan tajam (*shadow-2xl*), ikon pin lokasi, judul tempat tebal, dan alamat administratif pelengkap.
+  * **Smart Viewbox Biasing Berdasarkan Area Peta**:
+    - Query pencarian otomatis menyertakan parameter `viewbox` dinamis sesuai pusat koordinat peta/wilayah yang sedang aktif (misalnya jika pengguna memilih Bali/Badung, pencarian jalan dan tempat di sekitar wilayah tersebut diprioritaskan di baris teratas).
+    - Status loading interaktif dilengkapi indikator pemutar (*animated spinner*) di dalam sisi kanan input bar saat pencarian berlangsung.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #93 & Rule #70** (Standarisasi Estetika Modern Bersih, Anti-AI Slop, Autocomplete Ergonomis, Bebas Biaya Layanan Eksternal).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 01:00 WITA] — Perluasan Dimensi Tinggi Kontainer Peta Reservasi (Rule #70, Rule #93)
 
 * **Modul / Fitur**:
