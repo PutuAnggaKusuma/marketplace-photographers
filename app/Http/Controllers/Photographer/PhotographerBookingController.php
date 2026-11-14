@@ -200,58 +200,41 @@ class PhotographerBookingController extends Controller
 
 
         if ($status === 'confirmed') {
+            $isPaid = in_array($contract->status_payout, ['holding', 'ready']);
+            $newContractStatus = $isPaid ? 'active' : 'pending_payment';
 
             $contract->bookingDetail()->update(['status_booking' => 'confirmed']);
 
             $contract->update([
-
-                'status_contract' => 'active',
-
+                'status_contract' => $newContractStatus,
                 'is_validated_photographer' => true,
-
+                'expired_at' => $isPaid ? null : now()->addHours(24),
             ]);
 
-            $message = 'Pesanan booking berhasil dikonfirmasi! Klien telah diberitahukan.';
-
-
+            $message = $isPaid
+                ? 'Pesanan booking berhasil dikonfirmasi! Jadwal sesi foto telah aktif.'
+                : 'Pesanan booking berhasil disetujui! Klien telah diberitahukan untuk menyelesaikan pembayaran tagihan.';
 
             \App\Models\ActivityLog::record(
-
                 'booking_confirmed',
-
-                "Fotografer {$photographer->nama} mengonfirmasi booking sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
-
+                "Fotografer {$photographer->nama} menyetujui booking sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT),
                 $contract
-
             );
 
-
-
             if ($contract->client && $contract->client->id_user) {
-
                 Notification::create([
-
                     'id_user' => $contract->client->id_user,
-
                     'type' => 'booking_confirmed',
-
-                    'title' => 'Jadwal Booking Dikonfirmasi',
-
-                    'message' => "Fotografer {$photographer->nama} telah mengonfirmasi jadwal pemotretan sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ".",
-
+                    'title' => 'Reservasi Disetujui Fotografer',
+                    'message' => "Fotografer {$photographer->nama} telah menyetujui reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Silakan selesaikan pembayaran tagihan dalam waktu 24 jam.",
                     'data' => [
-
                         'contract_id' => $contract->id,
-
-                        'url' => route('client.bookings'),
-
+                        'url' => route('booking.invoice', $contract->id),
                     ],
-
                     'is_read' => false,
-
                 ]);
-
             }
+        }
 
         } elseif ($status === 'cancelled') {
 

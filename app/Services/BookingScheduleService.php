@@ -89,7 +89,16 @@ class BookingScheduleService
     {
         return ContractBooking::whereHas('contract', function ($q) use ($photographerId, $excludeContractId) {
             $q->where('id_photographer', $photographerId)
-              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
+              ->where(function ($sub) {
+                  $sub->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
+                      ->orWhere(function ($draftQ) {
+                          $draftQ->where('status_contract', 'draft')
+                                 ->where(function ($expQ) {
+                                     $expQ->whereNull('expired_at')
+                                          ->orWhere('expired_at', '>=', now());
+                                 });
+                      });
+              });
             if ($excludeContractId !== null) {
                 $q->where('id', '!=', $excludeContractId);
             }
@@ -121,7 +130,16 @@ class BookingScheduleService
 
         $multiDayBookings = ContractBooking::whereHas('contract', function ($q) use ($photographerId) {
             $q->where('id_photographer', $photographerId)
-              ->whereIn('status_contract', ['active', 'approved', 'pending_payment']);
+              ->where(function ($sub) {
+                  $sub->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
+                      ->orWhere(function ($draftQ) {
+                          $draftQ->where('status_contract', 'draft')
+                                 ->where(function ($expQ) {
+                                     $expQ->whereNull('expired_at')
+                                          ->orWhere('expired_at', '>=', now());
+                                 });
+                      });
+              });
         })
             ->whereNotNull('booking_end_date')
             ->whereColumn('booking_end_date', '>', 'booking_date')

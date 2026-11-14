@@ -1238,7 +1238,7 @@
             <template x-if="paymentType === 'dp' && selectedServiceId">
               <div class="space-y-2.5">
                 <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  <span>Tagihan DP (30%) Sekarang</span>
+                  <span>Estimasi DP (30%)</span>
                   <span class="font-bold text-gray-900 dark:text-white" x-text="'Rp ' + dpAmount.toLocaleString('id-ID')"></span>
                 </div>
                 <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -1249,12 +1249,12 @@
             </template>
 
             <div class="flex justify-between items-center text-gray-900 dark:text-white pt-2">
-              <span class="text-xs font-bold">Total Dibayar Sekarang</span>
+              <span class="text-xs font-bold">Total Biaya Sesi</span>
               <span class="text-lg font-black text-amber-600 dark:text-amber-400" x-text="'Rp ' + currentPayAmount.toLocaleString('id-ID')">Rp 0</span>
             </div>
           </div>
 
-          <!-- Tombol Lanjut Pembayaran -->
+          <!-- Tombol Ajukan Reservasi -->
           <div class="pt-2">
             <button type="submit"
                     :disabled="!selectedServiceId || !selectedDate || !selectedStartTime || !selectedEndTime || selectedDurationHours < 1"
@@ -1262,9 +1262,12 @@
                     class="w-full py-3.5 text-xs rounded-xl transition text-center block">
               <span x-show="!selectedServiceId">Pilih Paket Layanan Terlebih Dahulu</span>
               <span x-show="selectedServiceId && !selectedDate" style="display: none;">Pilih Tanggal Pemotretan</span>
-              <span x-show="selectedServiceId && selectedDate && (!selectedStartTime || !selectedEndTime)" style="display: none;">Pilih Jam Mulai dan Jam Selesai</span>
-              <span x-show="selectedServiceId && selectedDate && selectedStartTime && selectedEndTime" style="display: none;">Lanjut ke Invoice Pembayaran</span>
+              <span x-show="selectedServiceId && selectedDate && (!selectedStartTime || !selectedEndTime)" style="display: none;">Pilih Jam Mulai dan Selesai</span>
+              <span x-show="selectedServiceId && selectedDate && selectedStartTime && selectedEndTime" style="display: none;">Ajukan Reservasi Jadwal</span>
             </button>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center leading-relaxed pt-2">
+              Belum ada pembayaran. Fotografer akan memeriksa jadwal terlebih dahulu sebelum tagihan diterbitkan.
+            </p>
           </div>
         </div>
       </div>

@@ -1054,10 +1054,12 @@
                                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
                                     @elseif($hasPhotos && !$isValidated)
                                         <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Menunggu Konfirmasi Klien</span>
-                                    @elseif($c->status_contract === 'active' || $detail?->status_booking === 'confirmed')
-                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Dikonfirmasi</span>
+                                    @elseif($c->status_contract === 'active')
+                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Jadwal Aktif</span>
+                                    @elseif($c->status_contract === 'pending_payment' || ($detail?->status_booking === 'confirmed' && $c->is_validated_photographer))
+                                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Menunggu Pembayaran Klien</span>
                                     @else
-                                        <span class="text-xs font-bold text-amber-500 dark:text-amber-400">Menunggu Konfirmasi</span>
+                                        <span class="text-xs font-bold text-amber-500 dark:text-amber-400">Perlu Direview</span>
                                     @endif
                                 </td>
 
@@ -1077,15 +1079,20 @@
                                                 @csrf
                                                 <input type="hidden" name="status" value="confirmed">
                                                 <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
-                                                    Konfirmasi
+                                                    Terima
                                                 </button>
                                             </form>
-                                        @elseif($detail && $detail->status_booking === 'confirmed')
+                                        @elseif($c->status_contract === 'active')
                                             <button type="button" 
                                                     @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
                                                     class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
                                                 Upload Hasil Foto
                                             </button>
+                                        @elseif($c->status_contract === 'pending_payment')
+                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                               class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
+                                                Chat Klien
+                                            </a>
                                         @elseif($c->status_contract === 'completed' || ($detail && $detail->status_booking === 'completed'))
                                             @if(!$c->photographerClientReview)
                                                 <button type="button" 

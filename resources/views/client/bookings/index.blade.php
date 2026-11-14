@@ -465,92 +465,70 @@
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
                       Menunggu Konfirmasi Klien
                     </span>
-                  @elseif(($detail && $detail->status_booking === 'confirmed') || $c->status_contract === 'active')
+                  @elseif($c->status_contract === 'active')
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
-                      Dikonfirmasi
+                      Jadwal Terkonfirmasi
+                    </span>
+                  @elseif($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                      Menunggu Pembayaran
                     </span>
                   @else
-                    <span class="text-xs font-bold text-amber-500 dark:text-amber-400">
-                      Menunggu Konfirmasi
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
+                      Menunggu Persetujuan
                     </span>
                   @endif
                 </td>
 
-
-
                 <!-- Aksi (Chat Utama + Dropdown Menu '•••' untuk Opsi Lain) -->
-
                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
-
                   <div class="inline-flex items-center justify-center gap-2" x-data="{ menuOpen: false }">
-
                     
-
-                    <!-- 1. Tombol Chat Utama (Pure Text) -->
-
-                    <a href="{{ route('chat.start', $c->id_photographer) }}" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition inline-block">
-
-                      Chat
-
-                    </a>
-
-
+                    <!-- 1. Tombol Aksi Utama (Bayar jika sudah disetujui tapi belum bayar, atau Chat) -->
+                    @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
+                      <a href="{{ route('booking.invoice', $c->id) }}" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-bold text-xs rounded-xl transition inline-block">
+                        Bayar
+                      </a>
+                    @else
+                      <a href="{{ route('chat.start', $c->id_photographer) }}" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition inline-block">
+                        Chat
+                      </a>
+                    @endif
 
                     <!-- 2. Dropdown Menu Opsi Lainnya (•••) -->
-
                     <div class="relative inline-block text-left">
-
                       <button type="button" 
-
                               @click="menuOpen = !menuOpen" 
-
                               class="w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition shadow-2xs cursor-pointer">
-
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-
                           <circle cx="12" cy="5" r="1.75" />
-
                           <circle cx="12" cy="12" r="1.75" />
-
                           <circle cx="12" cy="19" r="1.75" />
-
                         </svg>
-
                       </button>
 
-
-
                       <!-- Floating Dropdown Menu (Pure Text Items) -->
-
                       <div x-show="menuOpen" 
-
                            @click.away="menuOpen = false" 
-
                            x-transition:enter="transition ease-out duration-100" 
-
                            x-transition:enter-start="transform opacity-0 scale-95" 
-
                            x-transition:enter-end="transform opacity-100 scale-100" 
-
                            x-transition:leave="transition ease-in duration-75" 
-
                            x-transition:leave-start="transform opacity-100 scale-100" 
-
                            x-transition:leave-end="transform opacity-0 scale-95" 
-
                            class="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 text-left" 
-
                            style="display: none;">
-
                         
-
                         <!-- Lihat Invoice -->
-
-                        <a href="{{ url('/pembayaran/' . $c->id) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
-
+                        <a href="{{ route('booking.invoice', $c->id) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                           Lihat Invoice
-
                         </a>
+
+                        @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
+                          <a href="{{ route('chat.start', $c->id_photographer) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                            Chat Fotografer
+                          </a>
+                        @endif
 
 
 

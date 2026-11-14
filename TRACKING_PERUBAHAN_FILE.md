@@ -20,6 +20,44 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 01:38 WITA] — Implementasi Alur Reservasi Skema B (Review & Persetujuan Fotografer Dahulu Sebelum Tagihan Invoice, Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Alur Pemesanan Jasa Fotografi (`BookingController`, `PhotographerBookingController`, `ClientBookingController`, `BookingScheduleService`, dan view Blade terkait).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `app/Services/BookingScheduleService.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Alur Pemesanan Klien**:
+    - **Before**: Klien langsung diarahkan membayar invoice sesaat setelah mengisi formulir pemesanan, sebelum fotografer meninjau kelayakan jadwal dan lokasi acara.
+    - **After**: Mengubah teks tombol formulir menjadi "Ajukan Reservasi Jadwal" dengan catatan edukatif: "Belum ada pembayaran. Fotografer akan memeriksa jadwal terlebih dahulu sebelum tagihan diterbitkan." Kontrak dibuat dengan status awal `draft` dan `is_validated_photographer = false`.
+  * **Halaman Invoice & Keamanan Transaksi**:
+    - **Before**: Halaman invoice langsung menampilkan instruksi pembayaran dan tombol unggah struk transfer.
+    - **After**: Jika status reservasi masih `draft`, halaman invoice menampilkan status "Menunggu Persetujuan" dan notifikasi informasional bahwa fotografer sedang meninjau jadwal & venue acara. Instruksi pembayaran dan fungsi konfirmasi pembayaran dikunci (*guarded*) hingga fotografer menyetujui reservasi.
+  * **Dashboard & Aksi Mitra Fotografer**:
+    - **Before**: Tombol aksi langsung "Upload Hasil Foto" bahkan ketika pembayaran belum terkonfirmasi aktif.
+    - **After**: Pesanan yang masuk berstatus "Perlu Direview" dengan tombol aksi utama "Terima" atau opsi "Tolak Sesi". Ketika fotografer mengklik "Terima", status kontrak berpindah ke `pending_payment` dengan batas waktu bayar 24 jam untuk klien, dan notifikasi otomatis dikirim ke akun klien beserta link invoice.
+  * **Dashboard & Daftar Reservasi Klien**:
+    - **Before**: Hanya menampilkan status umum dan tombol "Chat".
+    - **After**: Menampilkan status "Menunggu Persetujuan" saat awal pengajuan, dan berubah menjadi "Menunggu Pembayaran" dengan tombol aksi utama "Bayar" segera setelah fotografer menyetujui pesanan.
+  * **Proteksi Jadwal & Bentrok Slot Waktu (`BookingScheduleService`)**:
+    - Query ketersediaan jadwal memperhitungkan reservasi `draft` yang belum kedaluwarsa sehingga mencegah dua klien berbeda memesan jam pemotretan yang bertabrakan saat fotografer sedang meninjau permintaan awal.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Standarisasi teks alami tanpa pemborosan simbol `&`, tanpa bahasa alay/bertele-tele, to-the-point, serta penggunaan istilah lokal terpercaya.
+  * **Rule #51**: Copywriting proporsional, bersih, anti-fluff marketing.
+  * **Rule #41**: Tanpa garis pembatas (*border-t / border-b*) artifisial tambahan.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * `git status`: Semua file terverifikasi bersih dan rapi.
+
+---
+
 ### [2026-11-15 01:15 WITA] — Implementasi Live Typeahead Autocomplete & Smart Viewbox Biasing pada Kolom Pencarian Peta (Opsi B, Rule #93, Rule #70)
 
 * **Modul / Fitur**:

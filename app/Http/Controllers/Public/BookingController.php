@@ -282,8 +282,8 @@ class BookingController extends Controller
             'payout_amount' => $payoutAmount,
             'is_validated_photographer' => false,
             'is_validated_client' => true,
-            'expired_at' => now()->addDays(1),
-            'status_contract' => 'pending_payment',
+            'expired_at' => now()->addDays(2),
+            'status_contract' => 'draft',
         ]);
 
         ContractBooking::create([
@@ -317,7 +317,7 @@ class BookingController extends Controller
 
         \App\Models\ActivityLog::record(
             'booking_created',
-            "Klien {$clientProfile->nama} membuat reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " ({$bookingStart}-{$bookingEnd} WIB, {$durasi} jam) untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'DP 30%' : 'Bayar Penuh') . ")",
+            "Klien {$clientProfile->nama} mengajukan reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " ({$bookingStart}-{$bookingEnd} WIB, {$durasi} jam) untuk layanan '{$service->nama_layanan}' (" . ($paymentType === 'dp' ? 'DP 30%' : 'Bayar Penuh') . ")",
             $contract,
             [
                 'total_amount' => $totalAmount,
@@ -328,8 +328,26 @@ class BookingController extends Controller
             ]
         );
 
+        if ($targetPhotographer && $targetPhotographer->id_user) {
+            Notification::send(
+                $targetPhotographer->id_user,
+                'Permintaan Reservasi Baru',
+                "Klien {$clientProfile->nama} mengajukan reservasi untuk {$tanggalSesi} ({$bookingStart}-{$bookingEnd} WIB). Mohon tinjau jadwal dan lokasi acara.",
+                'booking_new_request',
+                url('/photographer/bookings')
+            );
+        }
+
+        Notification::send(
+            auth()->id(),
+            'Reservasi Berhasil Diajukan',
+            "Permintaan reservasi sesi foto Anda telah dikirim ke {$targetPhotographer->nama}. Tagihan pembayaran akan diterbitkan setelah fotografer menyetujui pesanan.",
+            'booking_submitted',
+            url('/client/bookings')
+        );
+
         return redirect()->route('booking.invoice', $contract->id)
-            ->with('success', 'Reservasi sesi foto berhasil diajukan. Silakan lanjutkan pembayaran invoice.');
+            ->with('success', 'Permintaan reservasi berhasil diajukan. Menunggu persetujuan fotografer sebelum tagihan pembayaran diterbitkan.');
     }
 
     /**
@@ -579,22 +597,19 @@ class BookingController extends Controller
 
 
         $contract = Contract::with([
-
             'client.user',
-
             'photographer.user',
-
             'payments'
-
         ])
-
         ->when($clientProfile, function ($q) use ($clientProfile) {
-
             $q->where('id_client', $clientProfile->id);
-
         })
-
         ->findOrFail($id);
+
+        if ($contract->status_contract === 'draft' || !$contract->is_validated_photographer) {
+            return redirect()->route('booking.invoice', $contract->id)
+                ->with('error', 'Pembayaran belum dapat dilakukan karena fotografer belum menyetujui reservasi ini.');
+        }
 
 
 
