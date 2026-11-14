@@ -106,6 +106,9 @@
 
       this.$nextTick(() => {
         this.initLeafletMap();
+        setTimeout(() => {
+          if (this.mapInstance) this.mapInstance.invalidateSize();
+        }, 200);
         if (this.selectedDate) {
           this.fetchAvailableSlots(true);
         }
@@ -945,8 +948,8 @@
 
             <p x-show="mapNotice" x-text="mapNotice" x-cloak class="text-[11px] text-amber-600 dark:text-amber-400 font-medium"></p>
 
-            <!-- Container Peta -->
-            <div x-ref="bookingMap" class="w-full h-56 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-100 dark:bg-gray-900"></div>
+            <!-- Container Peta (Diperbesar Luas & Nyaman untuk Eksplorasi) -->
+            <div x-ref="bookingMap" class="w-full h-80 sm:h-96 md:h-[420px] rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-100 dark:bg-gray-900 shadow-xs" style="min-height: 380px;"></div>
 
             <p class="text-[11px] text-gray-500 dark:text-gray-400">
               <template x-if="latitude !== '' && longitude !== ''">

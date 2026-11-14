@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 01:00 WITA] — Perluasan Dimensi Tinggi Kontainer Peta Reservasi (Rule #70, Rule #93)
+
+* **Modul / Fitur**:
+  - Halaman Pemesanan / Reservasi Booking Klien (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Perluasan Tinggi Kontainer Peta**:
+    - **Before**: Kontainer peta hanya memiliki tinggi `h-56` (224px) yang terasa sempit, terpotong, dan membatasi pandangan pengguna saat mencari lokasi dan menancapkan pin.
+    - **After**: Memperbesar tinggi kontainer menjadi `h-80 sm:h-96 md:h-[420px]` dengan inline fallback `min-height: 380px;`. Peta kini tampil luas, lapang, dan proporsional untuk eksplorasi area acara dan penempatan pin marker. Menambahkan `invalidateSize()` setelah peta dimuat agar seluruh ubin render mulus tanpa celah abu-abu.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70 & Rule #93** (Proporsionalitas UI, Ergonomi Pengguna, Presisi Titik Lokasi Acara).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 00:55 WITA] — Penerapan Tampilan Google Maps Roadmap & Layer Switcher Satelit pada Peta Booking (Rule #93, Rule #70)
 
 * **Modul / Fitur**:
