@@ -976,9 +976,8 @@
         <div x-show="activeTab === 'faqs'" class="space-y-8" x-data="{ openFaq: null }">
           <!-- Bagian 1: Tanya Jawab Fotografer -->
           <div class="space-y-4">
-            <div class="space-y-1">
+            <div>
               <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">Tanya Jawab Fotografer</h2>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Informasi layanan langsung dari {{ $photographer->nama }}.</p>
             </div>
 
             <div class="space-y-3">
@@ -1032,10 +1031,9 @@
           <!-- Bagian 2: Ketentuan Sistem LensMatch (Hardcoded Terpusat) -->
           @if(!empty($systemFaqs))
             <div class="space-y-4">
-              <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-                <div class="space-y-1">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
                   <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">Ketentuan Sistem LensMatch</h3>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Ketentuan pemesanan, pembayaran, jadwal ulang, dan penerimaan hasil foto di LensMatch.</p>
                 </div>
                 <a href="{{ route('public.faq') }}" target="_blank" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0">
                   Lihat Pusat Bantuan

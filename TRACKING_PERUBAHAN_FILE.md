@@ -20,6 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-15 00:35 WITA] — Penghapusan Subteks Judul Redundan pada Tab Tanya Jawab Profil Fotografer (Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Halaman Detail Profil Fotografer Publik (`resources/views/public/photographers/show.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penghapusan Subteks Redundan / Fluff**:
+    - **Before**: Di bawah judul `"Tanya Jawab Fotografer"` terdapat subteks `"Informasi layanan langsung dari [Nama Fotografer]."` dan di bawah judul `"Ketentuan Sistem LensMatch"` terdapat subteks `"Ketentuan pemesanan, pembayaran, jadwal ulang, dan penerimaan hasil foto di LensMatch."`. Subteks ini bertele-tele dan tidak menambah nilai fungsional.
+    - **After**: Menghapus kedua paragraf subteks tersebut sehingga judul tampil bersih, padat, profesional, dan seragam dengan tab lainnya (*Paket Layanan*, *Galeri Portofolio*, *Kalender Ketersediaan*, dan *Ulasan Klien*). Tautan `"Lihat Pusat Bantuan"` kini disejajarkan secara vertikal di tengah (`items-center`) dengan judul section.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70 & Rule #51** (Anti-AI Slop, Copywriting To-The-Point, Eliminasi Fluff/Deskripsi Redundan).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 00:30 WITA] — Implementasi Auto-Disappearing Text Bubble Umpan Balik Visual Tombol Save & Unsave Favorit (Rule #70, Rule #51, Rule #93)
 
 * **Modul / Fitur**:
