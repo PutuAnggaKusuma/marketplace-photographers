@@ -3958,3 +3958,18 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian**:
   * `php artisan view:cache`: **PASS**.
   * `php artisan view:clear`: **PASS**.
+
+
+---
+
+### [2026-11-14] Penghapusan Floating Chat Widget Dummy
+* **Modul / Fitur**: Layout Utama Aplikasi Publik (`layouts/app.blade.php`).
+* **File yang Dimodifikasi / Dihapus**:
+  * `resources/views/layouts/app.blade.php` (menghapus `@include('partials.shared.chat-widget')`)
+  * `resources/views/partials/shared/chat-widget.blade.php` (dihapus dari repository)
+* **Rincian Perubahan**:
+  * Mengeliminasi widget melayang kuning "Real-time Chat LensMatch" yang merupakan sisa template statis lama/mockup mati (tidak terhubung ke database maupun controller).
+  * Komunikasi obrolan real-time antar pengguna tetap berpusat pada halaman sistem chat resmi yang berjalan penuh menggunakan Laravel Reverb (`/chat` untuk Klien dan `/photographer/chat` untuk Fotografer).
+* **Hasil Pengujian**:
+  * `php artisan view:cache`: **PASS**.
+  * `php artisan view:clear`: **PASS**.

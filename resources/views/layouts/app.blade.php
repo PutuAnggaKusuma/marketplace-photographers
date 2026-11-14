@@ -55,7 +55,6 @@
     </main>
 
     @if(!request()->routeIs('client.chat*') && !request()->is('chat*') && !request()->routeIs('public.elearning.show'))
-      @include('partials.shared.chat-widget')
       @include('partials.public.footer')
     @endif
 
