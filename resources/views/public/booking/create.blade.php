@@ -625,13 +625,24 @@
     },
 
     selectDay(day) {
-      if (!day.isCurrentMonth || day.isPast || day.isFullDayBlocked) return;
+      if (!this.step2Unlocked || !day.isCurrentMonth || day.isPast || day.isFullDayBlocked) return;
       this.selectedDate = day.dateStr;
       this.touched.date = true;
       this.validateDate();
       this.openStartDropdown = false;
       this.openEndDropdown = false;
       this.fetchAvailableSlots(false);
+
+      const targetRef = (this.provinceCode && this.cityCode && this.lokasi_acara && this.lokasi_acara.trim().length >= 5)
+        ? this.$refs.timeSection
+        : this.$refs.locationSection;
+
+      this.$nextTick(() => {
+        targetRef?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+          if (this.mapInstance) this.mapInstance.invalidateSize();
+        }, 250);
+      });
     },
 
     async fetchAvailableSlots(preserveSelection = false) {
@@ -696,7 +707,7 @@
     },
 
     pickStartTime(opt) {
-      if (!opt.available) return;
+      if (!this.step4Unlocked || !opt.available) return;
       this.selectedStartTime = opt.value;
       this.openStartDropdown = false;
 
@@ -715,10 +726,14 @@
     },
 
     pickEndTime(opt) {
+      if (!this.step4Unlocked) return;
       this.selectedEndTime = opt.value;
       this.openEndDropdown = false;
       this.touched.time = true;
       this.validateTime();
+      this.$nextTick(() => {
+        this.$refs.noteSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     },
 
     get selectedDurationHours() {
@@ -762,6 +777,34 @@
     },
     get currentPayAmount() {
       return this.paymentType === 'dp' ? this.dpAmount : this.totalBill;
+    },
+
+    get step1Done() {
+      return Boolean(this.selectedServiceId);
+    },
+    get step2Unlocked() {
+      return this.step1Done;
+    },
+    get step2Done() {
+      return this.step2Unlocked && Boolean(this.selectedDate);
+    },
+    get step3Unlocked() {
+      return this.step2Done;
+    },
+    get step3Done() {
+      return this.step3Unlocked && Boolean(this.provinceCode) && Boolean(this.cityCode) && Boolean(this.lokasi_acara && this.lokasi_acara.trim().length >= 5);
+    },
+    get step4Unlocked() {
+      return this.step3Done;
+    },
+    get step4Done() {
+      return this.step4Unlocked && Boolean(this.selectedStartTime) && Boolean(this.selectedEndTime) && this.selectedDurationHours >= 1;
+    },
+    get step5Unlocked() {
+      return this.step4Done;
+    },
+    get isFormReady() {
+      return this.step4Done;
     },
 
     touched: {
@@ -869,11 +912,17 @@
     },
 
     selectService(id) {
+      const isNewSelection = (this.selectedServiceId !== id);
       this.selectedServiceId = (this.selectedServiceId === id ? null : id);
       this.touched.service = true;
       this.validateService();
       if (this.selectedDate) {
         this.fetchAvailableSlots(false);
+      }
+      if (isNewSelection && this.selectedServiceId) {
+        this.$nextTick(() => {
+          this.$refs.dateSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
       }
     },
 
@@ -1027,15 +1076,21 @@
         </div>
 
         <!-- 2. Pilih Tanggal Sesi Foto -->
-        <div x-ref="dateSection" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none">
+        <div x-ref="dateSection"
+             tabindex="-1"
+             :class="{ 'opacity-50 pointer-events-none select-none': !step2Unlocked }"
+             class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none transition-opacity duration-200">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
-                <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                   :class="step2Unlocked ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               </div>
-              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">2. Pilih Tanggal Sesi</h2>
+              <h2 class="text-sm sm:text-base font-black transition-colors"
+                  :class="step2Unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">2. Pilih Tanggal Sesi</h2>
             </div>
-            <span x-show="selectedDate" x-cloak class="text-xs font-bold text-gray-700 dark:text-gray-300" x-text="formatDateIndo(selectedDate)"></span>
+            <span x-show="!step2Unlocked" class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Pilih Paket di Langkah 1</span>
+            <span x-show="step2Unlocked && selectedDate" x-cloak class="text-xs font-bold text-gray-700 dark:text-gray-300" x-text="formatDateIndo(selectedDate)"></span>
           </div>
 
           <div class="p-4 sm:p-5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700/60 space-y-3.5">
@@ -1046,12 +1101,14 @@
               <div class="flex items-center gap-1">
                 <button type="button"
                         @click="prevMonth()"
-                        class="w-7 h-7 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition cursor-pointer">
+                        :disabled="!step2Unlocked"
+                        class="w-7 h-7 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
                 </button>
                 <button type="button"
                         @click="nextMonth()"
-                        class="w-7 h-7 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition cursor-pointer">
+                        :disabled="!step2Unlocked"
+                        class="w-7 h-7 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 </button>
               </div>
@@ -1089,12 +1146,24 @@
         </div>
 
         <!-- 3. Lokasi Acara (Wilayah + Peta Pin Opsional + Alamat) -->
-        <div x-ref="locationSection" id="sectionLocation" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none transition" :class="(touched.province && errors.province) || (touched.city && errors.city) || (touched.lokasi && errors.lokasi) ? 'ring-2 ring-rose-400/40' : ''">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
-              <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <div x-ref="locationSection"
+             id="sectionLocation"
+             tabindex="-1"
+             :class="{
+               'opacity-50 pointer-events-none select-none': !step3Unlocked,
+               'ring-2 ring-rose-400/40': (touched.province && errors.province) || (touched.city && errors.city) || (touched.lokasi && errors.lokasi)
+             }"
+             class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none transition duration-200">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                   :class="step3Unlocked ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              </div>
+              <h2 class="text-sm sm:text-base font-black transition-colors"
+                  :class="step3Unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">3. Lokasi Acara</h2>
             </div>
-            <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">3. Lokasi Acara</h2>
+            <span x-show="!step3Unlocked" class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Pilih Tanggal di Langkah 2</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1109,7 +1178,8 @@
                         id="bookingProvinceBtn"
                         x-ref="provinceBtn"
                         @click="open = !open"
-                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
+                        :disabled="!step3Unlocked"
+                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer disabled:cursor-not-allowed"
                         :class="touched.province && errors.province ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
@@ -1141,7 +1211,8 @@
                         id="bookingCityBtn"
                         x-ref="cityBtn"
                         @click="open = !open"
-                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
+                        :disabled="!step3Unlocked"
+                        class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer disabled:cursor-not-allowed"
                         :class="touched.city && errors.city ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText" id="bookingCityLabel"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
@@ -1164,14 +1235,16 @@
               <div class="flex items-center gap-3">
                 <button type="button"
                         @click="useCurrentLocation()"
-                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer">
+                        :disabled="!step3Unlocked"
+                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                   Gunakan Lokasi Saat Ini
                 </button>
                 <button type="button"
                         x-show="latitude !== '' && longitude !== ''"
                         x-cloak
                         @click="clearMarker()"
-                        class="text-[11px] font-bold text-gray-400 hover:text-rose-500 cursor-pointer">
+                        :disabled="!step3Unlocked"
+                        class="text-[11px] font-bold text-gray-400 hover:text-rose-500 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                   Hapus Pin
                 </button>
               </div>
@@ -1182,10 +1255,11 @@
               <div class="relative flex-1 z-30">
                 <input type="text"
                        x-model="mapQuery"
+                       :disabled="!step3Unlocked"
                        @input.debounce.300ms="searchMapLocation(true)"
                        @keydown.enter.prevent="searchMapLocation(false)"
                        placeholder="Cari jalan, gedung, hotel, atau area acara..."
-                       class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition">
+                       class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition disabled:opacity-50">
                 
                 <!-- Right Indicator: Live Spinner or Glass Icon -->
                 <div class="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
@@ -1253,40 +1327,52 @@
             <textarea name="lokasi_acara"
                     x-ref="lokasiInput"
                     x-model="lokasi_acara"
+                    :disabled="!step3Unlocked"
                     @input="touched.lokasi = true; validateLokasi()"
                     @blur="touched.lokasi = true; validateLokasi()"
                     rows="4"
                     placeholder="Masukkan nama venue, gedung, jalan, serta patokan lokasi acara"
-                    :class="touched.lokasi && errors.lokasi ? 'border-rose-400 focus:ring-rose-400 focus:border-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"
+                    :class="[
+                      touched.lokasi && errors.lokasi ? 'border-rose-400 focus:ring-rose-400 focus:border-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400',
+                      !step3Unlocked ? 'opacity-60 cursor-not-allowed' : ''
+                    ]"
                     class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:ring-2 focus:outline-none transition leading-relaxed"></textarea>
             <p x-show="touched.lokasi && errors.lokasi" x-text="errors.lokasi" x-cloak class="text-[11px] font-bold text-rose-500 mt-1"></p>
           </div>
         </div>
 
-        <!-- 4. Pilih Jam Mulai & Selesai (2 Dropdown Terpisah Kelipatan 1 Jam) -->
-        <div x-ref="timeSection" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none">
+        <!-- 4. Pilih Jam Mulai dan Selesai (2 Dropdown Terpisah Kelipatan 1 Jam) -->
+        <div x-ref="timeSection"
+             tabindex="-1"
+             :class="{ 'opacity-50 pointer-events-none select-none': !step4Unlocked }"
+             class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none transition duration-200">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
-                <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                   :class="step4Unlocked ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
-              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">4. Pilih Jam Mulai dan Selesai</h2>
+              <h2 class="text-sm sm:text-base font-black transition-colors"
+                  :class="step4Unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">4. Pilih Jam Mulai dan Selesai</h2>
             </div>
-            <span x-show="slotLoading" x-cloak class="text-[11px] font-bold text-amber-600 dark:text-amber-400">Memeriksa slot...</span>
+            <span x-show="!step4Unlocked" class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Lengkapi Lokasi di Langkah 3</span>
+            <span x-show="step4Unlocked && slotLoading" x-cloak class="text-[11px] font-bold text-amber-600 dark:text-amber-400">Memeriksa slot...</span>
           </div>
 
-          <template x-if="!selectedDate">
+          <template x-if="!step4Unlocked">
             <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-dashed border-gray-200 dark:border-gray-700 text-center text-xs text-gray-500 dark:text-gray-400">
-              Pilih tanggal sesi terlebih dahulu pada langkah 2 untuk melihat daftar jam yang tersedia.
+              <span x-show="!step1Done">Pilih paket layanan pada langkah 1 untuk memulai.</span>
+              <span x-show="step1Done && !step2Done">Pilih tanggal sesi pada langkah 2 terlebih dahulu.</span>
+              <span x-show="step2Done && !step3Done">Lengkapi lokasi acara pada langkah 3 untuk membuka pilihan jam.</span>
             </div>
           </template>
 
-          <template x-if="selectedDate && !slotLoading && (!slotMatrix.is_open || !slotMatrix.has_available_slots)">
+          <template x-if="step4Unlocked && !slotLoading && (!slotMatrix.is_open || !slotMatrix.has_available_slots)">
             <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-dashed border-gray-200 dark:border-gray-700 text-center text-xs text-gray-600 dark:text-gray-400" x-text="slotMatrix.reason || 'Tidak ada jam tersedia pada tanggal ini.'">
             </div>
           </template>
 
-          <template x-if="selectedDate && (slotLoading || (slotMatrix.is_open && slotMatrix.has_available_slots))">
+          <template x-if="step4Unlocked && (slotLoading || (slotMatrix.is_open && slotMatrix.has_available_slots))">
             <div class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Dropdown 1: Jam Mulai -->
@@ -1294,7 +1380,8 @@
                   <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Jam Mulai <span class="text-rose-500">*</span></label>
                   <button type="button"
                           @click="openStartDropdown = !openStartDropdown; openEndDropdown = false"
-                          class="w-full px-4 py-2.5 text-xs font-bold text-left bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition cursor-pointer"
+                          :disabled="!step4Unlocked"
+                          class="w-full px-4 py-2.5 text-xs font-bold text-left bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition cursor-pointer disabled:cursor-not-allowed"
                           :class="selectedStartTime ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500 font-medium'">
                     <span x-text="selectedStartTime ? selectedStartTime + ' WIB' : 'Pilih Jam Mulai'"></span>
                     <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="openStartDropdown ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -1322,11 +1409,11 @@
                 <div class="relative" @click.away="openEndDropdown = false">
                   <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Jam Selesai <span class="text-rose-500">*</span></label>
                   <button type="button"
-                          :disabled="!selectedStartTime || validEndOptions.length === 0"
-                          @click="if (selectedStartTime && validEndOptions.length > 0) { openEndDropdown = !openEndDropdown; openStartDropdown = false; }"
+                          :disabled="!step4Unlocked || !selectedStartTime || validEndOptions.length === 0"
+                          @click="if (step4Unlocked && selectedStartTime && validEndOptions.length > 0) { openEndDropdown = !openEndDropdown; openStartDropdown = false; }"
                           class="w-full px-4 py-2.5 text-xs font-bold text-left bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 flex items-center justify-between transition"
                           :class="[
-                            (!selectedStartTime || validEndOptions.length === 0) ? 'opacity-60 cursor-not-allowed' : 'hover:border-amber-400 cursor-pointer',
+                            (!step4Unlocked || !selectedStartTime || validEndOptions.length === 0) ? 'opacity-60 cursor-not-allowed' : 'hover:border-amber-400 cursor-pointer',
                             selectedEndTime ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500 font-medium'
                           ]">
                     <span x-text="selectedEndTime ? (selectedEndTime + ' WIB (' + selectedDurationHours + ' Jam)') : 'Pilih Jam Selesai'"></span>
@@ -1356,15 +1443,24 @@
         </div>
 
         <!-- 5. Catatan Khusus -->
-        <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
-              <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <div x-ref="noteSection"
+             tabindex="-1"
+             :class="{ 'opacity-50 pointer-events-none select-none': !step5Unlocked }"
+             class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-4 outline-none transition duration-200">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors"
+                   :class="step5Unlocked ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </div>
+              <h2 class="text-sm sm:text-base font-black transition-colors"
+                  :class="step5Unlocked ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">5. Catatan Khusus</h2>
             </div>
-            <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">5. Catatan Khusus</h2>
+            <span x-show="!step5Unlocked" class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Pilih Jam di Langkah 4</span>
+            <span x-show="step5Unlocked" class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Opsional</span>
           </div>
 
-          <textarea name="catatan_khusus" rows="4" placeholder="Masukkan catatan konsep, jumlah peserta, atau instruksi khusus untuk fotografer" class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition leading-relaxed">{{ old('catatan_khusus', '') }}</textarea>
+          <textarea name="catatan_khusus" :disabled="!step5Unlocked" rows="4" placeholder="Masukkan catatan konsep, jumlah peserta, atau instruksi khusus untuk fotografer" class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 focus:outline-none transition leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed">{{ old('catatan_khusus', '') }}</textarea>
         </div>
 
       </div>
@@ -1483,13 +1579,14 @@
           <!-- Tombol Ajukan Reservasi -->
           <div class="pt-2">
             <button type="submit"
-                    :disabled="!selectedServiceId || !selectedDate || !selectedStartTime || !selectedEndTime || selectedDurationHours < 1"
-                    :class="(!selectedServiceId || !selectedDate || !selectedStartTime || !selectedEndTime || selectedDurationHours < 1) ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-500' : 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-md cursor-pointer'"
+                    :disabled="!isFormReady"
+                    :class="!isFormReady ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-500' : 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-md cursor-pointer'"
                     class="w-full py-3.5 text-xs rounded-xl transition text-center block">
-              <span x-show="!selectedServiceId">Pilih Paket Layanan Terlebih Dahulu</span>
-              <span x-show="selectedServiceId && !selectedDate" style="display: none;">Pilih Tanggal Pemotretan</span>
-              <span x-show="selectedServiceId && selectedDate && (!selectedStartTime || !selectedEndTime)" style="display: none;">Pilih Jam Mulai dan Selesai</span>
-              <span x-show="selectedServiceId && selectedDate && selectedStartTime && selectedEndTime" style="display: none;">Ajukan Reservasi Jadwal</span>
+              <span x-show="!step1Done">Pilih Paket Layanan Terlebih Dahulu</span>
+              <span x-show="step1Done && !step2Done" style="display: none;">Pilih Tanggal Sesi</span>
+              <span x-show="step1Done && step2Done && !step3Done" style="display: none;">Lengkapi Lokasi Acara</span>
+              <span x-show="step1Done && step2Done && step3Done && !step4Done" style="display: none;">Pilih Jam Mulai dan Selesai</span>
+              <span x-show="isFormReady" style="display: none;">Ajukan Reservasi Jadwal</span>
             </button>
             <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center leading-relaxed pt-2">
               Belum ada pembayaran. Fotografer akan memeriksa jadwal terlebih dahulu sebelum tagihan diterbitkan.
