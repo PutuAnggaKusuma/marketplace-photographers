@@ -16,8 +16,9 @@
 @section('content')
 <section class="py-10 sm:py-14 lg:py-16 bg-white dark:bg-gray-900 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10" 
-       @booking-city-set.window="cityCode = $event.detail.code; touched.city = true; validateCity(); if ($event.detail.lat && $event.detail.lng) { panMapTo($event.detail.lat, $event.detail.lng, 12); }"
+       @booking-city-set.window="cityCode = $event.detail.code; touched.city = true; validateCity(); if (!$event.detail.skipPan && $event.detail.lat && $event.detail.lng) { panMapTo($event.detail.lat, $event.detail.lng, 12); }"
        x-data="{
+    provincesList: {{ Illuminate\Support\Js::from($provinces->map(fn($p) => ['code' => (string)$p->code, 'name' => $p->name, 'lat' => !empty($p->meta['lat']) ? (float)$p->meta['lat'] : null, 'lng' => !empty($p->meta['long']) ? (float)$p->meta['long'] : null])) }},
     allServices: {{ Illuminate\Support\Js::from($allServices->map(function($s) {
         return [
             'id' => $s->id,
@@ -175,6 +176,7 @@
 
       this.mapInstance.on('click', (e) => {
         this.placeMarker(e.latlng.lat, e.latlng.lng, true);
+        this.reverseGeocodeAndMatch(e.latlng.lat, e.latlng.lng);
       });
     },
 
@@ -205,6 +207,7 @@
             if (this.selectedDate) {
               this.fetchAvailableSlots(false);
             }
+            this.reverseGeocodeAndMatch(pos.lat, pos.lng);
           });
         }
         this.mapInstance.setView([lat, lng], Math.max(this.mapInstance.getZoom(), 15));
@@ -229,6 +232,169 @@
       }
     },
 
+    normalizeGeoName(str) {
+      if (!str) return '';
+      return String(str).toLowerCase()
+        .replace(/^provinsi\s+/i, '')
+        .replace(/^daerah\s+khusus\s+ibukota\s+/i, '')
+        .replace(/^daerah\s+istimewa\s+/i, '')
+        .replace(/^dki\s+/i, '')
+        .replace(/^di\s+/i, '')
+        .replace(/^kabupaten\s+/i, '')
+        .replace(/^kab\.\s+/i, '')
+        .replace(/^kota\s+/i, '')
+        .replace(/[^a-z0-9]/g, '')
+        .trim();
+    },
+
+    findMatchingProvince(rawState) {
+      if (!rawState) return null;
+      const clean = this.normalizeGeoName(rawState);
+      if (!clean) return null;
+
+      let found = this.provincesList.find(p => this.normalizeGeoName(p.name) === clean);
+      if (found) return found;
+
+      found = this.provincesList.find(p => {
+        const pNorm = this.normalizeGeoName(p.name);
+        return pNorm.includes(clean) || clean.includes(pNorm);
+      });
+      if (found) return found;
+
+      const aliasMap = {
+        'jakarta': '31',
+        'dkijakarta': '31',
+        'yogyakarta': '34',
+        'diyogyakarta': '34',
+        'jogja': '34',
+        'westjava': '32',
+        'centraljava': '33',
+        'eastjava': '35',
+        'westnusatenggara': '52',
+        'eastnusatenggara': '53',
+        'northsumatra': '12',
+        'westsumatra': '13',
+        'southsumatra': '16',
+        'bangkabelitung': '19',
+        'riauislands': '21',
+        'westkalimantan': '61',
+        'centralkalimantan': '62',
+        'southkalimantan': '63',
+        'eastkalimantan': '64',
+        'northkalimantan': '65',
+        'northsulawesi': '71',
+        'centralsulawesi': '72',
+        'southsulawesi': '73',
+        'southeastsulawesi': '74',
+        'westsulawesi': '76',
+        'northmaluku': '82',
+        'westpapua': '92'
+      };
+      if (aliasMap[clean]) {
+        return this.provincesList.find(p => String(p.code) === String(aliasMap[clean])) || null;
+      }
+      return null;
+    },
+
+    async reverseGeocodeAndMatch(lat, lng, preferredState = '', preferredCity = '') {
+      let stateCandidate = preferredState;
+      let cityCandidate = preferredCity;
+      let venueTitle = '';
+      let fullAddress = '';
+
+      if (!stateCandidate || !cityCandidate) {
+        try {
+          const photonUrl = `https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`;
+          const res = await fetch(photonUrl);
+          const data = await res.json();
+          if (data && data.features && data.features.length > 0) {
+            const props = data.features[0].properties || {};
+            stateCandidate = stateCandidate || props.state || '';
+            cityCandidate = cityCandidate || props.county || props.city || props.district || '';
+            venueTitle = props.name || props.street || '';
+            const parts = [];
+            if (props.street) parts.push(props.street + (props.housenumber ? ' No. ' + props.housenumber : ''));
+            if (props.district) parts.push(props.district);
+            if (props.city || props.county) parts.push(props.city || props.county);
+            if (props.state) parts.push(props.state);
+            fullAddress = (venueTitle ? venueTitle + ', ' : '') + parts.join(', ');
+          }
+        } catch (e) {
+          // Fallback Nominatim jika Photon gagal
+        }
+
+        if (!stateCandidate || !cityCandidate) {
+          try {
+            const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`;
+            const nomRes = await fetch(nomUrl, { headers: { 'Accept': 'application/json' } });
+            const nomData = await nomRes.json();
+            if (nomData && nomData.address) {
+              stateCandidate = stateCandidate || nomData.address.state || '';
+              cityCandidate = cityCandidate || nomData.address.city || nomData.address.town || nomData.address.county || nomData.address.city_district || '';
+              if (!fullAddress) fullAddress = nomData.display_name || '';
+            }
+          } catch (e) {
+            // Error ditangani secara senyap
+          }
+        }
+      }
+
+      if (fullAddress && (!this.lokasi_acara || !this.lokasi_acara.trim())) {
+        this.lokasi_acara = fullAddress;
+        this.touched.lokasi = true;
+        this.validateLokasi();
+      }
+
+      if (stateCandidate) {
+        const matchedProv = this.findMatchingProvince(stateCandidate);
+        if (matchedProv) {
+          this.provinceCode = matchedProv.code;
+          this.touched.province = true;
+          this.validateProvince();
+          window.dispatchEvent(new CustomEvent('booking-province-set', {
+            detail: { code: matchedProv.code, name: matchedProv.name }
+          }));
+
+          fetchBookingCities(matchedProv.code, '', cityCandidate);
+          this.mapNotice = `Lokasi terdeteksi: ${matchedProv.name}${cityCandidate ? ' — ' + cityCandidate : ''}`;
+          return;
+        }
+      }
+
+      this.mapNotice = `Titik koordinat terpilih: ${lat}, ${lng}`;
+    },
+
+    formatPhotonResult(feat) {
+      const p = feat.properties || {};
+      const coords = feat.geometry?.coordinates || [0, 0];
+      const lng = Number(coords[0]).toFixed(6);
+      const lat = Number(coords[1]).toFixed(6);
+      const title = p.name || p.street || p.city || 'Titik Lokasi';
+      
+      const subParts = [];
+      if (p.street && p.street !== title) subParts.push(p.street + (p.housenumber ? ' No. ' + p.housenumber : ''));
+      if (p.district) subParts.push(p.district);
+      if (p.city || p.county) subParts.push(p.city || p.county);
+      if (p.state) subParts.push(p.state);
+
+      let tag = '';
+      const osmVal = p.osm_value || '';
+      if (['hotel', 'guest_house', 'motel'].includes(osmVal)) tag = 'Hotel';
+      else if (['beach'].includes(osmVal)) tag = 'Pantai';
+      else if (['restaurant', 'cafe', 'bar', 'pub', 'food_court'].includes(osmVal)) tag = 'Kuliner';
+      else if (['tourism', 'attraction', 'viewpoint'].includes(osmVal)) tag = 'Wisata';
+      else if (['suburb', 'town', 'village', 'city', 'district'].includes(osmVal)) tag = 'Wilayah';
+
+      return {
+        lat: parseFloat(lat),
+        lon: parseFloat(lng),
+        main_title: title,
+        sub_title: subParts.join(', ') || p.country || '',
+        tag: tag,
+        raw_props: p
+      };
+    },
+
     formatSearchResult(item) {
       let mainTitle = '';
       let subTitle = '';
@@ -246,9 +412,15 @@
         subTitle = chunks.slice(1, 4).join(', ').trim();
       }
       return {
-        ...item,
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon),
         main_title: mainTitle,
-        sub_title: subTitle || item.display_name
+        sub_title: subTitle || item.display_name,
+        tag: 'Peta',
+        raw_props: {
+          state: item.address?.state || '',
+          city: item.address?.city || item.address?.county || item.address?.town || ''
+        }
       };
     },
 
@@ -261,7 +433,35 @@
       }
       this.mapSearching = true;
       this.mapNotice = '';
+
       try {
+        let lat = -6.2000;
+        let lon = 106.8166;
+        if (this.mapInstance) {
+          const center = this.mapInstance.getCenter();
+          lat = center.lat.toFixed(5);
+          lon = center.lng.toFixed(5);
+        }
+
+        // 1. Prioritas Utama: Photon Komoot (Elasticsearch OSM, Fuzzy match + typo tolerance + location bias)
+        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&limit=8`;
+        const res = await fetch(photonUrl);
+        const data = await res.json();
+
+        if (data && data.features && data.features.length > 0) {
+          let features = data.features.filter(f => {
+            const cc = f.properties?.countrycode || '';
+            const c = f.properties?.country || '';
+            return cc === 'ID' || c.toLowerCase().includes('indonesia');
+          });
+          if (features.length === 0) {
+            features = data.features.slice(0, 6);
+          }
+          this.mapResults = features.map(f => this.formatPhotonResult(f));
+          return;
+        }
+
+        // 2. Fallback Nominatim jika Photon kosong
         let viewboxParam = '';
         if (this.mapInstance) {
           const center = this.mapInstance.getCenter();
@@ -271,11 +471,11 @@
           const minLat = (center.lat - 0.6).toFixed(4);
           viewboxParam = `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=0`;
         }
-        const url = 'https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=6&addressdetails=1' + viewboxParam + '&q=' + encodeURIComponent(q);
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          this.mapResults = data.map(item => this.formatSearchResult(item));
+        const nomUrl = 'https://nominatim.openstreetmap.org/search?format=json&countrycodes=id&limit=6&addressdetails=1' + viewboxParam + '&q=' + encodeURIComponent(q);
+        const nomRes = await fetch(nomUrl, { headers: { 'Accept': 'application/json' } });
+        const nomData = await nomRes.json();
+        if (Array.isArray(nomData) && nomData.length > 0) {
+          this.mapResults = nomData.map(item => this.formatSearchResult(item));
         } else {
           this.mapResults = [];
           if (!isLive) {
@@ -293,14 +493,20 @@
     pickSearchResult(item) {
       const lat = parseFloat(item.lat);
       const lng = parseFloat(item.lon);
-      this.mapQuery = item.main_title || item.display_name;
+      this.mapQuery = item.main_title || item.sub_title;
       this.mapResults = [];
       this.placeMarker(lat, lng, true);
+
+      const fullAddr = (item.main_title ? item.main_title + ', ' : '') + (item.sub_title || '');
       if (!this.lokasi_acara || !this.lokasi_acara.trim()) {
-        this.lokasi_acara = item.display_name || '';
+        this.lokasi_acara = fullAddr;
         this.touched.lokasi = true;
         this.validateLokasi();
       }
+
+      const state = item.raw_props?.state || '';
+      const city = item.raw_props?.county || item.raw_props?.city || item.raw_props?.district || '';
+      this.reverseGeocodeAndMatch(lat, lng, state, city);
     },
 
     useCurrentLocation() {
@@ -312,6 +518,7 @@
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           this.placeMarker(pos.coords.latitude, pos.coords.longitude, true);
+          this.reverseGeocodeAndMatch(pos.coords.latitude, pos.coords.longitude);
         },
         () => {
           this.mapNotice = 'Izin lokasi ditolak atau tidak tersedia.';
@@ -879,7 +1086,8 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <!-- Province Custom Alpine Dropdown -->
-            <div x-data="{ open: false, selectedCode: '{{ old('province_code', '') }}', selectedText: '{{ old('province_code') ? ($provinces->firstWhere('code', old('province_code'))?->name ?? 'Pilih Provinsi') : 'Pilih Provinsi' }}' }">
+            <div x-data="{ open: false, selectedCode: '{{ old('province_code', '') }}', selectedText: '{{ old('province_code') ? ($provinces->firstWhere('code', old('province_code'))?->name ?? 'Pilih Provinsi') : 'Pilih Provinsi' }}' }"
+                 @booking-province-set.window="selectedCode = $event.detail.code; selectedText = $event.detail.name; open = false">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Provinsi <span class="text-rose-500">*</span></label>
               <input type="hidden" name="province_code" :value="selectedCode">
 
@@ -956,12 +1164,12 @@
               </div>
             </div>
 
-            <!-- Search Bar Peta (Live Autocomplete Typeahead Ala Google Maps) -->
+            <!-- Search Bar Peta (Live Autocomplete Typeahead Pintar Ala Google Maps) -->
             <div class="flex items-center gap-2">
-              <div class="relative flex-1">
+              <div class="relative flex-1 z-30">
                 <input type="text"
                        x-model="mapQuery"
-                       @input.debounce.350ms="searchMapLocation(true)"
+                       @input.debounce.300ms="searchMapLocation(true)"
                        @keydown.enter.prevent="searchMapLocation(false)"
                        placeholder="Cari jalan, gedung, hotel, atau area acara..."
                        class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition">
@@ -981,7 +1189,7 @@
                 <div x-show="mapResults.length > 0" 
                      x-cloak 
                      @click.away="mapResults = []"
-                     class="absolute top-full left-0 right-0 z-40 mt-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl divide-y divide-gray-100 dark:divide-gray-700/80 max-h-64 overflow-y-auto">
+                     class="absolute top-full left-0 right-0 z-[1050] mt-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl divide-y divide-gray-100 dark:divide-gray-700/80 max-h-72 overflow-y-auto">
                   <template x-for="(item, rIdx) in mapResults" :key="rIdx">
                     <button type="button"
                             @click="pickSearchResult(item)"
@@ -993,8 +1201,11 @@
                         </svg>
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 truncate" x-text="item.main_title"></p>
-                        <p class="text-[10px] text-gray-400 dark:text-gray-400 truncate mt-0.5" x-text="item.sub_title"></p>
+                        <div class="flex items-center gap-2">
+                          <p class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 truncate" x-text="item.main_title"></p>
+                          <span x-show="item.tag" x-text="item.tag" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 shrink-0"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate mt-0.5" x-text="item.sub_title"></p>
                       </div>
                     </button>
                   </template>
@@ -1361,11 +1572,11 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-  function fetchBookingCities(provinceCode, preselectCityCode = '') {
+  function fetchBookingCities(provinceCode, preselectCityCode = '', targetCityName = '') {
     const cityInput = document.getElementById('bookingCityInput');
     const cityList = document.getElementById('bookingCityOptionsList');
 
-    if (!preselectCityCode) {
+    if (!preselectCityCode && !targetCityName) {
       cityInput.value = '';
       cityInput.dispatchEvent(new Event('change'));
       window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: '', name: 'Memuat Kota...' } }));
@@ -1375,20 +1586,29 @@
     fetch('/api/cities/' + provinceCode)
       .then(res => res.json())
       .then(data => {
-        if (!preselectCityCode) {
+        if (!preselectCityCode && !targetCityName) {
           window.dispatchEvent(new CustomEvent('booking-city-set', { detail: { code: '', name: 'Pilih Kota / Kabupaten' } }));
         }
         let html = '';
         let matchedCity = null;
+
+        const cleanTarget = targetCityName ? targetCityName.toLowerCase().replace(/^(kabupaten|kota|kab\.)\s+/i, '').replace(/[^a-z0-9]/g, '') : '';
+
         data.forEach(city => {
           if (preselectCityCode && String(city.code) === String(preselectCityCode)) {
             matchedCity = city;
+          } else if (!matchedCity && cleanTarget) {
+            const cleanCityName = city.name.toLowerCase().replace(/^(kabupaten|kota|kab\.)\s+/i, '').replace(/[^a-z0-9]/g, '');
+            if (cleanCityName === cleanTarget || cleanCityName.includes(cleanTarget) || cleanTarget.includes(cleanCityName)) {
+              matchedCity = city;
+            }
           }
+
           const cityLat = (city.meta && city.meta.lat) ? city.meta.lat : '';
           const cityLng = (city.meta && city.meta.long) ? city.meta.long : '';
           const escapedName = city.name.replace(/'/g, "\\'");
           html += `
-            <div onclick="selectBookingCity('${city.code}', '${escapedName}', '${cityLat}', '${cityLng}')" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
+            <div onclick="selectBookingCity('${city.code}', '${escapedName}', '${cityLat}', '${cityLng}', false)" class="px-4 py-2.5 text-xs text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition cursor-pointer">
               ${city.name}
             </div>
           `;
@@ -1398,12 +1618,12 @@
         if (matchedCity) {
           const mLat = (matchedCity.meta && matchedCity.meta.lat) ? matchedCity.meta.lat : '';
           const mLng = (matchedCity.meta && matchedCity.meta.long) ? matchedCity.meta.long : '';
-          selectBookingCity(matchedCity.code, matchedCity.name, mLat, mLng);
+          selectBookingCity(matchedCity.code, matchedCity.name, mLat, mLng, Boolean(targetCityName));
         }
       });
   }
 
-  function selectBookingCity(code, name, lat = '', lng = '') {
+  function selectBookingCity(code, name, lat = '', lng = '', skipPan = false) {
     const input = document.getElementById('bookingCityInput');
     input.value = code;
     input.dispatchEvent(new Event('change'));
@@ -1412,7 +1632,8 @@
         code: code, 
         name: name,
         lat: lat,
-        lng: lng
+        lng: lng,
+        skipPan: skipPan
       } 
     }));
   }

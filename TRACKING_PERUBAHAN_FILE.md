@@ -20,6 +20,33 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 12:00 WITA] — Implementasi Mesin Rekomendasi Pencarian Pintar (Photon Komoot Geocoder) dan Otomasi Auto-Fill Dropdown Provinsi serta Kota (Rule #70, Rule #51, Rule #41)
+
+* **Modul / Fitur**:
+  - Formulir Reservasi Publik (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Upgrade Mesin Pencari Pintar Peta (100% Gratis)**:
+    - **Before**: Pencarian lokasi hanya menggunakan OpenStreetMap Nominatim biasa dengan pencarian teks kaku (tidak toleran salah ketik, lambat, dan sering gagal menampilkan nama tempat komersial seperti hotel, kafe, villa, atau pantai).
+    - **After**: Mengintegrasikan **Photon by Komoot** (mesin pencari Elasticsearch OpenStreetMap) dengan toleransi salah ketik (*fuzzy search dan typo tolerance*), pencarian berbasis koordinat aktif peta (*location bias*), penanda kategori ramah pengguna (*Hotel*, *Pantai*, *Kuliner*, *Wisata*, *Wilayah*), serta fallback otomatis ke Nominatim jika diperlukan. Mengubah `z-index` dropdown rekomendasi ke `z-[1050]` agar tidak tertutup oleh layer Leaflet map.
+  * **Otomasi Sinkronisasi Provinsi dan Kota (Auto-Fill serta Auto-Select)**:
+    - **Before**: Saat pengguna memilih lokasi rekomendasi, mengklik "Gunakan Lokasi Saat Ini", atau mengklik/menggeser pin di peta, hanya titik koordinat yang bergeser. Input dropdown Provinsi dan Kota/Kabupaten tetap kosong dan harus diisi manual, menyebabkan error validasi jika terlewat.
+    - **After**: Mengimplementasikan `reverseGeocodeAndMatch(lat, lng)` dan pencocokan wilayah otomatis:
+      1. Begitu pin peta berubah (via tombol lokasi saat ini, klik rekomendasi pencarian, klik peta, atau geser pin), sistem otomatis mengekstrak data wilayah via reverse geocoder cepat (Photon/Nominatim).
+      2. Sistem mencocokkan nama provinsi ke database 38 provinsi Indonesia dan mengirimkan event `@booking-province-set.window` untuk memperbarui tombol dropdown dan input tersembunyi `province_code`.
+      3. Sistem memuat daftar kota (`/api/cities/{provinceCode}`) dan langsung mencocokkan kota/kabupaten yang sesuai, lalu memilihnya otomatis via `selectBookingCity` tanpa menggeser posisi pin presisi pengguna (`skipPan: true`).
+      4. Validasi real-time untuk Provinsi dan Kota langsung terpenuhi (`errors.province = ''`, `errors.city = ''`), dan nama venue/alamat lengkap di textarea otomatis terisi jika belum ada.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, copywriting to-the-point, natural, tanpa redundant `&` atau hiperbola.
+  * **Rule #51**: Copywriting formulir bersih, to-the-point, dan profesional.
+  * **Rule #41**: UI elegan dan responsif tanpa glitch z-index.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-16 11:18 WITA] — Implementasi Model Hybrid (Inisialisasi Chat Otomatis + Review Reservasi Fotografer) & Perbaikan Real-Time Validation Auto-Scroll (Rule #70, Rule #51)
 
 * **Modul / Fitur**:
