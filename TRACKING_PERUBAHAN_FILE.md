@@ -20,6 +20,27 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 15:15 WITA] — Penerapan Konsep C: Fasilitas Layanan Inklusif Murni Bebas Angka Biaya Tambahan (Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Halaman Detail Profil Fotografer (`resources/views/public/photographers/show.blade.php`).
+  - Database Layanan Fotografer (`service_details`).
+* **File yang Diubah**:
+  * `resources/views/public/photographers/show.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyelarasan Tampilan Fasilitas Layanan Inklusif**:
+    - **Before**: Pada paket Prewedding, item *"Termasuk Cetak Canvas 40x60cm"* memunculkan teks oranye `+Rp 500.000` di samping centang hijau karena kolom `tarif_harga = 500000`, menimbulkan kebingungan apakah ada tagihan ekstra di luar tarif per jam.
+    - **After**: Menghapus blok pengecekan `@if($det->tarif_harga > 0)` pada view Blade dan mengupdate nilai `tarif_harga` record terkait di database menjadi `0`. Semua fasilitas yang dicentang kini murni berstatus benefit inklusif bawaan paket, sehingga selaras dengan judul *"FASILITAS LAYANAN TERMASUK"* dan menjaga transparansi tarif per jam tanpa biaya tersembunyi.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, copywriting to-the-point, bersih, dan natural.
+  * **Rule #51**: Tampilan rincian layanan rapi, transparan, dan tidak membingungkan pengguna.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Verifikasi database `service_details`: **PASS** (`tarif_harga` seragam bernilai 0).
+
+---
+
 ### [2026-11-16 15:10 WITA] — Perbaikan Logika Waktu Booking Hari-H: Sinkronisasi Timezone Indonesia (WIB), Jeda Persiapan 1 Jam, dan Filter Dropdown Jam Lewat (Rule #70, Rule #51)
 
 * **Modul / Fitur**:

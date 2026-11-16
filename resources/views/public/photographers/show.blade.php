@@ -447,11 +447,6 @@
                               <p class="text-xs text-gray-700 dark:text-gray-300 font-medium leading-tight">
                                 {{ $det->nama_fitur }}
                               </p>
-                              @if($det->tarif_harga > 0)
-                                <p class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 mt-0.5">
-                                  +Rp {{ number_format($det->tarif_harga, 0, ',', '.') }}
-                                </p>
-                              @endif
                             </div>
                           </div>
                         @endforeach
