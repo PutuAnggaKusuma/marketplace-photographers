@@ -70,6 +70,7 @@
     mapMarker: null,
     mapQuery: '',
     mapSearching: false,
+    isDetectingLocation: false,
     mapResults: [],
     mapNotice: '',
 
@@ -221,6 +222,7 @@
     clearMarker() {
       this.latitude = '';
       this.longitude = '';
+      this.mapQuery = '';
       this.mapResults = [];
       this.mapNotice = '';
       if (this.mapMarker && this.mapInstance) {
@@ -332,6 +334,7 @@
               stateCandidate = stateCandidate || nomData.address.state || '';
               cityCandidate = cityCandidate || nomData.address.city || nomData.address.town || nomData.address.county || nomData.address.city_district || '';
               if (!fullAddress) fullAddress = nomData.display_name || '';
+              if (!venueTitle) venueTitle = nomData.name || nomData.address?.hotel || nomData.address?.building || nomData.address?.tourism || nomData.address?.amenity || nomData.address?.road || '';
             }
           } catch (e) {
             // Error ditangani secara senyap
@@ -339,10 +342,17 @@
         }
       }
 
-      if (fullAddress && (!this.lokasi_acara || !this.lokasi_acara.trim())) {
-        this.lokasi_acara = fullAddress;
-        this.touched.lokasi = true;
-        this.validateLokasi();
+      const detectedQuery = venueTitle || (fullAddress ? fullAddress.split(',')[0].trim() : '');
+      if (detectedQuery) {
+        this.mapQuery = detectedQuery;
+      }
+
+      if (fullAddress) {
+        if (!this.lokasi_acara || !this.lokasi_acara.trim() || this.isDetectingLocation) {
+          this.lokasi_acara = fullAddress;
+          this.touched.lokasi = true;
+          this.validateLokasi();
+        }
       }
 
       if (stateCandidate) {
@@ -514,16 +524,24 @@
         this.mapNotice = 'Perangkat tidak mendukung deteksi lokasi otomatis.';
         return;
       }
+      this.isDetectingLocation = true;
       this.mapNotice = 'Mendeteksi titik lokasi perangkat...';
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          this.placeMarker(pos.coords.latitude, pos.coords.longitude, true);
-          this.reverseGeocodeAndMatch(pos.coords.latitude, pos.coords.longitude);
+        async (pos) => {
+          try {
+            this.placeMarker(pos.coords.latitude, pos.coords.longitude, true);
+            await this.reverseGeocodeAndMatch(pos.coords.latitude, pos.coords.longitude);
+          } catch (e) {
+            this.mapNotice = 'Gagal memproses titik lokasi.';
+          } finally {
+            this.isDetectingLocation = false;
+          }
         },
         () => {
           this.mapNotice = 'Izin lokasi ditolak atau tidak tersedia.';
+          this.isDetectingLocation = false;
         },
-        { enableHighAccuracy: true, timeout: 8000 }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     },
 
@@ -1178,10 +1196,19 @@
                         id="bookingProvinceBtn"
                         x-ref="provinceBtn"
                         @click="open = !open"
-                        :disabled="!step3Unlocked"
+                        :disabled="!step3Unlocked || isDetectingLocation"
                         class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer disabled:cursor-not-allowed"
-                        :class="touched.province && errors.province ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
-                  <span class="truncate" x-text="selectedText"></span>
+                        :class="[
+                          touched.province && errors.province ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400',
+                          isDetectingLocation && !provinceCode ? 'opacity-70 animate-pulse' : ''
+                        ]">
+                  <div class="flex items-center gap-2 truncate">
+                    <svg x-show="isDetectingLocation && !provinceCode" class="w-3.5 h-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="truncate" x-text="(isDetectingLocation && !provinceCode) ? 'Mencari provinsi...' : selectedText"></span>
+                  </div>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
 
@@ -1211,10 +1238,19 @@
                         id="bookingCityBtn"
                         x-ref="cityBtn"
                         @click="open = !open"
-                        :disabled="!step3Unlocked"
+                        :disabled="!step3Unlocked || isDetectingLocation"
                         class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer disabled:cursor-not-allowed"
-                        :class="touched.city && errors.city ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
-                  <span class="truncate" x-text="selectedText" id="bookingCityLabel"></span>
+                        :class="[
+                          touched.city && errors.city ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400',
+                          isDetectingLocation && !cityCode ? 'opacity-70 animate-pulse' : ''
+                        ]">
+                  <div class="flex items-center gap-2 truncate">
+                    <svg x-show="isDetectingLocation && !cityCode" class="w-3.5 h-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="truncate" id="bookingCityLabel" x-text="(isDetectingLocation && !cityCode) ? 'Mencari kota...' : selectedText"></span>
+                  </div>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
 
@@ -1235,15 +1271,19 @@
               <div class="flex items-center gap-3">
                 <button type="button"
                         @click="useCurrentLocation()"
-                        :disabled="!step3Unlocked"
-                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-                  Gunakan Lokasi Saat Ini
+                        :disabled="!step3Unlocked || isDetectingLocation"
+                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
+                  <svg x-show="isDetectingLocation" class="w-3.5 h-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span x-text="isDetectingLocation ? 'Mencari Lokasi...' : 'Gunakan Lokasi Saat Ini'"></span>
                 </button>
                 <button type="button"
                         x-show="latitude !== '' && longitude !== ''"
                         x-cloak
                         @click="clearMarker()"
-                        :disabled="!step3Unlocked"
+                        :disabled="!step3Unlocked || isDetectingLocation"
                         class="text-[11px] font-bold text-gray-400 hover:text-rose-500 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                   Hapus Pin
                 </button>
@@ -1255,19 +1295,20 @@
               <div class="relative flex-1 z-30">
                 <input type="text"
                        x-model="mapQuery"
-                       :disabled="!step3Unlocked"
+                       :disabled="!step3Unlocked || isDetectingLocation"
                        @input.debounce.300ms="searchMapLocation(true)"
                        @keydown.enter.prevent="searchMapLocation(false)"
-                       placeholder="Cari jalan, gedung, hotel, atau area acara..."
-                       class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition disabled:opacity-50">
+                       :placeholder="isDetectingLocation ? 'Mendeteksi titik lokasi perangkat...' : 'Cari jalan, gedung, hotel, atau area acara...'"
+                       class="w-full pl-4 pr-11 py-2.5 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-amber-400 focus:outline-none transition disabled:opacity-60"
+                       :class="isDetectingLocation ? 'animate-pulse' : ''">
                 
                 <!-- Right Indicator: Live Spinner or Glass Icon -->
                 <div class="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <svg x-show="mapSearching" class="w-4 h-4 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
+                  <svg x-show="mapSearching || isDetectingLocation" class="w-4 h-4 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <svg x-show="!mapSearching" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg x-show="!mapSearching && !isDetectingLocation" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                   </svg>
                 </div>
@@ -1301,9 +1342,9 @@
 
               <button type="button"
                       @click="searchMapLocation(false)"
-                      :disabled="mapSearching"
+                      :disabled="mapSearching || isDetectingLocation || !step3Unlocked"
                       class="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-bold text-gray-800 dark:text-white transition shrink-0 cursor-pointer disabled:opacity-50">
-                <span x-text="mapSearching ? 'Mencari...' : 'Cari'"></span>
+                <span x-text="(mapSearching || isDetectingLocation) ? 'Mencari...' : 'Cari'"></span>
               </button>
             </div>
 
@@ -1327,14 +1368,15 @@
             <textarea name="lokasi_acara"
                     x-ref="lokasiInput"
                     x-model="lokasi_acara"
-                    :disabled="!step3Unlocked"
+                    :disabled="!step3Unlocked || isDetectingLocation"
                     @input="touched.lokasi = true; validateLokasi()"
                     @blur="touched.lokasi = true; validateLokasi()"
                     rows="4"
-                    placeholder="Masukkan nama venue, gedung, jalan, serta patokan lokasi acara"
+                    :placeholder="isDetectingLocation ? 'Mengambil alamat lengkap dari titik lokasi...' : 'Masukkan nama venue, gedung, jalan, serta patokan lokasi acara'"
                     :class="[
                       touched.lokasi && errors.lokasi ? 'border-rose-400 focus:ring-rose-400 focus:border-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400',
-                      !step3Unlocked ? 'opacity-60 cursor-not-allowed' : ''
+                      (!step3Unlocked || isDetectingLocation) ? 'opacity-60 cursor-not-allowed' : '',
+                      isDetectingLocation ? 'animate-pulse' : ''
                     ]"
                     class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:ring-2 focus:outline-none transition leading-relaxed"></textarea>
             <p x-show="touched.lokasi && errors.lokasi" x-text="errors.lokasi" x-cloak class="text-[11px] font-bold text-rose-500 mt-1"></p>

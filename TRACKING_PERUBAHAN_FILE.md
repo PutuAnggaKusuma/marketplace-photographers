@@ -20,6 +20,60 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 15:55 WITA] — Animasi Loading Deteksi Lokasi dan Otomatisasi Input Field Pencarian Peta (Rule #70, Rule #51, Rule #41)
+
+* **Modul / Fitur**:
+  - Formulir Reservasi Publik — Bagian Lokasi Acara & Geolocation (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Animasi Loading Saat Klik "Gunakan Lokasi Saat Ini"**:
+    - **Before**: Saat tombol "Gunakan Lokasi Saat Ini" diklik, ada jeda sekitar 1-2 detik (proses pembacaan GPS perangkat, reverse geocoding via Photon/Nominatim, dan sinkronisasi dropdown kota) tanpa feedback visual apapun pada input field, sehingga pengguna mengira sistem macet atau tidak merespons.
+    - **After**: Menambahkan state `isDetectingLocation` di Alpine.js. Selama proses deteksi berlangsung:
+      1. Tombol "Gunakan Lokasi Saat Ini" menampilkan icon spinner berputar dan teks berubah menjadi `"Mencari Lokasi..."`.
+      2. Dropdown Provinsi dan Kota/Kabupaten masuk ke status pulse dengan icon spinner berputar dan teks `"Mencari provinsi..."` serta `"Mencari kota..."`.
+      3. Input field pencarian peta (`mapQuery`) menampilkan animasi pulse, icon spinner berputar di sisi kanan, serta placeholder dinamis `"Mendeteksi titik lokasi perangkat..."`.
+      4. Tombol "Cari" beralih label menjadi `"Mencari..."` dan berstatus disabled.
+      5. Textarea Alamat Lengkap menampilkan placeholder dinamis `"Mengambil alamat lengkap dari titik lokasi..."` dengan efek pulse lembut.
+  * **Otomatisasi Input Field Pencarian Peta (`mapQuery`)**:
+    - **Before**: Setelah titik lokasi berhasil dideteksi dari GPS, pin tertancap di peta dan alamat lengkap terisi di textarea bawah, tetapi kolom input pencarian di bawah "Pin Titik Lokasi di Peta (Opsional)" tetap kosong melompong.
+    - **After**: Fungsi `reverseGeocodeAndMatch()` mengekstrak nama tempat/jalan (`venueTitle` atau penggalan pertama nama jalan) dan otomatis mengisi input field pencarian peta (`this.mapQuery = detectedQuery;`). Saat tombol "Hapus Pin" diklik, kolom pencarian juga otomatis direset bersih (`this.mapQuery = '';`).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop Terminology, kata-kata to the point, ringkas, natural, tanpa simbol `&` redundan.
+  * **Rule #51**: Penanganan formulir dan interaksi peta yang intuitif, informatif, dan andal.
+  * **Rule #41**: Tidak ada pergeseran tata letak visual (*zero layout shift*) selama proses loading.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Pengujian state dan reaktivitas Alpine.js: **PASS**.
+
+---
+
+### [2026-11-16 15:40 WITA] — Implementasi Formulir Pemesanan Bertahap Sekuensial (Sequential Step-by-Step Form Progression) (Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Formulir Reservasi Publik — Alur Validasi Antar-Langkah (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penerapan Formulir Terkunci Bertahap (Sequential Locking)**:
+    - **Before**: Semua section formulir (Paket, Tanggal, Lokasi, Jam Sesi, Data Pemesan) terbuka sekaligus, memungkinkan pengguna melompati langkah atau mengisi bagian bawah terlebih dahulu meskipun paket atau tanggal belum dipilih.
+    - **After**: Mengimplementasikan getter `step1Done`, `step2Unlocked`, `step2Done`, `step3Unlocked`, `step3Done`, `step4Unlocked`, `step4Done`, dan `step5Unlocked` pada state Alpine.js:
+      - **Langkah 1 (Pilih Paket)**: Wajib dipilih pertama kali.
+      - **Langkah 2 (Pilih Tanggal)**: Terkunci (`opacity-50 pointer-events-none`) sampai paket layanan dipilih di Langkah 1.
+      - **Langkah 3 (Lokasi Acara)**: Terkunci sampai tanggal sesi dipilih di Langkah 2.
+      - **Langkah 4 (Pilih Jam Sesi)**: Terkunci dengan placeholder edukatif yang jelas sampai provinsi, kota, dan alamat acara terisi lengkap di Langkah 3.
+      - **Langkah 5 (Data Pemesan & Catatan)**: Terbuka setelah jam sesi valid.
+      - **Tombol Konfirmasi Booking**: Hanya aktif saat seluruh tahapan telah lengkap dan terverifikasi.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, pesan panduan langkah singkat, jelas, tanpa kalimat bertele-tele.
+  * **Rule #51**: Validasi formulir bertahap yang mencegah kesalahan input dan data inkonsisten.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-16 15:20 WITA] — Perapian Label Kalender: Eliminasi Tumpang Tindih Teks "Hari Ini" dan "Tutup" (Rule #70, Rule #41)
 
 * **Modul / Fitur**:
