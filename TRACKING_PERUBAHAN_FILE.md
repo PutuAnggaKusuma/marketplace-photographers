@@ -20,6 +20,25 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 15:20 WITA] — Perapian Label Kalender: Eliminasi Tumpang Tindih Teks "Hari Ini" dan "Tutup" (Rule #70, Rule #41)
+
+* **Modul / Fitur**:
+  - Formulir Reservasi Publik — Kalender Mini (`resources/views/public/booking/create.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyelarasan Label Status Sel Kalender**:
+    - **Before**: Jika tanggal hari ini sudah kehabisan slot atau berstatus tutup, teks oranye `"Hari Ini"` dan teks merah `"Tutup"` muncul bersamaan di satu sel tanggal, mengakibatkan tabrakan warna dan tampilan yang padat/membingungkan.
+    - **After**: Menambahkan kondisi `!day.isFullDayBlocked` pada teks `"Hari Ini"`. Jika tanggal hari ini berstatus tutup/penuh, label oranye `"Hari Ini"` otomatis disembunyikan dan sel hanya menampilkan satu label status tunggal `"Tutup"` dengan warna merah/rose yang konsisten dan rapi.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, tampilan to-the-point dan bersih.
+  * **Rule #41**: UI rapi tanpa glitch visual atau tabrakan teks status.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-16 15:15 WITA] — Penerapan Konsep C: Fasilitas Layanan Inklusif Murni Bebas Angka Biaya Tambahan (Rule #70, Rule #51)
 
 * **Modul / Fitur**:

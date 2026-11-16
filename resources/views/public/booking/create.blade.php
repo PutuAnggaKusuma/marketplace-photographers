@@ -1075,7 +1075,7 @@
                        'border-amber-400 bg-amber-400 text-gray-950 font-black shadow-xs ring-2 ring-amber-400/30': day.isCurrentMonth && !day.isPast && !day.isFullDayBlocked && selectedDate === day.dateStr
                      }">
                   <span class="text-xs font-black leading-none" x-text="day.dayNumber"></span>
-                  <template x-if="day.isCurrentMonth && day.isToday && selectedDate !== day.dateStr">
+                  <template x-if="day.isCurrentMonth && day.isToday && !day.isFullDayBlocked && selectedDate !== day.dateStr">
                     <span class="text-[9px] font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">Hari Ini</span>
                   </template>
                   <template x-if="day.isCurrentMonth && !day.isPast && day.isFullDayBlocked">
