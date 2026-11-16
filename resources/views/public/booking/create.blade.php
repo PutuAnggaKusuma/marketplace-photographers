@@ -555,6 +555,18 @@
       if (dow === 0) dow = 7;
       const wh = this.workingHours[dow];
       if (wh && !wh.is_open) return true;
+
+      const todayStr = this.getLocalTodayStr();
+      if (dateStr === todayStr && wh && !wh.is_24_hours && wh.jam_tutup) {
+        const now = new Date();
+        const currentMin = (now.getHours() * 60) + now.getMinutes();
+        const parts = wh.jam_tutup.split(':');
+        const closeMin = (parseInt(parts[0], 10) * 60) + parseInt(parts[1], 10);
+        if ((currentMin + 120) > closeMin) {
+          return true;
+        }
+      }
+
       return false;
     },
 
@@ -674,7 +686,8 @@
     },
 
     get startOptions() {
-      return this.slotMatrix.start_options || [];
+      const allOpts = this.slotMatrix.start_options || [];
+      return allOpts.filter(opt => opt.available);
     },
 
     get validEndOptions() {

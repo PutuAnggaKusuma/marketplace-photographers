@@ -20,6 +20,39 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 15:10 WITA] — Perbaikan Logika Waktu Booking Hari-H: Sinkronisasi Timezone Indonesia (WIB), Jeda Persiapan 1 Jam, dan Filter Dropdown Jam Lewat (Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Konfigurasi Timezone Aplikasi (`config/app.php`, `.env`, `.env.example`).
+  - Layanan Jadwal Reservasi (`app/Services/BookingScheduleService.php`).
+  - Formulir Reservasi Publik (`resources/views/public/booking/create.blade.php`).
+  - Controller Booking Fotografer (`app/Http/Controllers/Photographer/PhotographerBookingController.php`).
+* **File yang Diubah**:
+  * `config/app.php`
+  * `.env.example`
+  * `app/Services/BookingScheduleService.php`
+  * `resources/views/public/booking/create.blade.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Sinkronisasi Timezone Nasional (`Asia/Jakarta`)**:
+    - **Before**: Timezone sistem masih `UTC` (GMT+0). Saat klien mengakses sistem pada pukul 14:55 WIB, backend mengira waktu masih pukul 07:55 pagi, sehingga jam 08:00 pagi tetap ditandai tersedia.
+    - **After**: Menetapkan default timezone aplikasi ke `Asia/Jakarta` (WIB) sehingga sinkron dengan waktu nyata di Indonesia.
+  * **Penerapan Jeda Persiapan Minimal 1 Jam untuk Booking Hari-H**:
+    - **Before**: Tidak ada batas persiapan waktu. Pengguna bisa memesan jam yang sudah lewat atau jam yang terlalu mepet dengan waktu saat ini.
+    - **After**: Pada pemesanan hari ini, slot paling awal yang diizinkan memiliki buffer persiapan minimal 1 jam dari waktu saat ini (contoh: akses jam 14:03, slot mulai paling awal adalah 16:00 WIB). Validasi backend menolak keras jika ada manipulasi jam yang sudah lewat.
+  * **Penyembunyian Jam yang Sudah Lewat dari Dropdown (Opsi Tampilan 1)**:
+    - **Before**: Jam-jam pagi yang sudah lewat tetap muncul di dropdown jam mulai.
+    - **After**: Jam yang sudah lewat atau masih berada dalam jeda 1 jam otomatis dihilangkan dari daftar dropdown, sehingga klien hanya melihat jam yang benar-benar bisa dipesan. Jika sisa jam operasional hari ini sudah habis, kalender otomatis menandai tanggal hari ini dengan status "Tutup".
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, copywriting to-the-point dan natural.
+  * **Rule #51**: Logika validasi waktu formulir bersih, aman, dan dapat diandalkan.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Pengujian slot `2026-11-16` pada pukul 14:06 WIB: **PASS** (08:00 - 15:00 terfilter otomatis, hanya 16:00 yang tersedia).
+
+---
+
 ### [2026-11-16 12:00 WITA] — Implementasi Mesin Rekomendasi Pencarian Pintar (Photon Komoot Geocoder) dan Otomasi Auto-Fill Dropdown Provinsi serta Kota (Rule #70, Rule #51, Rule #41)
 
 * **Modul / Fitur**:

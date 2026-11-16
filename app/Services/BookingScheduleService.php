@@ -156,6 +156,25 @@ class BookingScheduleService
             }
         }
 
+        // Cek jika hari ini sisa jam operasionalnya sudah tidak mencukupi jeda persiapan + durasi minimal
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $now = Carbon::now($tz);
+        $todayStr = $now->toDateString();
+        if ($todayStr >= $fromDate) {
+            $dow = (int) $now->dayOfWeekIso;
+            $wh = PhotographerWorkingHour::where('id_photographer', $photographerId)
+                ->where('day_of_week', $dow)
+                ->first();
+            if ($wh && $wh->is_open && !$wh->is_24_hours) {
+                $closeMin = self::parseEndTimeToMinutes($wh->jam_tutup) ?? 1020;
+                $currentMin = ($now->hour * 60) + $now->minute;
+                // Buffer jeda 1 jam (60m) + durasi minimal sesi 1 jam (60m) = 120m
+                if (($currentMin + 120) > $closeMin) {
+                    $dates[] = $todayStr;
+                }
+            }
+        }
+
         return array_values(array_unique($dates));
     }
 
@@ -178,14 +197,19 @@ class BookingScheduleService
             return 'Pilihan jam sesi reguler harus dalam kelipatan 1 jam penuh.';
         }
 
-        $now = Carbon::now();
-        if ($date < $now->toDateString()) {
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $now = Carbon::now($tz);
+        $todayStr = $now->toDateString();
+
+        if ($date < $todayStr) {
             return 'Tanggal pemesanan tidak boleh di masa lalu.';
         }
-        if ($date === $now->toDateString()) {
-            $nowMinutes = ($now->hour * 60) + $now->minute;
-            if ($startMin <= $nowMinutes) {
-                return 'Jam mulai ' . self::formatMinutesToTime($startMin) . ' WIB sudah terlewat untuk hari ini.';
+        if ($date === $todayStr) {
+            $currentMinutes = ($now->hour * 60) + $now->minute;
+            $minAllowedMinutes = $currentMinutes + 60; // Jeda persiapan minimal 1 jam untuk pemesanan hari ini
+            if ($startMin < $minAllowedMinutes) {
+                $earliestSlot = self::formatMinutesToTime((int) ceil($minAllowedMinutes / 60) * 60);
+                return "Pemesanan untuk hari ini memerlukan jeda persiapan minimal 1 jam dari waktu saat ini (slot tercepat tersedia mulai pukul {$earliestSlot} WIB).";
             }
         }
 
@@ -396,6 +420,12 @@ class BookingScheduleService
             }
         }
 
+        $tz = config('app.timezone', 'Asia/Jakarta');
+        $now = Carbon::now($tz);
+        $isToday = ($date === $now->toDateString());
+        $currentMinutes = ($now->hour * 60) + $now->minute;
+        $minAllowedMinutes = $isToday ? ($currentMinutes + 60) : 0; // Jeda 1 jam buffer persiapan hari-H
+
         $firstHourStart = (int) ceil($openMin / 60) * 60;
         $lastHourEnd = (int) floor($closeMin / 60) * 60;
 
@@ -404,6 +434,11 @@ class BookingScheduleService
         $hasAnySlot = false;
 
         for ($s = $firstHourStart; $s <= $lastHourEnd - 60; $s += 60) {
+            // Opsi Tampilan 1: Jam yang sudah lewat atau berada dalam jeda persiapan 1 jam hari ini langsung dihilangkan dari dropdown
+            if ($isToday && $s < $minAllowedMinutes) {
+                continue;
+            }
+
             $validEnds = [];
             for ($e = $s + 60; $e <= $lastHourEnd; $e += 60) {
                 $err = self::validateRegularBookingSlot($photographerId, $date, $s, $e, $targetOptions, $excludeContractId);
@@ -425,32 +460,32 @@ class BookingScheduleService
             $isAvailable = count($validEnds) > 0;
             if ($isAvailable) {
                 $hasAnySlot = true;
-            }
-
-            $startOptions[] = [
-                'value' => $timeVal,
-                'label' => $timeVal . ' WIB',
-                'available' => $isAvailable,
-            ];
-
-            if ($isAvailable) {
+                $startOptions[] = [
+                    'value' => $timeVal,
+                    'label' => $timeVal . ' WIB',
+                    'available' => true,
+                ];
                 $endOptionsByStart[$timeVal] = $validEnds;
             }
         }
 
         $reason = null;
         if (!$hasAnySlot) {
-            $blocks = PhotographerAvailability::where('id_photographer', $photographerId)
-                ->where('tanggal', $date)
-                ->get();
-            foreach ($blocks as $blk) {
-                if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59')) {
-                    $reason = 'Fotografer libur pada tanggal ini (' . ($blk->keterangan ?: 'Libur Penuh') . ').';
-                    break;
+            if ($isToday && ($currentMinutes + 120) > $closeMin) {
+                $reason = 'Seluruh jam operasional untuk hari ini sudah terlewat atau tidak mencukupi jeda persiapan.';
+            } else {
+                $blocks = PhotographerAvailability::where('id_photographer', $photographerId)
+                    ->where('tanggal', $date)
+                    ->get();
+                foreach ($blocks as $blk) {
+                    if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59')) {
+                        $reason = 'Fotografer libur pada tanggal ini (' . ($blk->keterangan ?: 'Libur Penuh') . ').';
+                        break;
+                    }
                 }
-            }
-            if (!$reason) {
-                $reason = 'Seluruh jam pada tanggal ini sudah terisi atau melewati waktu saat ini.';
+                if (!$reason) {
+                    $reason = 'Seluruh jam pada tanggal ini sudah terisi atau melewati waktu saat ini.';
+                }
             }
         }
 

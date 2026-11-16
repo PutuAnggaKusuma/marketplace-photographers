@@ -253,8 +253,6 @@ class PhotographerBookingController extends Controller
                     'is_read' => false,
                 ]);
             }
-        }
-
         } elseif ($status === 'cancelled') {
 
             $alasan = $request->input('alasan') ?: 'Fotografer tidak dapat menerima jadwal sesi pemotretan ini.';
