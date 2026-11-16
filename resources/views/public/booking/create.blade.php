@@ -16,7 +16,7 @@
 @section('content')
 <section class="py-10 sm:py-14 lg:py-16 bg-white dark:bg-gray-900 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10" 
-       @booking-city-set.window="if ($event.detail.lat && $event.detail.lng) { panMapTo($event.detail.lat, $event.detail.lng, 12); }"
+       @booking-city-set.window="cityCode = $event.detail.code; touched.city = true; validateCity(); if ($event.detail.lat && $event.detail.lng) { panMapTo($event.detail.lat, $event.detail.lng, 12); }"
        x-data="{
     allServices: {{ Illuminate\Support\Js::from($allServices->map(function($s) {
         return [
@@ -579,7 +579,7 @@
     },
     validateTime() {
       if (!this.selectedStartTime || !this.selectedEndTime || this.selectedDurationHours < 1) {
-        this.errors.time = 'Pilih jam mulai dan jam selesai sesi pemotretan.';
+        this.errors.time = 'Pilih jam mulai dan selesai sesi pemotretan.';
         return false;
       }
       this.errors.time = '';
@@ -617,10 +617,10 @@
     submitBookingForm(e) {
       this.touched.service = true;
       this.touched.date = true;
-      this.touched.time = true;
       this.touched.province = true;
       this.touched.city = true;
       this.touched.lokasi = true;
+      this.touched.time = true;
 
       const sOk = this.validateService();
       const dOk = this.validateDate();
@@ -634,9 +634,9 @@
         let target = null;
         if (!sOk) target = this.$refs.serviceSection;
         else if (!dOk) target = this.$refs.dateSection;
-        else if (!pOk) target = this.$refs.provinceBtn;
-        else if (!cOk) target = this.$refs.cityBtn;
-        else if (!lOk) target = this.$refs.lokasiInput;
+        else if (!pOk) target = document.getElementById('bookingProvinceBtn') || this.$refs.locationSection || document.getElementById('sectionLocation');
+        else if (!cOk) target = document.getElementById('bookingCityBtn') || this.$refs.locationSection || document.getElementById('sectionLocation');
+        else if (!lOk) target = this.$refs.lokasiInput || this.$refs.locationSection || document.getElementById('sectionLocation');
         else if (!tOk) target = this.$refs.timeSection;
 
         if (target) {
@@ -869,7 +869,7 @@
         </div>
 
         <!-- 3. Lokasi Acara (Wilayah + Peta Pin Opsional + Alamat) -->
-        <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5">
+        <div x-ref="locationSection" id="sectionLocation" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none transition" :class="(touched.province && errors.province) || (touched.city && errors.city) || (touched.lokasi && errors.lokasi) ? 'ring-2 ring-rose-400/40' : ''">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
               <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -885,10 +885,11 @@
 
               <div class="relative">
                 <button type="button"
+                        id="bookingProvinceBtn"
                         x-ref="provinceBtn"
                         @click="open = !open"
                         class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
-                        :class="touched.province && errors.province ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
+                        :class="touched.province && errors.province ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -905,21 +906,22 @@
                   @endforeach
                 </div>
               </div>
-              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.province && errors.province" x-text="errors.province" x-cloak class="text-[11px] font-bold text-rose-500 mt-1"></p>
             </div>
 
             <!-- City Custom Alpine Dropdown -->
             <div x-data="{ open: false, selectedCode: '{{ old('city_code', '') }}', selectedText: 'Pilih Kota / Kabupaten' }"
-                 @booking-city-set.window="selectedCode = $event.detail.code; selectedText = $event.detail.name">
+                 @booking-city-set.window="selectedCode = $event.detail.code; selectedText = $event.detail.name; open = false">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Kota / Kabupaten <span class="text-rose-500">*</span></label>
               <input type="hidden" name="city_code" :value="selectedCode" id="bookingCityInput" @change="cityCode = $event.target.value; selectedCode = $event.target.value; touched.city = true; validateCity()">
 
               <div class="relative">
                 <button type="button"
+                        id="bookingCityBtn"
                         x-ref="cityBtn"
                         @click="open = !open"
                         class="w-full px-4 py-2.5 text-xs font-medium text-left text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:outline-none focus:ring-2 flex items-center justify-between transition cursor-pointer"
-                        :class="touched.city && errors.city ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
+                        :class="touched.city && errors.city ? 'border-rose-400 focus:ring-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400'">
                   <span class="truncate" x-text="selectedText" id="bookingCityLabel"></span>
                   <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -928,7 +930,7 @@
                   <div class="px-4 py-2.5 text-xs text-gray-400 font-semibold">Pilih provinsi terlebih dahulu</div>
                 </div>
               </div>
-              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+              <p x-show="touched.city && errors.city" x-text="errors.city" x-cloak class="text-[11px] font-bold text-rose-500 mt-1"></p>
             </div>
           </div>
 
@@ -1031,20 +1033,20 @@
                     @blur="touched.lokasi = true; validateLokasi()"
                     rows="4"
                     placeholder="Masukkan nama venue, gedung, jalan, serta patokan lokasi acara"
-                    :class="touched.lokasi && errors.lokasi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"
+                    :class="touched.lokasi && errors.lokasi ? 'border-rose-400 focus:ring-rose-400 focus:border-rose-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-400 focus:border-amber-400'"
                     class="w-full px-4 py-3 text-xs font-medium text-gray-800 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-xl border focus:ring-2 focus:outline-none transition leading-relaxed"></textarea>
-            <p x-show="touched.lokasi && errors.lokasi" x-text="errors.lokasi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+            <p x-show="touched.lokasi && errors.lokasi" x-text="errors.lokasi" x-cloak class="text-[11px] font-bold text-rose-500 mt-1"></p>
           </div>
         </div>
 
-        <!-- 4. Pilih Jam Mulai & Jam Selesai (2 Dropdown Terpisah Kelipatan 1 Jam) -->
+        <!-- 4. Pilih Jam Mulai & Selesai (2 Dropdown Terpisah Kelipatan 1 Jam) -->
         <div x-ref="timeSection" tabindex="-1" class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 outline-none">
           <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shrink-0">
                 <svg class="w-4.5 h-4.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               </div>
-              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">4. Pilih Jam Mulai dan Jam Selesai</h2>
+              <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">4. Pilih Jam Mulai dan Selesai</h2>
             </div>
             <span x-show="slotLoading" x-cloak class="text-[11px] font-bold text-amber-600 dark:text-amber-400">Memeriksa slot...</span>
           </div>

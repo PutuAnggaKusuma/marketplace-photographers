@@ -346,6 +346,31 @@ class BookingController extends Controller
             url('/client/bookings')
         );
 
+        // Model Hybrid: Inisialisasi percakapan chat otomatis antara Klien & Fotografer
+        $thread = ChatBooking::firstOrCreate([
+            'id_client' => $clientProfile->id,
+            'id_photographer' => $photographerId,
+        ]);
+
+        $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $formattedDate = Carbon::parse($tanggalSesi)->translatedFormat('d F Y');
+        $catatanText = $request->filled('catatan_khusus') ? "\n• Catatan: " . trim($request->input('catatan_khusus')) : '';
+
+        $openingMessage = "Halo {$targetPhotographer->nama}, saya telah mengajukan reservasi sesi foto:\n"
+            . "• Kode: {$contractCode}\n"
+            . "• Layanan: {$service->nama_layanan}\n"
+            . "• Tanggal: {$formattedDate}\n"
+            . "• Jam: {$bookingStart} - {$bookingEnd} WIB ({$durasi} Jam)\n"
+            . "• Lokasi: " . trim($request->input('lokasi_acara'))
+            . $catatanText;
+
+        ChatMessage::create([
+            'id_chat_booking' => $thread->id,
+            'id_sender' => auth()->id(),
+            'message' => $openingMessage,
+            'is_read' => false,
+        ]);
+
         return redirect()->route('booking.invoice', $contract->id)
             ->with('success', 'Permintaan reservasi berhasil diajukan. Menunggu persetujuan fotografer sebelum tagihan pembayaran diterbitkan.');
     }

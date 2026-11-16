@@ -20,6 +20,37 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-16 11:18 WITA] — Implementasi Model Hybrid (Inisialisasi Chat Otomatis + Review Reservasi Fotografer) & Perbaikan Real-Time Validation Auto-Scroll (Rule #70, Rule #51)
+
+* **Modul / Fitur**:
+  - Formulir Reservasi Publik (`resources/views/public/booking/create.blade.php`).
+  - Backend Reservasi Jasa (`app/Http/Controllers/Public/BookingController.php`).
+  - Dashboard Mitra Fotografer (`app/Http/Controllers/Photographer/PhotographerBookingController.php` & `resources/views/photographer/bookings/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Real-time Validation & Auto-Scroll Terfokus pada Form Reservasi**:
+    - **Before**: Jika klien mengklik "Ajukan Reservasi Jadwal" di bawah saat Bagian 3 (Provinsi/Kota/Alamat) belum terisi, form menahan pengiriman namun layar tetap diam di bawah tanpa menggulir ke atas karena target dropdown button berada di dalam scope child Alpine yang tidak terjangkau parent `$refs`.
+    - **After**: Menambahkan `x-ref="locationSection"` dan `id="sectionLocation"` pada kontainer Bagian 3, serta `id="bookingProvinceBtn"` dan `id="bookingCityBtn"` pada tombol dropdown. Jika validasi gagal, layar secara otomatis meluncur halus (*smooth auto-scroll*) langsung ke elemen yang belum lengkap dan memberikan fokus. Styling pesan error dan border diubah ke palet standar rose (`border-rose-400`, `text-rose-500`) sesuai sistem desain.
+    - Sinkronisasi data kota diperkuat dengan mengikat `@booking-city-set.window` langsung ke variabel induk `cityCode` dan menutup menu pilihan kota secara otomatis saat opsi diklik.
+  * **Penerapan Model Hybrid (Airbnb / Bridestory Standard)**:
+    - Klien tetap bisa langsung memesan instan via form booking tanpa dipaksa membuka ruang chat terlebih dahulu.
+    - Begitu form diajukan, sistem secara otomatis menginisialisasi ruang obrolan (*chat thread*) antara Klien dan Fotografer serta mengirim pesan pembuka terstruktur yang merangkum kode kontrak, paket, tanggal, rentang jam, alamat venue, dan catatan klien.
+    - Pada Dashboard Fotografer, baris pesanan yang menunggu review kini menyajikan tombol aksi **"Terima"** (1 klik untuk menyetujui langsung) dan **"Chat Klien"** (untuk berdiskusi sebelum menyetujui).
+    - Ketika fotografer menekan **"Terima"** atau **"Tolak"**, sistem mengirimkan pesan status resmi otomatis ke dalam ruang obrolan tersebut agar kedua pihak tetap sinkron.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop, tanpa redundansi kata atau simbol `&`, copywriting to-the-point dan natural.
+  * **Rule #51**: Copywriting formulir bersih dan profesional.
+  * **Rule #41**: Whitespace bersih tanpa sekat garis divider artifisial.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-15 01:38 WITA] — Implementasi Alur Reservasi Skema B (Review & Persetujuan Fotografer Dahulu Sebelum Tagihan Invoice, Rule #70, Rule #51)
 
 * **Modul / Fitur**:

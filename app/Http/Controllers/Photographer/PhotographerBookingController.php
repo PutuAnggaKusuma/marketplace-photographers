@@ -234,6 +234,25 @@ class PhotographerBookingController extends Controller
                     'is_read' => false,
                 ]);
             }
+
+            // Model Hybrid: Kirim konfirmasi pesan langsung ke thread chat
+            $thread = \App\Models\ChatBooking::where('id_client', $contract->id_client)
+                ->where('id_photographer', $contract->id_photographer)
+                ->first();
+
+            if ($thread && auth()->check()) {
+                $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+                $chatMsg = $isPaid
+                    ? "Halo {$contract->client->nama}, saya telah mengonfirmasi reservasi sesi {$contractCode}. Jadwal pemotretan telah aktif."
+                    : "Halo {$contract->client->nama}, saya telah menyetujui reservasi sesi {$contractCode}. Tagihan pembayaran invoice telah aktif dengan batas waktu 24 jam.";
+
+                \App\Models\ChatMessage::create([
+                    'id_chat_booking' => $thread->id,
+                    'id_sender' => auth()->id(),
+                    'message' => $chatMsg,
+                    'is_read' => false,
+                ]);
+            }
         }
 
         } elseif ($status === 'cancelled') {
@@ -320,6 +339,21 @@ class PhotographerBookingController extends Controller
 
                 ]);
 
+            }
+
+            // Model Hybrid: Beritahukan penolakan di thread chat
+            $thread = \App\Models\ChatBooking::where('id_client', $contract->id_client)
+                ->where('id_photographer', $contract->id_photographer)
+                ->first();
+
+            if ($thread && auth()->check()) {
+                $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+                \App\Models\ChatMessage::create([
+                    'id_chat_booking' => $thread->id,
+                    'id_sender' => auth()->id(),
+                    'message' => "Mohon maaf {$contract->client->nama}, saya belum dapat menerima reservasi sesi {$contractCode}. Alasan: {$alasan}",
+                    'is_read' => false,
+                ]);
             }
 
         } elseif ($status === 'completed') {

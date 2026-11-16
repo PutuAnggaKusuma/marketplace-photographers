@@ -1082,6 +1082,10 @@
                                                     Terima
                                                 </button>
                                             </form>
+                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                               class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
+                                                Chat Klien
+                                            </a>
                                         @elseif($c->status_contract === 'active')
                                             <button type="button" 
                                                     @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
