@@ -95,92 +95,98 @@
           </div>
         @endif
 
-        <!-- Vertical Component: Foto Avatar Profil (Rule #94 & Rule #97) -->
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-4">
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+        <!-- Component: Foto Avatar Profil (Rule #94, #96, #97 - Proporsional Selebar Kolom Input) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                 Foto Avatar Profil
-            </label>
-            <div class="space-y-4">
-                <div class="flex justify-center">
-                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-xs shrink-0 flex items-center justify-center transition"
-                         :class="uploadError ? 'border-red-400 border-solid' : (preview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
-                         @click="if (preview) imagePreviewModalOpen = true">
-                      <img :src="preview" 
-                           x-show="preview" 
-                           alt="Preview Avatar" 
-                           class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                           style="display: none;" 
-                           :style="preview ? 'display: block;' : 'display: none;'">
-                      <div x-show="preview" 
-                           class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
-                        <span class="text-xs font-bold">Pratinjau</span>
-                      </div>
-                      <div x-show="!preview" 
-                           class="flex items-center justify-center text-gray-400 dark:text-gray-500"
-                           :style="!preview ? 'display: flex;' : 'display: none;'">
-                        <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                        </svg>
-                      </div>
-                    </div>
-                </div>
-                
-                <div class="space-y-2">
-                    <div tabindex="0"
-                         role="button"
-                         @click="$refs.avatarFileInput.click()"
-                         @keydown.enter.prevent="$refs.avatarFileInput.click()"
-                         @keydown.space.prevent="$refs.avatarFileInput.click()"
-                         @dragover.prevent="isDraggingAvatar = true"
-                         @dragleave.prevent="isDraggingAvatar = false"
-                         @drop.prevent="handleAvatarDrop($event)"
-                         class="w-full min-h-[112px] px-5 py-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
-                         :class="isDraggingAvatar
-                             ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
-                             : (uploadError
-                                 ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
-                                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
-                        <input type="file" name="foto_file" x-ref="avatarFileInput" accept="image/jpeg,image/png,image/webp" @change="handleFile($event)" class="sr-only">
-                        <svg class="w-6 h-6 transition-colors" :class="isDraggingAvatar ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-                        </svg>
-                        <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
-                            Seret dan lepas di sini
-                        </p>
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
-                            Format JPG, PNG, WEBP maksimal 10 MB.
-                        </p>
-                    </div>
-                    <p x-show="uploadError" x-text="uploadError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                    @error('foto_file')
-                        <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+              </label>
+              <span class="text-[11px] text-gray-400">Rasio 1:1 Persegi</span>
             </div>
 
-            <!-- Modal Pratinjau Foto Resolusi Penuh -->
-            <div x-show="imagePreviewModalOpen" 
-                 x-cloak 
-                 @keydown.escape.window="imagePreviewModalOpen = false"
-                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6"
-                 tabindex="-1">
-                <button type="button" 
-                        @click="imagePreviewModalOpen = false" 
-                        title="Tutup (Esc)" 
-                        class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer z-50">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-                <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center space-y-3" @click.outside="imagePreviewModalOpen = false">
-                    <img :src="preview" 
-                         alt="Foto Avatar Profil" 
-                         draggable="false"
-                         class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl select-none border border-white/10">
-                    <div class="px-4 py-1.5 rounded-full bg-black/60 text-white/90 text-xs font-semibold backdrop-blur-sm border border-white/10 flex items-center gap-2">
-                        <span>Foto Avatar Profil</span>
-                        <span class="text-white/40">•</span>
-                        <span class="text-white/60 text-[11px]">Tekan Esc atau klik di luar untuk menutup</span>
-                    </div>
+            <div class="space-y-4">
+              <div class="flex justify-center">
+                <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 shadow-xs shrink-0 flex items-center justify-center transition"
+                     :class="uploadError ? 'border-red-400 border-solid' : (preview ? 'border-amber-400 border-solid cursor-pointer group' : 'border-dashed border-gray-300 dark:border-gray-600')"
+                     @click="if (preview) imagePreviewModalOpen = true">
+                  <img :src="preview" 
+                       x-show="preview" 
+                       alt="Preview Avatar" 
+                       class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                       style="display: none;" 
+                       :style="preview ? 'display: block;' : 'display: none;'">
+                  <div x-show="preview" 
+                       class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                    <span class="text-xs font-bold">Pratinjau</span>
+                  </div>
+                  <div x-show="!preview" 
+                       class="flex items-center justify-center text-gray-400 dark:text-gray-500"
+                       :style="!preview ? 'display: flex;' : 'display: none;'">
+                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div tabindex="0"
+                     role="button"
+                     @click="$refs.avatarFileInput.click()"
+                     @keydown.enter.prevent="$refs.avatarFileInput.click()"
+                     @keydown.space.prevent="$refs.avatarFileInput.click()"
+                     @dragover.prevent="isDraggingAvatar = true"
+                     @dragleave.prevent="isDraggingAvatar = false"
+                     @drop.prevent="handleAvatarDrop($event)"
+                     class="w-full min-h-[104px] px-4 py-5 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-1.5 cursor-pointer transition outline-none"
+                     :class="isDraggingAvatar
+                         ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/25'
+                         : (uploadError
+                             ? 'border-red-400 bg-red-50/40 dark:bg-red-950/20 focus:ring-2 focus:ring-red-400'
+                             : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50/30 dark:hover:bg-amber-950/20 focus:ring-2 focus:ring-amber-500')">
+                  <input type="file" name="foto_file" x-ref="avatarFileInput" accept="image/jpeg,image/png,image/webp" @change="handleFile($event)" class="sr-only">
+                  <svg class="w-6 h-6 transition-colors" :class="isDraggingAvatar ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                  </svg>
+                  <p class="text-xs font-bold text-gray-700 dark:text-gray-200">
+                    Seret dan lepas di sini
+                  </p>
+                  <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                    Format JPG, PNG, WEBP maksimal 10 MB.
+                  </p>
+                </div>
+                <p x-show="uploadError" x-text="uploadError" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
+                @error('foto_file')
+                  <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
+                @enderror
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Pratinjau Foto Resolusi Penuh -->
+        <div x-show="imagePreviewModalOpen" 
+             x-cloak 
+             @keydown.escape.window="imagePreviewModalOpen = false"
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6"
+             tabindex="-1">
+            <button type="button" 
+                    @click="imagePreviewModalOpen = false" 
+                    title="Tutup (Esc)" 
+                    class="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition cursor-pointer z-50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center space-y-3" @click.outside="imagePreviewModalOpen = false">
+                <img :src="preview" 
+                     alt="Foto Avatar Profil" 
+                     draggable="false"
+                     class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl select-none border border-white/10">
+                <div class="px-4 py-1.5 rounded-full bg-black/60 text-white/90 text-xs font-semibold backdrop-blur-sm border border-white/10 flex items-center gap-2">
+                    <span>Foto Avatar Profil</span>
+                    <span class="text-white/40">•</span>
+                    <span class="text-white/60 text-[11px]">Tekan Esc atau klik di luar untuk menutup</span>
                 </div>
             </div>
         </div>

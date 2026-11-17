@@ -20,7 +20,29 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 16:00 WITA] — Implementasi Floating Back to Top Button Khusus Halaman Beranda (Alpine.js Native Smooth Scroll & Rule #72)
+### [2026-11-17 16:15 WITA] — Penyesuaian Skala Spasial Dropzone Foto Avatar Profil pada Halaman Profil Pengguna (Pola Vertikal Proporsional Selebar Kolom Input)
+
+* **Modul / Fitur**:
+  - Halaman Pengaturan Profil Pengguna / Klien (`resources/views/public/profile/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/profile/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Perbaikan Skala Spasial & Batasan Lebar Kartu Avatar**:
+    - **Before**: Kartu pembungkus dan area dropzone garis putus-putus (*dashed box*) avatar membentang selebar 100% kontainer (~1000px). Hal ini menyebabkan anomali visual di mana foto mikro berukuran 100x100px memiliki area seret seluas landasan pacu.
+    - **After**: Menerapkan tata letak proporsional vertikal (Pilihan B) menggunakan `grid grid-cols-1 md:grid-cols-2 gap-6 items-start`. Kartu unggah avatar kini menempati tepat 1 kolom di sisi kiri (sejajar lurus di bawah field input `Nama Lengkap` dan `Nomor Telepon / WhatsApp`), membatasi lebar dropzone secara natural di kisaran ~380–450px.
+  * **Preservasi Standar Fungsionalitas & Kepatuhan Rule**:
+    - Seluruh standar fungsionalitas dipertahankan 100%: pratinjau avatar persegi/squircle (`w-24 h-24 sm:w-28 sm:h-28`), modal *lightbox* resolusi penuh saat foto diklik (**Rule #97**), ikon outline kamera kosong (**Rule #94**), teks instruksi seret berkas, validasi ukuran maks 10 MB, serta feedback hover/drag border amber (**Rule #61**).
+    - Menghilangkan anomali "Amnesia Skala Spasial", menyelaraskan tampilan profil publik dengan kerapian dasbor mitra fotografer tanpa merusak struktur visual.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch.
+  * **Rule #70**: Anti-AI Slop Terminology & Natural Human Text Standard.
+  * **Rule #94**: Zero Dummy Fallback & Dynamic Data Integrity.
+  * **Rule #96**: Standarisasi Proporsi Card Media & Larangan Pemanipulasian Tinggi Seragam.
+  * **Rule #97**: Standarisasi Pratinjau Modal (Lightbox) Interaktif pada Field Media.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
 
 * **Modul / Fitur**:
   - Halaman Beranda Publik (`resources/views/public/home.blade.php`).
