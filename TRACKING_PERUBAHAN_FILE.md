@@ -20,7 +20,42 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 16:30 WITA] — Perbaikan Kebocoran Celah Putih Hover Tombol Logout pada Dropdown Navbar (Full-Bleed Rounded Bottom & Zero Space Reduction)
+### [2026-11-17 16:45 WITA] — Implementasi Halaman Terpadu Aktivitas Komunitas Klien (E-Learning, Lomba Foto, dan Diskusi Forum)
+
+* **Modul / Fitur**:
+  - Halaman Aktivitas Komunitas Klien (`resources/views/client/activities/index.blade.php`).
+  - Controller Aktivitas Klien (`app/Http/Controllers/Client/ClientActivityController.php`).
+  - Dropdown Profil Navbar (`resources/views/partials/public/navbar.blade.php`).
+  - Rute Web Aplikasi (`routes/web.php`).
+* **File yang Diubah / Dibuat**:
+  * `app/Http/Controllers/Client/ClientActivityController.php` (Baru)
+  * `resources/views/client/activities/index.blade.php` (Baru)
+  * `resources/views/partials/public/navbar.blade.php`
+  * `routes/web.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Halaman Terpadu 1-Pintu untuk Aktivitas Klien (Opsi 1)**:
+    - **Before**: Klien tidak memiliki tempat untuk memantau progres materi kursus yang sedang dipelajari di e-learning, status pendaftaran dan submisi karya di lomba foto, maupun riwayat topik diskusi di forum komunitas. Klien harus mencari secara manual di halaman publik.
+    - **After**: Membangun halaman terpadu `/client/activities` yang memiliki **3 Tab Interaktif**:
+      1. **Tab 1: E-Learning Saya**: Menampilkan kursus yang sedang diikuti, bar progres penyelesaian materi, tombol 1-klik *Lanjutkan Belajar*, serta tombol *Unduh Sertifikat* (jika sudah 100% selesai).
+      2. **Tab 2: Lomba Foto**: Menampilkan kompetisi yang didaftari, status verifikasi pendaftaran, status pelunasan tiket masuk, status submisi foto karya dengan modal lightbox resolusi penuh (**Rule #97**), serta tautan langsung ke detail kompetisi.
+      3. **Tab 3: Diskusi Forum**: Menampilkan daftar topik yang dibuat klien di forum komunitas, jumlah tanggapan balasan, tanggal posting, dan tautan langsung ke ruang diskusi.
+  * **Preservasi Skala Spasial & Standar Anti-AI Slop**:
+    - **Dropdown Navbar Ramping**: Menambahkan 1 tautan bersih `Aktivitas Komunitas` dengan ikon buku/pembelajaran minimalis tanpa membengkakkan tinggi dropdown.
+    - **4 Kartu Ringkasan Metrik (Rule #64)**: Terdiri dari 2 baris murni dengan font seragam `text-xs font-bold uppercase` dan `text-xs font-black` (*E-Learning Aktif, E-Learning Tuntas, Lomba Diikuti, Diskusi Forum*).
+    - **Zero Dummy Data (Rule #94)**: Menampilkan empty state bersih dengan ajakan aksi (*Call-to-Action*) to the point, bebas dari data buatan atau terminologi alay/kaku (**Rule #70**).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch (Aksen Amber).
+  * **Rule #62**: Standar Breadcrumb Navigation.
+  * **Rule #64**: Standarisasi KPI Metric Cards (Ukuran Seragam `text-xs` & Eliminasi Teks Ketiga).
+  * **Rule #70**: Anti-AI Slop Terminology & Natural Human Text Standard (Bebas simbol `&` redundan).
+  * **Rule #72**: Modern Single Chevron Standard (`M8.25 4.5l...`).
+  * **Rule #94**: Zero Dummy Fallback & Dynamic Data Integrity.
+  * **Rule #97**: Standarisasi Pratinjau Modal (Lightbox) Interaktif pada Field Media.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * Eksekusi controller dan rendering HTML penuh: **PASS** (78.178 bytes ter-render sempurna).
+
 
 * **Modul / Fitur**:
   - Dropdown Profil Pengguna pada Navbar (`resources/views/partials/public/navbar.blade.php`).

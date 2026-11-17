@@ -163,6 +163,7 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/client/favorites', [\App\Http\Controllers\Client\ClientFavoriteController::class, 'index'])->name('client.favorites');
     Route::post('/client/favorites/{photographerId}/toggle', [\App\Http\Controllers\Client\ClientFavoriteController::class, 'toggle'])->name('client.favorites.toggle');
     Route::get('/client/galleries', [ClientBookingController::class, 'galleries'])->name('client.galleries');
+    Route::get('/client/activities', [\App\Http\Controllers\Client\ClientActivityController::class, 'index'])->name('client.activities');
     Route::post('/client/bookings/{id}/confirm-gallery', [ClientBookingController::class, 'confirmGallery'])->name('client.bookings.confirm-gallery');
     Route::post('/client/bookings/{id}/request-revision', [ClientBookingController::class, 'requestRevision'])->name('client.bookings.request-revision');
     Route::post('/client/reviews', [\App\Http\Controllers\Public\ReviewController::class, 'store'])->name('client.reviews.store');
