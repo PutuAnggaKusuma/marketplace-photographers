@@ -955,7 +955,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
         activeThreadId: activeThreadId,
         activeThread: null,
         messages: initialMessages || [],
-        newMessage: '',
+        newMessage: @json(request('prefill', '')),
         isSending: false,
         chatListCollapsed: false,
         userStatus: initialStatus || { is_online: false, label: 'Aktif 7+ hari lalu', color: 'text-gray-400', dot_color: 'bg-gray-400' },
@@ -1045,6 +1045,18 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 this.listenToEcho(this.activeThreadId);
                 // Background polling sebagai fallback ketahanan jika WebSocket terputus
                 setInterval(() => this.fetchMessages(), 5000);
+            }
+
+            // Auto-focus input jika terdapat prefill pesan dari pengingat waktu
+            if (this.newMessage) {
+                this.$nextTick(() => {
+                    const inputEl = document.querySelector('input[x-model="newMessage"]');
+                    if (inputEl) {
+                        inputEl.focus();
+                        const len = inputEl.value.length;
+                        inputEl.setSelectionRange(len, len);
+                    }
+                });
             }
         },
 

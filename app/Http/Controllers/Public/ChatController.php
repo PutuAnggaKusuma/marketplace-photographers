@@ -421,7 +421,7 @@ class ChatController extends Controller
     /**
      * Memulai atau Membuka Thread Chat dari Fotografer ke Klien Spesifik.
      */
-    public function photographerStartChat($clientId)
+    public function photographerStartChat(Request $request, $clientId)
     {
         $user = Auth::user();
         $photographer = RolePhotographer::where('id_user', $user->id)->first();
@@ -436,13 +436,18 @@ class ChatController extends Controller
             'id_photographer' => $photographer->id,
         ]);
 
-        return redirect()->route('photographer.chat', ['thread' => $thread->id]);
+        $params = ['thread' => $thread->id];
+        if ($request->filled('prefill')) {
+            $params['prefill'] = $request->input('prefill');
+        }
+
+        return redirect()->route('photographer.chat', $params);
     }
 
     /**
      * Mulai Chat dari Halaman Profil Fotografer / Tombol Kontak.
      */
-    public function startChat($photographerId)
+    public function startChat(Request $request, $photographerId)
     {
         $user = Auth::user();
         $photographer = RolePhotographer::findOrFail($photographerId);
@@ -477,11 +482,16 @@ class ChatController extends Controller
             $thread->touch();
         }
 
-        if ($user->role === 'photographer') {
-            return redirect()->route('photographer.chat', ['thread' => $thread->id]);
+        $params = ['thread' => $thread->id];
+        if ($request->filled('prefill')) {
+            $params['prefill'] = $request->input('prefill');
         }
 
-        return redirect()->route('client.chat', ['thread' => $thread->id]);
+        if ($user->role === 'photographer') {
+            return redirect()->route('photographer.chat', $params);
+        }
+
+        return redirect()->route('client.chat', $params);
     }
 
     /**

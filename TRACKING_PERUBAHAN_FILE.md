@@ -4731,3 +4731,19 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian**:
   * Unit test simulasi skenario (H-5, H-1, Same-day 6 jam, Same-day 2 jam, Same-day 45 menit): **PASS (100% perhitungan akurat dan teruji)**.
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-17] Implementasi Pre-filled Draft Pesan Chat Pengingat Sesi (Smart Reminder Chat Prefill)
+* **Modul / Fitur**: Ruang Obrolan Chat & Banner Pengingat Sesi (`/chat` & `upcoming-session-banner`).
+* **File yang Dimodifikasi**:
+  * `resources/views/partials/shared/upcoming-session-banner.blade.php` (menambahkan parameter `prefill` pada tautan tombol `[Chat]` dengan template teks dinamis H-1 & Hari-H)
+  * `app/Http/Controllers/Public/ChatController.php` (`startChat` & `photographerStartChat` meneruskan parameter query `prefill`)
+  * `resources/views/public/chat/index.blade.php` (mengikat `newMessage` dari parameter `prefill` dan auto-focus ke input)
+  * `resources/views/photographer/chat/index.blade.php` (sinkronisasi prefill dan auto-focus pada chat fotografer)
+* **Rincian Perubahan**:
+  1. Tombol `[Chat]` pada kartu pengingat sesi H-1 dan Hari-H kini membawa pesan template kontekstual yang ditahan (*draft/hold*) di kotak input chat pengguna tanpa terkirim secara otomatis.
+  2. Klien memiliki kendali penuh: teks langsung tampil di input, tombol `[Kirim]` aktif berwarna amber, kursor berada di akhir teks, dan klien dapat langsung mengirim, mengedit, atau menghapus teks tersebut.
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.

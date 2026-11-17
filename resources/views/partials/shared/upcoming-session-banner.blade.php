@@ -10,17 +10,25 @@
     $isToday = $urgentSession->is_today;
     $isTomorrow = $urgentSession->is_tomorrow;
 
+    $jamMulai = substr($urgentSession->jam_mulai, 0, 5) . ' WIB';
+    $statusText = $isToday ? "HARI INI • {$jamMulai}" : ($isTomorrow ? "BESOK • {$jamMulai}" : \Carbon\Carbon::parse($urgentSession->booking_date)->translatedFormat('d M Y') . " • {$jamMulai}");
+
+    $timeLabel = $isToday ? 'hari ini' : ($isTomorrow ? 'besok' : 'pada ' . \Carbon\Carbon::parse($urgentSession->booking_date)->translatedFormat('d M Y'));
+    $locationPart = $urgentSession->lokasi ? " di {$urgentSession->lokasi}" : '';
+    $servicePart = $service->nama_layanan ?? 'sesi pemotretan';
+
     if ($role === 'photographer') {
         $counterpartName = $contract->client->nama ?? ($contract->client->user->nama ?? 'Klien');
-        $chatUrl = route('photographer.chat.client', $contract->id_client);
+        $prefillMessage = "Halo Kak {$counterpartName}, mengingatkan kembali jadwal sesi {$servicePart} {$timeLabel} pukul {$jamMulai}{$locationPart}. Apakah ada hal yang perlu dipersiapkan bersama?";
+        $chatUrl = route('photographer.chat.client', ['clientId' => $contract->id_client, 'prefill' => $prefillMessage]);
     } else {
         $photographer = $contract->photographer;
         $counterpartName = $photographer->nama ?? 'Mitra Fotografer';
-        $chatUrl = route('chat.start', $contract->id_photographer);
+        $prefillMessage = $isToday
+            ? "Halo {$counterpartName}, memastikan kembali untuk sesi {$servicePart} hari ini pukul {$jamMulai}{$locationPart}. Sampai bertemu di lokasi ya!"
+            : "Halo {$counterpartName}, memastikan kembali untuk sesi {$servicePart} {$timeLabel} pukul {$jamMulai}{$locationPart}. Apakah semua persiapan sudah siap?";
+        $chatUrl = route('chat.start', ['photographerId' => $contract->id_photographer, 'prefill' => $prefillMessage]);
     }
-
-    $jamMulai = substr($urgentSession->jam_mulai, 0, 5) . ' WIB';
-    $statusText = $isToday ? "HARI INI • {$jamMulai}" : ($isTomorrow ? "BESOK • {$jamMulai}" : \Carbon\Carbon::parse($urgentSession->booking_date)->translatedFormat('d M Y') . " • {$jamMulai}");
   @endphp
 
   <!-- Compact Minimalist Bar (Inspirasi Airbnb / Uber) -->

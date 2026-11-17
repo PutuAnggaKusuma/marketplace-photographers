@@ -1920,7 +1920,7 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
         messages: initialMessages || [],
 
-        newMessage: '',
+        newMessage: @json(request('prefill', '')),
 
         isSending: false,
 
@@ -2067,6 +2067,18 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
                 setInterval(() => this.fetchMessages(), 5000);
 
+            }
+
+            // Auto-focus input jika terdapat prefill pesan dari pengingat waktu
+            if (this.newMessage) {
+                this.$nextTick(() => {
+                    const inputEl = document.querySelector('input[x-model="newMessage"]');
+                    if (inputEl) {
+                        inputEl.focus();
+                        const len = inputEl.value.length;
+                        inputEl.setSelectionRange(len, len);
+                    }
+                });
             }
 
         },
