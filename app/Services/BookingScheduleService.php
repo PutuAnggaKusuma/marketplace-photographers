@@ -626,4 +626,56 @@ class BookingScheduleService
             'new_end_time' => self::formatMinutesToDbTime($endMin),
         ];
     }
+
+    /**
+     * Kirim notifikasi in-app pengingat sesi (H-1 & Hari-H) secara otomatis tanpa duplikasi di hari yang sama.
+     */
+    public static function dispatchUrgentSessionNotification($urgentSession, $user, string $role): void
+    {
+        if (!$urgentSession || !$user) {
+            return;
+        }
+
+        $today = now()->toDateString();
+        $contractId = $urgentSession->id_contract;
+
+        // Cegah duplikasi notifikasi untuk sesi yang sama pada hari ini
+        $alreadySent = \App\Models\Notification::where('id_user', $user->id)
+            ->where('type', 'session_reminder')
+            ->where('data->contract_id', $contractId)
+            ->whereDate('created_at', $today)
+            ->exists();
+
+        if ($alreadySent) {
+            return;
+        }
+
+        $hariText = $urgentSession->is_today ? 'hari ini' : 'besok';
+        $jamText = substr($urgentSession->jam_mulai, 0, 5) . ' WIB';
+        $serviceName = $urgentSession->service->nama_layanan ?? 'Sesi Foto';
+
+        if ($role === 'photographer') {
+            $clientName = $urgentSession->contract->client->nama ?? ($urgentSession->contract->client->user->nama ?? 'Klien');
+            $title = $urgentSession->is_today ? 'Pengingat Sesi Foto Hari Ini' : 'Pengingat Sesi Foto Besok';
+            $message = "Sesi '{$serviceName}' bersama klien {$clientName} dijadwalkan {$hariText} pukul {$jamText}.";
+            $targetUrl = url('/photographer/bookings');
+        } else {
+            $photographerName = $urgentSession->contract->photographer->nama ?? 'Mitra Fotografer';
+            $title = $urgentSession->is_today ? 'Pengingat Sesi Foto Hari Ini' : 'Pengingat Sesi Foto Besok';
+            $message = "Sesi '{$serviceName}' bersama fotografer {$photographerName} dijadwalkan {$hariText} pukul {$jamText}.";
+            $targetUrl = url('/client/bookings');
+        }
+
+        \App\Models\Notification::create([
+            'id_user' => $user->id,
+            'type' => 'session_reminder',
+            'title' => $title,
+            'message' => $message,
+            'data' => [
+                'contract_id' => $contractId,
+                'target_url' => $targetUrl,
+            ],
+            'is_read' => false,
+        ]);
+    }
 }

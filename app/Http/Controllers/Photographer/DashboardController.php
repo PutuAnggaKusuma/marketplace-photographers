@@ -14,6 +14,7 @@ use App\Models\PhotographerService;
 use App\Models\RolePhotographer;
 use App\Models\Testimonial;
 use App\Models\User;
+use App\Services\BookingScheduleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravolt\Indonesia\Models\Province;
@@ -158,6 +159,10 @@ class DashboardController extends Controller
             ->upcomingUrgent()
             ->with(['contract.client.user', 'service'])
             ->first();
+
+        if ($urgentSession && auth()->check()) {
+            BookingScheduleService::dispatchUrgentSessionNotification($urgentSession, auth()->user(), 'photographer');
+        }
 
         // Data pendukung Onboarding Wizard & Checklist Etalase Tahap 2
         $onboardingCategories = Category::all();

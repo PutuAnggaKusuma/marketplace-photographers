@@ -20,6 +20,36 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 11:05 WITA] — Implementasi Banner Pengingat Sesi Minimalis 1-Baris (Alternatif A ala Airbnb/Uber) dan Integrasi Notifikasi In-App (Rule #70, Rule #85, Rule #41)
+
+* **Modul / Fitur**:
+  - Banner Pengingat Sesi Foto H-1 & Hari-H (`resources/views/partials/shared/upcoming-session-banner.blade.php`).
+  - Layanan Jadwal Reservasi (`app/Services/BookingScheduleService.php`).
+  - Controller Reservasi Klien & Fotografer (`ClientBookingController.php`, `PhotographerBookingController.php`, `DashboardController.php`).
+* **File yang Diubah**:
+  * `resources/views/partials/shared/upcoming-session-banner.blade.php`
+  * `app/Services/BookingScheduleService.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `app/Http/Controllers/Photographer/DashboardController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyederhanaan UI Banner Pengingat Sesi (Alternatif A: Compact Minimalist Bar)**:
+    - **Before**: Banner menggunakan latar gradient kuning-putih tipis, border amber neon, penumpukan badge berwarna-warni (*PENGINGAT SESI H-1*, *ID Kontrak*, *Mitra Fotografer*), serta stopwatch countdown berdetik per detik (`28j : 03m : 12d`) yang terasa seperti promo flash sale / scarcity AI slop.
+    - **After**: Mengubah seluruh tampilan banner menjadi bar horizontal 1-baris minimalis ala Airbnb/Uber berlatar putih bersih (`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 rounded-2xl p-4 sm:p-5 shadow-xs`). Sisi kiri memuat label waktu murni (`BESOK • 14:00 WIB` / `HARI INI • 14:00 WIB`), judul layanan & mitra fotografer mengalir alami, dan sub-info lokasi acara. Sisi kanan memuat dua tombol kompak: `Petunjuk Arah` (border abu-abu tipis) dan `Chat` (solid amber brand LensMatch).
+  * **Integrasi Notifikasi In-App Pengingat Sesi ke Lonceng Header**:
+    - **Before**: Pengingat sesi hanya berupa banner di halaman reservasi, belum terhubung ke sistem notifikasi lonceng header real-time.
+    - **After**: Menambahkan `BookingScheduleService::dispatchUrgentSessionNotification()` yang otomatis mengirimkan notifikasi in-app ke akun pengguna (Klien & Fotografer) saat sesi mendekati H-1 atau Hari-H, dengan pengaman filter harian agar notifikasi untuk sesi yang sama hanya dikirim 1 kali per hari (bebas spam duplikat).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #70**: Anti-AI Slop Terminology, teks natural to the point tanpa tanda `&` redundan.
+  * **Rule #85**: Penyesuaian visual smart reminder sesi H-1 & Hari-H yang tenang dan bebas polusi visual.
+  * **Rule #41**: Zero layout shift, tanpa garis pembatas divider horizontal berlebih.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Pengujian pembuatan notifikasi database: **PASS** (Notifikasi pengingat sesi berhasil terkirim dan tercatat di database).
+
+---
+
 ### [2026-11-16 15:55 WITA] — Animasi Loading Deteksi Lokasi dan Otomatisasi Input Field Pencarian Peta (Rule #70, Rule #51, Rule #41)
 
 * **Modul / Fitur**:

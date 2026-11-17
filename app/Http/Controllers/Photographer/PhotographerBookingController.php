@@ -149,6 +149,10 @@ class PhotographerBookingController extends Controller
 
             ->first();
 
+        if ($urgentSession && auth()->check()) {
+            BookingScheduleService::dispatchUrgentSessionNotification($urgentSession, auth()->user(), 'photographer');
+        }
+
 
 
         return view('photographer.bookings.index', compact('contracts', 'stats', 'filterStatus', 'photographer', 'urgentSession'));

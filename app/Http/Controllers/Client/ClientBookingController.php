@@ -168,6 +168,10 @@ class ClientBookingController extends Controller
 
             ->first();
 
+        if ($urgentSession && auth()->check()) {
+            BookingScheduleService::dispatchUrgentSessionNotification($urgentSession, auth()->user(), 'client');
+        }
+
 
 
         return view('client.bookings.index', compact('contracts', 'clientProfile', 'filterStatus', 'stats', 'urgentSession'));
