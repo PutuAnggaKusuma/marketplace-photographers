@@ -45,14 +45,45 @@
          }
        }">
 
-    <!-- Top Action Navigation -->
+    <!-- Top Action Navigation (Adaptive 2-Layer Back Resolution) -->
+    @php
+      $from = request('from');
+      $prev = url()->previous();
+
+      if (!$from && $prev && $prev !== url()->current()) {
+        if (str_contains($prev, '/client/invoices')) {
+          $from = 'invoices';
+        } elseif (str_contains($prev, '/client/bookings')) {
+          $from = 'bookings';
+        } elseif (str_contains($prev, '/chat')) {
+          $from = 'chat';
+        } elseif (str_contains($prev, '/admin/transactions')) {
+          $from = 'admin';
+        }
+      }
+
+      if ($from === 'invoices') {
+        $backUrl = route('client.invoices');
+        $backLabel = 'Kembali ke Riwayat Pembayaran';
+      } elseif ($from === 'chat') {
+        $backUrl = route('client.chat');
+        $backLabel = 'Kembali ke Ruang Chat';
+      } elseif ($from === 'admin') {
+        $backUrl = route('admin.transactions.index');
+        $backLabel = 'Kembali ke Kelola Transaksi';
+      } else {
+        $backUrl = route('client.bookings');
+        $backLabel = 'Kembali ke Reservasi Saya';
+      }
+    @endphp
+
     <div class="flex items-center justify-between">
-      <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+      <a href="{{ $backUrl }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-        <span>Kembali ke Reservasi Saya</span>
+        <span>{{ $backLabel }}</span>
       </a>
 
-      <a href="{{ route('booking.invoice', ['id' => $contract->id, 'view' => 'invoice']) }}" class="text-xs font-bold text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">
+      <a href="{{ route('booking.invoice', array_merge(['id' => $contract->id, 'view' => 'invoice', 'from' => 'checkout'], $from ? ['ref' => $from] : [])) }}" class="text-xs font-bold text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 transition flex items-center gap-1 cursor-pointer">
         <span>Lihat Pratinjau Invoice</span>
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
       </a>

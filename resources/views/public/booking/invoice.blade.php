@@ -6,22 +6,54 @@
 <section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false, lightboxOpen: false, lightboxUrl: '' }">
 
-    <!-- Top Action Navigation -->
+    <!-- Top Action Navigation (Adaptive 2-Layer Back Resolution) -->
+    @php
+      $from = request('from');
+      $prev = url()->previous();
+
+      // Auto-deteksi fallback via URL previous jika query ?from tidak diberikan secara eksplisit
+      if (!$from && $prev && $prev !== url()->current()) {
+        if (str_contains($prev, '/client/invoices')) {
+          $from = 'invoices';
+        } elseif (str_contains($prev, '/client/bookings')) {
+          $from = 'bookings';
+        } elseif (str_contains($prev, '/chat')) {
+          $from = 'chat';
+        } elseif (str_contains($prev, '/admin/transactions')) {
+          $from = 'admin';
+        } elseif (str_contains($prev, '/pembayaran/') && !str_contains($prev, 'view=invoice')) {
+          $from = 'checkout';
+        }
+      }
+
+      $isPendingPayment = ($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment']))) && (!isset($payment) || $payment->payment_status !== 'completed');
+
+      if ($from === 'invoices') {
+        $backUrl = route('client.invoices');
+        $backLabel = 'Kembali ke Riwayat Pembayaran';
+      } elseif ($from === 'checkout' || ($isPendingPayment && !$from)) {
+        $backUrl = route('booking.invoice', $contract->id);
+        $backLabel = 'Kembali ke Selesaikan Pembayaran';
+      } elseif ($from === 'chat') {
+        $backUrl = route('client.chat');
+        $backLabel = 'Kembali ke Ruang Chat';
+      } elseif ($from === 'admin') {
+        $backUrl = route('admin.transactions.index');
+        $backLabel = 'Kembali ke Kelola Transaksi';
+      } else {
+        $backUrl = route('client.bookings');
+        $backLabel = 'Kembali ke Reservasi Saya';
+      }
+    @endphp
+
     <div class="flex items-center justify-between">
-      @if(($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment']))) && (!isset($payment) || $payment->payment_status !== 'completed'))
-        <a href="{{ route('booking.invoice', $contract->id) }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-          <span>Kembali ke Selesaikan Pembayaran</span>
-        </a>
-      @else
-        <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-          <span>Kembali ke Reservasi Saya</span>
-        </a>
-      @endif
+      <a href="{{ $backUrl }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        <span>{{ $backLabel }}</span>
+      </a>
 
       @if($payment && $payment->payment_status === 'completed')
-        <a href="{{ route('booking.invoice.print', $contract->id) }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs cursor-pointer">
+        <a href="{{ route('booking.invoice.print', array_merge(['id' => $contract->id], $from ? ['from' => $from] : [])) }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs cursor-pointer">
           Cetak PDF
         </a>
       @endif
@@ -174,7 +206,7 @@
             <span class="font-bold text-amber-600 dark:text-amber-400 block">Menunggu Pembayaran</span>
             <p>Silakan selesaikan pembayaran dan unggah bukti transfer pada halaman pembayaran.</p>
           </div>
-          <a href="{{ route('booking.invoice', $contract->id) }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0">
+          <a href="{{ route('booking.invoice', array_merge(['id' => $contract->id], $from ? ['from' => $from] : [])) }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0">
             Selesaikan Pembayaran
           </a>
         </div>

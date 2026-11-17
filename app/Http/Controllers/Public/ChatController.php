@@ -223,7 +223,7 @@ class ChatController extends Controller
                 'formatted_dp_amount' => 'Rp ' . number_format($dpAmount, 0, ',', '.'),
                 'status' => $offer->status,
                 'id_contract' => $offer->id_contract,
-                'invoice_url' => $offer->id_contract ? route('booking.invoice', $offer->id_contract) : null,
+                'invoice_url' => $offer->id_contract ? route('booking.invoice', ['id' => $offer->id_contract, 'from' => 'chat']) : null,
             ];
         }
 
@@ -1086,7 +1086,7 @@ class ChatController extends Controller
             $contract
         );
 
-        $invoiceUrl = route('booking.invoice', $contract->id);
+        $invoiceUrl = route('booking.invoice', ['id' => $contract->id, 'from' => 'chat']);
 
         return response()->json([
             'success' => true,

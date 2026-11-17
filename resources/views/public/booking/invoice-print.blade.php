@@ -49,7 +49,7 @@
     <!-- Top Action Toolbar (Hidden during print) -->
     <div class="no-print max-w-4xl mx-auto mb-6 bg-white rounded-2xl p-4 shadow-xs border border-gray-200/90 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-            <a href="{{ route('booking.invoice', $contract->id) }}" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs transition inline-flex items-center gap-1.5">
+            <a href="{{ route('booking.invoice', array_merge(['id' => $contract->id], request()->only('from', 'view'))) }}" class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs transition inline-flex items-center gap-1.5">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg><span>Kembali ke Invoice</span>
             </a>
             <span class="text-xs text-gray-500 font-medium">Pratinjau Dokumen Resmi Invoice Pembayaran</span>

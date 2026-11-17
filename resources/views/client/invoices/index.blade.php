@@ -223,7 +223,7 @@
 
                 <!-- Aksi -->
                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                  <a href="{{ url('/pembayaran/' . $c->id) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group">
+                  <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'invoices']) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group">
                     <span>Rincian</span>
                     <svg class="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>
@@ -405,7 +405,7 @@
                 <!-- Aksi -->
                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
                   @if($cr->contest)
-                    <a href="{{ route('public.contests.show', $cr->contest->id) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group">
+                    <a href="{{ route('public.contests.show', ['id' => $cr->contest->id, 'from' => 'invoices']) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group">
                       <span>Detail Event</span>
                       <svg class="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>

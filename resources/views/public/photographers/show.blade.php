@@ -53,14 +53,44 @@
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
 
-    <!-- Top Navigation / Back Button (Rule #72: Modern Single Chevron, No Stem Arrow, No Breadcrumb) -->
+    <!-- Top Navigation / Back Button (Rule #72: Modern Single Chevron, No Stem Arrow, No Breadcrumb, Dynamic Adaptive Back) -->
+    @php
+      $photoFrom = request('from');
+      $photoPrev = url()->previous();
+
+      if (!$photoFrom && $photoPrev && $photoPrev !== url()->current()) {
+        if (str_contains($photoPrev, '/client/bookings')) {
+          $photoFrom = 'bookings';
+        } elseif (str_contains($photoPrev, '/chat')) {
+          $photoFrom = 'chat';
+        } elseif ($photoPrev === url('/') || $photoPrev === route('home')) {
+          $photoFrom = 'home';
+        } elseif (str_contains($photoPrev, '/katalog')) {
+          $photoFrom = 'katalog';
+        }
+      }
+
+      if ($photoFrom === 'bookings') {
+        $photoBackUrl = route('client.bookings');
+        $photoBackLabel = 'Kembali ke Reservasi Saya';
+      } elseif ($photoFrom === 'chat') {
+        $photoBackUrl = route('client.chat');
+        $photoBackLabel = 'Kembali ke Ruang Chat';
+      } elseif ($photoFrom === 'home') {
+        $photoBackUrl = route('home');
+        $photoBackLabel = 'Kembali ke Beranda';
+      } else {
+        $photoBackUrl = route('public.photographers.katalog');
+        $photoBackLabel = 'Kembali ke Katalog';
+      }
+    @endphp
     <div>
-      <a href="{{ route('public.photographers.katalog') }}" 
-         class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition">
+      <a href="{{ $photoBackUrl }}" 
+         class="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
-        <span>Kembali ke Katalog</span>
+        <span>{{ $photoBackLabel }}</span>
       </a>
     </div>
 

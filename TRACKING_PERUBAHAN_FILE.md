@@ -20,6 +20,53 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 15:30 WITA] — Implementasi Navigasi Dinamis Adaptif 2-Lapis pada Halaman Invoice, Checkout Pembayaran, Profil Fotografer, dan Event Lomba (Eliminasi Hardcoded Back Navigation)
+
+* **Modul / Fitur**:
+  - Halaman Dokumen Invoice Publik (`resources/views/public/booking/invoice.blade.php`).
+  - Halaman Checkout Pembayaran Sesi Foto (`resources/views/public/booking/checkout.blade.php`).
+  - Cetak Pratinjau Dokumen Invoice (`resources/views/public/booking/invoice-print.blade.php`).
+  - Tabel Riwayat Pembayaran Klien (`resources/views/client/invoices/index.blade.php`).
+  - Tabel Reservasi Saya Klien (`resources/views/client/bookings/index.blade.php`).
+  - Controller Chat Ruang Obrolan (`app/Http/Controllers/Public/ChatController.php`).
+  - Halaman Profil Fotografer Publik (`resources/views/public/photographers/show.blade.php`).
+  - Halaman Detail Event Lomba Foto (`resources/views/public/contests/show.blade.php`).
+  - Halaman Kelola Peserta & Karya Lomba Admin (`resources/views/admin/contests/participants.blade.php`, `submissions.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/booking/checkout.blade.php`
+  * `resources/views/public/booking/invoice-print.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/admin/contests/participants.blade.php`
+  * `resources/views/admin/contests/submissions.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Navigasi Dinamis 2-Lapis pada Dokumen Invoice (`invoice.blade.php`)**:
+    - **Before**: Tombol kembali di-hardcode ke `route('client.bookings')` (*Kembali ke Reservasi Saya*), sehingga saat klien membuka invoice dari *Riwayat Pembayaran Saya* (`/client/invoices`), klien malah terlempar ke *Reservasi Saya*.
+    - **After**: Menerapkan 2-Layer Adaptive Navigation: Membaca parameter eksplisit `?from=` (`invoices`, `bookings`, `checkout`, `chat`, `admin`), dengan smart fallback deteksi `url()->previous()`. Label tombol kembali otomatis adaptif dan kontekstual (`Kembali ke Riwayat Pembayaran`, `Kembali ke Reservasi Saya`, `Kembali ke Selesaikan Pembayaran`, `Kembali ke Ruang Chat`, `Kembali ke Kelola Transaksi`).
+  * **Navigasi Dinamis pada Checkout Pembayaran (`checkout.blade.php`)**:
+    - **Before**: Tombol kembali di-hardcode ke `client.bookings`.
+    - **After**: Menggunakan resolusi adaptif yang sama: Jika datang dari Riwayat Pembayaran, tombol kembali mengarah ke `client.invoices` (*Kembali ke Riwayat Pembayaran*). Link *"Lihat Pratinjau Invoice"* menyertakan parameter `from=checkout` agar alur bolak-balik invoice-checkout presisi.
+  * **Penyelarasan Tautan Pemanggil Invoice**:
+    - Menambahkan `from=invoices` pada tabel pembayaran (`client/invoices/index.blade.php`).
+    - Menambahkan `from=bookings` pada tombol Bayar dan dropdown invoice (`client/bookings/index.blade.php`).
+    - Menambahkan `from=chat` pada tautan invoice penawaran khusus chat (`ChatController.php`).
+  * **Audit & Perbaikan Seluruh Sistem pada Halaman Multi-Entry**:
+    - **Profil Fotografer (`photographers/show.blade.php`)**: Menerapkan deteksi asal dinamis: jika dibuka dari Beranda -> *Kembali ke Beranda*, dari Chat -> *Kembali ke Ruang Chat*, dari Reservasi -> *Kembali ke Reservasi Saya*, dari Katalog -> *Kembali ke Katalog*.
+    - **Detail Lomba Foto (`contests/show.blade.php`)**: Menerapkan deteksi asal dinamis: jika dibuka dari Riwayat Pembayaran Klien (`/client/invoices`) -> *Kembali ke Riwayat Pembayaran*, jika dari Pengajuan Saya -> *Kembali ke Riwayat Pengajuan Saya*, fallback ke Katalog Lomba.
+    - **Kelola Peserta & Karya Lomba Admin (`participants.blade.php` & `submissions.blade.php`)**: Jika admin mengakses dari halaman *Kelola Event Lomba* (`admin.contests.manage`), tombol kembali mengarah ke kelola lomba terkait (*Kembali ke Kelola Lomba*), bukan terlempar ke daftar lomba umum.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #72**: Modern Back Navigation Standard, konsistensi single chevron dan contextual return.
+  * **Rule #51 & #89**: Human-Centric Communication & Navigation, anti-broken context.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-17 11:40 WITA] — Audit Lanjutan & Pembersihan Sisa AI-Slop (Normalisasi Total Form Booking, Bahasa Forum, dan Eliminasi Settlement/Escrow)
 
 * **Modul / Fitur**:

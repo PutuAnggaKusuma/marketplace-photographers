@@ -165,15 +165,21 @@
         </div>
 
         <div>
-
-            <a href="{{ route('admin.contests') }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0">
-
+            @php
+                $adminSubmFrom = request('from');
+                $adminSubmPrev = url()->previous();
+                if (!$adminSubmFrom && $adminSubmPrev && $adminSubmPrev !== url()->current()) {
+                    if (str_contains($adminSubmPrev, '/manage')) {
+                        $adminSubmFrom = 'manage';
+                    }
+                }
+                $adminSubmBackUrl = ($adminSubmFrom === 'manage') ? route('admin.contests.manage', $contest->id) : route('admin.contests');
+                $adminSubmBackLabel = ($adminSubmFrom === 'manage') ? 'Kembali ke Kelola Lomba' : 'Kembali';
+            @endphp
+            <a href="{{ $adminSubmBackUrl }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
-
-                <span>Kembali</span>
-
+                <span>{{ $adminSubmBackLabel }}</span>
             </a>
-
         </div>
 
     </div>

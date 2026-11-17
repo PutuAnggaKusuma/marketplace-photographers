@@ -13,16 +13,27 @@
 
 
     <!-- Header & Back Navigation -->
+    @php
+        $adminContestFrom = request('from');
+        $adminContestPrev = url()->previous();
+        if (!$adminContestFrom && $adminContestPrev && $adminContestPrev !== url()->current()) {
+            if (str_contains($adminContestPrev, '/manage')) {
+                $adminContestFrom = 'manage';
+            }
+        }
+        $adminBackUrl = ($adminContestFrom === 'manage') ? route('admin.contests.manage', $contest->id) : route('admin.contests');
+        $adminBackLabel = ($adminContestFrom === 'manage') ? 'Kembali ke Kelola Lomba' : 'Kembali ke Daftar Event Lomba';
+    @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
         <div>
 
-            <a href="{{ route('admin.contests') }}" class="text-xs font-bold text-amber-600 hover:underline flex items-center gap-1.5 mb-1">
+            <a href="{{ $adminBackUrl }}" class="text-xs font-bold text-amber-600 hover:underline flex items-center gap-1.5 mb-1 cursor-pointer">
 
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
 
-                <span>Kembali ke Daftar Event Lomba</span>
+                <span>{{ $adminBackLabel }}</span>
 
             </a>
 

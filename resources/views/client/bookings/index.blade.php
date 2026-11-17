@@ -481,7 +481,7 @@
                     
                     <!-- 1. Tombol Aksi Utama (Bayar jika sudah disetujui tapi belum bayar, atau Chat) -->
                     @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
-                      <a href="{{ route('booking.invoice', $c->id) }}" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-bold text-xs rounded-xl transition inline-block">
+                      <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'bookings']) }}" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-bold text-xs rounded-xl transition inline-block">
                         Bayar
                       </a>
                     @else
@@ -515,7 +515,7 @@
                            style="display: none;">
                         
                         <!-- Lihat Invoice -->
-                        <a href="{{ route('booking.invoice', $c->id) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                        <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'bookings']) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                           Lihat Invoice
                         </a>
 
