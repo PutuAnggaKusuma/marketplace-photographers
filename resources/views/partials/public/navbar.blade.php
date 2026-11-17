@@ -298,11 +298,17 @@ function headerNotifApp() {
 
           <!-- User Profile Dropdown -->
           <div class="relative" x-data="{ open: false }">
-            <button @click="open = !open" class="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-gray-800 dark:text-white hover:text-amber-400 dark:hover:text-amber-400 focus:outline-none p-1 rounded-xl transition">
+            <button @click="open = !open" 
+                    class="group flex items-center gap-2.5 text-xs sm:text-sm font-bold text-gray-800 dark:text-white hover:text-amber-500 dark:hover:text-amber-400 focus:outline-none p-1 rounded-xl transition cursor-pointer"
+                    :class="open ? 'text-amber-500 dark:text-amber-400' : ''">
               <!-- Navbar Avatar (x-user-avatar: foto or initials) -->
               <x-user-avatar :user="auth()->user()" size="w-9 h-9 sm:w-10 sm:h-10" bg="bg-amber-400" textColor="text-gray-900" textSize="text-sm" />
-              <span class="hidden sm:inline font-extrabold text-sm">{{ auth()->user()->nama }}</span>
-              <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-400' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+              <span class="hidden sm:inline font-extrabold text-sm transition-colors duration-200">{{ auth()->user()->nama }}</span>
+              <svg class="w-4 h-4 text-gray-500 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition duration-200" 
+                   :class="open ? 'rotate-180 !text-amber-500 dark:!text-amber-400' : ''" 
+                   fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </button>
 
             <!-- Enlarged Proportional User Dropdown Menu -->

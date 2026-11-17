@@ -20,6 +20,25 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 15:50 WITA] — Sinkronisasi Warna Interaktif Chevron Dropdown Profil Pengguna pada Navbar (Hover & Open State Harmonization)
+
+* **Modul / Fitur**:
+  - Navbar Publik & Klien (`resources/views/partials/public/navbar.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/partials/public/navbar.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Sinkronisasi Hover & Status Buka Chevron Dropdown Profil**:
+    - **Before**: Saat tombol profil pengguna di-hover atau dalam kondisi terbuka (*open*), teks nama pengguna berubah menjadi kuning amber (`text-amber-400`), tetapi ikon chevron panah di kanannya tetap berwarna abu-abu gelap (`text-gray-500`) karena kelas warnanya di-hardcode pada elemen SVG tanpa `group-hover`.
+    - **After**: Menambahkan utilitas `group` pada tombol pemicu dropdown dan `group-hover:text-amber-500 dark:group-hover:text-amber-400` pada ikon SVG chevron, serta `!text-amber-500 dark:!text-amber-400` saat status `open` aktif. Teks nama dan panah chevron kini berubah warna secara serempak dan selaras 100%.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch (Aksen Amber).
+  * **Rule #70**: Visual Harmony & Micro-Interaction Integrity.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-17 15:45 WITA] — Implementasi Standar Card Grid Bertoolbar pada Galeri Klien (4 KPI Metric Cards, Dropdown Filter Status, dan Real-Time Search Bar)
 
 * **Modul / Fitur**:
