@@ -132,7 +132,7 @@
         </div>
       </div>
 
-      <!-- 5. Editorial Footnote / Status & Action Section (Tenang, Alami & Bebas Boks Kartu Bertumpuk) -->
+      <!-- 5. Status & Action Section (Hanya Tampil Jika Sudah Selesai, Menunggu Verifikasi Struk, atau Siap Bayar) -->
       @if($payment && $payment->payment_status === 'completed')
         <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div class="space-y-0.5">
@@ -159,18 +159,7 @@
             </button>
           </div>
         </div>
-      @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
-        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <div class="space-y-0.5">
-            <span class="font-bold text-amber-600 dark:text-amber-400 block">Menunggu Konfirmasi Fotografer</span>
-            <p>Fotografer sedang memeriksa detail jadwal dan lokasi acara Anda. Tagihan pembayaran akan aktif setelah pesanan disetujui.</p>
-          </div>
-          <a href="{{ route('client.bookings') }}" class="inline-flex items-center gap-1.5 font-bold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition shrink-0 cursor-pointer">
-            <span>Lihat Reservasi Saya</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-          </a>
-        </div>
-      @else
+      @elseif($contract->is_validated_photographer && in_array($contract->status_contract, ['pending_payment', 'approved']))
         <div class="pt-5 border-t border-gray-100 dark:border-gray-700 space-y-4">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
             <div>
