@@ -388,7 +388,7 @@
                                     </template>
 
                                     <template x-if="!m.deleted_for_all && m.message && !m.custom_offer">
-                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5" x-text="m.message"></p>
+                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5" x-html="renderMessageContent(m.message)"></p>
                                     </template>
 
                                 <!-- WhatsApp Style Bottom-Right Timestamp & Indicators -->
@@ -1198,6 +1198,20 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 },
                 body: JSON.stringify({ id_chat_booking: this.activeThreadId })
             }).catch(() => {});
+        },
+
+        renderMessageContent(msg) {
+            if (!msg) return '';
+            const escaped = msg
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+            const urlRegex = /(https?:\/\/[^\s<]+)/g;
+            return escaped.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline font-bold hover:opacity-80 break-all text-inherit">${url}</a>`;
+            });
         },
 
         sendMessage() {

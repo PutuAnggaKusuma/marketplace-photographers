@@ -366,16 +366,20 @@ class BookingController extends Controller
             'id_photographer' => $photographerId,
         ]);
 
-        $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
         $formattedDate = Carbon::parse($tanggalSesi)->translatedFormat('d F Y');
-        $catatanText = $request->filled('catatan_khusus') ? "\n• Catatan: " . trim($request->input('catatan_khusus')) : '';
+        $catatanText = $request->filled('catatan_khusus') ? "\n• Catatan Khusus: " . trim($request->input('catatan_khusus')) : '';
+
+        // Bentuk tautan Google Maps dari koordinat Leaflet atau query pencarian lokasi
+        $mapsUrl = ($lat && $lng)
+            ? "https://maps.google.com/?q={$lat},{$lng}"
+            : "https://www.google.com/maps/search/?api=1&query=" . urlencode(trim($request->input('lokasi_acara')));
 
         $openingMessage = "Halo {$targetPhotographer->nama}, saya telah mengajukan reservasi sesi foto:\n"
-            . "• Kode: {$contractCode}\n"
             . "• Layanan: {$service->nama_layanan}\n"
             . "• Tanggal: {$formattedDate}\n"
             . "• Jam: {$bookingStart} - {$bookingEnd} WIB ({$durasi} Jam)\n"
-            . "• Lokasi: " . trim($request->input('lokasi_acara'))
+            . "• Lokasi: " . trim($request->input('lokasi_acara')) . "\n"
+            . "• Petunjuk Arah: {$mapsUrl}"
             . $catatanText;
 
         ChatMessage::create([

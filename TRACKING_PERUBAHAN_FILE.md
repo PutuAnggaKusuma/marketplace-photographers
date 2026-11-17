@@ -4747,3 +4747,25 @@ Setiap entri log perubahan wajib mencantumkan:
   2. Klien memiliki kendali penuh: teks langsung tampil di input, tombol `[Kirim]` aktif berwarna amber, kursor berada di akhir teks, dan klien dapat langsung mengirim, mengedit, atau menghapus teks tersebut.
 * **Hasil Pengujian**:
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-17] Penambahan Tautan Google Maps Presisi pada Pesan Pembuka Reservasi Chat & Auto-Link Chat Bubbles
+* **Modul / Fitur**: Pesan Otomatis Reservasi Baru & Rendering Link Interaktif pada Chat (`BookingController@store` & `chat.index`).
+* **File yang Dimodifikasi**:
+  * `app/Http/Controllers/Public/BookingController.php` (menambahkan tautan Google Maps `https://maps.google.com/?q={lat},{lng}` pada pesan pembuka reservasi chat dan membuang glorifikasi kode `• Kode: KTRK-` di urutan pertama)
+  * `resources/views/public/chat/index.blade.php` (menambahkan helper `renderMessageContent` untuk auto-link URL interaktif dan XSS sanitization)
+  * `resources/views/photographer/chat/index.blade.php` (sinkronisasi rendering link URL interaktif pada sisi fotografer)
+* **Rincian Perubahan**:
+  1. **Tautan Google Maps Presisi**:
+     - Saat klien mengajukan reservasi, koordinat GPS (`latitude` dan `longitude`) yang dipilih klien pada peta Leaflet otomatis dibentuk menjadi tautan Google Maps: `• Petunjuk Arah: https://maps.google.com/?q={lat},{lng}`.
+     - Jika koordinat tidak tersedia, tautan menggunakan query pencarian nama alamat: `https://www.google.com/maps/search/?api=1&query=...`.
+  2. **Hierarki Pesan Manusiawi (Anti-AI Slop - Rule #89)**:
+     - Mengeliminasi `• Kode: KTRK-XXXXX` dari baris paling atas pesan. Urutan informasi disusun alami: Layanan, Tanggal, Jam, Lokasi Acara, Petunjuk Arah (Maps), dan Catatan Khusus.
+  3. **Auto-Link Interaktif pada Bubble Chat**:
+     - Seluruh URL (termasuk link Google Maps) yang dikirim dalam obrolan kini otomatis terformat menjadi tautan klik (*clickable link*) dengan atribut `target="_blank"` dan `rel="noopener noreferrer"`.
+     - Tautan di-escape dari karakter berbahaya terlebih dahulu untuk menjamin keamanan dari serangan XSS.
+     - Fotografer maupun klien kini cukup mengetuk 1-klik tautan peta di obrolan untuk langsung membuka navigasi rute di Google Maps atau Waze.
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
