@@ -20,7 +20,32 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 15:50 WITA] — Sinkronisasi Warna Interaktif Chevron Dropdown Profil Pengguna pada Navbar (Hover & Open State Harmonization)
+### [2026-11-17 16:00 WITA] — Implementasi Floating Back to Top Button Khusus Halaman Beranda (Alpine.js Native Smooth Scroll & Rule #72)
+
+* **Modul / Fitur**:
+  - Halaman Beranda Publik (`resources/views/public/home.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/home.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Tombol Mengambang (Floating Action Button) Kembali ke Atas**:
+    - **Before**: Tidak ada tombol pintasan untuk kembali ke posisi teratas halaman saat pengguna menjelajahi konten beranda yang panjang ke bawah, sehingga pengguna harus melakukan scrolling manual.
+    - **After**: Menambahkan tombol melayang (*floating button*) di sudut kanan bawah (`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40`) khusus pada halaman beranda (`home.blade.php`).
+    - **Mekanisme & Animasi Ringan Native (Zero Bloat Libraries)**:
+      - Menggunakan state reaktif Alpine.js: `@scroll.window="showTopBtn = (window.pageYOffset || document.documentElement.scrollTop) > 400"`.
+      - Tombol otomatis muncul dengan transisi fade & slide lembut saat posisi scroll melebihi 400px.
+      - Aksi klik mengeksekusi `window.scrollTo({ top: 0, behavior: 'smooth' })` bawaan browser tanpa library eksternal yang membebani memori atau bundle aplikasi.
+    - **Desain & Kepatuhan Visual**:
+      - Ikon single upward chevron minimalis (`d="M4.5 15.75l7.5-7.5 7.5 7.5"`) sesuai **Rule #72**.
+      - Bentuk rounded squircle (`rounded-2xl`) berukuran proporsional `w-11 h-11 sm:w-12 sm:h-12` dengan warna amber khas LensMatch (`bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0`) sesuai **Rule #61**.
+      - Dilengkapi atribut aksesibilitas `aria-label="Kembali ke atas"` dan `title="Kembali ke atas"`.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch (Aksen Amber).
+  * **Rule #70**: Anti-AI Slop Terminology & Natural Human Text Standard.
+  * **Rule #72**: Modern Single Chevron Standard (Ikon navigasi bersih tanpa panah batang berekor).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
 
 * **Modul / Fitur**:
   - Navbar Publik & Klien (`resources/views/partials/public/navbar.blade.php`).

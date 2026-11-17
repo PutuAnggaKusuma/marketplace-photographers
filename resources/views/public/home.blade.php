@@ -515,5 +515,33 @@
     </div>
   </section>
 
+  <!-- 8. FLOATING SCROLL TO TOP (Khusus Beranda - Alpine.js Smooth Scroll & Rule #72) -->
+  <div x-data="{ 
+         showTopBtn: false,
+         scrollToTop() {
+           window.scrollTo({ top: 0, behavior: 'smooth' });
+         }
+       }"
+       @scroll.window="showTopBtn = (window.pageYOffset || document.documentElement.scrollTop) > 400"
+       class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40">
+    <button type="button" 
+            x-show="showTopBtn"
+            @click="scrollToTop()"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 scale-90"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+            x-cloak
+            title="Kembali ke atas"
+            aria-label="Kembali ke atas"
+            class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0 flex items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
+      </svg>
+    </button>
+  </div>
+
 </main>
 @endsection
