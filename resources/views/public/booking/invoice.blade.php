@@ -20,11 +20,11 @@
       @endif
     </div>
 
-    <!-- Official Invoice Document Sheet (Rule #89) -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-10 lg:p-12 space-y-8">
+    <!-- Official Invoice Document Sheet (Rule #89 & Rule #106) -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-sm p-6 sm:p-8 lg:p-10 space-y-6 sm:space-y-7">
       
       <!-- 1. Document Header -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-gray-100 dark:border-gray-700 pb-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-gray-100 dark:border-gray-700 pb-6 sm:pb-7">
         <div class="space-y-1">
           <span class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
             Lens<span class="text-amber-500">Match</span>
@@ -34,36 +34,31 @@
         </div>
 
         <div class="text-left sm:text-right space-y-1">
-          <div class="flex sm:justify-end items-center gap-2">
-            <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Invoice</h1>
-            @if($payment && $payment->payment_status === 'completed')
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                Lunas
-              </span>
-            @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
-              <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
-                Menunggu Verifikasi
-              </span>
-            @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
-              <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                Menunggu Konfirmasi
-              </span>
-            @else
-              <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                Menunggu Pembayaran
-              </span>
-            @endif
+          <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Invoice</h1>
+          <div class="text-xs space-y-0.5 text-gray-500 dark:text-gray-400">
+            <p><span class="font-mono text-gray-600 dark:text-gray-300">{{ $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</span></p>
+            <p>Tanggal: {{ $contract->created_at->translatedFormat('d F Y') }}</p>
+            <p>
+              Status: 
+              @if($payment && $payment->payment_status === 'completed')
+                <span class="font-bold text-emerald-600 dark:text-emerald-400">Lunas</span>
+              @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
+                <span class="font-bold text-blue-600 dark:text-blue-400">Menunggu Verifikasi</span>
+              @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
+                <span class="font-bold text-amber-600 dark:text-amber-400">Menunggu Konfirmasi</span>
+              @else
+                <span class="font-bold text-amber-600 dark:text-amber-400">Menunggu Pembayaran</span>
+              @endif
+            </p>
           </div>
-          <p class="text-xs font-mono text-gray-500 dark:text-gray-400">{{ $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Tanggal: {{ $contract->created_at->translatedFormat('d F Y') }}</p>
         </div>
       </div>
 
       <!-- 2. Flat Editorial Billing Info (Klien & Fotografer) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs sm:text-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
         <div class="space-y-1">
           <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block mb-1">Ditagihkan Kepada:</span>
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{{ $contract->client->nama ?? 'Klien' }}</h4>
+          <h4 class="font-bold text-gray-900 dark:text-white text-xs">{{ $contract->client->nama ?? 'Klien' }}</h4>
           <p class="text-gray-500 dark:text-gray-400">{{ $contract->client->user->email ?? auth()->user()->email ?? '-' }}</p>
           @if($contract->bookingDetail?->lokasi)
             <p class="text-gray-500 dark:text-gray-400">Lokasi Acara: {{ $contract->bookingDetail->lokasi }}</p>
@@ -72,17 +67,17 @@
 
         <div class="space-y-1 sm:text-right">
           <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 block mb-1">Penyedia Jasa:</span>
-          <h4 class="font-bold text-gray-900 dark:text-white text-sm sm:text-base">{{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</h4>
+          <h4 class="font-bold text-gray-900 dark:text-white text-xs">{{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</h4>
           <p class="text-gray-500 dark:text-gray-400">{{ $contract->photographer->city->name ?? $contract->photographer->alamat ?? '-' }}</p>
           <p class="text-gray-500 dark:text-gray-400">{{ $contract->photographer->nomor_telepon ?? '-' }}</p>
         </div>
       </div>
 
-      <!-- 3. Line-Item Table (Tabel Rincian Layanan Standar Industri) -->
+      <!-- 3. Line-Item Table (Tabel Rincian Layanan Standar Industri - Rule #106 Seragam text-xs) -->
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs sm:text-sm border-collapse">
+        <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="border-b border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-400">
+            <tr class="border-b border-gray-200 dark:border-gray-700 text-xs font-bold uppercase tracking-wider text-gray-400">
               <th class="py-3 pr-4">Deskripsi Layanan</th>
               <th class="py-3 px-4 text-center">Jadwal Sesi</th>
               <th class="py-3 px-4 text-center">Tipe Pembayaran</th>
@@ -91,12 +86,12 @@
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
             <tr>
-              <td class="py-4 pr-4">
+              <td class="py-3.5 pr-4">
                 <span class="font-bold text-gray-900 dark:text-white block">
                   {{ $contract->bookingDetail?->service?->nama_layanan ?? 'Paket Layanan Fotografi' }}
                 </span>
               </td>
-              <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
+              <td class="py-3.5 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
                 <span>{{ $contract->bookingDetail ? $contract->bookingDetail->date_range_label : '-' }}</span>
                 @if($contract->bookingDetail?->jam_mulai)
                   @php
@@ -106,10 +101,10 @@
                   <span class="block text-gray-400 text-xs">{{ $invEnd ? "{$invStart} - {$invEnd} WIB" : "{$invStart} WIB" }} ({{ $contract->bookingDetail->effective_duration_hours }} Jam)</span>
                 @endif
               </td>
-              <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
+              <td class="py-3.5 px-4 text-center text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
                 {{ $contract->payment_type === 'dp' ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh' }}
               </td>
-              <td class="py-4 pl-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              <td class="py-3.5 pl-4 text-right font-bold text-gray-900 dark:text-white whitespace-nowrap">
                 Rp {{ number_format($contract->jumlah, 0, ',', '.') }}
               </td>
             </tr>
@@ -117,82 +112,84 @@
         </table>
       </div>
 
-      <!-- 4. Rangkuman Kalkulasi Tagihan (Rata Kanan Bawah) -->
-      <div class="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
-        <div class="w-full sm:w-72 space-y-2 text-xs sm:text-sm">
+      <!-- 4. Rangkuman Kalkulasi Tagihan (Rata Kanan Bawah - Rule #106 Seragam text-xs) -->
+      <div class="flex justify-end pt-3 border-t border-gray-100 dark:border-gray-700">
+        <div class="w-full sm:w-72 space-y-2 text-xs">
           <div class="flex justify-between text-gray-500 dark:text-gray-400">
             <span>Subtotal</span>
-            <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($contract->jumlah, 0, ',', '.') }}</span>
+            <span class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($contract->jumlah, 0, ',', '.') }}</span>
           </div>
           <div class="flex justify-between text-gray-500 dark:text-gray-400">
             <span>Biaya Layanan Platform</span>
-            <span class="font-medium text-gray-900 dark:text-white">Gratis</span>
+            <span class="font-semibold text-gray-900 dark:text-white">Gratis</span>
           </div>
           <div class="pt-2 border-t border-gray-200 dark:border-gray-700 flex justify-between items-baseline">
-            <span class="font-bold text-gray-900 dark:text-white text-sm">Total Tagihan</span>
-            <span class="font-black text-gray-900 dark:text-white text-lg sm:text-xl">
+            <span class="font-bold text-gray-900 dark:text-white text-xs">Total Tagihan</span>
+            <span class="font-black text-gray-900 dark:text-white text-xs">
               Rp {{ number_format($contract->jumlah, 0, ',', '.') }}
             </span>
           </div>
         </div>
       </div>
 
-      <!-- 5. Status & Action Section (Tenang, Bersih, Bebas Banner Neon) -->
+      <!-- 5. Editorial Footnote / Status & Action Section (Tenang, Alami & Bebas Boks Kartu Bertumpuk) -->
       @if($payment && $payment->payment_status === 'completed')
-        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div class="space-y-0.5">
-            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">Pembayaran Terverifikasi</span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Pembayaran telah diterima dan jadwal sesi foto Anda telah terkonfirmasi.</p>
+            <span class="font-bold text-emerald-600 dark:text-emerald-400 block">Pembayaran Terverifikasi (Lunas)</span>
+            <p>Pembayaran telah diterima lunas dan jadwal sesi foto Anda telah terkonfirmasi secara resmi.</p>
           </div>
-          <a href="{{ route('client.bookings') }}" class="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-extrabold text-xs rounded-xl transition shadow-xs cursor-pointer">
-            Lihat Jadwal Reservasi
+          <a href="{{ route('client.bookings') }}" class="inline-flex items-center gap-1.5 font-bold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition shrink-0 cursor-pointer">
+            <span>Lihat Jadwal Reservasi</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
           </a>
         </div>
       @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
-        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div class="space-y-0.5">
-            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 block">Bukti Transfer Sedang Diverifikasi</span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Struk transfer Anda sedang diperiksa oleh Tim Admin. Jadwal sesi foto akan aktif otomatis setelah disetujui.</p>
+            <span class="font-bold text-blue-600 dark:text-blue-400 block">Bukti Transfer Sedang Diverifikasi</span>
+            <p>Struk transfer sedang diperiksa oleh Tim Admin. Jadwal sesi foto akan aktif otomatis setelah disetujui.</p>
           </div>
           <div class="flex items-center gap-3 shrink-0">
-            <a href="{{ $payment->bukti_transfer }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs">
+            <a href="{{ $payment->bukti_transfer }}" target="_blank" class="px-3.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs">
               Lihat Struk
             </a>
-            <button type="button" @click="showModal = true" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+            <button type="button" @click="showModal = true" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
               Unggah Ulang
             </button>
           </div>
         </div>
       @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
-        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
           <div class="space-y-0.5">
-            <span class="text-xs font-bold text-amber-600 dark:text-amber-400 block">Menunggu Konfirmasi Fotografer</span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Fotografer sedang memeriksa detail jadwal dan lokasi acara Anda. Tagihan pembayaran akan aktif setelah pesanan disetujui.</p>
+            <span class="font-bold text-amber-600 dark:text-amber-400 block">Menunggu Konfirmasi Fotografer</span>
+            <p>Fotografer sedang memeriksa detail jadwal dan lokasi acara Anda. Tagihan pembayaran akan aktif setelah pesanan disetujui.</p>
           </div>
-          <a href="{{ route('client.bookings') }}" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-800 dark:text-gray-200 font-bold text-xs transition shadow-2xs shrink-0">
-            Lihat Reservasi
+          <a href="{{ route('client.bookings') }}" class="inline-flex items-center gap-1.5 font-bold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition shrink-0 cursor-pointer">
+            <span>Lihat Reservasi Saya</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
           </a>
         </div>
       @else
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 space-y-4">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
             <div>
-              <span class="text-xs font-bold text-gray-900 dark:text-white block">Instruksi Pembayaran</span>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Silakan transfer nominal tagihan ke rekening bank berikut:</p>
+              <span class="font-bold text-gray-900 dark:text-white block">Instruksi Pembayaran Transfer Bank</span>
+              <p class="text-gray-500 dark:text-gray-400">Silakan transfer nominal tagihan tepat ke rekening resmi berikut:</p>
             </div>
             @if($contract->expired_at)
               <span class="text-[11px] text-gray-400">Batas waktu: {{ \Carbon\Carbon::parse($contract->expired_at)->translatedFormat('d M Y, H:i') }} WIB</span>
             @endif
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 py-3.5 px-4 rounded-2xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700/80 text-xs">
             <div>
               <span class="text-gray-400 block text-[11px]">Bank Tujuan</span>
               <strong class="font-bold text-gray-900 dark:text-white">{{ config('app.escrow_bank', 'Bank Central Asia (BCA)') }}</strong>
             </div>
             <div>
               <span class="text-gray-400 block text-[11px]">Nomor Rekening</span>
-              <strong class="font-mono font-bold text-gray-900 dark:text-white text-sm">{{ config('app.escrow_account_number', '8840-1928-3746') }}</strong>
+              <strong class="font-mono font-bold text-gray-900 dark:text-white">{{ config('app.escrow_account_number', '8840-1928-3746') }}</strong>
             </div>
             <div>
               <span class="text-gray-400 block text-[11px]">Atas Nama</span>
@@ -200,8 +197,8 @@
             </div>
           </div>
 
-          <div class="flex justify-end pt-2">
-            <button type="button" @click="showModal = true" class="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+          <div class="flex justify-end pt-1">
+            <button type="button" @click="showModal = true" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
               Unggah Bukti Transfer
             </button>
           </div>

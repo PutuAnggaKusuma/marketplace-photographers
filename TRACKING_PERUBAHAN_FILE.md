@@ -20,6 +20,34 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 11:25 WITA] — Refaktor Total Tipografi, Spacing, dan Eliminasi Boxed Card pada Lembar Faktur (Kepatuhan Penuh Rule #106, Rule #89, Rule #7, Rule #70)
+
+* **Modul / Fitur**:
+  - Halaman Faktur Pembayaran / Invoice (`resources/views/public/booking/invoice.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/invoice.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Pemisahan Terstruktur Judul Dokumen & Status Faktur (Rule #89)**:
+    - **Before**: `<h1>Invoice</h1>` dan `<span>Menunggu Konfirmasi</span>` berada di dalam flexbox horizontal berdampingan tanpa pemisah yang jelas, sehingga terbaca janggal seperti satu kalimat: *"Invoice Menunggu Konfirmasi"*.
+    - **After**: Memisahkan `Invoice` sebagai tajuk formal independen (`text-2xl font-black text-gray-900 dark:text-white tracking-tight`). Seluruh metadata diletakkan secara terstruktur di bawahnya dalam 3 baris tenang: Nomor Invoice (`font-mono text-gray-600`), Tanggal Faktur, dan baris `Status: Menunggu Konfirmasi` (atau Lunas / Menunggu Pembayaran) dengan label status yang jelas dan rapi.
+  * **Keseragaman Ukuran Font `text-xs` pada Tabel dan Angka Nominal (Kepatuhan Absolut Rule #106)**:
+    - **Before**: Angka `Total Tagihan` melonjak menjadi `text-lg sm:text-xl font-black`, meniru pola template e-commerce SaaS generik yang norak dan melanggar Rule #106. Identitas klien/fotografer juga melonjak ke `text-base`.
+    - **After**: Menyeragamkan seluruh teks dokumen faktur (tabel rincian layanan, identitas penagihan, subtotal, dan total tagihan) ke ukuran patokan **`text-xs`**. Hierarki visual untuk `Total Tagihan` dan nominal harga Rp 3.000.000 murni dibangun menggunakan ketebalan huruf `font-black` dan kontras teks monokrom pekat (`text-gray-900 dark:text-white`).
+  * **Harmonisasi Spacing, Padding, dan Eliminasi Boks Kartu Bertumpuk (Rule #7 & Rule #89)**:
+    - **Before**: Menggunakan `space-y-8` dan `py-4` yang menciptakan rongga hampa kosong di tengah dokumen. Di bagian bawah faktur terdapat boks kartu abu-abu kaku (`p-5 rounded-2xl bg-gray-50 border border-gray-200`) dengan tombol aksi di dalamnya yang tampak seperti kartu dashboard nyasar di dalam lembar kertas formal.
+    - **After**: Memperbaiki ritme vertikal menjadi `p-6 sm:p-8 lg:p-10 space-y-6 sm:space-y-7` dengan baris tabel `py-3.5`. Mengganti boks kartu abu-abu kaku menjadi catatan kaki dokumen (*editorial footnote*) bergaris tipis lembut (`pt-5 border-t border-gray-100`) yang menyatu alami dengan kertas faktur, lengkap dengan link navigasi teks yang tenang (`Lihat Reservasi Saya >`).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #106**: Keseragaman ukuran font `text-xs` di seluruh sel dan nominal tabel/dokumen faktur.
+  * **Rule #89**: Standarisasi faktur bersih standar industri, anti-kotak kaku terpisah, dan tata letak editorial datar.
+  * **Rule #7**: Proporsionalitas padding dan margin (*comfortable whitespace rhythm*).
+  * **Rule #70**: Anti-AI slop copywriting dan terminologi manusiawi.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Tampilan Blade template tervalidasi bersih dan proporsional.
+
+---
+
 ### [2026-11-17 11:15 WITA] — Implementasi Alur Reservasi Opsi C (Standar Emas Airbnb / SweetEscape) dan Pembersihan AI-Slop pada Lembar Faktur (Rule #14, Rule #70, Rule #89, Rule #90)
 
 * **Modul / Fitur**:
