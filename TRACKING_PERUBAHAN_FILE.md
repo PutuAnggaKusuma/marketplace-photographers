@@ -20,7 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 16:15 WITA] — Penyesuaian Skala Spasial Dropzone Foto Avatar Profil pada Halaman Profil Pengguna (Pola Vertikal Proporsional Selebar Kolom Input)
+### [2026-11-17 16:30 WITA] — Perbaikan Kebocoran Celah Putih Hover Tombol Logout pada Dropdown Navbar (Full-Bleed Rounded Bottom & Zero Space Reduction)
+
+* **Modul / Fitur**:
+  - Dropdown Profil Pengguna pada Navbar (`resources/views/partials/public/navbar.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/partials/public/navbar.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Eliminasi Kebocoran Padding Putih pada Efek Hover Logout**:
+    - **Before**: Terdapat celah strip putih di bawah tombol logout saat di-hover karena adanya `py-2` pada kontainer kartu dropdown dan pembungkus `<div class="pt-1">` di atas tombol. Latar merah muda hover (`hover:bg-red-50`) hanya mewarnai elemen button dan tidak mencapai tepi dasar kartu.
+    - **After**: Menghapus `py-2` pada kontainer dropdown dan menghapus pembungkus `<div class="pt-1">`. Jarak ruang bernapas teks tetap dipertahankan 100% lapang dengan memindahkan ruang luar ke dalam padding tombol (`pt-4 pb-5`).
+    - **Hasil Akhir**: Latar hover merah muda kini mengalir mulus mengisi 100% sudut lengkung bawah kartu (`rounded-b-2xl`) secara solid tanpa kebocoran warna putih, dan jarak baca teks tetap nyaman persis seperti sebelumnya.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Visual Consistency & Interactive Color Harmony.
+  * **Rule #70**: Micro-Interaction Integrity & Natural Layout Balance.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
 
 * **Modul / Fitur**:
   - Halaman Pengaturan Profil Pengguna / Klien (`resources/views/public/profile/index.blade.php`).

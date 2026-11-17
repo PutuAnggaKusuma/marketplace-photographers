@@ -312,7 +312,7 @@ function headerNotifApp() {
             </button>
 
             <!-- Enlarged Proportional User Dropdown Menu -->
-            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-3 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 py-2 z-50 overflow-hidden">
+            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-3 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 z-50 overflow-hidden">
               
               <!-- User Header Card -->
               <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 flex items-center gap-3.5">
@@ -360,13 +360,13 @@ function headerNotifApp() {
                 </a>
               @endif
               
-              <!-- Logout Action Button with Confirmation Modal Trigger -->
-              <div class="pt-1">
-                <button type="button" @click="open = false; $dispatch('open-confirm-modal', { title: 'Konfirmasi Keluar Akun', message: 'Apakah Anda yakin ingin keluar dari akun LensMatch?', actionUrl: '{{ route('logout') }}', method: 'POST', buttonText: 'Ya, Keluar Akun', iconType: 'logout', buttonClass: 'bg-red-600 hover:bg-red-700 text-white' })" class="w-full text-left px-5 py-3.5 text-xs sm:text-sm font-extrabold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition flex items-center gap-3 group">
-                  <svg class="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                  <span>Keluar / Logout</span>
-                </button>
-              </div>
+              <!-- Logout Action Button with Confirmation Modal Trigger (Full-Bleed Rounded Bottom & Generous Spacing) -->
+              <button type="button" 
+                      @click="open = false; $dispatch('open-confirm-modal', { title: 'Konfirmasi Keluar Akun', message: 'Apakah Anda yakin ingin keluar dari akun LensMatch?', actionUrl: '{{ route('logout') }}', method: 'POST', buttonText: 'Ya, Keluar Akun', iconType: 'logout', buttonClass: 'bg-red-600 hover:bg-red-700 text-white' })" 
+                      class="w-full text-left px-5 pt-4 pb-5 text-xs sm:text-sm font-extrabold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition flex items-center gap-3 group cursor-pointer">
+                <svg class="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span>Keluar / Logout</span>
+              </button>
             </div>
           </div>
         @else
