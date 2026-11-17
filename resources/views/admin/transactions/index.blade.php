@@ -1216,7 +1216,7 @@
 
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 
-                        <th class="py-3.5 px-4 sm:px-6">Kode Reg & Tanggal</th>
+                        <th class="py-3.5 px-4 sm:px-6">Registrasi Peserta</th>
 
                         <th class="py-3.5 px-4 sm:px-6">Peserta (User)</th>
 
@@ -1420,14 +1420,10 @@
 
             
 
-            <!-- Modal Header (No Icon, No X button because Tutup button exists) -->
-
+            <!-- Modal Header (No Icon, No X button because Tutup button exists - Rule #59 & Rule #89) -->
             <div class="border-b border-gray-100 dark:border-gray-700/80 pb-4 text-center flex flex-col gap-1">
-
-                <h3 class="text-lg font-black text-gray-900 dark:text-white" x-text="activeContract?.code || 'Detail Transaksi'"></h3>
-
-                <p class="text-xs text-gray-500">Dibuat pada <span x-text="activeContract?.created_at"></span></p>
-
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Detail Transaksi</h3>
+                <p class="text-xs text-gray-500"><span class="font-mono text-gray-600 dark:text-gray-300 font-bold" x-text="activeContract?.code"></span> • Dibuat pada <span x-text="activeContract?.created_at"></span></p>
             </div>
 
 
@@ -1557,11 +1553,8 @@
                         </div>
 
                         <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-
                             <span class="text-gray-500">Nomor Invoice:</span>
-
-                            <span class="font-bold text-amber-600 dark:text-amber-400 font-mono" x-text="activeContract.external_id"></span>
-
+                            <span class="font-bold text-gray-700 dark:text-gray-300 font-mono" x-text="activeContract.external_id"></span>
                         </div>
 
                         <div class="flex justify-between py-1">

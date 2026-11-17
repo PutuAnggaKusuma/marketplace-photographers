@@ -328,7 +328,7 @@ function headerNotifApp() {
                 </a>
                 <a href="{{ url('/client/invoices') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                  <span>Invoice & Pembayaran</span>
+                  <span>Riwayat Pembayaran</span>
                 </a>
                 <a href="{{ url('/client/galleries') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -336,7 +336,7 @@ function headerNotifApp() {
                 </a>
                 <a href="{{ url('/chat') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                  <span>Pesan & Chat Fotografer</span>
+                  <span>Ruang Chat</span>
                 </a>
                 <a href="{{ url('/profile') }}" class="px-5 py-3.5 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-b border-gray-100 dark:border-gray-700/60 transition flex items-center gap-3 font-bold group">
                   <svg class="w-4 h-4 text-gray-400 group-hover:text-amber-400 dark:hover:text-amber-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>

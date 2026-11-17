@@ -9,19 +9,14 @@
 @section('content')
 
 <section class="py-12 bg-white dark:bg-gray-900 min-h-screen" x-data="{
-
   cancelModalOpen: false,
-
   cancelContractId: null,
-
-  cancelContractCode: '',
-
+  cancelPhotographerName: '',
+  cancelServiceName: '',
   rescheduleModalOpen: false,
-
   rescheduleContractId: null,
-
-  rescheduleContractCode: '',
-
+  reschedulePhotographerName: '',
+  rescheduleServiceName: '',
   rescheduleDefaultDate: '{{ date('Y-m-d', strtotime('+1 day')) }}',
 
   handleSearch(e) {
@@ -607,37 +602,21 @@
 
 
                         <!-- Ajukan Jadwal Ulang (Hanya jika belum selesai dan belum dibatalkan) -->
-
                         @if($detail && !in_array($detail->status_booking, ['completed', 'cancelled']) && $detail->reschedule_status !== 'pending')
-
                           <button type="button" 
-
-                                  @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; rescheduleContractCode = 'KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; rescheduleModalOpen = true;"
-
+                                  @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; reschedulePhotographerName = '{{ addslashes($photographer->nama ?? 'Mitra Fotografer') }}'; rescheduleServiceName = '{{ addslashes($detail->service->nama_layanan ?? 'Sesi Fotografi') }}'; rescheduleModalOpen = true;"
                                   class="w-full px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
-
                             Ajukan Jadwal Ulang
-
                           </button>
-
                         @endif
 
-
-
                         <!-- Batalkan Reservasi (Hanya jika belum selesai dan belum dibatalkan) -->
-
                         @if($detail && !in_array($detail->status_booking, ['completed', 'cancelled']))
-
                           <button type="button" 
-
-                                  @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelContractCode = 'KTRK-{{ str_pad($c->id, 5, '0', STR_PAD_LEFT) }}'; cancelModalOpen = true;"
-
+                                  @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelPhotographerName = '{{ addslashes($photographer->nama ?? 'Mitra Fotografer') }}'; cancelServiceName = '{{ addslashes($detail->service->nama_layanan ?? 'Sesi Fotografi') }}'; cancelModalOpen = true;"
                                   class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
-
                             Batalkan Reservasi
-
                           </button>
-
                         @endif
 
 
@@ -770,12 +749,9 @@
 
 
 
-        <!-- Deskripsi -->
-
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center max-w-sm mx-auto">
-
-          Apakah Anda yakin ingin membatalkan pesanan <span class="font-mono font-bold text-gray-800 dark:text-gray-200" x-text="cancelContractCode"></span>? Jika sudah melakukan pembayaran, dana akan ditinjau Admin untuk proses refund.
-
+        <!-- Deskripsi: Fokus pada Mitra Fotografer & Layanan (Opsi A ala Airbnb/SweetEscape) -->
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center max-w-sm mx-auto leading-relaxed">
+          Apakah Anda yakin ingin membatalkan sesi <strong class="text-gray-900 dark:text-white" x-text="cancelServiceName"></strong> bersama <strong class="text-gray-900 dark:text-white" x-text="cancelPhotographerName"></strong>? Jika sudah melakukan pembayaran, dana akan ditinjau Admin untuk proses refund.
         </p>
 
 
@@ -938,12 +914,9 @@
 
 
 
-        <!-- Deskripsi -->
-
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center max-w-sm mx-auto">
-
-          Pilih tanggal dan jam mulai pengganti untuk pesanan <span class="font-mono font-bold text-gray-800 dark:text-gray-200" x-text="rescheduleContractCode"></span>.
-
+        <!-- Deskripsi: Fokus pada Mitra Fotografer & Layanan (Opsi A ala Airbnb/SweetEscape) -->
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center max-w-sm mx-auto leading-relaxed">
+          Pilih tanggal dan jam mulai pengganti untuk sesi <strong class="text-gray-900 dark:text-white" x-text="rescheduleServiceName"></strong> bersama <strong class="text-gray-900 dark:text-white" x-text="reschedulePhotographerName"></strong>.
         </p>
 
 

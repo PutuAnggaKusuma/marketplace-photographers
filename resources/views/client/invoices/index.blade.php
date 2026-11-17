@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Invoice & Tagihan Saya — LensMatch')
+@section('title', 'Riwayat Pembayaran Saya — LensMatch')
 
 @section('content')
 <section class="py-12 bg-white dark:bg-gray-900 min-h-screen" x-data="{
@@ -19,7 +19,7 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-gray-900 dark:text-white">Invoice & Pembayaran Saya</h1>
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white">Riwayat Pembayaran Saya</h1>
       </div>
     </div>
 

@@ -48,15 +48,15 @@
             <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalLogs, 0, ',', '.') }}</h2>
         </div>
 
-        <!-- Card 2: Log Transaksi & Rekber -->
+        <!-- Card 2: Log Transaksi Pembayaran -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Transaksi & Rekber</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Transaksi Pembayaran</span>
             <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalTransactions, 0, ',', '.') }}</h2>
         </div>
 
-        <!-- Card 3: Log Booking & Reservasi -->
+        <!-- Card 3: Log Sesi Reservasi -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Booking & Sesi Foto</span>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Sesi Reservasi</span>
             <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ number_format($totalBookings, 0, ',', '.') }}</h2>
         </div>
 

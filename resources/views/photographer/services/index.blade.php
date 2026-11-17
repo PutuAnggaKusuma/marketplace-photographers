@@ -1,6 +1,6 @@
 @extends('layouts.photographer')
 
-@section('title', 'Kelola Paket Layanan & Tarif — Dashboard Fotografer')
+@section('title', 'Kelola Paket Layanan — Dashboard Fotografer')
 
 @section('content')
 <div class="space-y-6 w-full" x-data="{

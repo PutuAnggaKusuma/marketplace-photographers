@@ -20,6 +20,58 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 11:35 WITA] — Pembersihan Menyeluruh Glorifikasi Kode Database, Penerapan Modal Manusiawi (Opsi A ala Airbnb/SweetEscape), dan Eliminasi Jargon Teknis (Rule #89, Rule #70, Rule #106)
+
+* **Modul / Fitur**:
+  - Modal Pembatalan & Jadwal Ulang Reservasi Klien (`resources/views/client/bookings/index.blade.php`).
+  - Modal Detail Transaksi & Baris Invoice Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Modal Pengajuan Payout Fotografer (`resources/views/photographer/reports/index.blade.php`).
+  - Halaman Pembayaran Fallback (`resources/views/public/payment/index.blade.php`).
+  - Modal Penawaran Khusus Chat (`resources/views/public/chat/index.blade.php`).
+  - Halaman Invoice & Menu Navbar Klien (`client/invoices/index.blade.php`, `navbar.blade.php`, `services/index.blade.php`, `activity_logs/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/photographer/reports/index.blade.php`
+  * `resources/views/public/payment/index.blade.php`
+  * `resources/views/public/chat/index.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/partials/public/navbar.blade.php`
+  * `resources/views/photographer/services/index.blade.php`
+  * `resources/views/admin/activity_logs/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penerapan Modal Pembatalan & Reschedule Manusiawi Opsi A (Rule #89 Point 1)**:
+    - **Before**: Modal pembatalan dan reschedule klien menodongkan kode transaksi database (*"Apakah Anda yakin ingin membatalkan pesanan KTRK-00018?"* dan *"Pilih tanggal dan jam mulai pengganti untuk pesanan KTRK-00018"*), membingungkan klien karena tidak menyebut identitas sesi yang dipesan.
+    - **After**: Mengubah teks modal pembatalan menjadi **Opsi A ala Airbnb/SweetEscape**: *"Apakah Anda yakin ingin membatalkan sesi [Nama Layanan] bersama [Nama Fotografer]? Jika sudah melakukan pembayaran, dana akan ditinjau Admin untuk proses refund."*, serta modal reschedule menjadi *"Pilih tanggal dan jam mulai pengganti untuk sesi [Nama Layanan] bersama [Nama Fotografer]."* tanpa menyebutkan kode acak database.
+  * **Pemberantasan Glorifikasi Kode & Aksen Warna Norak pada Admin Transaksi (Rule #89 Point 1)**:
+    - **Before**: Judul modal `<h3>` detail transaksi admin diisi kode kontrak raksasa `KTRK-00018`, dan nomor invoice diwarnai aksen kuning amber mencolok (`text-amber-600 font-bold`).
+    - **After**: Judul modal dikembalikan ke entitas formal **"Detail Transaksi"** dengan kode kontrak sebagai metadata pendukung monokrom di bawahnya. Nomor invoice diubah menjadi monokrom netral `font-mono text-gray-700 dark:text-gray-300`. Header kolom `Kode Reg & Tanggal` diubah menjadi `Registrasi Peserta`.
+  * **Restrukturisasi Modal Payout Fotografer (Rule #89)**:
+    - **Before**: Modal tarik saldo payout menempatkan baris pertama `Nomor Kontrak: KTRK-00018` tebal di atas nominal pencairan.
+    - **After**: Mengedepankan nama sesi pemotretan, nama klien, dan nominal bersih (90%) di urutan teratas, sementara kode transaksi diletakkan sebagai referensi sekunder tenang di baris terbawah.
+  * **Pembersihan Halaman Pembayaran Fallback (`payment/index.blade.php`)**:
+    - **Before**: Judul halaman *"Selesaikan Pembayaran Kontrak"*, kode kontrak dipajang di header atas, nominal harga raksasa kuning amber (`text-2xl text-amber-500`), copywriting jargon *"Pembayaran via Midtrans Snap / Rekening Bersama Escrow"*, dan emoji `💳` di empty state.
+    - **After**: Judul diubah menjadi *"Pembayaran Reservasi Sesi Foto"*, kode diletakkan sebagai referensi sekunder, nominal harga dinormalkan ke tipografi formal proporsional `text-xs font-black text-gray-900`, jargon dihapus menjadi *"Pembayaran resmi diproses secara aman melalui sistem LensMatch"*, dan emoji digantikan ikon SVG bersih.
+  * **Eliminasi Jargon Teknis "Escrow" pada Antarmuka Publik (Rule #89 Point 2)**:
+    - **Before**: Radio button pilihan pembayaran di modal penawaran chat bertuliskan *"Langsung lunas via Escrow"*.
+    - **After**: Diubah menjadi bahasa manusiawi yang lugas: *"Pembayaran lunas langsung"*.
+  * **Pembersihan Redundansi Simbol `&` (Rule #70)**:
+    - Mengubah judul halaman invoice klien dari *"Invoice & Pembayaran Saya"* menjadi *"Riwayat Pembayaran Saya"*.
+    - Mengubah menu dropdown navbar dari *"Invoice & Pembayaran"* menjadi *"Riwayat Pembayaran"*, dan *"Pesan & Chat Fotografer"* menjadi *"Ruang Chat"*.
+    - Mengubah title kelola paket fotografer dari *"Kelola Paket Layanan & Tarif"* menjadi *"Kelola Paket Layanan"*.
+    - Mengubah kartu metrik admin dari *"Transaksi & Rekber"* menjadi *"Transaksi Pembayaran"*, dan *"Booking & Sesi Foto"* menjadi *"Sesi Reservasi"*.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #89 Point 1**: Anti-Code Glorification di seluruh dialog dan antarmuka.
+  * **Rule #89 Point 2**: Eliminasi total jargon teknis "Escrow / Rekber" dari UI publik.
+  * **Rule #70**: Anti-AI Slop Terminology dan eliminasi simbol `&` redundan.
+  * **Rule #106**: Keseragaman tipografi nominal proporsional.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * Seluruh modal dan halaman tervalidasi bersih.
+
+---
+
 ### [2026-11-17 11:25 WITA] — Refaktor Total Tipografi, Spacing, dan Eliminasi Boxed Card pada Lembar Faktur (Kepatuhan Penuh Rule #106, Rule #89, Rule #7, Rule #70)
 
 * **Modul / Fitur**:

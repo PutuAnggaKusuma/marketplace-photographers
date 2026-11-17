@@ -237,6 +237,8 @@
                                             <button type="button" 
                                                     @click="openPayoutModal({{ json_encode([
                                                         'id' => $c->id,
+                                                        'client_name' => $c->client->nama ?? 'Klien',
+                                                        'service_name' => $c->bookingDetail?->service?->nama_layanan ?? 'Sesi Fotografi',
                                                         'contract_code' => 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
                                                         'amount' => 'Rp ' . number_format($netPayout, 0, ',', '.'),
                                                         'bank_name' => $photographer->nama_bank,
@@ -299,14 +301,22 @@
             </div>
 
             <!-- Details Box -->
-            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 flex flex-col gap-3 text-xs">
+            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 flex flex-col gap-2.5 text-xs">
                 <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
-                    <span class="text-gray-500 dark:text-gray-400">Nomor Kontrak:</span>
-                    <span class="font-bold text-gray-900 dark:text-white font-mono" x-text="payoutData.contract_code"></span>
+                    <span class="text-gray-500 dark:text-gray-400">Sesi Pemotretan:</span>
+                    <span class="font-bold text-gray-900 dark:text-white" x-text="payoutData.service_name || '-'"></span>
+                </div>
+                <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
+                    <span class="text-gray-500 dark:text-gray-400">Klien:</span>
+                    <span class="font-bold text-gray-900 dark:text-white" x-text="payoutData.client_name || '-'"></span>
                 </div>
                 <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60">
                     <span class="text-gray-500 dark:text-gray-400">Nominal Bersih (90%):</span>
                     <span class="font-black text-emerald-600 dark:text-emerald-400 text-sm" x-text="payoutData.amount"></span>
+                </div>
+                <div class="flex items-center justify-between pb-2 border-b border-gray-200/70 dark:border-gray-700/60 text-[11px] text-gray-400">
+                    <span>Ref. Transaksi:</span>
+                    <span class="font-mono text-gray-500 dark:text-gray-400" x-text="payoutData.contract_code"></span>
                 </div>
                 <div class="flex flex-col gap-1">
                     <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Rekening Bank Tujuan:</span>

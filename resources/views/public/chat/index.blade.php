@@ -1612,7 +1612,7 @@
                             <input type="radio" x-model="acceptOfferPaymentType" value="full" class="text-amber-500 focus:ring-amber-400">
                             <div>
                                 <div class="text-xs font-extrabold text-gray-900 dark:text-white">Bayar Penuh (100%)</div>
-                                <div class="text-[11px] text-gray-500 dark:text-gray-400">Langsung lunas via Escrow</div>
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400">Pembayaran lunas langsung</div>
                             </div>
                         </div>
                         <span class="text-xs font-black text-gray-900 dark:text-amber-400" x-text="acceptOfferTarget ? acceptOfferTarget.formatted_harga : '-'"></span>
