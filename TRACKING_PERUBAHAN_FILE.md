@@ -20,6 +20,37 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 11:15 WITA] — Implementasi Alur Reservasi Opsi C (Standar Emas Airbnb / SweetEscape) dan Pembersihan AI-Slop pada Lembar Faktur (Rule #14, Rule #70, Rule #89, Rule #90)
+
+* **Modul / Fitur**:
+  - Alur Pengajuan Reservasi (`app/Http/Controllers/Public/BookingController.php`).
+  - Halaman Faktur Pembayaran (`resources/views/public/booking/invoice.blade.php`).
+  - Halaman Reservasi Saya Klien (`resources/views/client/bookings/index.blade.php`).
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penerapan Alur Opsi C Pasca Ajukan Reservasi (Standar Airbnb & SweetEscape)**:
+    - **Before**: Setelah klien menekan tombol "Ajukan Reservasi", sistem me-redirect klien ke lembar invoice (`/pembayaran/{id}`) dengan status "Menunggu Persetujuan" di mana tombol bayarnya dinonaktifkan. Hal ini membingungkan klien karena dibawa ke lembar pembayaran padahal belum bisa membayar.
+    - **After**: Mengubah redirect `BookingController@store` langsung ke halaman **Reservasi Saya (`/client/bookings`)** dengan notifikasi sukses *"Permintaan reservasi berhasil diajukan. Menunggu konfirmasi fotografer."*. Pesanan baru langsung tampil di baris teratas dengan status baku `"Menunggu Konfirmasi"` dan tombol aksi `"Chat"`. Lembar invoice aktif baru dibuka melalui tombol `"Bayar"` setelah fotografer menyetujui pesanan.
+  * **Pembersihan AI-Slop pada Lembar Faktur (`invoice.blade.php`)**:
+    - **Penyelarasan Status Pure Colored Text (Rule #14 & #67)**: Mengganti pill kapsul berwarna tebal (`rounded-full bg-amber-100 text-amber-800`) menjadi teks warna murni yang elegan tanpa wadah badge (`text-xs font-bold text-amber-600 dark:text-amber-400`).
+    - **Eliminasi Boks Alert Kuning Tebal (Rule #89)**: Mengganti kotak peringatan kuning raksasa menjadi panel pemberitahuan netral abu-abu yang tenang (`bg-gray-50 border border-gray-200`) dengan tombol standar netral.
+    - **Eliminasi Redundansi Teks Layanan (Rule #70)**: Menghapus teks duplikat *"Sesi foto bersama [Nama Fotografer]"* di bawah nama layanan karena identitas penyedia jasa sudah tercantum jelas pada header faktur.
+    - **Penyederhanaan Baris Navigasi Atas (Rule #62 & #72)**: Menghilangkan tumpukan breadcrumb ganda, mempertahankan satu tautan kembali yang bersih dan elegan ke Reservasi Saya.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #14 & #67**: Status teks murni tanpa pill/badge kapsul.
+  * **Rule #70**: Anti-AI Slop Terminology, anti-redundansi teks.
+  * **Rule #89**: Standarisasi faktur bersih standar industri.
+  * **Rule #90**: Sinkronisasi status booking antara peran Klien dan Fotografer.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` dan `php artisan view:cache`: **PASS** (Zero error).
+  * Pengujian alur redirect form reservasi: **PASS**.
+
+---
+
 ### [2026-11-17 11:05 WITA] — Implementasi Banner Pengingat Sesi Minimalis 1-Baris (Alternatif A ala Airbnb/Uber) dan Integrasi Notifikasi In-App (Rule #70, Rule #85, Rule #41)
 
 * **Modul / Fitur**:

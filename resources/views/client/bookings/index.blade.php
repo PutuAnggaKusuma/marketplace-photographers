@@ -474,8 +474,8 @@
                       Menunggu Pembayaran
                     </span>
                   @else
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
-                      Menunggu Persetujuan
+                    <span class="text-xs font-bold text-amber-500 dark:text-amber-400">
+                      Menunggu Konfirmasi
                     </span>
                   @endif
                 </td>

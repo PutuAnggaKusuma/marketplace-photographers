@@ -371,8 +371,8 @@ class BookingController extends Controller
             'is_read' => false,
         ]);
 
-        return redirect()->route('booking.invoice', $contract->id)
-            ->with('success', 'Permintaan reservasi berhasil diajukan. Menunggu persetujuan fotografer sebelum tagihan pembayaran diterbitkan.');
+        return redirect()->route('client.bookings')
+            ->with('success', 'Permintaan reservasi berhasil diajukan. Menunggu konfirmasi fotografer.');
     }
 
     /**

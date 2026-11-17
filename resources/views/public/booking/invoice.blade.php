@@ -6,13 +6,6 @@
 <section class="py-12 sm:py-16 bg-gray-50/60 dark:bg-gray-900/60 min-h-screen">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data="{ showModal: false, lightboxOpen: false, lightboxUrl: '' }">
 
-    <!-- Breadcrumb Navigation -->
-    <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-      <a href="{{ route('client.invoices') }}" class="hover:text-amber-500 transition">Faktur Pembayaran</a>
-      <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-      <span class="text-gray-900 dark:text-white font-bold">Rincian Faktur {{ $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)) }}</span>
-    </nav>
-
     <!-- Top Action Navigation -->
     <div class="flex items-center justify-between">
       <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
@@ -44,19 +37,19 @@
           <div class="flex sm:justify-end items-center gap-2">
             <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Invoice</h1>
             @if($payment && $payment->payment_status === 'completed')
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 Lunas
               </span>
             @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+              <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
                 Menunggu Verifikasi
               </span>
             @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-                Menunggu Persetujuan
+              <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                Menunggu Konfirmasi
               </span>
             @else
-              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+              <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                 Menunggu Pembayaran
               </span>
             @endif
@@ -101,9 +94,6 @@
               <td class="py-4 pr-4">
                 <span class="font-bold text-gray-900 dark:text-white block">
                   {{ $contract->bookingDetail?->service?->nama_layanan ?? 'Paket Layanan Fotografi' }}
-                </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">
-                  Sesi foto bersama {{ $contract->photographer->nama ?? 'Mitra Fotografer' }}
                 </span>
               </td>
               <td class="py-4 px-4 text-center text-xs text-gray-600 dark:text-gray-300">
@@ -174,13 +164,13 @@
           </div>
         </div>
       @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
-        <div class="p-6 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <span class="text-xs font-bold text-amber-700 dark:text-amber-300 block">Menunggu Konfirmasi Fotografer</span>
-            <p class="text-xs text-amber-800/80 dark:text-amber-400">Fotografer sedang meninjau detail jadwal dan lokasi acara Anda. Tagihan pembayaran akan aktif setelah fotografer menyetujui reservasi.</p>
+        <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-0.5">
+            <span class="text-xs font-bold text-amber-600 dark:text-amber-400 block">Menunggu Konfirmasi Fotografer</span>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Fotografer sedang memeriksa detail jadwal dan lokasi acara Anda. Tagihan pembayaran akan aktif setelah pesanan disetujui.</p>
           </div>
-          <a href="{{ route('client.bookings') }}" class="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-extrabold text-xs rounded-xl transition shadow-xs shrink-0">
-            Lihat Daftar Reservasi
+          <a href="{{ route('client.bookings') }}" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-800 dark:text-gray-200 font-bold text-xs transition shadow-2xs shrink-0">
+            Lihat Reservasi
           </a>
         </div>
       @else
