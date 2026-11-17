@@ -404,35 +404,69 @@ class ClientBookingController extends Controller
 
 
 
-        $contracts = Contract::with([
+        $baseQuery = Contract::where('id_client', $clientProfile->id)
+            ->whereHas('bookingDetail', function ($q) {
+                $q->whereNotNull('hasil_foto_url');
+            });
 
+        // 4 Ringkasan Metrik Riil Database (Rule #64)
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'pending_client' => (clone $baseQuery)->where('is_validated_client', false)->count(),
+            'completed' => (clone $baseQuery)->where('is_validated_client', true)->count(),
+            'unreviewed' => (clone $baseQuery)->doesntHave('testimonial')->count(),
+            'reviewed' => (clone $baseQuery)->has('testimonial')->count(),
+        ];
+
+        $filterStatus = $request->query('status', 'all');
+        $searchQuery = trim($request->query('q', ''));
+
+        $query = Contract::with([
             'photographer.user',
-
             'bookingDetail.service',
-
             'payments',
-
             'testimonial',
-
             'photographerClientReview'
-
         ])
-
         ->where('id_client', $clientProfile->id)
-
         ->whereHas('bookingDetail', function ($q) {
-
             $q->whereNotNull('hasil_foto_url');
+        });
 
-        })
+        // Filter Status Logic
+        if ($filterStatus && $filterStatus !== 'all') {
+            if ($filterStatus === 'pending') {
+                $query->where('is_validated_client', false);
+            } elseif ($filterStatus === 'completed') {
+                $query->where('is_validated_client', true);
+            } elseif ($filterStatus === 'unreviewed') {
+                $query->doesntHave('testimonial');
+            } elseif ($filterStatus === 'reviewed') {
+                $query->has('testimonial');
+            }
+        }
 
-        ->latest()
+        // Server-side Search Filter
+        if ($searchQuery !== '') {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->whereHas('photographer', function ($p) use ($searchQuery) {
+                    $p->where('nama', 'like', "%{$searchQuery}%");
+                })
+                ->orWhereHas('bookingDetail.service', function ($s) use ($searchQuery) {
+                    $s->where('nama_layanan', 'like', "%{$searchQuery}%");
+                })
+                ->orWhereHas('bookingDetail', function ($b) use ($searchQuery) {
+                    $b->where('lokasi', 'like', "%{$searchQuery}%")
+                      ->orWhere('catatan_fotografer', 'like', "%{$searchQuery}%");
+                });
+            });
+        }
 
-        ->paginate((int) ($request->query('per_page') && in_array((int)$request->query('per_page'), [10, 20, 50, 100]) ? $request->query('per_page') : 10))->withQueryString();
+        $contracts = $query->latest()
+            ->paginate((int) ($request->query('per_page') && in_array((int)$request->query('per_page'), [10, 20, 50, 100]) ? $request->query('per_page') : 10))
+            ->withQueryString();
 
-
-
-        return view('client.galleries.index', compact('contracts', 'clientProfile'));
+        return view('client.galleries.index', compact('contracts', 'clientProfile', 'stats', 'filterStatus', 'searchQuery'));
 
     }
 

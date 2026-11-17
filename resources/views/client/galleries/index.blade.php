@@ -4,43 +4,125 @@
 
 @section('content')
 
-<section class="py-12 bg-white dark:bg-gray-900 min-h-screen" x-data="{ openRevisionModal: null }">
+<section class="py-12 bg-white dark:bg-gray-900 min-h-screen" x-data="{ 
+  openRevisionModal: null,
+  handleSearch(e) {
+    let q = e.target.value.toLowerCase().trim();
+    let cards = document.querySelectorAll('.gallery-card');
+    let visible = 0;
+    cards.forEach(card => {
+      let text = card.innerText.toLowerCase();
+      let match = text.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    let emptyEl = document.getElementById('search-empty-state');
+    if (emptyEl) {
+      emptyEl.style.display = (visible === 0 && cards.length > 0) ? 'block' : 'none';
+    }
+  }
+}">
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
     <!-- Page Header -->
-
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-
       <div>
-
         <h1 class="text-3xl font-black text-gray-900 dark:text-white">
-
           Galeri Hasil Foto Saya
-
         </h1>
+      </div>
+    </div>
 
+    <!-- 4 Clean Summary Metric Cards (Matching Dashboard & Table Standard - Rule #64) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <!-- Card 1: Total Galeri -->
+      <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs space-y-2">
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Galeri</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['total'] ?? 0 }} Sesi</h2>
       </div>
 
+      <!-- Card 2: Menunggu Konfirmasi -->
+      <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs space-y-2">
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Menunggu Konfirmasi</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['pending_client'] ?? 0 }} Sesi</h2>
+      </div>
+
+      <!-- Card 3: Selesai Disetujui -->
+      <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs space-y-2">
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Selesai Disetujui</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['completed'] ?? 0 }} Sesi</h2>
+      </div>
+
+      <!-- Card 4: Belum Diulas -->
+      <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs space-y-2">
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Belum Diulas</span>
+        <h2 class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $stats['unreviewed'] ?? 0 }} Sesi</h2>
+      </div>
+    </div>
+
+    <!-- Toolbar: Filter Status di Kiri, Search Bar di Kanan (Rule #107 Standard) -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Filter Status (Alpine.js Custom Floating Dropdown) -->
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        @php
+          $statusLabels = [
+            'all' => 'Semua Status Galeri',
+            'pending' => 'Menunggu Konfirmasi Klien',
+            'completed' => 'Selesai Disetujui',
+            'unreviewed' => 'Belum Diulas',
+            'reviewed' => 'Sudah Diulas'
+          ];
+          $curStatName = $statusLabels[$filterStatus ?? 'all'] ?? 'Semua Status Galeri';
+        @endphp
+        <div class="relative w-full sm:w-auto min-w-[220px]" x-data="{ open: false, selectedId: '{{ $filterStatus ?? 'all' }}', selectedName: '{{ $curStatName }}' }">
+          <button @click="open = !open" type="button" 
+                  class="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white flex items-center justify-between gap-2 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition">
+            <span x-text="selectedName" class="truncate"></span>
+            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200" :class="open ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div x-show="open" @click.away="open = false" x-transition 
+               class="absolute z-50 left-0 mt-2 min-w-[220px] w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
+            @foreach($statusLabels as $stKey => $stVal)
+              <a href="{{ request()->fullUrlWithQuery(['status' => $stKey, 'page' => 1]) }}" 
+                 class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0 {{ ($filterStatus ?? 'all') === $stKey ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : '' }}">
+                <span>{{ $stVal }}</span>
+              </a>
+            @endforeach
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar di Kanan -->
+      <div class="relative w-full md:w-80">
+        <input type="text" 
+               @input="handleSearch($event)" 
+               placeholder="Cari fotografer, layanan, lokasi..." 
+               value="{{ $searchQuery ?? '' }}"
+               class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+        <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
     </div>
 
     <!-- Galleries Card Grid (2 Kolom Horizontal, Diperpanjang ke Bawah / Vertikal) -->
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+
+      <!-- Empty State Khusus Pencarian Real-Time -->
+      <div id="search-empty-state" class="col-span-1 md:col-span-2 bg-white dark:bg-gray-800 p-12 text-center rounded-3xl border border-gray-200 dark:border-gray-700/80 space-y-3" style="display: none;">
+        <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Tidak Ada Hasil Sesuai Pencarian</h3>
+        <p class="text-xs text-gray-500">Coba gunakan kata kunci nama fotografer, layanan, atau lokasi yang berbeda.</p>
+      </div>
 
       @forelse($contracts as $c)
 
         @php
-
           $detail = $c->bookingDetail;
-
           $photographer = $c->photographer;
-
           $testimonial = $c->testimonial;
-
         @endphp
 
-        <div class="bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs transition hover:border-amber-400/60 flex flex-col h-auto">
+        <div class="gallery-card bg-white dark:bg-gray-800 p-6 sm:p-7 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs transition hover:border-amber-400/60 flex flex-col h-auto">
 
           
 
@@ -282,27 +364,38 @@
       @empty
 
         <div class="col-span-1 md:col-span-2 bg-white dark:bg-gray-800 p-12 text-center rounded-3xl border border-gray-200 dark:border-gray-700/80 space-y-4">
-
           <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center mx-auto">
-
             <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-
           </div>
 
           <div class="space-y-1">
-
-            <h4 class="text-sm font-black text-gray-900 dark:text-white">Belum Ada Galeri Foto Yang Selesai</h4>
-
-            <p class="text-xs text-gray-400 max-w-md mx-auto">Tautan galeri foto hasil sesi pemotretan Anda akan tampil otomatis di halaman ini setelah fotografer menyelesaikan proses retouching foto.</p>
-
+            <h4 class="text-xs font-black text-gray-900 dark:text-white">
+              @if(($filterStatus ?? 'all') !== 'all' || ($searchQuery ?? '') !== '')
+                Tidak Ada Galeri Foto yang Sesuai Filter
+              @else
+                Belum Ada Galeri Foto Yang Selesai
+              @endif
+            </h4>
+            <p class="text-xs text-gray-400 max-w-md mx-auto">
+              @if(($filterStatus ?? 'all') !== 'all' || ($searchQuery ?? '') !== '')
+                Tidak ditemukan sesi hasil foto dengan kriteria filter atau pencarian saat ini.
+              @else
+                Tautan galeri foto hasil sesi pemotretan Anda akan tampil otomatis di halaman ini setelah fotografer mengunggah link album foto.
+              @endif
+            </p>
           </div>
 
-          <a href="{{ route('client.bookings') }}" class="inline-block px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition">
-
-            Lihat Status Reservasi Saya
-
-          </a>
-
+          <div class="pt-1">
+            @if(($filterStatus ?? 'all') !== 'all' || ($searchQuery ?? '') !== '')
+              <a href="{{ route('client.galleries') }}" class="inline-block px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
+                Reset Filter
+              </a>
+            @else
+              <a href="{{ route('client.bookings') }}" class="inline-block px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition">
+                Lihat Status Reservasi Saya
+              </a>
+            @endif
+          </div>
         </div>
 
       @endforelse

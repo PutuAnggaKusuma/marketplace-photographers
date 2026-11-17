@@ -20,6 +20,39 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 15:45 WITA] — Implementasi Standar Card Grid Bertoolbar pada Galeri Klien (4 KPI Metric Cards, Dropdown Filter Status, dan Real-Time Search Bar)
+
+* **Modul / Fitur**:
+  - Halaman Galeri Hasil Foto Klien (`resources/views/client/galleries/index.blade.php`).
+  - Controller Reservasi Klien (`app/Http/Controllers/Client/ClientBookingController.php`).
+* **File yang Diubah**:
+  * `resources/views/client/galleries/index.blade.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penerapan 4 KPI Metric Cards Riil Database (Rule #64)**:
+    - **Before**: Halaman galeri foto langsung menampilkan card grid tanpa ringkasan eksekutif, tidak seimbang dengan halaman Reservasi dan Tagihan.
+    - **After**: Menambahkan 4 kartu metrik statistik ringkas di atas toolbar (`Total Galeri`, `Menunggu Konfirmasi`, `Selesai Disetujui`, `Belum Diulas`) yang diambil 100% dari data riil database klien. Tipografi seragam `text-xs font-bold uppercase text-gray-500` dan angka `text-xs font-black text-gray-900`, bebas dari angka raksasa maupun teks baris ketiga redundan (*anti-AI slop*).
+  * **Wadah Toolbar Standar Sistem (Rule #107 & Rule #70)**:
+    - **Before**: Tidak ada wadah toolbar, pencarian, maupun penyaringan status.
+    - **After**: Menambahkan toolbar card bersih (`rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs p-4 flex flex-col md:flex-row items-center justify-between gap-4`) tanpa divider ganda.
+      - **Kiri**: Dropdown mengambang Alpine.js untuk Filter Status (`Semua Status Galeri`, `Menunggu Konfirmasi Klien`, `Selesai Disetujui`, `Belum Diulas`, `Sudah Diulas`) dengan indikator chevron aktif.
+      - **Kanan**: Input pencarian dengan ikon kaca pembesar dan placeholder to the point: *"Cari fotografer, layanan, lokasi..."*.
+  * **Pencarian Real-Time Client-Side & Dukungan Server-Side**:
+    - Komponen Alpine.js `handleSearch(e)` menyaring kartu `.gallery-card` secara instan tanpa reload halaman yang berat.
+    - Dilengkapi *empty state* real-time (`#search-empty-state`) jika pencarian tidak menemukan kartu yang cocok.
+    - Controller `ClientBookingController@galleries` juga mendukung parameter server-side `status` dan `q` untuk konsistensi pagination.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #64**: Standarisasi KPI Metric Cards 2-elemen teks seragam `text-xs`.
+  * **Rule #107**: Standar Toolbar Card tanpa garis divider ganda (`0 border-b`).
+  * **Rule #90**: Standarisasi Sinkronisasi Status Booking dan Card Layout (`items-start`, `h-auto`).
+  * **Rule #70 & Rule #51**: Copywriting to the point, eliminasi simbol `&` redundan, bebas jargon AI slop.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * Standalone test script: **PASS** (Filter `Alex` return 3, filter `pending` return 0, filter `completed` return 9).
+
+---
+
 ### [2026-11-17 15:30 WITA] — Implementasi Navigasi Dinamis Adaptif 2-Lapis pada Halaman Invoice, Checkout Pembayaran, Profil Fotografer, dan Event Lomba (Eliminasi Hardcoded Back Navigation)
 
 * **Modul / Fitur**:
