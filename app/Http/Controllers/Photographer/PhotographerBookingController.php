@@ -209,11 +209,16 @@ class PhotographerBookingController extends Controller
 
             $contract->bookingDetail()->update(['status_booking' => 'confirmed']);
 
+            // Hitung batas waktu pembayaran dinamis (Dynamic Deadline ala SweetEscape / Traveloka)
+            $deadline = $isPaid ? null : $contract->calculatePaymentDeadline();
+
             $contract->update([
                 'status_contract' => $newContractStatus,
                 'is_validated_photographer' => true,
-                'expired_at' => $isPaid ? null : now()->addHours(24),
+                'expired_at' => $deadline,
             ]);
+
+            $deadlineText = $contract->payment_deadline_description;
 
             $message = $isPaid
                 ? 'Pesanan booking berhasil dikonfirmasi! Jadwal sesi foto telah aktif.'
@@ -230,7 +235,7 @@ class PhotographerBookingController extends Controller
                     'id_user' => $contract->client->id_user,
                     'type' => 'booking_confirmed',
                     'title' => 'Reservasi Disetujui Fotografer',
-                    'message' => "Fotografer {$photographer->nama} telah menyetujui reservasi sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Silakan selesaikan pembayaran tagihan dalam waktu 24 jam.",
+                    'message' => "Fotografer {$photographer->nama} telah menyetujui reservasi sesi foto Anda. Silakan selesaikan pembayaran tagihan {$deadlineText}.",
                     'data' => [
                         'contract_id' => $contract->id,
                         'url' => route('booking.invoice', $contract->id),
@@ -245,10 +250,10 @@ class PhotographerBookingController extends Controller
                 ->first();
 
             if ($thread && auth()->check()) {
-                $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+                $serviceTitle = $contract->bookingDetail?->service?->nama_layanan ?? 'sesi foto';
                 $chatMsg = $isPaid
-                    ? "Halo {$contract->client->nama}, saya telah mengonfirmasi reservasi sesi {$contractCode}. Jadwal pemotretan telah aktif."
-                    : "Halo {$contract->client->nama}, saya telah menyetujui reservasi sesi {$contractCode}. Tagihan pembayaran invoice telah aktif dengan batas waktu 24 jam.";
+                    ? "Halo {$contract->client->nama}, saya telah mengonfirmasi reservasi {$serviceTitle}. Jadwal pemotretan telah aktif."
+                    : "Halo {$contract->client->nama}, saya telah menyetujui reservasi {$serviceTitle}. Tagihan pembayaran telah aktif dan dapat diselesaikan {$deadlineText}.";
 
                 \App\Models\ChatMessage::create([
                     'id_chat_booking' => $thread->id,

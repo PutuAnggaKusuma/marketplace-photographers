@@ -13,7 +13,7 @@
   $invStart = $bookingDetail?->jam_mulai ? substr($bookingDetail->jam_mulai, 0, 5) : null;
   $invEnd = $bookingDetail?->jam_selesai ? substr($bookingDetail->jam_selesai, 0, 5) : null;
   $effectiveDuration = $bookingDetail?->effective_duration_hours ?? 0;
-  $expiredAt = $contract->expired_at ?? now()->addHours(24);
+  $expiredAt = $contract->expired_at ?? $contract->calculatePaymentDeadline();
   $isPendingVerification = $payment && $payment->bukti_transfer && $payment->payment_status === 'pending';
   $orderCode = $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT));
   $bankAccount = config('app.escrow_account_number', '8840-1928-3746');
@@ -114,6 +114,11 @@
         <span class="font-bold text-gray-900 dark:text-white block">Batas Waktu Pembayaran</span>
         <p class="text-gray-600 dark:text-gray-400">
           Selesaikan transfer sebelum <strong class="text-gray-800 dark:text-gray-200">{{ $expiredAt->translatedFormat('d F Y, H:i') }} WIB</strong>
+          @if($expiredAt->isToday())
+            <span class="text-amber-700 dark:text-amber-300 font-bold">(Hari Ini)</span>
+          @elseif($expiredAt->isTomorrow())
+            <span class="text-amber-700 dark:text-amber-300 font-bold">(Besok)</span>
+          @endif
         </p>
       </div>
 

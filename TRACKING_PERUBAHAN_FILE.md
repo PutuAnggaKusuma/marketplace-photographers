@@ -4705,3 +4705,29 @@ Setiap entri log perubahan wajib mencantumkan:
   * Uji rendering HTTP terautentikasi:
     - `GET /pembayaran/13` -> Status **200 OK**, me-render view `public.booking.checkout`.
     - `GET /pembayaran/13?view=invoice` -> Status **200 OK**, me-render view `public.booking.invoice`.
+
+
+---
+
+### [2026-11-17] Implementasi Logika Batas Waktu Pembayaran Dinamis & Adaptif (Dynamic Deadline ala SweetEscape / Traveloka)
+* **Modul / Fitur**: Logika Batas Waktu Pembayaran Booking Klien (`calculatePaymentDeadline`).
+* **File yang Dimodifikasi**:
+  * `app/Models/Contract.php` (menambahkan method `calculatePaymentDeadline` dan accessor `payment_deadline_description`)
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php` (menerapkan batas waktu adaptif saat fotografer menyetujui booking, notifikasi dinamis, dan pesan chat in-thread)
+  * `app/Http/Controllers/Public/BookingController.php` (auto-heal `expired_at` dinamis dan konfirmasi draft adaptif)
+  * `app/Http/Controllers/Public/ChatController.php` (menerapkan batas waktu dinamis saat penawaran khusus chat disetujui)
+  * `resources/views/public/booking/checkout.blade.php` (tampilan batas waktu dengan penanda `(Hari Ini)` dan `(Besok)`)
+* **Rincian Perubahan**:
+  1. **Logika Batas Waktu Pembayaran Dinamis (Dynamic Deadline)**:
+     - Menggantikan batas mati 24 jam kaku dengan sistem bertingkat sesuai sisa waktu menuju jadwal sesi foto:
+       - **Sesi Normal (> 24 jam / H-2 ke atas)**: Batas bayar 24 jam (maksimal H-12 jam sebelum sesi).
+       - **Sesi H-1 (12 - 24 jam ke sesi)**: Batas bayar 6 jam (maksimal H-3 jam sebelum sesi).
+       - **Sesi Hari Ini / Same-Day (3 - 12 jam ke sesi)**: Batas bayar 1 jam / 60 menit (dengan buffer persiapan fotografer minimal 1.5 jam sebelum sesi).
+       - **Sesi Sangat Mepet (< 3 jam ke sesi)**: Batas bayar 15 - 30 menit (maksimal H-15 menit sebelum sesi).
+       - **Sesi Telah Dimulai / Terlewat**: Batas bayar kilat 15 menit.
+  2. **Copywriting & Notifikasi Manusiawi**:
+     - Notifikasi dan chat kini menampilkan batas waktu yang akurat (contoh: *"dalam waktu 59 menit (sebelum pukul 14:17 WIB)"*, *"hari ini, sebelum pukul 16:00 WIB"*, atau *"besok, sebelum pukul 19:00 WIB"*).
+     - Mengeliminasi kode kontrak dari pesan chat pembuka fotografer ke klien, fokus pada nama sesi pemotretan.
+* **Hasil Pengujian**:
+  * Unit test simulasi skenario (H-5, H-1, Same-day 6 jam, Same-day 2 jam, Same-day 45 menit): **PASS (100% perhitungan akurat dan teruji)**.
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.

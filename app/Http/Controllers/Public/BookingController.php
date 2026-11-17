@@ -272,6 +272,20 @@ class BookingController extends Controller
             $paymentExternalId = 'INV-DP-' . date('Ymd') . '-' . strtoupper(Str::random(6));
         }
 
+        // Hitung batas waktu konfirmasi fotografer secara adaptif untuk draft
+        $timeStr = $startMin !== null ? BookingScheduleService::formatMinutesToDbTime($startMin) : '08:00';
+        $sessionStart = Carbon::parse($tanggalSesi . ' ' . $timeStr);
+        $diffMinutes = (int) now()->diffInMinutes($sessionStart, false);
+        if ($diffMinutes > 0 && $diffMinutes < 2880) {
+            $draftExpired = now()->addMinutes(min(120, max(30, (int) floor($diffMinutes / 2))));
+            $oneHourBefore = $sessionStart->copy()->subHours(1);
+            if ($oneHourBefore->gt(now()) && $draftExpired->gt($oneHourBefore)) {
+                $draftExpired = $oneHourBefore;
+            }
+        } else {
+            $draftExpired = now()->addDays(2);
+        }
+
         $contract = Contract::create([
             'id_client' => $clientProfile->id,
             'id_photographer' => $photographerId,
@@ -282,7 +296,7 @@ class BookingController extends Controller
             'payout_amount' => $payoutAmount,
             'is_validated_photographer' => false,
             'is_validated_client' => true,
-            'expired_at' => now()->addDays(2),
+            'expired_at' => $draftExpired,
             'status_contract' => 'draft',
         ]);
 
@@ -519,9 +533,9 @@ class BookingController extends Controller
             }
         }
 
-        // Pastikan expired_at aktif untuk kontrak pending_payment
+        // Pastikan expired_at aktif untuk kontrak pending_payment sesuai batas waktu dinamis
         if ($contract->status_contract === 'pending_payment' && (!$contract->expired_at || $contract->expired_at < now())) {
-            $contract->update(['expired_at' => now()->addHours(24)]);
+            $contract->update(['expired_at' => $contract->calculatePaymentDeadline()]);
         }
 
         $dpPayment = $contract->payments->where('contract_payment_type', 'dp')->first();

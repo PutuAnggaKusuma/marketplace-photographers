@@ -1009,6 +1009,11 @@ class ChatController extends Controller
                     'status_booking' => 'pending',
                 ]);
 
+                // Terapkan batas waktu pembayaran dinamis
+                $contract->update([
+                    'expired_at' => $contract->calculatePaymentDeadline(),
+                ]);
+
                 // 3. Buat Payment Record Awal (Penuh atau DP 30%)
                 \App\Models\Payment::create([
                     'id_contract' => $contract->id,
