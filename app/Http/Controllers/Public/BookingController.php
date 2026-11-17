@@ -511,7 +511,18 @@ class BookingController extends Controller
 
         ->findOrFail($id);
 
+        // Auto-heal status jika kontrak sudah pending_payment
+        if ($contract->status_contract === 'pending_payment' && !$contract->is_validated_photographer) {
+            $contract->update(['is_validated_photographer' => true]);
+            if ($contract->bookingDetail && $contract->bookingDetail->status_booking === 'pending') {
+                $contract->bookingDetail->update(['status_booking' => 'confirmed']);
+            }
+        }
 
+        // Pastikan expired_at aktif untuk kontrak pending_payment
+        if ($contract->status_contract === 'pending_payment' && (!$contract->expired_at || $contract->expired_at < now())) {
+            $contract->update(['expired_at' => now()->addHours(24)]);
+        }
 
         $dpPayment = $contract->payments->where('contract_payment_type', 'dp')->first();
 
@@ -601,8 +612,20 @@ class BookingController extends Controller
 
 
 
-        return view('public.booking.invoice', compact('contract', 'payment', 'dpPayment', 'fullPayment'));
+        // Opsi 2 (Standar Traveloka / Tiket.com):
+        // Jika request secara eksplisit meminta pratinjau invoice (?view=invoice)
+        // atau kontrak telah lunas (completed)
+        // atau kontrak masih draft menunggu persetujuan fotografer: tampilkan lembar dokumen Invoice formal A4.
+        $wantsInvoiceView = $request->query('view') === 'invoice';
+        $isCompleted = $contract->status_contract === 'completed' || ($payment && $payment->payment_status === 'completed');
+        $isDraftWaitingApproval = $contract->status_contract === 'draft' && !$contract->is_validated_photographer;
 
+        if ($wantsInvoiceView || $isCompleted || $isDraftWaitingApproval) {
+            return view('public.booking.invoice', compact('contract', 'payment', 'dpPayment', 'fullPayment'));
+        }
+
+        // Default untuk status pending_payment / pembayaran aktif: Tampilkan Halaman Checkout Pembayaran
+        return view('public.booking.checkout', compact('contract', 'payment', 'dpPayment', 'fullPayment'));
     }
 
 
@@ -631,9 +654,13 @@ class BookingController extends Controller
         })
         ->findOrFail($id);
 
-        if ($contract->status_contract === 'draft' || !$contract->is_validated_photographer) {
+        if ($contract->status_contract === 'draft' || ($contract->status_contract === 'pending' && !$contract->is_validated_photographer)) {
             return redirect()->route('booking.invoice', $contract->id)
                 ->with('error', 'Pembayaran belum dapat dilakukan karena fotografer belum menyetujui reservasi ini.');
+        }
+
+        if ($contract->status_contract === 'pending_payment' && !$contract->is_validated_photographer) {
+            $contract->update(['is_validated_photographer' => true]);
         }
 
 

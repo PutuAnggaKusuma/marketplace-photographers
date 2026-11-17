@@ -4673,3 +4673,35 @@ Setiap entri log perubahan wajib mencantumkan:
   * `php artisan view:clear`: **PASS**.
   * `php artisan view:cache`: **PASS (100% template compiled successfully)**.
   * Uji rendering HTTP terautentikasi: **PASS (Status 200 OK, seluruh direktif Alpine step lock terpasang presisi)**.
+
+
+---
+
+### [2026-11-17] Implementasi Opsi 2: Halaman Khusus Selesaikan Pembayaran (Checkout Standar Traveloka / Tiket.com) & Audit Anti-AI Slop
+* **Modul / Fitur**: Alur Pembayaran Booking Klien (`/pembayaran/{id}` & `/client/bookings`).
+* **File yang Dimodifikasi / Dibuat**:
+  * `resources/views/public/booking/checkout.blade.php` (file baru: Halaman Checkout Pembayaran Aktif)
+  * `resources/views/public/booking/invoice.blade.php` (lembar dokumen Invoice formal A4 murni)
+  * `app/Http/Controllers/Public/BookingController.php` (`showInvoice` & `confirmPayment`)
+  * `resources/views/client/bookings/index.blade.php` (modal pembatalan dan reschedule manusiawi)
+* **Rincian Perubahan**:
+  1. **Halaman Khusus Selesaikan Pembayaran / Payment Checkout (Standar Traveloka / Tiket.com)**:
+     - Tombol `[Bayar]` pada `/client/bookings` mengarahkan ke `/pembayaran/{id}` yang secara cerdas me-render `public.booking.checkout` saat status reservasi `pending_payment` / aktif bayar.
+     - **Batas Waktu Pembayaran (Countdown Timer)**: Baris penghitung waktu mundur yang tenang dan elegan via Alpine.js (`jam : menit : detik`), menghitung mundur batas waktu transfer 24 jam tanpa animasi neon ticker alay.
+     - **Kartu Instruksi Transfer Bank Resmi**: Menampilkan rekening resmi Bank BCA `8840-1928-3746` a.n. `PT LensMatch Indonesia` lengkap dengan tombol interaktif **[Salin]** (otomatis feedback teks "Tersalin!" via `navigator.clipboard`), serta nominal transfer tepat dengan tombol **[Salin Nominal]**.
+     - **Form Unggah Bukti Transfer Interaktif**: Dropzone area native menerima JPG, PNG, WEBP (maksimal 10 MB per Rule #21), required field asterisk merah `<span class="text-rose-500">*</span>` per Rule #20, pratinjau thumbnail instan dengan modal lightbox interaktif per Rule #97, dan tombol aksi utama `Kirim Bukti Pembayaran` berwarna amber per Rule #91.
+     - **Status Menunggu Verifikasi Admin**: Jika struk pembayaran telah dikirimkan oleh klien, kartu menampilkan thumbnail struk dengan tombol pratinjau lightbox dan opsi `Ganti Berkas`.
+     - **Link Pratinjau Dokumen Invoice**: Di pojok kanan atas disediakan tautan tenang `Lihat Pratinjau Invoice >` (`/pembayaran/{id}?view=invoice`) untuk melihat lembar faktur formal A4 kapan pun dibutuhkan.
+  2. **Perbaikan Logika Status & Sinkronisasi Database**:
+     - Memperbaiki bug status pada kontrak 13 di mana kontrak berstatus `pending_payment` secara keliru terbaca sebagai `Menunggu Konfirmasi` akibat pengecekan `!is_validated_photographer`.
+     - Menyinkronkan logic dan database: kontrak dengan `status_contract === 'pending_payment'` murni berstatus **"Menunggu Pembayaran"** dan membuka form pembayaran aktif.
+  3. **Pembersihan Glorifikasi Kode & Terminologi Escrow/Rekber**:
+     - Modal Batal Klien: Berubah dari *"Apakah Anda yakin ingin membatalkan pesanan KTRK-00018?"* menjadi *"Apakah Anda yakin ingin membatalkan sesi [Nama Layanan] bersama [Nama Fotografer]?"* (Opsi A ala Airbnb/SweetEscape).
+     - Menghilangkan jargon teknis "Escrow", "Rekber", simbol `&` redundan, serta warna-warni kontras tinggi pada kode database di seluruh view terkait.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #20** (Simbol Asterisk Wajib Isi Merah), **Rule #21** (Maksimal Upload 10 MB JPG/PNG/WEBP), **Rule #22** (Strict Icon Constraint), **Rule #47** (Standarisasi Konsistensi Navbar & Tombol Primer), **Rule #49** (Strict Scope), **Rule #50** (Container Width Consistency `max-w-4xl`), **Rule #51** (Copywriting Bersih, Proporsional & Anti-AI Slop), **Rule #70** (Anti-AI Slop Terminology & No Redundant `&`), **Rule #89** (Anti-Code Glorification & Eliminasi Jargon Escrow), **Rule #91** (Tombol Aksi Form Amber Primer), **Rule #97** (Lightbox Modal Interaktif), **Rule #106** (Tipografi Seragam `text-xs`).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (*Blade templates cached successfully*).
+  * Uji rendering HTTP terautentikasi:
+    - `GET /pembayaran/13` -> Status **200 OK**, me-render view `public.booking.checkout`.
+    - `GET /pembayaran/13?view=invoice` -> Status **200 OK**, me-render view `public.booking.invoice`.

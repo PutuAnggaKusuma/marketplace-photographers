@@ -8,10 +8,17 @@
 
     <!-- Top Action Navigation -->
     <div class="flex items-center justify-between">
-      <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-        <span>Kembali ke Reservasi Saya</span>
-      </a>
+      @if(($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment']))) && (!isset($payment) || $payment->payment_status !== 'completed'))
+        <a href="{{ route('booking.invoice', $contract->id) }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+          <span>Kembali ke Selesaikan Pembayaran</span>
+        </a>
+      @else
+        <a href="{{ route('client.bookings') }}" class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+          <span>Kembali ke Reservasi Saya</span>
+        </a>
+      @endif
 
       @if($payment && $payment->payment_status === 'completed')
         <a href="{{ route('booking.invoice.print', $contract->id) }}" target="_blank" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-xs transition shadow-2xs cursor-pointer">
@@ -44,6 +51,8 @@
                 <span class="font-bold text-emerald-600 dark:text-emerald-400">Lunas</span>
               @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
                 <span class="font-bold text-blue-600 dark:text-blue-400">Menunggu Verifikasi</span>
+              @elseif($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment'])))
+                <span class="font-bold text-amber-600 dark:text-amber-400">Menunggu Pembayaran</span>
               @elseif($contract->status_contract === 'draft' || !$contract->is_validated_photographer)
                 <span class="font-bold text-amber-600 dark:text-amber-400">Menunggu Konfirmasi</span>
               @else
@@ -159,38 +168,15 @@
             </button>
           </div>
         </div>
-      @elseif($contract->is_validated_photographer && in_array($contract->status_contract, ['pending_payment', 'approved']))
-        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 space-y-4">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-            <div>
-              <span class="font-bold text-gray-900 dark:text-white block">Instruksi Pembayaran Transfer Bank</span>
-              <p class="text-gray-500 dark:text-gray-400">Silakan transfer nominal tagihan tepat ke rekening resmi berikut:</p>
-            </div>
-            @if($contract->expired_at)
-              <span class="text-[11px] text-gray-400">Batas waktu: {{ \Carbon\Carbon::parse($contract->expired_at)->translatedFormat('d M Y, H:i') }} WIB</span>
-            @endif
+      @elseif($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['pending_payment', 'approved'])))
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+          <div class="space-y-0.5">
+            <span class="font-bold text-amber-600 dark:text-amber-400 block">Menunggu Pembayaran</span>
+            <p>Silakan selesaikan pembayaran dan unggah bukti transfer pada halaman pembayaran.</p>
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 py-3.5 px-4 rounded-2xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700/80 text-xs">
-            <div>
-              <span class="text-gray-400 block text-[11px]">Bank Tujuan</span>
-              <strong class="font-bold text-gray-900 dark:text-white">{{ config('app.escrow_bank', 'Bank Central Asia (BCA)') }}</strong>
-            </div>
-            <div>
-              <span class="text-gray-400 block text-[11px]">Nomor Rekening</span>
-              <strong class="font-mono font-bold text-gray-900 dark:text-white">{{ config('app.escrow_account_number', '8840-1928-3746') }}</strong>
-            </div>
-            <div>
-              <span class="text-gray-400 block text-[11px]">Atas Nama</span>
-              <strong class="font-bold text-gray-900 dark:text-white">{{ config('app.escrow_account_holder', 'PT LensMatch Indonesia') }}</strong>
-            </div>
-          </div>
-
-          <div class="flex justify-end pt-1">
-            <button type="button" @click="showModal = true" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer">
-              Unggah Bukti Transfer
-            </button>
-          </div>
+          <a href="{{ route('booking.invoice', $contract->id) }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0">
+            Selesaikan Pembayaran
+          </a>
         </div>
       @endif
 
