@@ -20,7 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 16:45 WITA] — Implementasi Halaman Terpadu Aktivitas Komunitas Klien (E-Learning, Lomba Foto, dan Diskusi Forum)
+### [2026-11-17 17:00 WITA] — Eliminasi Divider Horizontal Panjang pada Navigasi Tab Aktivitas Komunitas (Kepatuhan Penuh Rule #58 & Rule #41)
+
+* **Modul / Fitur**:
+  - Halaman Aktivitas Komunitas Klien (`resources/views/client/activities/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/activities/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Eliminasi Divider Garis Penuh Membelah Layar (Rule #58 & Rule #41)**:
+    - **Before**: Navigasi tab dibungkus dalam kontainer bergaris `border-b border-gray-200 dark:border-gray-700` yang membelah halaman secara horizontal penuh, serta tombol aktif menggunakan `border-b-2`.
+    - **After**: Menghapus seluruh garis divider panjang tersebut selaras dengan standar `client/invoices/index.blade.php` dan `admin/transactions/index.blade.php`. Menggunakan penanda aktif teks berjarak murni (*text underline with offset*): `underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400` dan pill hitungan badge lembut (`bg-amber-100 text-amber-700`).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #41**: Larangan Mutlak Menambahkan UI Garis Pembatas (Divider / Border-B) Sembarangan.
+  * **Rule #58**: Standarisasi Tampilan Konten & Elemen Aktif (Eliminasi Divider Panjang & Garis Bawah Menempel).
+  * **Rule #61**: Standarisasi Aksen Amber LensMatch.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
 
 * **Modul / Fitur**:
   - Halaman Aktivitas Komunitas Klien (`resources/views/client/activities/index.blade.php`).
