@@ -1612,9 +1612,9 @@
               </div>
             </template>
 
-            <div class="flex justify-between items-center text-gray-900 dark:text-white pt-2">
+            <div class="flex justify-between items-center text-gray-900 dark:text-white pt-2 border-t border-gray-100 dark:border-gray-700">
               <span class="text-xs font-bold">Total Biaya Sesi</span>
-              <span class="text-lg font-black text-amber-600 dark:text-amber-400" x-text="'Rp ' + currentPayAmount.toLocaleString('id-ID')">Rp 0</span>
+              <span class="text-xs font-black text-gray-900 dark:text-white" x-text="'Rp ' + currentPayAmount.toLocaleString('id-ID')">Rp 0</span>
             </div>
           </div>
 

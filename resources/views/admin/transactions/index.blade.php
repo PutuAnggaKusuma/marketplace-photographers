@@ -856,7 +856,7 @@
 
                                                             title: 'Verifikasi Pembayaran Transfer?',
 
-                                                            message: 'Apakah Anda yakin pembayaran transfer untuk pesanan ini sudah valid dan dana telah masuk ke rekening bersama escrow?',
+                                                            message: 'Apakah Anda yakin pembayaran transfer untuk pesanan ini sudah valid dan dana telah masuk ke rekening resmi LensMatch?',
 
                                                             confirmText: 'Ya, Verifikasi Bayar',
 

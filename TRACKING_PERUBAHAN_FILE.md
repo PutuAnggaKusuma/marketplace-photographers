@@ -20,6 +20,41 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-17 11:40 WITA] — Audit Lanjutan & Pembersihan Sisa AI-Slop (Normalisasi Total Form Booking, Bahasa Forum, dan Eliminasi Settlement/Escrow)
+
+* **Modul / Fitur**:
+  - Kolom Ringkasan Biaya Form Booking (`resources/views/public/booking/create.blade.php`).
+  - Verifikasi Pembayaran Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Laporan Ledger Fotografer (`resources/views/photographer/reports/export.blade.php`).
+  - Diskusi Forum Komunitas (`resources/views/public/forum/show.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/public/booking/create.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/photographer/reports/export.blade.php`
+  * `resources/views/public/forum/show.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Normalisasi Tipografi Ringkasan Form Booking (`create.blade.php`)**:
+    - **Before**: Angka Total Biaya Sesi di kolom kanan menggunakan font raksasa kuning (`text-lg font-black text-amber-600`), bergaya template SaaS promosi.
+    - **After**: Dinormalkan menjadi tipografi formal hitam netral proporsional `text-xs font-black text-gray-900 dark:text-white` dengan garis pembatas halus di atasnya (Rule #106 & Rule #89).
+  * **Eliminasi Sisa Jargon Escrow pada Dialog Verifikasi Admin (`transactions/index.blade.php`)**:
+    - **Before**: Pesan konfirmasi bertuliskan *"Apakah Anda yakin pembayaran transfer untuk pesanan ini sudah valid dan dana telah masuk ke rekening bersama escrow?"*.
+    - **After**: Diubah menjadi bahasa resmi platform: *"Apakah Anda yakin pembayaran transfer untuk pesanan ini sudah valid dan dana telah masuk ke rekening resmi LensMatch?"*.
+  * **Penyelarasan Bahasa Indonesia pada Forum Diskusi (`forum/show.blade.php`)**:
+    - **Before**: Teks toggle balasan bertuliskan bahasa Inggris berikon panah ganjil: *"▾ See Replies / ▴ Hide Replies"*.
+    - **After**: Diubah menjadi bahasa Indonesia yang tenang dan baku: *"▾ Lihat Balasan / ▴ Sembunyikan Balasan"*.
+  * **Pembersihan Simbol `&` dan Jargon Settlement pada Laporan (`export.blade.php`)**:
+    - **Before**: Header ledger bertuliskan *"Rincian Transaksi Pemotretan & Pencairan Settlement"*.
+    - **After**: Diubah menjadi *"Rincian Transaksi Pemotretan dan Pencairan Dana"*.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #89 Point 2**: Eliminasi kata Escrow / Rekber.
+  * **Rule #70**: Anti-AI Slop Terminology, konsistensi bahasa Indonesia dan anti-simbol `&` redundan.
+  * **Rule #106**: Keseragaman ukuran teks dan nominal proporsional.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-17 11:35 WITA] — Pembersihan Menyeluruh Glorifikasi Kode Database, Penerapan Modal Manusiawi (Opsi A ala Airbnb/SweetEscape), dan Eliminasi Jargon Teknis (Rule #89, Rule #70, Rule #106)
 
 * **Modul / Fitur**:

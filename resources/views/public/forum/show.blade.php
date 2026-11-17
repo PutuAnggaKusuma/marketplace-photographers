@@ -1222,12 +1222,12 @@
                     @endif
 
                     @if($comment->replies && $comment->replies->count() > 0)
-                      {{-- See Replies Toggle (ONLY Rendered When Comment ACTUALLY Has Child Replies) --}}
+                      {{-- Toggle Balasan --}}
                       <div class="mt-1.5">
                         <button type="button" 
                                 @click="showReplies = !showReplies" 
-                                class="text-xs font-black text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 focus:outline-none border-0 outline-none cursor-pointer">
-                          <span x-text="showReplies ? '▴ Hide Replies' : '▾ See Replies (' + {{ $comment->replies->count() }} + ')'">▾ See Replies ({{ $comment->replies->count() }})</span>
+                                class="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white flex items-center gap-1 focus:outline-none border-0 outline-none cursor-pointer transition">
+                          <span x-text="showReplies ? '▴ Sembunyikan Balasan' : '▾ Lihat Balasan (' + {{ $comment->replies->count() }} + ')'">▾ Lihat Balasan ({{ $comment->replies->count() }})</span>
                         </button>
                       </div>
 

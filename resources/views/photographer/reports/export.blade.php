@@ -167,7 +167,7 @@
         <section class="space-y-2">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-black uppercase tracking-wider text-gray-900">
-                    Rincian Transaksi Pemotretan & Pencairan Settlement
+                    Rincian Transaksi Pemotretan dan Pencairan Dana
                 </h3>
                 <span class="text-[10px] text-gray-400 font-mono">Total Transaksi: {{ $contracts->count() }} Sesi</span>
             </div>
