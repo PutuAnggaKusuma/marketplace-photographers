@@ -20,7 +20,24 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-17 17:00 WITA] — Eliminasi Divider Horizontal Panjang pada Navigasi Tab Aktivitas Komunitas (Kepatuhan Penuh Rule #58 & Rule #41)
+### [2026-11-17 17:15 WITA] — Sinkronisasi Warna Ikon Aktif & Hover pada Tab Navigasi Aktivitas Komunitas
+
+* **Modul / Fitur**:
+  - Halaman Aktivitas Komunitas Klien (`resources/views/client/activities/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/client/activities/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Sinkronisasi Warna Ikon dengan Status Aktif Tab (Rule #61 & Visual Harmony)**:
+    - **Before**: Ikon SVG di samping judul tab memiliki kelas warna statis `text-gray-400`, sehingga saat tab aktif dan teksnya berwarna amber, ikon tetap berwarna abu-abu.
+    - **After**: Menambahkan `group` pada tombol tab dan binding kelas dinamis pada elemen SVG: `:class="activeTab === '...' ? 'text-amber-500 dark:text-amber-400' : 'text-gray-400 group-hover:text-amber-500 dark:group-hover:text-amber-400'"`.
+    - **Hasil Akhir**: Ikon, teks, garis bawah, dan lencana hitungan kini berubah warna menjadi amber secara serentak dan harmonis 100%.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch.
+  * **Rule #70**: Visual Consistency & Interactive Color Harmony.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
 
 * **Modul / Fitur**:
   - Halaman Aktivitas Komunitas Klien (`resources/views/client/activities/index.blade.php`).

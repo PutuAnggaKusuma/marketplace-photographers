@@ -69,8 +69,10 @@
       <button type="button" 
               @click="activeTab = 'elearning'" 
               :class="activeTab === 'elearning' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
-              class="py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+              class="group py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
+        <svg class="w-4 h-4 transition duration-200" 
+             :class="activeTab === 'elearning' ? 'text-amber-500 dark:text-amber-400' : 'text-gray-400 group-hover:text-amber-500 dark:group-hover:text-amber-400'" 
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
         <span :class="activeTab === 'elearning' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">E-Learning Saya</span>
         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
               :class="activeTab === 'elearning' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
@@ -81,8 +83,10 @@
       <button type="button" 
               @click="activeTab = 'contests'" 
               :class="activeTab === 'contests' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
-              class="py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A2.25 2.25 0 0015 12V6.75a2.25 2.25 0 00-2.25-2.25h-1.5A2.25 2.25 0 009 6.75V12a2.25 2.25 0 001.504 2.125m3.996 0H9.5"/></svg>
+              class="group py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
+        <svg class="w-4 h-4 transition duration-200" 
+             :class="activeTab === 'contests' ? 'text-amber-500 dark:text-amber-400' : 'text-gray-400 group-hover:text-amber-500 dark:group-hover:text-amber-400'" 
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.004 0A2.25 2.25 0 0015 12V6.75a2.25 2.25 0 00-2.25-2.25h-1.5A2.25 2.25 0 009 6.75V12a2.25 2.25 0 001.504 2.125m3.996 0H9.5"/></svg>
         <span :class="activeTab === 'contests' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Lomba Foto</span>
         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
               :class="activeTab === 'contests' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
@@ -93,8 +97,10 @@
       <button type="button" 
               @click="activeTab = 'forum'" 
               :class="activeTab === 'forum' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold'"
-              class="py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3.57-3.091c-.48-.008-.962-.02-1.44-.037a48.79 48.79 0 01-4.74-.448m6.75-8.072V6.75A2.25 2.25 0 0013.5 4.5h-9a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25h.75v3l3-3h3"/></svg>
+              class="group py-2 text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 whitespace-nowrap">
+        <svg class="w-4 h-4 transition duration-200" 
+             :class="activeTab === 'forum' ? 'text-amber-500 dark:text-amber-400' : 'text-gray-400 group-hover:text-amber-500 dark:group-hover:text-amber-400'" 
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3.57-3.091c-.48-.008-.962-.02-1.44-.037a48.79 48.79 0 01-4.74-.448m6.75-8.072V6.75A2.25 2.25 0 0013.5 4.5h-9a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25h.75v3l3-3h3"/></svg>
         <span :class="activeTab === 'forum' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : ''">Diskusi Forum</span>
         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
               :class="activeTab === 'forum' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'">
