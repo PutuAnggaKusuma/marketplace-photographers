@@ -5001,3 +5001,22 @@ Setiap entri log perubahan wajib mencantumkan:
      - Fotografer maupun klien kini cukup mengetuk 1-klik tautan peta di obrolan untuk langsung membuka navigasi rute di Google Maps atau Waze.
 * **Hasil Pengujian**:
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-17] Penataan Ulang Input Field Modal Penilaian Performa Klien Menjadi Vertikal Stack
+* **Modul / Fitur**: Modal Penilaian Performa Klien Fotografer (`/photographer/bookings` - `rateClientModal`).
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/bookings/index.blade.php` (mengubah layout 3 aspek penilaian: Ketepatan Waktu, Komunikasi, Kerjasama & Sikap dari grid 3-kolom horizontal sempit menjadi vertical stack lapang).
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Ketiga aspek penilaian diletakkan berdampingan dalam grid 3-kolom (`grid grid-cols-1 sm:grid-cols-3 gap-2.5`). Pada modal `sm:max-w-lg`, lebar per kolom sangat sempit (~120px) sehingga label `Kerjasama & Sikap *` dan opsi `5 - Sangat Ramah` terbungkus bertingkat menjadi 2-3 baris yang sesak (*cramped / awkward wrapping*).
+  * **After**:
+    1. Mengubah pembungkus menjadi tata letak vertikal `space-y-3`.
+    2. Setiap aspek kini memiliki lebar penuh kartu (~460px) dengan padding `p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50`.
+    3. Label teks (`text-xs font-bold`) dan tombol dropdown (`py-2 px-3 text-xs sm:text-sm`) duduk nyaman dalam 1 baris utuh tanpa ada teks yang terpotong atau terbungkus.
+    4. Menu dropdown interaktif Alpine.js tetap responsif dengan styling amber LensMatch dan transisi halus.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #59** (Modal Center & Buttons), **Rule #61** (Amber LensMatch), **Rule #70** (Anti-AI Slop Terminology), **Rule #102** (Anti-Narrow Void & Spacious Layout).
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.

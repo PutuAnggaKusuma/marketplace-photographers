@@ -2451,401 +2451,136 @@
 
 
 
-                    <!-- 3 Aspek Penilaian (Grid 3 Kolom) -->
-
-
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-
-
+                    <!-- 3 Aspek Penilaian (Tata Letak Vertikal) -->
+                    <div class="space-y-3">
 
                         <!-- Aspek 1: Ketepatan Waktu -->
-
-
-
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
-
+                        <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
                              x-data="{
-
                                 openDropdown: false,
-
                                 options: {
-
                                     5: '5 - Sangat Tepat',
-
                                     4: '4 - Tepat Waktu',
-
                                     3: '3 - Cukup',
-
                                     2: '2 - Terlambat',
-
                                     1: '1 - Sangat Lambat'
-
                                 }
-
                              }">
-
-
-
-                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300">
-
-
-
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                 Ketepatan Waktu <span class="text-rose-500">*</span>
-
-
-
                             </label>
-
-
-
                             <input type="hidden" name="ketepatan_waktu" :value="rateKetepatanWaktu">
-
-
-
                             <div class="relative">
-
-
-
                                 <button type="button"
-
                                         @click="openDropdown = !openDropdown"
-
-                                        class="w-full flex items-center justify-between py-1.5 px-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 transition cursor-pointer">
-
-
-
+                                        class="w-full flex items-center justify-between py-2 px-3 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer">
                                     <span x-text="options[rateKetepatanWaktu] || 'Pilih Nilai'"></span>
-
-
-
-                                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-
-
-
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-
-
-
                                     </svg>
-
-
-
                                 </button>
-
-
-
                                 <div x-show="openDropdown"
-
                                      @click.outside="openDropdown = false"
-
                                      x-transition
-
                                      class="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
-
                                      style="display: none;">
-
-
-
                                     <template x-for="(label, val) in options" :key="val">
-
-
-
                                         <button type="button"
-
                                                 @click="rateKetepatanWaktu = parseInt(val); openDropdown = false"
-
-                                                class="w-full text-left px-2.5 py-1.5 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
-
+                                                class="w-full text-left px-3 py-2 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
                                                 :class="rateKetepatanWaktu === parseInt(val) ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
-
                                                 x-text="label">
-
-
-
                                         </button>
-
-
-
                                     </template>
-
-
-
                                 </div>
-
-
-
                             </div>
-
-
-
                         </div>
-
-
-
-
-
-
 
                         <!-- Aspek 2: Komunikasi -->
-
-
-
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
-
+                        <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
                              x-data="{
-
                                 openDropdown: false,
-
                                 options: {
-
                                     5: '5 - Responsif',
-
                                     4: '4 - Jelas & Baik',
-
                                     3: '3 - Cukup',
-
                                     2: '2 - Kurang Jelas',
-
                                     1: '1 - Sulit Dihubungi'
-
                                 }
-
                              }">
-
-
-
-                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300">
-
-
-
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                 Komunikasi <span class="text-rose-500">*</span>
-
-
-
                             </label>
-
-
-
                             <input type="hidden" name="komunikasi" :value="rateKomunikasi">
-
-
-
                             <div class="relative">
-
-
-
                                 <button type="button"
-
                                         @click="openDropdown = !openDropdown"
-
-                                        class="w-full flex items-center justify-between py-1.5 px-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 transition cursor-pointer">
-
-
-
+                                        class="w-full flex items-center justify-between py-2 px-3 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer">
                                     <span x-text="options[rateKomunikasi] || 'Pilih Nilai'"></span>
-
-
-
-                                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-
-
-
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-
-
-
                                     </svg>
-
-
-
                                 </button>
-
-
-
                                 <div x-show="openDropdown"
-
                                      @click.outside="openDropdown = false"
-
                                      x-transition
-
                                      class="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
-
                                      style="display: none;">
-
-
-
                                     <template x-for="(label, val) in options" :key="val">
-
-
-
                                         <button type="button"
-
                                                 @click="rateKomunikasi = parseInt(val); openDropdown = false"
-
-                                                class="w-full text-left px-2.5 py-1.5 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
-
+                                                class="w-full text-left px-3 py-2 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
                                                 :class="rateKomunikasi === parseInt(val) ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
-
                                                 x-text="label">
-
-
-
                                         </button>
-
-
-
                                     </template>
-
-
-
                                 </div>
-
-
-
                             </div>
-
-
-
                         </div>
-
-
-
-
-
-
 
                         <!-- Aspek 3: Kerjasama -->
-
-
-
-                        <div class="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
-
+                        <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col gap-1.5"
                              x-data="{
-
                                 openDropdown: false,
-
                                 options: {
-
                                     5: '5 - Sangat Ramah',
-
                                     4: '4 - Kooperatif',
-
                                     3: '3 - Cukup',
-
                                     2: '2 - Kurang Kooperatif',
-
                                     1: '1 - Tidak Bersahabat'
-
                                 }
-
                              }">
-
-
-
-                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300">
-
-
-
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                 Kerjasama & Sikap <span class="text-rose-500">*</span>
-
-
-
                             </label>
-
-
-
                             <input type="hidden" name="kerjasama" :value="rateKerjasama">
-
-
-
                             <div class="relative">
-
-
-
                                 <button type="button"
-
                                         @click="openDropdown = !openDropdown"
-
-                                        class="w-full flex items-center justify-between py-1.5 px-2 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 transition cursor-pointer">
-
-
-
+                                        class="w-full flex items-center justify-between py-2 px-3 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 font-semibold text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer">
                                     <span x-text="options[rateKerjasama] || 'Pilih Nilai'"></span>
-
-
-
-                                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-
-
-
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0" :class="{ 'rotate-180': openDropdown }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-
-
-
                                     </svg>
-
-
-
                                 </button>
-
-
-
                                 <div x-show="openDropdown"
-
                                      @click.outside="openDropdown = false"
-
                                      x-transition
-
                                      class="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-1 space-y-0.5 overflow-hidden"
-
                                      style="display: none;">
-
-
-
                                     <template x-for="(label, val) in options" :key="val">
-
-
-
                                         <button type="button"
-
                                                 @click="rateKerjasama = parseInt(val); openDropdown = false"
-
-                                                class="w-full text-left px-2.5 py-1.5 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
-
+                                                class="w-full text-left px-3 py-2 text-xs font-bold rounded text-gray-800 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 transition cursor-pointer"
                                                 :class="rateKerjasama === parseInt(val) ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-black' : ''"
-
                                                 x-text="label">
-
-
-
                                         </button>
-
-
-
                                     </template>
-
-
-
                                 </div>
-
-
-
                             </div>
-
-
-
                         </div>
 
-
-
                     </div>
-
-
-
-
-
-
 
                     <!-- Catatan Pengalaman Memotret Klien (Rule #73) -->
 
