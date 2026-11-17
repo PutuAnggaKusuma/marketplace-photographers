@@ -536,7 +536,7 @@
             x-cloak
             title="Kembali ke atas"
             aria-label="Kembali ke atas"
-            class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0 flex items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+            class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0 flex items-center justify-center transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>
       </svg>

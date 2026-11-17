@@ -37,7 +37,7 @@ Setiap entri log perubahan wajib mencantumkan:
       - Aksi klik mengeksekusi `window.scrollTo({ top: 0, behavior: 'smooth' })` bawaan browser tanpa library eksternal yang membebani memori atau bundle aplikasi.
     - **Desain & Kepatuhan Visual**:
       - Ikon single upward chevron minimalis (`d="M4.5 15.75l7.5-7.5 7.5 7.5"`) sesuai **Rule #72**.
-      - Bentuk rounded squircle (`rounded-2xl`) berukuran proporsional `w-11 h-11 sm:w-12 sm:h-12` dengan warna amber khas LensMatch (`bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0`) sesuai **Rule #61**.
+      - Bentuk lingkaran bulat sempurna (`rounded-full`) berukuran proporsional `w-11 h-11 sm:w-12 sm:h-12` dengan warna amber khas LensMatch (`bg-amber-400 hover:bg-amber-500 text-gray-950 font-black shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0`) sesuai **Rule #61**.
       - Dilengkapi atribut aksesibilitas `aria-label="Kembali ke atas"` dan `title="Kembali ke atas"`.
 * **Standar / Rule README yang Dipatuhi**:
   * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch (Aksen Amber).
