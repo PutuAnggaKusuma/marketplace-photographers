@@ -5020,3 +5020,22 @@ Setiap entri log perubahan wajib mencantumkan:
   * **Rule #59** (Modal Center & Buttons), **Rule #61** (Amber LensMatch), **Rule #70** (Anti-AI Slop Terminology), **Rule #102** (Anti-Narrow Void & Spacious Layout).
 * **Hasil Pengujian**:
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-18] Sinkronisasi Label Status Booking Fotografer Menjadi 'Jadwal Terkonfirmasi'
+* **Modul / Fitur**: Tabel Reservasi Fotografer (`/photographer/bookings`) & Dashboard Fotografer (`/photographer/dashboard`).
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/bookings/index.blade.php` (menyelaraskan teks status kontrak `active` dari `Jadwal Aktif` menjadi `Jadwal Terkonfirmasi`).
+  * `resources/views/photographer/dashboard.blade.php` (menyelaraskan teks status kontrak `active` menjadi `Jadwal Terkonfirmasi`).
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Status kontrak `active` pada tabel pesanan fotografer berlabel `Jadwal Aktif`. Istilah ini ambigu karena terkesan sesi foto sedang berlangsung saat ini (*live*), tidak menegaskan bahwa klien telah melunasi pembayaran, serta tidak konsisten dengan sisi klien yang menampilkan `Jadwal Terkonfirmasi`.
+  * **After**:
+    1. Mengubah label teks status kontrak `active` menjadi **`Jadwal Terkonfirmasi`** (`text-xs font-bold text-blue-600 dark:text-blue-400`).
+    2. Konsisten 100% dengan sisi Klien ([client/bookings/index.blade.php](resources/views/client/bookings/index.blade.php)), menegaskan secara lugas bahwa pesanan telah disetujui kedua pihak, pembayaran telah lunas/masuk ke sistem, dan jadwal resmi terkunci di kalender.
+    3. Mempertahankan standar tipografi murni tanpa badge/dot/divider berlebih (Rule #14, Rule #67, Rule #68, dan Rule #70).
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #14** & **Rule #68** (Pure Colored Text Status), **Rule #49** (Strict Scope), **Rule #70** (Anti-AI Slop Terminology).
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.

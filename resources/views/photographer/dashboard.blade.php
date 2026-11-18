@@ -501,7 +501,9 @@
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
                   @elseif($hasPhotos && !$isValidated)
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Menunggu Konfirmasi Klien</span>
-                  @elseif($b->status_contract === 'active' || $detail?->status_booking === 'confirmed')
+                  @elseif($b->status_contract === 'active')
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Jadwal Terkonfirmasi</span>
+                  @elseif($detail?->status_booking === 'confirmed')
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Dikonfirmasi</span>
                   @elseif($b->status_contract === 'pending_payment')
                     <span class="text-xs font-bold text-amber-500 dark:text-amber-400">Menunggu Pembayaran</span>

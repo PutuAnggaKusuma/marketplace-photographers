@@ -1055,7 +1055,7 @@
                                     @elseif($hasPhotos && !$isValidated)
                                         <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Menunggu Konfirmasi Klien</span>
                                     @elseif($c->status_contract === 'active')
-                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Jadwal Aktif</span>
+                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Jadwal Terkonfirmasi</span>
                                     @elseif($c->status_contract === 'pending_payment' || ($detail?->status_booking === 'confirmed' && $c->is_validated_photographer))
                                         <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Menunggu Pembayaran Klien</span>
                                     @else
