@@ -513,7 +513,7 @@
 
             <!-- Input Form -->
             <div class="p-4">
-                <form @submit.prevent="editingMessage ? saveEditMessage() : sendMessage()" class="flex items-center gap-2 sm:gap-3">
+                <form @submit.prevent="editingMessage ? saveEditMessage() : sendMessage()" class="flex items-end gap-2 sm:gap-3">
                     <!-- Hidden Photo Input -->
                     <input type="file" 
                            x-ref="fileInput" 
@@ -539,13 +539,16 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </button>
 
-                    <input type="text" 
-                           x-model="newMessage" 
-                           @input="handleTyping()"
-                           @keydown.enter.prevent="editingMessage ? saveEditMessage() : sendMessage()"
-                           @keydown.escape="if (editingMessage) cancelEdit(); else if (replyingToMessage) cancelReply();"
-                           :placeholder="editingMessage ? 'Ketik pesan baru...' : (selectedPhotoPreview ? 'Beri keterangan foto (opsional)...' : 'Tulis balasan Anda untuk klien...')" 
-                           class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                    <textarea x-ref="messageInput"
+                              x-model="newMessage" 
+                              rows="1"
+                              @input="handleTyping(); resizeInput()"
+                              @keydown.enter.exact.prevent="editingMessage ? saveEditMessage() : sendMessage()"
+                              @keydown.shift.enter="resizeInput()"
+                              @keydown.escape="if (editingMessage) cancelEdit(); else if (replyingToMessage) cancelReply();"
+                              :placeholder="editingMessage ? 'Ketik pesan baru...' : (selectedPhotoPreview ? 'Beri keterangan foto (opsional)...' : 'Tulis balasan Anda untuk klien...')" 
+                              class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
+                              style="height: 44px;"></textarea>
                     
                     <button type="submit" 
                             :disabled="!newMessage.trim() && !selectedPhotoFile" 
@@ -1047,10 +1050,11 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                 setInterval(() => this.fetchMessages(), 5000);
             }
 
-            // Auto-focus input jika terdapat prefill pesan dari pengingat waktu
+            // Auto-focus input & resize jika terdapat prefill pesan dari pengingat waktu
             if (this.newMessage) {
                 this.$nextTick(() => {
-                    const inputEl = document.querySelector('input[x-model="newMessage"]');
+                    this.resizeInput();
+                    const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
                     if (inputEl) {
                         inputEl.focus();
                         const len = inputEl.value.length;
@@ -1200,6 +1204,16 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             }).catch(() => {});
         },
 
+        resizeInput() {
+            this.$nextTick(() => {
+                const el = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
+                if (!el) return;
+                el.style.height = 'auto';
+                const nextHeight = Math.min(el.scrollHeight, 144);
+                el.style.height = Math.max(nextHeight, 44) + 'px';
+            });
+        },
+
         renderMessageContent(msg) {
             if (!msg) return '';
             const escaped = msg
@@ -1224,6 +1238,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
 
             // Reset Input UI Instantly
             this.newMessage = '';
+            this.resizeInput();
             this.replyingToMessage = null;
             this.selectedPhotoFile = null;
             this.selectedPhotoPreview = null;
@@ -1337,7 +1352,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             this.cancelEdit();
             this.replyingToMessage = m;
             this.$nextTick(() => {
-                const inputEl = document.querySelector('input[x-model="newMessage"]');
+                const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
                 if (inputEl) inputEl.focus();
             });
         },
@@ -1453,7 +1468,8 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             this.editingMessage = m;
             this.newMessage = m.message;
             this.$nextTick(() => {
-                const inputEl = document.querySelector('input[x-model="newMessage"]');
+                this.resizeInput();
+                const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
                 if (inputEl) {
                     inputEl.focus();
                     inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
@@ -1464,6 +1480,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
         cancelEdit() {
             this.editingMessage = null;
             this.newMessage = '';
+            this.resizeInput();
         },
 
         saveEditMessage() {
@@ -1479,6 +1496,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
             }
             this.editingMessage = null;
             this.newMessage = '';
+            this.resizeInput();
 
             const tokenEl = document.querySelector('meta[name=csrf-token]');
             const csrfToken = tokenEl ? tokenEl.content : '';

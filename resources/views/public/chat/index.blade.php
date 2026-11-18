@@ -1087,7 +1087,7 @@
 
                 <div class="p-4">
 
-                    <form @submit.prevent="editingMessage ? saveEditMessage() : sendMessage()" class="flex items-center gap-2 sm:gap-3">
+                    <form @submit.prevent="editingMessage ? saveEditMessage() : sendMessage()" class="flex items-end gap-2 sm:gap-3">
 
                         <!-- Hidden Photo Input -->
 
@@ -1145,19 +1145,16 @@
 
 
 
-                        <input type="text" 
-
-                               x-model="newMessage" 
-
-                               @input="handleTyping()"
-
-                               @keydown.enter.prevent="editingMessage ? saveEditMessage() : sendMessage()"
-
-                               @keydown.escape="if (editingMessage) cancelEdit(); else if (replyingToMessage) cancelReply();"
-
-                               :placeholder="editingMessage ? 'Ketik pesan baru...' : (selectedPhotoPreview ? 'Beri keterangan foto (opsional)...' : 'Tulis pesan Anda untuk fotografer...')" 
-
-                               class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
+                        <textarea x-ref="messageInput"
+                                  x-model="newMessage" 
+                                  rows="1"
+                                  @input="handleTyping(); resizeInput()"
+                                  @keydown.enter.exact.prevent="editingMessage ? saveEditMessage() : sendMessage()"
+                                  @keydown.shift.enter="resizeInput()"
+                                  @keydown.escape="if (editingMessage) cancelEdit(); else if (replyingToMessage) cancelReply();"
+                                  :placeholder="editingMessage ? 'Ketik pesan baru...' : (selectedPhotoPreview ? 'Beri keterangan foto (opsional)...' : 'Tulis pesan Anda untuk fotografer...')" 
+                                  class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
+                                  style="height: 44px;"></textarea>
 
                         
 
@@ -2069,10 +2066,11 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
             }
 
-            // Auto-focus input jika terdapat prefill pesan dari pengingat waktu
+            // Auto-focus input & resize jika terdapat prefill pesan dari pengingat waktu
             if (this.newMessage) {
                 this.$nextTick(() => {
-                    const inputEl = document.querySelector('input[x-model="newMessage"]');
+                    this.resizeInput();
+                    const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
                     if (inputEl) {
                         inputEl.focus();
                         const len = inputEl.value.length;
@@ -2351,6 +2349,16 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
         },
 
+        resizeInput() {
+            this.$nextTick(() => {
+                const el = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
+                if (!el) return;
+                el.style.height = 'auto';
+                const nextHeight = Math.min(el.scrollHeight, 144);
+                el.style.height = Math.max(nextHeight, 44) + 'px';
+            });
+        },
+
 
 
         renderMessageContent(msg) {
@@ -2386,6 +2394,8 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             // Reset Input UI Instantly
 
             this.newMessage = '';
+
+            this.resizeInput();
 
             this.replyingToMessage = null;
 
@@ -2613,7 +2623,7 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
             this.$nextTick(() => {
 
-                const inputEl = document.querySelector('input[x-model="newMessage"]');
+                const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
 
                 if (inputEl) inputEl.focus();
 
@@ -2845,7 +2855,9 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
 
             this.$nextTick(() => {
 
-                const inputEl = document.querySelector('input[x-model="newMessage"]');
+                this.resizeInput();
+
+                const inputEl = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
 
                 if (inputEl) {
 
@@ -2866,6 +2878,8 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             this.editingMessage = null;
 
             this.newMessage = '';
+
+            this.resizeInput();
 
         },
 
@@ -2896,6 +2910,8 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             this.editingMessage = null;
 
             this.newMessage = '';
+
+            this.resizeInput();
 
 
 
