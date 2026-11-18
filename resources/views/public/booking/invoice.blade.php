@@ -26,9 +26,18 @@
         }
       }
 
-      $isPendingPayment = ($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment']))) && (!isset($payment) || $payment->payment_status !== 'completed');
+      $isCancelled = $contract->status_contract === 'cancelled';
+      $isPendingPayment = !$isCancelled && ($contract->status_contract === 'pending_payment' || ($contract->is_validated_photographer && in_array($contract->status_contract, ['approved', 'pending_payment']))) && (!isset($payment) || $payment->payment_status !== 'completed');
 
-      if ($from === 'invoices') {
+      if ($isCancelled) {
+        if ($from === 'invoices') {
+          $backUrl = route('client.invoices');
+          $backLabel = 'Kembali ke Riwayat Pembayaran';
+        } else {
+          $backUrl = route('client.bookings');
+          $backLabel = 'Kembali ke Reservasi Saya';
+        }
+      } elseif ($from === 'invoices') {
         $backUrl = route('client.invoices');
         $backLabel = 'Kembali ke Riwayat Pembayaran';
       } elseif ($from === 'checkout' || ($isPendingPayment && !$from)) {

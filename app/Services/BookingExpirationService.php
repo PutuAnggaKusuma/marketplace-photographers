@@ -95,16 +95,24 @@ class BookingExpirationService
             return false;
         }
 
-        DB::transaction(function () use ($contract, $booking, $reason) {
-            $contract->update([
-                'status_contract' => 'cancelled',
-            ]);
+        DB::transaction(function () use ($contract, $booking, $reason, $now) {
+            $updateData = ['status_contract' => 'cancelled'];
+            if (!$contract->expired_at || Carbon::parse($contract->expired_at)->gt($now)) {
+                $updateData['expired_at'] = $now;
+            }
+
+            $contract->update($updateData);
 
             if ($booking) {
                 $booking->update([
                     'status_booking' => 'cancelled',
                 ]);
             }
+
+            // Batalkan seluruh tagihan yang masih berstatus pending
+            $contract->payments()
+                ->where('payment_status', 'pending')
+                ->update(['payment_status' => 'failed']);
 
             ContractCancellation::firstOrCreate(
                 ['id_contract' => $contract->id],

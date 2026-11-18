@@ -13,6 +13,15 @@
   $invStart = $bookingDetail?->jam_mulai ? substr($bookingDetail->jam_mulai, 0, 5) : null;
   $invEnd = $bookingDetail?->jam_selesai ? substr($bookingDetail->jam_selesai, 0, 5) : null;
   $effectiveDuration = $bookingDetail?->effective_duration_hours ?? 0;
+  $sessionStart = null;
+  if ($bookingDetail && $bookingDetail->booking_date) {
+    $timeStr = $bookingDetail->jam_mulai ? substr($bookingDetail->jam_mulai, 0, 5) : '08:00';
+    $sessionStart = \Carbon\Carbon::parse($bookingDetail->booking_date . ' ' . $timeStr);
+  }
+  $isSessionPassed = $sessionStart && $sessionStart->isPast();
+  $isContractCancelled = $contract->status_contract === 'cancelled';
+  $isDeadlinePassed = $contract->expired_at ? $contract->expired_at->isPast() : false;
+  $isOrderExpired = $isContractCancelled || $isSessionPassed || $isDeadlinePassed;
   $expiredAt = $contract->expired_at ?? $contract->calculatePaymentDeadline();
   $isPendingVerification = $payment && $payment->bukti_transfer && $payment->payment_status === 'pending';
   $orderCode = $payment->external_id ?? ('KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT));
@@ -109,67 +118,83 @@
       </p>
     </div>
 
-    <!-- Batas Waktu Pembayaran (Countdown Timer ala Traveloka / Tiket.com) -->
-    <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-         x-data="{
-           targetTime: new Date('{{ $expiredAt->toISOString() }}').getTime(),
-           hours: '00',
-           minutes: '00',
-           seconds: '00',
-           isExpired: false,
-           timer: null,
-           updateTimer() {
-             const now = new Date().getTime();
-             const distance = this.targetTime - now;
-             if (distance <= 0) {
-               this.isExpired = true;
-               this.hours = '00';
-               this.minutes = '00';
-               this.seconds = '00';
-               if (this.timer) clearInterval(this.timer);
-               return;
-             }
-             const h = Math.floor(distance / (1000 * 60 * 60));
-             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-             const s = Math.floor((distance % (1000 * 60)) / 1000);
-             this.hours = String(h).padStart(2, '0');
-             this.minutes = String(m).padStart(2, '0');
-             this.seconds = String(s).padStart(2, '0');
-           },
-           init() {
-             this.updateTimer();
-             this.timer = setInterval(() => this.updateTimer(), 1000);
-           }
-         }">
-      <div class="space-y-0.5">
-        <span class="font-bold text-gray-900 dark:text-white block">Batas Waktu Pembayaran</span>
-        <p class="text-gray-600 dark:text-gray-400">
-          Selesaikan transfer sebelum <strong class="text-gray-800 dark:text-gray-200">{{ $expiredAt->translatedFormat('d F Y, H:i') }} WIB</strong>
-          @if($expiredAt->isToday())
-            <span class="text-amber-700 dark:text-amber-300 font-bold">(Hari Ini)</span>
-          @elseif($expiredAt->isTomorrow())
-            <span class="text-amber-700 dark:text-amber-300 font-bold">(Besok)</span>
-          @endif
-        </p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <template x-if="!isExpired">
-          <div class="flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-200">
-            <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="hours">00</span>
-            <span class="text-amber-600">:</span>
-            <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="minutes">00</span>
-            <span class="text-amber-600">:</span>
-            <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="seconds">00</span>
-          </div>
-        </template>
-        <template x-if="isExpired">
-          <span class="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800">
-            Waktu Pembayaran Berakhir
+    <!-- Batas Waktu Pembayaran -->
+    @if($isOrderExpired)
+      <div class="p-4 sm:p-5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/90 dark:border-rose-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="space-y-0.5">
+          <span class="font-bold text-rose-900 dark:text-rose-200 block">Batas Waktu Pembayaran Telah Berakhir</span>
+          <p class="text-rose-700 dark:text-rose-300">
+            Waktu pembayaran telah habis atau jadwal pelaksanaan sesi foto telah terlewati. Pesanan ini telah kadaluarsa.
+          </p>
+        </div>
+        <div class="shrink-0">
+          <span class="text-xs font-bold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/40 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800">
+            Pesanan Kadaluarsa
           </span>
-        </template>
+        </div>
       </div>
-    </div>
+    @else
+      <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+           x-data="{
+             targetTime: new Date('{{ $expiredAt->toISOString() }}').getTime(),
+             hours: '00',
+             minutes: '00',
+             seconds: '00',
+             isExpired: false,
+             timer: null,
+             updateTimer() {
+               const now = new Date().getTime();
+               const distance = this.targetTime - now;
+               if (distance <= 0) {
+                 this.isExpired = true;
+                 this.hours = '00';
+                 this.minutes = '00';
+                 this.seconds = '00';
+                 if (this.timer) clearInterval(this.timer);
+                 return;
+               }
+               const h = Math.floor(distance / (1000 * 60 * 60));
+               const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+               const s = Math.floor((distance % (1000 * 60)) / 1000);
+               this.hours = String(h).padStart(2, '0');
+               this.minutes = String(m).padStart(2, '0');
+               this.seconds = String(s).padStart(2, '0');
+             },
+             init() {
+               this.updateTimer();
+               this.timer = setInterval(() => this.updateTimer(), 1000);
+             }
+           }">
+        <div class="space-y-0.5">
+          <span class="font-bold text-gray-900 dark:text-white block">Batas Waktu Pembayaran</span>
+          <p class="text-gray-600 dark:text-gray-400">
+            Selesaikan transfer sebelum <strong class="text-gray-800 dark:text-gray-200">{{ $expiredAt->translatedFormat('d F Y, H:i') }} WIB</strong>
+            @if($expiredAt->isToday())
+              <span class="text-amber-700 dark:text-amber-300 font-bold">(Hari Ini)</span>
+            @elseif($expiredAt->isTomorrow())
+              <span class="text-amber-700 dark:text-amber-300 font-bold">(Besok)</span>
+            @endif
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <template x-if="!isExpired">
+            <div class="flex items-center gap-1.5 font-mono font-bold text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+              <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="hours">00</span>
+              <span class="text-amber-600">:</span>
+              <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="minutes">00</span>
+              <span class="text-amber-600">:</span>
+              <span class="px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/50 rounded-lg" x-text="seconds">00</span>
+            </div>
+          </template>
+          <template x-if="isExpired">
+            <span class="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-200 dark:border-rose-800">
+              Waktu Pembayaran Berakhir
+            </span>
+          </template>
+        </div>
+      </div>
+    @endif
 
     <!-- Main Content 2-Column Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
@@ -177,6 +202,28 @@
       <!-- Kolom Kiri (7 Kolom): Instruksi Transfer & Form Unggah Bukti -->
       <div class="lg:col-span-7 space-y-6">
 
+        @if($isOrderExpired)
+          <!-- Kartu Pesanan Kadaluarsa -->
+          <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs p-6 sm:p-8 space-y-5 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+            </div>
+            <div class="space-y-1.5">
+              <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Pesanan Ini Telah Kadaluarsa</h2>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                Batas waktu pembayaran telah berakhir atau jadwal pelaksanaan sesi foto telah terlewati. Pesanan ini tidak dapat diproses lebih lanjut.
+              </p>
+            </div>
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a href="{{ $backUrl }}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-bold text-gray-800 dark:text-gray-200 transition text-center cursor-pointer">
+                {{ $backLabel }}
+              </a>
+              <a href="{{ route('booking.invoice', array_merge(['id' => $contract->id, 'view' => 'invoice', 'from' => 'checkout'], $from ? ['ref' => $from] : [])) }}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs font-bold text-gray-700 dark:text-gray-300 transition text-center cursor-pointer">
+                Lihat Invoice
+              </a>
+            </div>
+          </div>
+        @else
         <!-- 1. Kartu Instruksi Transfer Bank Resmi -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700/80 shadow-xs p-6 sm:p-7 space-y-5">
           <div class="border-b border-gray-100 dark:border-gray-700/80 pb-4">
@@ -422,6 +469,7 @@
           </div>
 
         </div>
+        @endif
 
       </div>
 

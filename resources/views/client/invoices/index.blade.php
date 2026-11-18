@@ -201,7 +201,7 @@
                 $isDp = $c->payment_type === 'dp';
                 $isDpPaid = $dpPayment && $dpPayment->payment_status === 'completed';
                 $isFullPaid = $fullPayment && $fullPayment->payment_status === 'completed';
-                $isFullySettled = $isDp ? ($isDpPaid && $isFullPaid) : ($c->payments->first() && $c->payments->first()->payment_status === 'completed');
+                $isFullySettled = in_array($c->status_contract, ['active', 'completed']) || ($isDp ? ($isDpPaid && $isFullPaid) : ($c->payments->first() && $c->payments->first()->payment_status === 'completed'));
 
                 $payment = $c->payments->first();
                 $pStatus = $payment->payment_status ?? 'pending';
@@ -259,6 +259,10 @@
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
                       DP Terbayar
                     </span>
+                  @elseif($c->status_contract === 'cancelled')
+                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                      Kadaluarsa
+                    </span>
                   @elseif($pStatus === 'failed')
                     <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
                       Gagal
@@ -272,7 +276,7 @@
 
                 <!-- Aksi -->
                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                  <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'invoices']) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group">
+                  <a href="{{ route('booking.invoice', ['id' => $c->id, 'view' => 'invoice', 'from' => 'invoices']) }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition group cursor-pointer">
                     <span>Rincian</span>
                     <svg class="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path>

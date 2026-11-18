@@ -640,12 +640,15 @@ class BookingController extends Controller
         $wantsInvoiceView = $request->query('view') === 'invoice';
         $isCompleted = $contract->status_contract === 'completed' || ($payment && $payment->payment_status === 'completed');
         $isDraftWaitingApproval = $contract->status_contract === 'draft' && !$contract->is_validated_photographer;
+        $isCancelled = $contract->status_contract === 'cancelled';
 
-        if ($wantsInvoiceView || $isCompleted || $isDraftWaitingApproval) {
+        // Jika meminta invoice, sudah lunas, masih draft, atau pesanan telah kadaluarsa / dibatalkan:
+        // Tampilkan dokumen invoice formal (read-only tanpa form pembayaran)
+        if ($wantsInvoiceView || $isCompleted || $isDraftWaitingApproval || $isCancelled) {
             return view('public.booking.invoice', compact('contract', 'payment', 'dpPayment', 'fullPayment'));
         }
 
-        // Default untuk status pending_payment / pembayaran aktif: Tampilkan Halaman Checkout Pembayaran
+        // Default untuk status pending_payment aktif yang belum kadaluarsa: Tampilkan Halaman Checkout Pembayaran
         return view('public.booking.checkout', compact('contract', 'payment', 'dpPayment', 'fullPayment'));
     }
 

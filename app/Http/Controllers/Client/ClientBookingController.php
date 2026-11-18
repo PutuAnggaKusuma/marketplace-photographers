@@ -234,31 +234,39 @@ class ClientBookingController extends Controller
 
             if ($filterStatus === 'completed') {
 
-                $query->whereHas('payments', function ($q) {
-
-                    $q->where('payment_status', 'completed');
-
+                $query->where(function ($q) {
+                    $q->whereIn('status_contract', ['active', 'completed'])
+                      ->orWhereHas('payments', function ($p) {
+                          $p->where('payment_status', 'completed');
+                      });
                 });
 
             } elseif ($filterStatus === 'pending') {
 
-                $query->where(function ($q) {
+                $query->whereNotIn('status_contract', ['active', 'completed', 'cancelled'])
+                      ->where(function ($q) {
 
-                    $q->whereDoesntHave('payments')
+                          $q->whereDoesntHave('payments')
 
-                      ->orWhereHas('payments', function ($p) {
+                            ->orWhereHas('payments', function ($p) {
 
-                          $p->where('payment_status', 'pending');
+                                $p->where('payment_status', 'pending');
+
+                            });
 
                       });
 
-                });
-
             } elseif ($filterStatus === 'failed') {
 
-                $query->whereHas('payments', function ($q) {
+                $query->where(function ($q) {
 
-                    $q->where('payment_status', 'failed');
+                    $q->where('status_contract', 'cancelled')
+
+                      ->orWhereHas('payments', function ($p) {
+
+                          $p->where('payment_status', 'failed');
+
+                      });
 
                 });
 
@@ -340,11 +348,11 @@ class ClientBookingController extends Controller
 
 
 
-        $contractPaidCount = $allContracts->filter(fn($c) => $c->payments->first() && $c->payments->first()->payment_status === 'completed')->count();
+        $contractPaidCount = $allContracts->filter(fn($c) => in_array($c->status_contract, ['active', 'completed']) || ($c->payments->first() && $c->payments->first()->payment_status === 'completed'))->count();
 
-        $contractPendingCount = $allContracts->filter(fn($c) => !$c->payments->first() || $c->payments->first()->payment_status === 'pending')->count();
+        $contractPendingCount = $allContracts->filter(fn($c) => !in_array($c->status_contract, ['active', 'completed', 'cancelled']) && (!$c->payments->first() || $c->payments->first()->payment_status === 'pending'))->count();
 
-        $contractPaidAmount = $allContracts->filter(fn($c) => $c->payments->first() && $c->payments->first()->payment_status === 'completed')->sum('jumlah');
+        $contractPaidAmount = $allContracts->filter(fn($c) => in_array($c->status_contract, ['active', 'completed']) || ($c->payments->first() && $c->payments->first()->payment_status === 'completed'))->sum('jumlah');
 
 
 

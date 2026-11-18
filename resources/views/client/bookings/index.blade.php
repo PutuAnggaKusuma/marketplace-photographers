@@ -574,7 +574,7 @@
                            style="display: none;">
                         
                         <!-- Lihat Invoice -->
-                        <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'bookings']) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                        <a href="{{ route('booking.invoice', ['id' => $c->id, 'view' => 'invoice', 'from' => 'bookings']) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                           Lihat Invoice
                         </a>
 

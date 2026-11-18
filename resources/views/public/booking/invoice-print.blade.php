@@ -82,19 +82,22 @@
         </div>
 
         @php
+            $isCancelled = $contract->status_contract === 'cancelled';
             $isDpPaid = isset($dpPayment) && $dpPayment && $dpPayment->payment_status === 'completed';
             $isPelunasanPaid = isset($fullPayment) && $fullPayment && $fullPayment->payment_status === 'completed';
-            $isAllPaid = ($contract->payment_type === 'dp') ? ($isDpPaid && $isPelunasanPaid) : ($activePayment->payment_status === 'completed');
+            $isAllPaid = !$isCancelled && (($contract->payment_type === 'dp') ? ($isDpPaid && $isPelunasanPaid) : ($activePayment->payment_status === 'completed'));
         @endphp
 
         <!-- Status Watermark Ribbon / Banner -->
-        <div class="p-4 rounded-2xl flex items-center justify-between {{ $isAllPaid ? 'bg-emerald-50 border border-emerald-200' : ($contract->payment_type === 'dp' && $isDpPaid ? 'bg-blue-50 border border-blue-200' : 'bg-amber-50 border border-amber-200') }}">
+        <div class="p-4 rounded-2xl flex items-center justify-between {{ $isCancelled ? 'bg-rose-50 border border-rose-200' : ($isAllPaid ? 'bg-emerald-50 border border-emerald-200' : ($contract->payment_type === 'dp' && $isDpPaid ? 'bg-blue-50 border border-blue-200' : 'bg-amber-50 border border-amber-200')) }}">
             <div class="space-y-0.5">
-                <span class="text-[10px] font-black uppercase tracking-wider block {{ $isAllPaid ? 'text-emerald-700' : ($contract->payment_type === 'dp' && $isDpPaid ? 'text-blue-700' : 'text-amber-700') }}">
+                <span class="text-[10px] font-black uppercase tracking-wider block {{ $isCancelled ? 'text-rose-700' : ($isAllPaid ? 'text-emerald-700' : ($contract->payment_type === 'dp' && $isDpPaid ? 'text-blue-700' : 'text-amber-700')) }}">
                     Status Transaksi
                 </span>
                 <p class="text-xs font-bold text-gray-800">
-                    @if($isAllPaid)
+                    @if($isCancelled)
+                        Kadaluarsa — Batas Waktu Pembayaran Telah Berakhir
+                    @elseif($isAllPaid)
                         Lunas — Pembayaran Telah Terverifikasi
                     @elseif($contract->payment_type === 'dp' && $isDpPaid)
                         Uang Muka (DP 30%) Lunas — Sesi Terkonfirmasi, Menunggu Pelunasan
@@ -103,8 +106,8 @@
                     @endif
                 </p>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $isAllPaid ? 'bg-emerald-600 text-white' : ($contract->payment_type === 'dp' && $isDpPaid ? 'bg-blue-600 text-white' : 'bg-amber-500 text-gray-950') }}">
-                {{ $isAllPaid ? 'Lunas' : ($contract->payment_type === 'dp' && $isDpPaid ? 'DP Lunas' : 'Menunggu') }}
+            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $isCancelled ? 'bg-rose-600 text-white' : ($isAllPaid ? 'bg-emerald-600 text-white' : ($contract->payment_type === 'dp' && $isDpPaid ? 'bg-blue-600 text-white' : 'bg-amber-500 text-gray-950')) }}">
+                {{ $isCancelled ? 'Kadaluarsa' : ($isAllPaid ? 'Lunas' : ($contract->payment_type === 'dp' && $isDpPaid ? 'DP Lunas' : 'Menunggu')) }}
             </span>
         </div>
 
