@@ -229,6 +229,12 @@ layer(base);
     @apply size-1.5;
   }
 
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   &::-webkit-scrollbar-track {
     @apply rounded-full;
   }
@@ -236,6 +242,8 @@ layer(base);
   &::-webkit-scrollbar-thumb {
     @apply rounded-full bg-gray-200;
   }
+
+  scrollbar-width: thin;
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {

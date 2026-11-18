@@ -1153,7 +1153,7 @@
                                   @keydown.shift.enter="resizeInput()"
                                   @keydown.escape="if (editingMessage) cancelEdit(); else if (replyingToMessage) cancelReply();"
                                   :placeholder="editingMessage ? 'Ketik pesan baru...' : (selectedPhotoPreview ? 'Beri keterangan foto (opsional)...' : 'Tulis pesan Anda untuk fotografer...')" 
-                                  class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors resize-none min-h-[44px] max-h-36 overflow-y-auto leading-relaxed"
+                                  class="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-colors resize-none min-h-[44px] max-h-36 overflow-hidden leading-relaxed"
                                   style="height: 44px;"></textarea>
 
                         
@@ -2354,9 +2354,22 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
             this.$nextTick(() => {
                 const el = this.$refs.messageInput || document.querySelector('[x-model="newMessage"]');
                 if (!el) return;
+                if (!this.newMessage || !this.newMessage.trim()) {
+                    el.style.height = '44px';
+                    el.classList.remove('overflow-y-auto', 'custom-scrollbar');
+                    el.classList.add('overflow-hidden');
+                    return;
+                }
                 el.style.height = 'auto';
                 const nextHeight = Math.min(el.scrollHeight, 144);
                 el.style.height = Math.max(nextHeight, 44) + 'px';
+                if (el.scrollHeight > 144) {
+                    el.classList.add('overflow-y-auto', 'custom-scrollbar');
+                    el.classList.remove('overflow-hidden');
+                } else {
+                    el.classList.remove('overflow-y-auto', 'custom-scrollbar');
+                    el.classList.add('overflow-hidden');
+                }
             });
         },
 
