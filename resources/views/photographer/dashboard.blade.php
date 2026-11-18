@@ -150,19 +150,19 @@
     <!-- Chip 1: Booking Masuk Perlu Konfirmasi -->
     <a href="{{ route('photographer.bookings', ['status' => 'pending']) }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Konfirmasi Order</span>
-      <span>(<span class="{{ $pendingBookingsCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $pendingBookingsCount }}</span>)</span>
+      <span class="{{ $pendingBookingsCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">({{ $pendingBookingsCount }})</span>
     </a>
 
     <!-- Chip 2: Galeri Foto Perlu Diunggah -->
     <a href="{{ route('photographer.bookings', ['status' => 'confirmed']) }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Kirim Hasil Foto</span>
-      <span>(<span class="{{ $needGalleryUploadCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $needGalleryUploadCount }}</span>)</span>
+      <span class="{{ $needGalleryUploadCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">({{ $needGalleryUploadCount }})</span>
     </a>
 
     <!-- Chip 3: Dana Siap Dicairkan (Rule #70) -->
     <a href="{{ route('photographer.reports') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Pencairan Dana</span>
-      <span>(<span class="{{ $readyPayoutCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $readyPayoutCount }}</span>)</span>
+      <span class="{{ $readyPayoutCount > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">({{ $readyPayoutCount }})</span>
     </a>
   </div>
 

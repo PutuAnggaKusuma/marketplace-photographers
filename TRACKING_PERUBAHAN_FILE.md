@@ -5043,17 +5043,16 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
-### [2026-11-18] Pewarnaan Angka Dinamis pada Chip Antrean Kerja Dashboard Fotografer & Admin
+### [2026-11-18] Pewarnaan Angka & Kurung Dinamis pada Chip Antrean Kerja Dashboard Fotografer & Admin
 * **Modul / Fitur**: Chip Antrean Kerja (*Operational Queue*) pada Dashboard Fotografer (`/photographer/dashboard`) & Dashboard Admin (`/admin/dashboard`).
 * **File yang Dimodifikasi**:
-  * `resources/views/photographer/dashboard.blade.php` (menambahkan logika pewarnaan kuning brand sistem hanya pada angka jika bernilai > 0 pada chip: Konfirmasi Order, Kirim Hasil Foto, dan Pencairan Dana).
-  * `resources/views/admin/dashboard.blade.php` (menambahkan logika pewarnaan kuning brand sistem hanya pada angka jika bernilai > 0 pada chip: Verifikasi Fotografer, Dana Siap Tarik, dan Submisi Lomba).
+  * `resources/views/photographer/dashboard.blade.php` (menyelaraskan warna kurung dan angka menjadi satu kesatuan kuning brand sistem jika bernilai > 0 pada chip antrean kerja).
+  * `resources/views/admin/dashboard.blade.php` (menyelaraskan warna kurung dan angka menjadi satu kesatuan kuning brand sistem jika bernilai > 0 pada chip antrean kerja).
 * **Rincian Perubahan (Before vs After)**:
-  * **Before**: Seluruh teks chip antrean kerja beserta angka di dalam kurung menggunakan warna teks statis (`text-gray-800 dark:text-gray-200`) baik bernilai 0 maupun > 0.
+  * **Before**: Hanya digit angka yang diwarnai kuning saat > 0, sedangkan kurung buka dan kurung tutup tetap hitam sehingga terlihat terpisah dan kurang seragam.
   * **After**:
-    1. **Saat Angka = 0**: Angka tetap menggunakan warna hitam/default bawaan (`text-gray-800 dark:text-gray-200`) tanpa penambahan kelas warna.
-    2. **Saat Angka > 0**: Angka mendapatkan warna kuning brand sistem LensMatch (`text-amber-500 dark:text-amber-400`).
-    3. **Kurung Buka & Kurung Tutup**: Kurung `(` dan `)` tetap berada di luar inner span dengan warna default netral tanpa perubahan warna.
+    1. **Saat Nilai = 0**: Format `(0)` seluruhnya tetap menggunakan warna hitam/default netral (`text-gray-800 dark:text-gray-200`).
+    2. **Saat Nilai > 0**: Format `(1)`, `(2)`, dst. secara seragam dan utuh (baik kurung buka, angka, maupun kurung tutup) diwarnai kuning brand LensMatch (`text-amber-500 dark:text-amber-400`).
 * **Standar / Rule README yang Dipatuhi**:
   * **Rule #49** (Strict Scope & Zero Unrequested Side-Effects), **Rule #61** (Amber Brand LensMatch Color Hierarchy).
 * **Hasil Pengujian**:
