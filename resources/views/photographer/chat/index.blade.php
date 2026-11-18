@@ -1061,6 +1061,7 @@ function photographerChatApp(initialThreads, activeThreadId, initialMessages, in
                         inputEl.setSelectionRange(len, len);
                     }
                 });
+                setTimeout(() => this.resizeInput(), 100);
             }
         },
 

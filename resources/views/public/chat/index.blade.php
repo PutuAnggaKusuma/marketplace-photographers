@@ -2077,6 +2077,7 @@ function clientChatApp(initialThreads, activeThreadId, initialMessages, initialS
                         inputEl.setSelectionRange(len, len);
                     }
                 });
+                setTimeout(() => this.resizeInput(), 100);
             }
 
         },
