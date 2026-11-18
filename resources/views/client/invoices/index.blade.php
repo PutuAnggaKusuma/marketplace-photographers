@@ -5,6 +5,21 @@
 @section('content')
 <section class="py-12 bg-white dark:bg-gray-900 min-h-screen" x-data="{
   activeTab: 'booking',
+  isLoading: false,
+  currentStatus: '{{ $filterStatus ?? 'all' }}',
+
+  applyFilter(val) {
+    this.currentStatus = val;
+    let url = new URL(window.location.href);
+    if (val && val !== 'all') {
+      url.searchParams.set('status', val);
+    } else {
+      url.searchParams.delete('status');
+    }
+    url.searchParams.set('page', '1');
+    this.fetchTable(url.toString());
+  },
+
   handleSearch(e) {
     let q = e.target.value.toLowerCase();
     let rows = document.querySelectorAll('.invoice-row');
@@ -12,6 +27,36 @@
       let text = r.innerText.toLowerCase();
       r.style.display = text.includes(q) ? '' : 'none';
     });
+  },
+
+  fetchTable(url) {
+    this.isLoading = true;
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.text();
+      })
+      .then(html => {
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, 'text/html');
+        let newTable = doc.querySelector('#dashboard-table-container');
+        let curTable = document.querySelector('#dashboard-table-container');
+        if (newTable && curTable) {
+          curTable.innerHTML = newTable.innerHTML;
+          if (window.Alpine) window.Alpine.initTree(curTable);
+        }
+        let newStats = doc.querySelector('#dashboard-stats-container');
+        let curStats = document.querySelector('#dashboard-stats-container');
+        if (newStats && curStats) {
+          curStats.innerHTML = newStats.innerHTML;
+        }
+        window.history.pushState(null, '', url);
+        this.isLoading = false;
+      })
+      .catch(err => {
+        console.error(err);
+        this.isLoading = false;
+      });
   }
 }">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -24,7 +69,7 @@
     </div>
 
     <!-- 4 Clean Summary Metric Cards (Matching Dashboard Standard) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div id="dashboard-stats-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       <!-- Card 1: Total Semua Invoice -->
       <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
         <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Tagihan</span>
@@ -112,10 +157,12 @@
             <div x-show="open" @click.away="open = false" x-transition 
                  class="absolute z-50 left-0 mt-2 min-w-[220px] w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
               @foreach($statusLabels as $stKey => $stVal)
-                <a href="{{ request()->fullUrlWithQuery(['status' => $stKey, 'page' => 1]) }}" 
-                   class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0 {{ ($filterStatus ?? 'all') === $stKey ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : '' }}">
+                <button type="button" 
+                        @click="selectedId = '{{ $stKey }}'; selectedName = '{{ $stVal }}'; open = false; applyFilter('{{ $stKey }}')"
+                        class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
+                        :class="selectedId === '{{ $stKey }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
                   <span>{{ $stVal }}</span>
-                </a>
+                </button>
               @endforeach
             </div>
           </div>
@@ -130,6 +177,8 @@
           <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
       </div>
+
+      <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
       <!-- 1. Table Container: Sesi Booking Fotografer -->
       <div x-show="activeTab === 'booking'" class="overflow-x-auto">
@@ -426,6 +475,8 @@
             @endforelse
           </tbody>
         </table>
+      </div>
+
       </div>
 
     </div>

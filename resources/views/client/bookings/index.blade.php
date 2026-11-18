@@ -19,22 +19,59 @@
   rescheduleServiceName: '',
   rescheduleDefaultDate: '{{ date('Y-m-d', strtotime('+1 day')) }}',
 
+  isLoading: false,
+  currentStatus: '{{ $filterStatus ?? 'all' }}',
+
+  applyFilter(val) {
+    this.currentStatus = val;
+    let url = new URL(window.location.href);
+    if (val && val !== 'all') {
+      url.searchParams.set('status', val);
+    } else {
+      url.searchParams.delete('status');
+    }
+    url.searchParams.set('page', '1');
+    this.fetchTable(url.toString());
+  },
+
   handleSearch(e) {
-
     let q = e.target.value.toLowerCase();
-
     let rows = document.querySelectorAll('#booking-table-body tr');
-
     rows.forEach(r => {
-
       let text = r.innerText.toLowerCase();
-
       r.style.display = text.includes(q) ? '' : 'none';
-
     });
+  },
 
+  fetchTable(url) {
+    this.isLoading = true;
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.text();
+      })
+      .then(html => {
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, 'text/html');
+        let newTable = doc.querySelector('#dashboard-table-container');
+        let curTable = document.querySelector('#dashboard-table-container');
+        if (newTable && curTable) {
+          curTable.innerHTML = newTable.innerHTML;
+          if (window.Alpine) window.Alpine.initTree(curTable);
+        }
+        let newStats = doc.querySelector('#dashboard-stats-container');
+        let curStats = document.querySelector('#dashboard-stats-container');
+        if (newStats && curStats) {
+          curStats.innerHTML = newStats.innerHTML;
+        }
+        window.history.pushState(null, '', url);
+        this.isLoading = false;
+      })
+      .catch(err => {
+        console.error(err);
+        this.isLoading = false;
+      });
   }
-
 }">
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -63,7 +100,7 @@
 
     <!-- 4 Clean Summary Metric Cards (Matching Dashboard Standard) -->
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div id="dashboard-stats-container" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
 
       <!-- Card 1: Total Semua Reservasi -->
 
@@ -168,15 +205,12 @@
                  class="absolute z-50 left-0 mt-2 min-w-[220px] w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
 
               @foreach($statusLabels as $stKey => $stVal)
-
-                <a href="{{ request()->fullUrlWithQuery(['status' => $stKey, 'page' => 1]) }}" 
-
-                   class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0 {{ ($filterStatus ?? 'all') === $stKey ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : '' }}">
-
+                <button type="button" 
+                        @click="selectedId = '{{ $stKey }}'; selectedName = '{{ $stVal }}'; open = false; applyFilter('{{ $stKey }}')"
+                        class="w-full px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
+                        :class="selectedId === '{{ $stKey }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
                   <span>{{ $stVal }}</span>
-
-                </a>
-
+                </button>
               @endforeach
 
             </div>
@@ -209,7 +243,9 @@
 
       <!-- Table Container -->
 
-      <div class="overflow-x-auto">
+      <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
+
+        <div class="overflow-x-auto">
 
         <table class="w-full text-left border-collapse">
 
@@ -700,6 +736,8 @@
         </div>
 
       @endif
+
+      </div>
 
     </div>
 

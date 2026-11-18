@@ -63,6 +63,10 @@ window.loadAjaxPage = function(url, containerSelector = null) {
             currentStats.innerHTML = newStats.innerHTML;
         }
 
+        if (window.Alpine) {
+            window.Alpine.initTree(target);
+        }
+
         window.history.pushState(null, '', url);
     })
     .catch(err => {
