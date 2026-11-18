@@ -1052,7 +1052,9 @@
                                         $datePhrase = $bookingDateStr ? " pada {$bookingDateStr}" : '';
 
                                         // Template Draft Chat Kontekstual (Ditahan di kotak input tanpa kirim otomatis)
+                                        $pendingPrefill = "Halo Kak {$clientName}, terima kasih atas reservasi sesi {$serviceName}{$datePhrase}. Sebelum saya konfirmasi, ada beberapa hal terkait lokasi dan konsep yang ingin saya tanyakan.";
                                         $paymentPrefill = "Halo Kak {$clientName}, jadwal sesi {$serviceName}{$datePhrase} sudah saya setujui. Silakan menyelesaikan pembayaran invoice agar jadwal pemotretan resmi terkunci. Jika ada hal yang ingin didiskusikan terlebih dahulu, silakan kabari saya ya!";
+                                        $activePrefill = "Halo Kak {$clientName}, terkait jadwal sesi pemotretan {$serviceName}{$datePhrase}, apakah ada referensi gaya foto atau titik temu khusus yang ingin kita sepakati bersama?";
                                         $confirmPrefill = "Halo Kak {$clientName}, hasil foto untuk sesi {$serviceName} sudah selesai saya unggah dan dapat diakses di menu reservasi. Silakan diperiksa ya Kak, dan jika sudah sesuai mohon bantuannya untuk mengonfirmasi penerimaan hasil foto. Terima kasih!";
                                     @endphp
 
@@ -1090,7 +1092,7 @@
                                                     Terima
                                                 </button>
                                             </form>
-                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                            <a href="{{ route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $pendingPrefill]) }}" 
                                                class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
                                                 Chat Klien
                                             </a>
@@ -1161,8 +1163,12 @@
                                                     <!-- Chat Klien -->
                                                     @php
                                                         $menuPrefill = null;
-                                                        if ($c->status_contract === 'pending_payment') {
+                                                        if ($detail && $detail->status_booking === 'pending') {
+                                                            $menuPrefill = $pendingPrefill;
+                                                        } elseif ($c->status_contract === 'pending_payment') {
                                                             $menuPrefill = $paymentPrefill;
+                                                        } elseif ($c->status_contract === 'active') {
+                                                            $menuPrefill = $activePrefill;
                                                         } elseif ($hasPhotos && !$isValidated) {
                                                             $menuPrefill = $confirmPrefill;
                                                         }

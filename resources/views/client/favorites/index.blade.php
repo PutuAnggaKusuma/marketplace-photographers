@@ -237,7 +237,11 @@
                 <span>Reservasi</span>
               </a>
 
-              <a href="{{ route('chat.start', $photographer->id) }}" 
+              @php
+                $favChatPrefill = "Halo Kak {$photographer->nama}, saya menyimpan profil Anda di daftar favorit LensMatch dan tertarik untuk berkonsultasi mengenai pemotretan. Apakah saat ini sedang menerima jadwal foto?";
+              @endphp
+
+              <a href="{{ route('chat.start', ['photographerId' => $photographer->id, 'prefill' => $favChatPrefill]) }}" 
                  class="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-800 dark:text-gray-100 font-bold text-xs transition flex items-center justify-center gap-1.5 text-center shrink-0">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

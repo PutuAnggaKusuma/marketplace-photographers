@@ -479,13 +479,41 @@
                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
                   <div class="inline-flex items-center justify-center gap-2" x-data="{ menuOpen: false }">
                     
+                    @php
+                      $photoName = $photographer->nama ?? 'Fotografer';
+                      $serviceName = $detail?->service?->nama_layanan ?? 'sesi pemotretan';
+                      $bookingDateStr = $detail?->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d M Y') : '';
+                      $datePhrase = $bookingDateStr ? " pada {$bookingDateStr}" : '';
+
+                      // Template Draft Chat Kontekstual Klien (Rule #70: Natural, tanpa simbol & redundan, ditahan di draft tanpa auto-send)
+                      $clientChatPrefill = null;
+                      if ($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment']))) {
+                        $clientChatPrefill = "Halo Kak {$photoName}, terkait pesanan sesi {$serviceName}{$datePhrase}, saya ingin menanyakan rincian pembayarannya sebelum menyelesaikan transfer invoice.";
+                      } elseif ($hasPhotos && !$isValidated) {
+                        $clientChatPrefill = "Halo Kak {$photoName}, saya sedang memeriksa hasil foto sesi {$serviceName}{$datePhrase} yang sudah diunggah. Ada beberapa hal yang ingin saya diskusikan terkait hasilnya.";
+                      } elseif ($c->status_contract === 'active') {
+                        $clientChatPrefill = "Halo Kak {$photoName}, untuk persiapan sesi pemotretan {$serviceName}{$datePhrase}, apakah ada hal atau outfit yang perlu saya siapkan?";
+                      } elseif ($c->status_contract === 'completed' && $isValidated) {
+                        $clientChatPrefill = "Halo Kak {$photoName}, terima kasih banyak atas hasil foto untuk sesi {$serviceName}. Hasilnya sangat memuaskan!";
+                      } elseif ($c->status_contract === 'cancelled') {
+                        $clientChatPrefill = "Halo Kak {$photoName}, mengenai pesanan sesi {$serviceName}{$datePhrase} yang dibatalkan...";
+                      } else {
+                        // Status pending (Menunggu Konfirmasi)
+                        $clientChatPrefill = "Halo Kak {$photoName}, saya ingin menanyakan ketersediaan jadwal untuk sesi {$serviceName}{$datePhrase}. Apakah slot jadwal tersebut masih bisa diambil?";
+                      }
+
+                      $clientChatUrl = $clientChatPrefill
+                        ? route('chat.start', ['photographerId' => $c->id_photographer, 'prefill' => $clientChatPrefill])
+                        : route('chat.start', $c->id_photographer);
+                    @endphp
+
                     <!-- 1. Tombol Aksi Utama (Bayar jika sudah disetujui tapi belum bayar, atau Chat) -->
                     @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
                       <a href="{{ route('booking.invoice', ['id' => $c->id, 'from' => 'bookings']) }}" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-bold text-xs rounded-xl transition inline-block">
                         Bayar
                       </a>
                     @else
-                      <a href="{{ route('chat.start', $c->id_photographer) }}" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition inline-block">
+                      <a href="{{ $clientChatUrl }}" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition inline-block">
                         Chat
                       </a>
                     @endif
@@ -520,7 +548,7 @@
                         </a>
 
                         @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
-                          <a href="{{ route('chat.start', $c->id_photographer) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                          <a href="{{ $clientChatUrl }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                             Chat Fotografer
                           </a>
                         @endif
