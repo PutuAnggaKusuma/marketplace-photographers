@@ -1046,6 +1046,14 @@
                                     @php
                                         $hasPhotos = !empty($detail?->hasil_foto_url);
                                         $isValidated = (bool) $c->is_validated_client;
+                                        $clientName = $client->nama ?? ($client->user->nama ?? 'Klien');
+                                        $serviceName = $detail?->service?->nama_layanan ?? 'sesi pemotretan';
+                                        $bookingDateStr = $detail?->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d M Y') : '';
+                                        $datePhrase = $bookingDateStr ? " pada {$bookingDateStr}" : '';
+
+                                        // Template Draft Chat Kontekstual (Ditahan di kotak input tanpa kirim otomatis)
+                                        $paymentPrefill = "Halo Kak {$clientName}, jadwal sesi {$serviceName}{$datePhrase} sudah saya setujui. Silakan menyelesaikan pembayaran invoice agar jadwal pemotretan resmi terkunci. Jika ada hal yang ingin didiskusikan terlebih dahulu, silakan kabari saya ya!";
+                                        $confirmPrefill = "Halo Kak {$clientName}, hasil foto untuk sesi {$serviceName} sudah selesai saya unggah dan dapat diakses di menu reservasi. Silakan diperiksa ya Kak, dan jika sudah sesuai mohon bantuannya untuk mengonfirmasi penerimaan hasil foto. Terima kasih!";
                                     @endphp
 
                                     @if($c->status_contract === 'cancelled')
@@ -1093,7 +1101,7 @@
                                                 Upload Hasil Foto
                                             </button>
                                         @elseif($c->status_contract === 'pending_payment')
-                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                            <a href="{{ route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $paymentPrefill]) }}" 
                                                class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
                                                 Chat Klien
                                             </a>
@@ -1117,7 +1125,10 @@
                                                 </button>
                                             @endif
                                         @else
-                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                            @php
+                                                $chatPrefill = ($hasPhotos && !$isValidated) ? $confirmPrefill : null;
+                                            @endphp
+                                            <a href="{{ $chatPrefill ? route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $chatPrefill]) : route('photographer.chat.client', $c->id_client) }}" 
                                                class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
                                                 Chat Klien
                                             </a>
@@ -1148,7 +1159,15 @@
                                                      style="display: none;">
 
                                                     <!-- Chat Klien -->
-                                                    <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                                    @php
+                                                        $menuPrefill = null;
+                                                        if ($c->status_contract === 'pending_payment') {
+                                                            $menuPrefill = $paymentPrefill;
+                                                        } elseif ($hasPhotos && !$isValidated) {
+                                                            $menuPrefill = $confirmPrefill;
+                                                        }
+                                                    @endphp
+                                                    <a href="{{ $menuPrefill ? route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $menuPrefill]) : route('photographer.chat.client', $c->id_client) }}" 
                                                        class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
                                                         Chat Klien
                                                     </a>

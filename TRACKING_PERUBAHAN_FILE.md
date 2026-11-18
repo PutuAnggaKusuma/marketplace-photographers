@@ -5057,3 +5057,21 @@ Setiap entri log perubahan wajib mencantumkan:
   * **Rule #49** (Strict Scope & Zero Unrequested Side-Effects), **Rule #61** (Amber Brand LensMatch Color Hierarchy).
 * **Hasil Pengujian**:
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-18] Implementasi Pre-filled Draft Template Chat Kontekstual pada Kelola Booking Fotografer
+* **Modul / Fitur**: Tabel Kelola Booking Fotografer (`/photographer/bookings`) & Ruang Chat (`/photographer/chat`).
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/bookings/index.blade.php` (menambahkan parameter `prefill` kontekstual pada tombol utama dan menu kebab `Chat Klien` untuk status `Menunggu Pembayaran Klien` dan `Menunggu Konfirmasi Klien`).
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Mengklik tombol `Chat Klien` membuka ruang obrolan dengan kolom input teks kosong sehingga mitra fotografer harus mengetik pesan pengingat pembayaran atau konfirmasi foto dari awal secara manual.
+  * **After**:
+    1. **Saat Status `Menunggu Pembayaran Klien`**: Tombol `Chat Klien` membawa draf pesan otomatis: *"Halo Kak [Nama Klien], jadwal sesi [Layanan] pada [Tanggal] sudah saya setujui. Silakan menyelesaikan pembayaran invoice agar jadwal pemotretan resmi terkunci. Jika ada hal yang ingin didiskusikan terlebih dahulu, silakan kabari saya ya!"*.
+    2. **Saat Status `Menunggu Konfirmasi Klien`**: Tombol `Chat Klien` membawa draf pesan otomatis: *"Halo Kak [Nama Klien], hasil foto untuk sesi [Layanan] sudah selesai saya unggah dan dapat diakses di menu reservasi. Silakan diperiksa ya Kak, dan jika sudah sesuai mohon bantuannya untuk mengonfirmasi penerimaan hasil foto. Terima kasih!"*.
+    3. **Mekanisme Draft Hold**: Pesan ditahan di kotak input chat (*draft hold*) dengan auto-focus dan tombol kirim aktif tanpa terkirim secara otomatis, memberikan kendali 100% bagi fotografer untuk meninjau, mengedit, atau mengirim.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49** (Strict Scope & Zero Unrequested Side-Effects), **Rule #70** (Anti-AI Slop Terminology & Natural Human Text Standard).
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
