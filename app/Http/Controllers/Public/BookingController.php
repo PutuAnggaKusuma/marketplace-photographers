@@ -537,8 +537,11 @@ class BookingController extends Controller
             }
         }
 
-        // Pastikan expired_at aktif untuk kontrak pending_payment sesuai batas waktu dinamis
-        if ($contract->status_contract === 'pending_payment' && (!$contract->expired_at || $contract->expired_at < now())) {
+        // Cek dan batalkan otomatis jika pesanan telah kadaluarsa (waktu habis atau sesi terlewati)
+        $expirationService = app(\App\Services\BookingExpirationService::class);
+        if ($expirationService->checkAndExpireSingle($contract)) {
+            $contract->refresh();
+        } elseif ($contract->status_contract === 'pending_payment' && !$contract->expired_at) {
             $contract->update(['expired_at' => $contract->calculatePaymentDeadline()]);
         }
 
@@ -671,6 +674,11 @@ class BookingController extends Controller
             $q->where('id_client', $clientProfile->id);
         })
         ->findOrFail($id);
+
+        if ($contract->status_contract === 'cancelled' || app(\App\Services\BookingExpirationService::class)->checkAndExpireSingle($contract)) {
+            return redirect()->route('client.bookings')
+                ->with('error', 'Pesanan ini telah kadaluarsa dan pembayaran tidak dapat diproses.');
+        }
 
         if ($contract->status_contract === 'draft' || ($contract->status_contract === 'pending' && !$contract->is_validated_photographer)) {
             return redirect()->route('booking.invoice', $contract->id)

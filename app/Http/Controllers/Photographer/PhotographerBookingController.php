@@ -40,6 +40,9 @@ class PhotographerBookingController extends Controller
 
         );
 
+        // Jalankan auto-expire untuk pesanan fotografer yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings(null, $photographer->id);
+
 
 
         $filterStatus = $request->input('status', 'all');
@@ -187,6 +190,9 @@ class PhotographerBookingController extends Controller
 
         );
 
+        // Jalankan auto-expire untuk pesanan fotografer yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings(null, $photographer->id);
+
 
 
         $contract = Contract::with(['client.user'])->where('id_photographer', $photographer->id)->findOrFail($id);
@@ -204,6 +210,17 @@ class PhotographerBookingController extends Controller
 
 
         if ($status === 'confirmed') {
+            // Validasi jika jadwal sesi sudah lewat
+            $booking = $contract->bookingDetail;
+            if ($booking && $booking->booking_date) {
+                $timeStr = $booking->jam_mulai ? substr($booking->jam_mulai, 0, 5) : '08:00';
+                $sessionStart = \Carbon\Carbon::parse($booking->booking_date . ' ' . $timeStr);
+                if ($sessionStart->lte(now())) {
+                    app(\App\Services\BookingExpirationService::class)->checkAndExpireSingle($contract);
+                    return redirect()->back()->with('error', 'Jadwal sesi foto telah terlewati dan tidak dapat disetujui.');
+                }
+            }
+
             $isPaid = in_array($contract->status_payout, ['holding', 'ready']);
             $newContractStatus = $isPaid ? 'active' : 'pending_payment';
 
@@ -431,6 +448,9 @@ class PhotographerBookingController extends Controller
 
         );
 
+        // Jalankan auto-expire untuk pesanan fotografer yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings(null, $photographer->id);
+
 
 
         $contract = Contract::with(['client.user'])->where('id_photographer', $photographer->id)->findOrFail($id);
@@ -555,6 +575,9 @@ class PhotographerBookingController extends Controller
 
         );
 
+        // Jalankan auto-expire untuk pesanan fotografer yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings(null, $photographer->id);
+
 
 
         $contract = Contract::with(['client.user', 'bookingDetail'])
@@ -673,6 +696,9 @@ class PhotographerBookingController extends Controller
             ['nama' => auth()->user()->nama]
 
         );
+
+        // Jalankan auto-expire untuk pesanan fotografer yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings(null, $photographer->id);
 
 
 

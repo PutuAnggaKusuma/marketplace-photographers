@@ -90,9 +90,9 @@ class BookingScheduleService
         return ContractBooking::whereHas('contract', function ($q) use ($photographerId, $excludeContractId) {
             $q->where('id_photographer', $photographerId)
               ->where(function ($sub) {
-                  $sub->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
-                      ->orWhere(function ($draftQ) {
-                          $draftQ->where('status_contract', 'draft')
+                  $sub->whereIn('status_contract', ['active', 'approved'])
+                      ->orWhere(function ($pendQ) {
+                          $pendQ->whereIn('status_contract', ['draft', 'pending_payment'])
                                  ->where(function ($expQ) {
                                      $expQ->whereNull('expired_at')
                                           ->orWhere('expired_at', '>=', now());
@@ -131,9 +131,9 @@ class BookingScheduleService
         $multiDayBookings = ContractBooking::whereHas('contract', function ($q) use ($photographerId) {
             $q->where('id_photographer', $photographerId)
               ->where(function ($sub) {
-                  $sub->whereIn('status_contract', ['active', 'approved', 'pending_payment'])
-                      ->orWhere(function ($draftQ) {
-                          $draftQ->where('status_contract', 'draft')
+                  $sub->whereIn('status_contract', ['active', 'approved'])
+                      ->orWhere(function ($pendQ) {
+                          $pendQ->whereIn('status_contract', ['draft', 'pending_payment'])
                                  ->where(function ($expQ) {
                                      $expQ->whereNull('expired_at')
                                           ->orWhere('expired_at', '>=', now());

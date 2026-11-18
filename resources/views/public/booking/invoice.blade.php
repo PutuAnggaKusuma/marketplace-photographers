@@ -79,7 +79,9 @@
             <p>Tanggal: {{ $contract->created_at->translatedFormat('d F Y') }}</p>
             <p>
               Status: 
-              @if($payment && $payment->payment_status === 'completed')
+              @if($contract->status_contract === 'cancelled')
+                <span class="font-bold text-rose-600 dark:text-rose-400">Kadaluarsa</span>
+              @elseif($payment && $payment->payment_status === 'completed')
                 <span class="font-bold text-emerald-600 dark:text-emerald-400">Lunas</span>
               @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')
                 <span class="font-bold text-blue-600 dark:text-blue-400">Menunggu Verifikasi</span>
@@ -208,6 +210,16 @@
           </div>
           <a href="{{ route('booking.invoice', array_merge(['id' => $contract->id], $from ? ['from' => $from] : [])) }}" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl shadow-xs transition cursor-pointer shrink-0">
             Selesaikan Pembayaran
+          </a>
+        </div>
+      @elseif($contract->status_contract === 'cancelled')
+        <div class="pt-5 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+          <div class="space-y-0.5">
+            <span class="font-bold text-rose-600 dark:text-rose-400 block">Pesanan Kadaluarsa</span>
+            <p>Batas waktu pembayaran telah berakhir atau jadwal sesi foto telah terlewati.</p>
+          </div>
+          <a href="{{ route('client.bookings') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition cursor-pointer shrink-0">
+            Kembali ke Reservasi
           </a>
         </div>
       @endif

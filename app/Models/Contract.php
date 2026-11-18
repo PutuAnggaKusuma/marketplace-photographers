@@ -125,7 +125,7 @@ class Contract extends Model
 
         // Kasus 1: Sesi sudah lewat atau sudah dimulai saat disetujui
         if ($minutesUntilSession <= 0) {
-            return $now->copy()->addMinutes(15);
+            return $sessionStart->copy();
         }
 
         // Kasus 2: Sesi sangat mepet (< 3 jam / 180 menit)

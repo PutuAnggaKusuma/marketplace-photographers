@@ -13,6 +13,9 @@ class TransactionController extends Controller
      */
         public function index(Request $request)
     {
+        // Jalankan auto-expire pesanan yang telah kadaluarsa
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings();
+
         $statusFilter = $request->query('status', 'all');
         $sort = $request->query('sort', 'latest');
         $search = $request->query('search', '');

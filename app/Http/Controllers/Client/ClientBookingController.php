@@ -48,6 +48,9 @@ class ClientBookingController extends Controller
 
         }
 
+        // Jalankan auto-expire untuk pesanan klien yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings($clientProfile->id);
+
 
 
         $query = Contract::with([
@@ -205,6 +208,9 @@ class ClientBookingController extends Controller
             );
 
         }
+
+        // Jalankan auto-expire untuk pesanan klien yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings($clientProfile->id);
 
 
 
@@ -401,6 +407,9 @@ class ClientBookingController extends Controller
             );
 
         }
+
+        // Jalankan auto-expire untuk pesanan klien yang kadaluarsa (waktu habis / sesi terlewati)
+        app(\App\Services\BookingExpirationService::class)->expireOutdatedBookings($clientProfile->id);
 
 
 

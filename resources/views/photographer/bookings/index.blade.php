@@ -1059,7 +1059,9 @@
                                     @endphp
 
                                     @if($c->status_contract === 'cancelled')
-                                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400">Dibatalkan</span>
+                                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                                            {{ ($c->cancellation && (str_contains(strtolower($c->cancellation->alasan), 'kadaluarsa') || str_contains(strtolower($c->cancellation->alasan), 'terlewati'))) ? 'Kadaluarsa' : 'Dibatalkan' }}
+                                        </span>
                                     @elseif($c->status_contract === 'completed' && $isValidated)
                                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
                                     @elseif($hasPhotos && !$isValidated)
