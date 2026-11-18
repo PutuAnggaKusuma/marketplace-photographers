@@ -521,22 +521,17 @@
                       $bookingDateStr = $detail?->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d M Y') : '';
                       $datePhrase = $bookingDateStr ? " pada {$bookingDateStr}" : '';
 
-                      // Template Draft Chat Kontekstual Klien (Rule #70: Natural, tanpa simbol & redundan, ditahan di draft tanpa auto-send)
+                      // Template Draft Chat Kontekstual Klien
+                      // Hanya ada saat tombol aksi utama yang aktif adalah 'Chat' (proses sedang menunggu respon/tindak lanjut fotografer)
                       $clientChatPrefill = null;
-                      if ($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment']))) {
-                        $clientChatPrefill = "Halo Kak {$photoName}, terkait pesanan sesi {$serviceName}{$datePhrase}, saya ingin menanyakan rincian pembayarannya sebelum menyelesaikan transfer invoice.";
-                      } elseif ($hasPhotos && !$isValidated) {
-                        $clientChatPrefill = "Halo Kak {$photoName}, saya sedang memeriksa hasil foto sesi {$serviceName}{$datePhrase} yang sudah diunggah. Ada beberapa hal yang ingin saya diskusikan terkait hasilnya.";
-                      } elseif ($c->status_contract === 'active') {
-                        $clientChatPrefill = "Halo Kak {$photoName}, untuk persiapan sesi pemotretan {$serviceName}{$datePhrase}, apakah ada hal atau outfit yang perlu saya siapkan?";
-                      } elseif ($c->status_contract === 'completed' && $isValidated) {
-                        $clientChatPrefill = "Halo Kak {$photoName}, terima kasih banyak atas hasil foto untuk sesi {$serviceName}. Hasilnya sangat memuaskan!";
-                      } elseif ($c->status_contract === 'cancelled') {
-                        $clientChatPrefill = "Halo Kak {$photoName}, mengenai pesanan sesi {$serviceName}{$datePhrase} yang dibatalkan...";
-                      } else {
-                        // Status pending (Menunggu Konfirmasi)
+                      if ($detail?->status_booking === 'pending' || $c->status_contract === 'pending') {
+                        // Menunggu Konfirmasi: Klien menunggu konfirmasi slot jadwal dari fotografer
                         $clientChatPrefill = "Halo Kak {$photoName}, saya ingin menanyakan ketersediaan jadwal untuk sesi {$serviceName}{$datePhrase}. Apakah slot jadwal tersebut masih bisa diambil?";
+                      } elseif ($c->status_contract === 'active') {
+                        // Jadwal Terkonfirmasi: Klien koordinasi persiapan menjelang hari-H pemotretan
+                        $clientChatPrefill = "Halo Kak {$photoName}, untuk persiapan sesi pemotretan {$serviceName}{$datePhrase}, apakah ada hal atau outfit yang perlu saya siapkan?";
                       }
+                      // Status Menunggu Pembayaran (tombol utama: Bayar), Selesai, dan Dibatalkan: Murni tanpa template (input pesan kosong)
 
                       $clientChatUrl = $clientChatPrefill
                         ? route('chat.start', ['photographerId' => $c->id_photographer, 'prefill' => $clientChatPrefill])
@@ -584,7 +579,7 @@
                         </a>
 
                         @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
-                          <a href="{{ $clientChatUrl }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                          <a href="{{ route('chat.start', $c->id_photographer) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                             Chat Fotografer
                           </a>
                         @endif

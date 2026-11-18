@@ -1167,8 +1167,6 @@
                                                             $menuPrefill = $pendingPrefill;
                                                         } elseif ($c->status_contract === 'pending_payment') {
                                                             $menuPrefill = $paymentPrefill;
-                                                        } elseif ($c->status_contract === 'active') {
-                                                            $menuPrefill = $activePrefill;
                                                         } elseif ($hasPhotos && !$isValidated) {
                                                             $menuPrefill = $confirmPrefill;
                                                         }
