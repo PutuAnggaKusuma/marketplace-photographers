@@ -1022,7 +1022,7 @@
 
 
 
-                                        Net: Rp {{ number_format($c->payout_amount ?: ($c->jumlah * 0.9), 0, ',', '.') }}
+                                        Bersih: Rp {{ number_format($c->payout_amount ?: ($c->jumlah * 0.9), 0, ',', '.') }}
 
 
 
