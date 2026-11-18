@@ -28,19 +28,19 @@
     <!-- Chip 1: Pending Photographer Verification -->
     <a href="{{ route('admin.photographers') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Verifikasi Fotografer</span>
-      <span>({{ $pendingVerifications }})</span>
+      <span>(<span class="{{ $pendingVerifications > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $pendingVerifications }}</span>)</span>
     </a>
 
     <!-- Chip 2: Ready Payouts -->
     <a href="{{ route('admin.transactions') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Dana Siap Tarik</span>
-      <span>({{ $pendingPayouts }})</span>
+      <span>(<span class="{{ $pendingPayouts > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $pendingPayouts }}</span>)</span>
     </a>
 
     <!-- Chip 3: Contest Submissions to Review -->
     <a href="{{ route('admin.contests') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-2xs transition text-xs font-bold">
       <span>Submisi Lomba</span>
-      <span>({{ $pendingContestReviews }})</span>
+      <span>(<span class="{{ $pendingContestReviews > 0 ? 'text-amber-500 dark:text-amber-400' : '' }}">{{ $pendingContestReviews }}</span>)</span>
     </a>
   </div>
 

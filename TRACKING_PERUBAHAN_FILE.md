@@ -5039,3 +5039,22 @@ Setiap entri log perubahan wajib mencantumkan:
   * **Rule #14** & **Rule #68** (Pure Colored Text Status), **Rule #49** (Strict Scope), **Rule #70** (Anti-AI Slop Terminology).
 * **Hasil Pengujian**:
   * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
+
+
+---
+
+### [2026-11-18] Pewarnaan Angka Dinamis pada Chip Antrean Kerja Dashboard Fotografer & Admin
+* **Modul / Fitur**: Chip Antrean Kerja (*Operational Queue*) pada Dashboard Fotografer (`/photographer/dashboard`) & Dashboard Admin (`/admin/dashboard`).
+* **File yang Dimodifikasi**:
+  * `resources/views/photographer/dashboard.blade.php` (menambahkan logika pewarnaan kuning brand sistem hanya pada angka jika bernilai > 0 pada chip: Konfirmasi Order, Kirim Hasil Foto, dan Pencairan Dana).
+  * `resources/views/admin/dashboard.blade.php` (menambahkan logika pewarnaan kuning brand sistem hanya pada angka jika bernilai > 0 pada chip: Verifikasi Fotografer, Dana Siap Tarik, dan Submisi Lomba).
+* **Rincian Perubahan (Before vs After)**:
+  * **Before**: Seluruh teks chip antrean kerja beserta angka di dalam kurung menggunakan warna teks statis (`text-gray-800 dark:text-gray-200`) baik bernilai 0 maupun > 0.
+  * **After**:
+    1. **Saat Angka = 0**: Angka tetap menggunakan warna hitam/default bawaan (`text-gray-800 dark:text-gray-200`) tanpa penambahan kelas warna.
+    2. **Saat Angka > 0**: Angka mendapatkan warna kuning brand sistem LensMatch (`text-amber-500 dark:text-amber-400`).
+    3. **Kurung Buka & Kurung Tutup**: Kurung `(` dan `)` tetap berada di luar inner span dengan warna default netral tanpa perubahan warna.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #49** (Strict Scope & Zero Unrequested Side-Effects), **Rule #61** (Amber Brand LensMatch Color Hierarchy).
+* **Hasil Pengujian**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS**.
