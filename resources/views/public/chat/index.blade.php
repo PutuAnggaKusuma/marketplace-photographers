@@ -8,7 +8,7 @@
 
 @section('content')
 
-<div class="flex-1 flex w-full h-full min-h-0 bg-white dark:bg-gray-800 overflow-hidden relative select-none"
+<div class="flex-1 flex w-full h-full min-h-0 bg-white dark:bg-gray-800 overflow-hidden relative"
 
      x-data="clientChatApp(
 
@@ -497,7 +497,7 @@
 
                                      ]"
 
-                                     class="max-w-md px-4 py-2.5 space-y-1 relative group">
+                                     class="max-w-md px-4 py-2.5 space-y-1 relative group select-text">
 
                                     
 
@@ -847,7 +847,7 @@
 
                                     <template x-if="!m.deleted_for_all && m.message && !m.custom_offer">
 
-                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5" x-html="renderMessageContent(m.message)"></p>
+                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5 select-text cursor-text" x-html="renderMessageContent(m.message)"></p>
 
                                     </template>
 

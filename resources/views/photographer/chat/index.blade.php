@@ -3,7 +3,7 @@
 @section('title', 'Pesan Klien — Fotografer')
 
 @section('content')
-<div class="flex-1 flex w-full h-full min-h-0 bg-white dark:bg-gray-800 overflow-hidden relative select-none"
+<div class="flex-1 flex w-full h-full min-h-0 bg-white dark:bg-gray-800 overflow-hidden relative"
      x-data="photographerChatApp(
          {{ Illuminate\Support\Js::from($formattedThreads) }},
          {{ $activeThread ? $activeThread->id : 'null' }},
@@ -245,7 +245,7 @@
                                          : (m.deleted_for_all ? 'bg-gray-100 dark:bg-gray-800/80 text-gray-400 dark:text-gray-400 border border-gray-200 dark:border-gray-700/80 rounded-2xl rounded-tl-none shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-tl-none shadow-xs'),
                                      highlightedMsgId === m.id ? 'ring-4 ring-amber-400/90 ring-offset-2 dark:ring-offset-gray-900 transition-all duration-300' : ''
                                  ]"
-                                 class="max-w-md px-4 py-2.5 space-y-1 relative group">
+                                 class="max-w-md px-4 py-2.5 space-y-1 relative group select-text">
                                 
                                 <!-- WhatsApp Web Style Chevron Dropdown Trigger -->
                                 <template x-if="!m.deleted_for_all && !m.pending">
@@ -388,7 +388,7 @@
                                     </template>
 
                                     <template x-if="!m.deleted_for_all && m.message && !m.custom_offer">
-                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5" x-html="renderMessageContent(m.message)"></p>
+                                        <p class="text-xs leading-relaxed break-words whitespace-pre-line pr-5 select-text cursor-text" x-html="renderMessageContent(m.message)"></p>
                                     </template>
 
                                 <!-- WhatsApp Style Bottom-Right Timestamp & Indicators -->
