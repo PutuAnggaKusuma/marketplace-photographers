@@ -263,10 +263,11 @@ class ServiceController extends Controller
 
         $hasActiveBookings = \App\Models\ContractBooking::where('id_service', $service->id)
             ->whereIn('status_booking', ['pending', 'confirmed'])
+            ->whereHas('contract', fn($c) => !in_array($c->status_contract, ['cancelled', 'completed']))
             ->exists();
 
         if ($hasActiveBookings) {
-            return back()->with('error', 'Paket layanan tidak dapat dihapus karena masih digunakan pada pesanan aktif (pending/confirmed).');
+            return back()->with('error', 'Paket layanan tidak dapat dihapus karena masih digunakan pada pesanan aktif.');
         }
 
         ServiceDetail::where('id_p_service', $service->id)->delete();

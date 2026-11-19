@@ -100,17 +100,28 @@
                 <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
                   Refund
                 </span>
+              @elseif($item->status_contract === 'draft' || ($item->status_contract === 'pending' && !$item->is_validated_photographer))
+                <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                  Menunggu Konfirmasi
+                </span>
               @elseif($item->status_contract === 'pending_payment')
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                   Menunggu Pembayaran
                 </span>
               @elseif($item->status_contract === 'cancelled')
+                @php
+                  $isExpired = $item->cancellation && (str_contains(strtolower($item->cancellation->alasan), 'kadaluarsa') || str_contains(strtolower($item->cancellation->alasan), 'terlewati'));
+                @endphp
                 <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
-                  Dibatalkan
+                  {{ $isExpired ? 'Kadaluarsa' : 'Dibatalkan' }}
                 </span>
-              @else
+              @elseif($item->payments->where('payment_status', 'completed')->isNotEmpty() && ($item->status_payout === 'holding' || $item->status_contract === 'active'))
                 <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
                   Dana Ditahan
+                </span>
+              @else
+                <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
+                  -
                 </span>
               @endif
             </td>

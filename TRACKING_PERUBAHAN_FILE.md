@@ -20,6 +20,564 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-19 17:50 WITA] — Implementasi Perbaikan Bug 31 s/d 35: Eliminasi Fatal TypeError Profil Fotografer Tanpa Review, Sinkronisasi Tagihan DP & Pelunasan, Status Booking Penawaran Khusus Chat, Navigasi Form Admin, dan Filter Metrik Booking Klien
+
+* **Modul / Fitur**:
+  - Halaman Profil Publik Fotografer (`app/Http/Controllers/Public/PhotographerController.php` & `resources/views/public/photographers/show.blade.php`)
+  - Manajemen Tagihan Klien (`app/Http/Controllers/Client/ClientBookingController.php`)
+  - Verifikasi Transaksi Admin (`app/Http/Controllers/Admin/TransactionController.php`)
+  - Penawaran Khusus Chat Fotografer (`app/Http/Controllers/Public/ChatController.php`)
+  - Manajemen Staf Admin (`app/Http/Controllers/Admin/AdminStaffController.php`)
+  - Halaman Reservasi Booking Klien (`app/Http/Controllers/Client/ClientBookingController.php`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `resources/views/public/photographers/show.blade.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `app/Http/Controllers/Admin/AdminStaffController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Bug 31: Fatal TypeError (HTTP 500) Saat Membuka Profil Fotografer Tanpa Ulasan & Variabel Star Distribution (`PhotographerController.php` & `photographers/show.blade.php`)**:
+     - **Before**: Jika fotografer baru belum memiliki ulasan (`$totalReviews === 0`), `$avgRating` diatur sebagai string `'-'`. Di view `show.blade.php:941`, Blade mengeksekusi `round($avgRating)`. Di PHP 8+, `round('-')` memicu fatal `TypeError: round(): Argument #1 ($num) must be of type int|float, string given`, sehingga setiap profil fotografer baru mengalami server crash (HTTP 500). Selain itu, controller mengirim `'starCounts'` tetapi view memanggil `$starDistribution[$star]`, menyebabkan grafik distribusi bintang selalu 0%.
+     - **After**: Mengonversi nilai ke numerik aman di Blade `@php $numericRating = is_numeric($avgRating) ? (float) $avgRating : 0; @endphp` sebelum diproses `round()`, serta meneruskan dan menyinkronkan kedua variabel `'starDistribution'` dan `'starCounts'`. Profil fotografer baru kini dapat dibuka mulus tanpa crash dan grafik bintang terhitung akurat.
+  2. **Bug 32: Salah Kategori Tagihan DP pada Filter Invoice Klien & Penerbitan Tagihan Pelunasan (`ClientBookingController.php` & `TransactionController.php`)**:
+     - **Before**: Pesanan DP yang baru membayar DP 30% keliru masuk ke filter tagihan "Lunas" (`status=completed`) karena query mencari kontrak yang tidak memiliki pembayaran selain completed. Pada saat yang sama, tagihan pelunasan (70%) belum digenerate di database sehingga pesanan tidak muncul di filter "DP Terbayar" (`dp_paid`).
+     - **After**: Di `ClientBookingController::invoices`, filter `dp_paid` secara ketat menyaring kontrak DP yang belum selesai (`status_contract != 'completed'`) dan belum memiliki pelunasan lunas. Filter `completed` mewajibkan pelunasan penuh terbayar. Di `TransactionController::verifyPayment`, sistem otomatis membuat record tagihan pelunasan (pending) seketika setelah pembayaran DP diverifikasi oleh admin.
+  3. **Bug 33: Penawaran Khusus Chat Menampilkan Tombol "Terima" Redundan pada Fotografer (`ChatController.php`)**:
+     - **Before**: Saat klien menyetujui tawaran khusus yang diajukan fotografer di chat, `acceptCustomOffer` menyetel `status_booking = 'pending'`. Di view pesanan fotografer, hal ini memicu tombol "Terima Booking Sesi Foto?", membingungkan fotografer karena ia yang menginisiasi tawaran tersebut.
+     - **After**: Menyetel `'status_booking' => 'confirmed'` pada penawaran khusus yang disetujui klien, sehingga fotografer langsung melihat status "Menunggu Pembayaran Klien" dengan tombol aksi "Chat Klien" (selaras dengan alur pesanan reguler).
+  4. **Bug 34: Formulir Tambah Admin Mengarahkan Super Admin Kembali ke Form Kosong (`AdminStaffController.php`)**:
+     - **Before**: Setelah menyimpan akun staf admin baru, controller mengeksekusi `redirect()->back()`, mengarahkan pengguna kembali ke form kosong (`admin/admins/create`).
+     - **After**: Mengubah redirect menjadi `redirect()->route('admin.admins.index')`, membawa Super Admin kembali ke tabel manajemen admin dengan notifikasi sukses.
+  5. **Bug 35: Metrik Ringkasan Booking Klien Menghitung Pesanan Dibatalkan / Kadaluarsa (`ClientBookingController.php`)**:
+     - **Before**: Query ringkasan KPI booking klien (`pending`, `confirmed`, `completed`) tidak mengecualikan kontrak yang dibatalkan, menyebabkan pesanan batal tetap terhitung di kartu metrik.
+     - **After**: Menambahkan `whereNotIn('status_contract', ['cancelled'])` pada ketiga metrik tersebut agar selalu sinkron dengan data riil pada tabel pesanan.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #14: Standarisasi Tampilan Status Transaksi Berbasis Pure Colored Text.
+  - Rule #51: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop.
+  - Rule #64: Standarisasi KPI Metric Cards di Atas Tabel Fitur.
+  - Rule #70: Larangan Terminologi Teknis & Karakter Redundan.
+  - Rule #90: Standarisasi Sinkronisasi Status Booking Klien & Fotografer.
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` seluruh controller yang diubah: **PASS (0 syntax errors)**.
+  - `php artisan view:clear; php artisan view:cache`: **PASS (Zero error)**.
+
+---
+
+### [2026-11-19 16:50 WITA] — Implementasi Perbaikan Bug 28, Bug 29, dan Bug 30: Validasi Ulasan Selesai Klien, Pencarian Nomor Kontrak Transaksi Admin, dan Submisi Karya Lomba Tautan Eksternal
+
+* **Modul / Fitur**:
+  - Penulisan Ulasan Klien (`app/Http/Controllers/Public/ReviewController.php` & `resources/views/client/bookings/index.blade.php`)
+  - Pencarian Transaksi Admin (`app/Http/Controllers/Admin/TransactionController.php`)
+  - Pengelolaan Submisi Lomba Admin (`database/migrations`, `resources/views/admin/contests/submissions.blade.php`)
+  - Catatan Pengecualian Khusus Bug 26 & 27 (Testimoni & Statistik Beranda Tetap Dipertahankan)
+* **File yang Diubah**:
+  * `database/migrations/2026_11_19_000003_make_image_url_nullable_on_contest_submissions_table.php` (File Baru)
+  * `app/Http/Controllers/Public/ReviewController.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `resources/views/admin/contests/submissions.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Pengecualian Bug 26 & Bug 27 (Instruksi Khusus Pengguna)**:
+     - Bug 26 (Testimoni hardcoded pada halaman beranda) dan Bug 27 (Metrik statistik 514 kota pada beranda) secara eksplisit dikecualikan dari perbaikan dan dipertahankan apa adanya sesuai arahan pengguna.
+  2. **Bug 28: Klien Dapat Menulis Ulasan Sebelum Kontrak Selesai & Valid (`ReviewController.php` & `client/bookings/index.blade.php`)**:
+     - **Before**: Tombol ulasan pada menu aksi pesanan klien muncul setiap kali `status_contract === 'completed'`, tanpa memeriksa apakah klien sudah memvalidasi galeri (`is_validated_client`). Selain itu, validasi di backend controller `ReviewController::store` tidak mengecek status kontrak secara ketat, memungkinkan celah penulisan ulasan fiktif atau prematur.
+     - **After**: Di `ReviewController::store`, ditambahkan validasi ketat `if ($contract->status_contract !== 'completed' || !$contract->is_validated_client)` yang menolak ulasan dengan pesan informatif jika pesanan belum selesai penuh atau belum divalidasi. Di tampilan `client/bookings/index.blade.php`, tombol `Tulis Ulasan` hanya dirender jika kedua kondisi (`completed` dan `is_validated_client`) terpenuhi (Rule #90).
+  3. **Bug 29: Pencarian Nomor Kontrak Tidak Berfungsi pada Monitoring Transaksi Admin (`Admin/TransactionController.php`)**:
+     - **Before**: Fitur pencarian transaksi admin hanya mengekstrak angka dari format invoice via regex `preg_match('/INV-LM-\d+-0*(\d+)/i', $search, $matches)`. Ketika admin menyalin dan mencari nomor kontrak seperti `#KTRK-00019` atau `KTRK-00019`, regex gagal menangkap ID kontrak sehingga hasil pencarian kosong.
+     - **After**: Regex diperluas menjadi `preg_match('/(?:INV-LM-\d+-0*|#?KTRK-0*)(\d+)/i', $search, $matches)` sehingga pencarian berbasis nomor kontrak `#KTRK-00019` maupun `KTRK-00019` langsung menangkap ID `19` dan mencocokkan kontrak dengan akurat.
+  4. **Bug 30: Database Crash Saat Peserta Lomba Mengirim Karya Berupa Tautan Eksternal (`contest_submissions` Migration & `admin/contests/submissions.blade.php`)**:
+     - **Before**: Formulir pendaftaran lomba foto mengizinkan pengiriman karya via tautan eksternal (Google Drive / portofolio online) tanpa mengunggah berkas gambar langsung. Namun, kolom `image_url` pada tabel `contest_submissions` tidak disetel `nullable`. Saat peserta mengirim tautan saja, database melempar error fatal SQL (*Column 'image_url' cannot be null*). Selain itu, antarmuka kurasi admin mengalami *broken image* jika `image_url` bernilai null.
+     - **After**: Dibuat dan dijalankan migrasi `2026_11_19_000003_make_image_url_nullable_on_contest_submissions_table.php` untuk mengubah kolom `image_url` menjadi nullable. Pada antarmuka `admin/contests/submissions.blade.php`, sistem memeriksa keberadaan `image_url`; jika null dan memiliki `media_link`, sistem menampilkan kartu tautan eksternal yang rapi dengan tombol akses berkas Google Drive langsung (Rule #15 & #51).
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #14: Standarisasi Tampilan Status Transaksi Berbasis Pure Colored Text.
+  - Rule #15: Standar Penggunaan Data Dinamis & Validitas Tautan Karya.
+  - Rule #51: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop.
+  - Rule #70: Larangan Karakter Ampersand Redundan.
+  - Rule #90: Standarisasi Sinkronisasi Status Booking Klien & Fotografer.
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` controller: **PASS (0 syntax errors)**.
+  - `php artisan migrate`: **PASS (Migrasi kolom nullable sukses)**.
+  - `php artisan view:clear; php artisan view:cache`: **PASS (Zero error)**.
+
+---
+
+### [2026-11-19 16:30 WITA] — Implementasi Perbaikan 5 Bug Sistem: Enum Diskualifikasi Lomba, Integritas Status Lomba, Proteksi Escrow Pelunasan DP, Retensi Status Selesai, dan Sinkronisasi Refund Klien
+
+* **Modul / Fitur**:
+  - Skema Enum & Otoritas Penjurian Submisi Lomba Foto (`database/migrations`, `app/Http/Controllers/Admin/ContestController.php`)
+  - Logika Pencabutan Juara & Status Aktif Lomba Foto (`app/Http/Controllers/Admin/ContestController.php`)
+  - Proteksi Keuangan Escrow pada Konfirmasi Galeri DP (`ClientBookingController.php` & `client/galleries/index.blade.php`)
+  - Pencegahan Demosi Status Selesai Saat Verifikasi Pelunasan DP Admin (`TransactionController.php`)
+  - Sinkronisasi Alur Refund Pembatalan Klien & Update Nominal Refund Riil (`ClientBookingController.php` & `TransactionController.php`)
+* **File yang Diubah**:
+  * `database/migrations/2026_11_19_000002_add_disqualified_to_contest_submissions_table.php` (File Baru)
+  * `app/Http/Controllers/Admin/ContestController.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `resources/views/client/galleries/index.blade.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Bug 21: Database Schema Crash Saat Admin Mendiskualifikasi Karya Lomba Foto (`ContestController.php` & Migration)**:
+     - **Before**: Antarmuka juri dan validasi controller menyediakan opsi status `'disqualified'`, namun kolom database `contest_submissions.status_submission` hanya bertipe `enum('pending','verified','winner_1','winner_2','winner_3','rejected')`. Saat admin memilih "Diskualifikasi", database MySQL melempar error fatal (*Data truncated* / HTTP 500).
+     - **After**: Membuat dan menjalankan file migrasi `2026_11_19_000002_add_disqualified_to_contest_submissions_table.php` untuk menambahkan nilai `'disqualified'` ke enum database, sehingga status diskualifikasi berjalan lancar tanpa error database.
+  2. **Bug 22: Event Lomba Foto Dipaksa Tutup Prematur Saat Admin Mencabut Status Juara (`Admin/ContestController.php`)**:
+     - **Before**: Pada method `setWinner`, ketika semua pemenang dicabut kembali ke status `verified`, sistem mengeksekusi `$contest->update(['status' => 'ditutup'])` secara buta, meskipun deadline pendaftaran lomba sebenarnya masih berlangsung di masa depan (`now() < end_date`).
+     - **After**: Menambahkan pengecekan tenggat waktu: `$isPastDeadline = $contest->end_date && \Carbon\Carbon::parse($contest->end_date)->endOfDay()->isPast()`. Jika batas waktu lomba belum lewat, status dikembalikan ke `'buka'` sehingga peserta lain tetap dapat mendaftar.
+  3. **Bug 23: Kerugian Kas Platform — Konfirmasi Selesai Sebelum Pelunasan DP 70% Terbayar (`ClientBookingController.php` & `client/galleries/index.blade.php`)**:
+     - **Before**: Klien pesanan DP dapat mengonfirmasi selesai hasil foto pada galeri meskipun sisa pelunasan 70% belum dibayar. Controller langsung menandai `status_payout = 'ready'`, dan Admin mencairkan payout 90% penuh (`jumlah * 0.90`) ke fotografer, mengakibatkan platform menanggung kerugian 60% sisa biaya yang belum dibayar klien.
+     - **After**: Di `ClientBookingController::confirmGallery`, sistem mewajibkan pembayaran pelunasan berstatus `completed` sebelum klien diizinkan mengonfirmasi selesai. Di UI galeri klien, jika pelunasan masih tertunda, tombol aksi berubah menjadi tombol amber `"Selesaikan Pelunasan"` yang mengarahkan klien langsung ke lembar tagihan resmi invoice (Rule #51, #90).
+  4. **Bug 24: Status Pesanan Selesai Terhapus Menjadi Active/Confirmed Saat Verifikasi Pelunasan DP (`Admin/TransactionController.php`)**:
+     - **Before**: Saat Admin memverifikasi pembayaran transfer pelunasan, controller mengeksekusi `$contract->update(['status_contract' => 'active'])` dan `$bookingDetail->update(['status_booking' => 'confirmed'])`. Pada pesanan yang fotonya sudah selesai diunggah, hal ini merusak alur penyelesaian dan mendemosi status kembali ke aktif belum selesai.
+     - **After**: Memeriksa status penyelesaian sebelumnya (`$alreadyCompleted`). Jika foto atau pesanan sudah selesai, status tetap dipertahankan sebagai `'completed'`, dan `status_booking` tidak diturunkan ke `'confirmed'`.
+  5. **Bug 25: Pemalsuan Status "Refunded" Dini & Deadlock Tombol Refund Admin pada Pembatalan Klien (`ClientBookingController.php` & `Admin/TransactionController.php`)**:
+     - **Before**: Saat klien membatalkan pesanan, controller langsung menyetel `status_payout = 'refunded'`. Padahal Admin belum memproses pengembalian dana riil. Akibatnya, saat Admin menekan tombol "Proses Refund", sistem menolak dengan pesan *"Transaksi ini sudah direfund sebelumnya"*, sehingga refund terkunci selamanya dan nominal refund di `contract_cancellations` tidak pernah diperbarui.
+     - **After**: Di `ClientBookingController`, status dana pembatalan disetel ke `'holding'` (Dana Ditahan menunggu refund Admin) selaras dengan alur pembatalan fotografer. Di `TransactionController::processRefund`, jika record pembatalan sudah ada, sistem memperbarui nilai `refund_amount` dengan nominal riil yang dibayarkan dan mencatat catatan admin.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #14: Standarisasi Tampilan Status Transaksi Berbasis Pure Colored Text.
+  - Rule #15: Standar Penggunaan Data Dinamis & Seeder Database.
+  - Rule #51: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop.
+  - Rule #55: Standarisasi Tampilan Status Event Lomba Foto.
+  - Rule #70: Larangan Terminologi Teknis Kaku & Pemborosan Simbol "&".
+  - Rule #90: Standarisasi Sinkronisasi Status Booking Klien & Fotografer.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan migrate`: **PASS (Migration 2026_11_19_000002 executed successfully)**.
+  - `php -l` seluruh file yang diubah: **PASS (0 syntax errors)**.
+  - `php artisan view:clear` & `php artisan view:cache`: **PASS (0 error)**.
+
+---
+
+### [2026-11-19 16:00 WITA] — Implementasi Perbaikan 5 Bug Logika Sistem: Invoice DP, Proteksi IDOR, Siklus Revisi, Stale Expiry Reschedule, dan Format 24:00 Tengah Malam
+
+* **Modul / Fitur**:
+  - Logika Status Invoice DP Klien (`resources/views/client/invoices/index.blade.php`)
+  - Otorisasi Akses Tagihan & Proteksi IDOR (`BookingController.php` & `routes/web.php`)
+  - Siklus Alur Status Permintaan Revisi Foto (`ClientBookingController.php`, `client/bookings/index.blade.php`, `photographer/bookings/index.blade.php`, `client/galleries/index.blade.php`)
+  - Sinkronisasi Batas Waktu Bayar (`expired_at`) Saat Persetujuan Reschedule (`ClientBookingController.php` & `PhotographerBookingController.php`)
+  - Koreksi Pemotongan Durasi Jam Booking Tengah Malam 24:00 (`BookingScheduleService.php`)
+* **File yang Diubah**:
+  * `resources/views/client/invoices/index.blade.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `routes/web.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/client/galleries/index.blade.php`
+  * `app/Services/BookingScheduleService.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Bug 16: Label Invoice DP Klien Muncul "Lunas" Padahal Pelunasan 70% Belum Terbayar (`client/invoices/index.blade.php`)**:
+     - **Before**: Pengecekan `$isFullySettled` menyertakan `in_array($c->status_contract, ['active', 'completed'])`. Saat pesanan DP disetujui, `status_contract` menjadi `active`, menyebabkan `$isFullySettled` selalu bernilai `true` (muncul teks hijau "Lunas" 100%) dan cabang evaluasi `@elseif($isDp && $isDpPaid && !$isFullPaid)` ("DP Terbayar") tidak pernah tercapai.
+     - **After**: Mengharuskan secara ketat `$isDp ? ($isDpPaid && $isFullPaid) : ...` dan mengecualikan kontrak berstatus `cancelled`. Pesanan DP yang baru membayar uang muka kini tampil presisi sebagai teks biru "DP Terbayar", dan baru berubah menjadi teks hijau "Lunas" jika pelunasan telah selesai (Rule #14).
+  2. **Bug 17: Celah Akses IDOR & Buka Invoice Publik Tanpa Login (`BookingController.php` & `routes/web.php`)**:
+     - **Before**: `showInvoice` mengambil `$clientProfile` via `auth()->id()` dan menggunakan `->when($clientProfile, fn($q) => $q->where('id_client', $clientProfile->id))`. Apabila diakses oleh tamu atau user tanpa RoleClient, `when()` diabaikan sehingga rute `findOrFail($id)` membocorkan data identitas, alamat, kontak, dan bukti transfer kontrak siapapun.
+     - **After**: Memindahkan rute `booking.invoice` ke grup proteksi middleware `auth` dan mengimplementasikan pengecekan otorisasi ketat multi-role (`$isAdmin || $isClientOwner || $isPhotographerOwner`). Akses yang tidak sah ditolak dengan HTTP 403 Forbidden. Pada `confirmPayment`, kepemilikan klien juga divalidasi secara absolut.
+  3. **Bug 18: Deadlock Status Revisi Foto "Menunggu Konfirmasi Klien" (`ClientBookingController.php`, `client/bookings/index.blade.php`, `photographer/bookings/index.blade.php`, `client/galleries/index.blade.php`)**:
+     - **Before**: Saat klien mengajukan revisi (`requestRevision`), controller membiarkan `status_contract = 'completed'` dan `status_booking = 'completed'`. Karena `hasil_foto_url` tetap ada dan `is_validated_client = false`, tabel Klien dan Fotografer tetap menampilkan teks "Menunggu Konfirmasi Klien". Klien dan fotografer saling menunggu tanpa kepastian.
+     - **After**: Di dalam `requestRevision`, kontrak dikembalikan ke `status_contract = 'active'`, `status_booking = 'confirmed'`, dan catatan revisi dicatat. Tabel pemesanan klien dan fotografer menyajikan indikator teks kuning amber "Revisi Diminta", fotografer mendapatkan tombol upload ulang hasil foto, dan halaman galeri klien menampilkan pesan bahwa revisi sedang diproses (Rule #51, #90).
+  4. **Bug 19: Pembatalan Otomatis Kontrak Pasca Reschedule Akibat `expired_at` Usang (`ClientBookingController.php` & `PhotographerBookingController.php`)**:
+     - **Before**: Saat klien atau fotografer menyetujui tanggal/jam baru di `respondReschedule`, tanggal pemotretan diperbarui namun `expired_at` pada kontrak tidak dihitung ulang berdasarkan jadwal baru (atau pada fotografer membaca relasi lama yang belum di-refresh). Akibatnya, `BookingExpirationService` membatalkan pesanan karena batas waktu mengacu ke sesi lama.
+     - **After**: Memanggil `$contract->refresh()` dan menghitung ulang `expired_at` via `$contract->calculatePaymentDeadline()` pada status kontrak non-settled (`pending_payment`, `draft`, `approved`), sehingga tenggat waktu pembayaran selaras 100% dengan jadwal baru (Rule #79).
+  5. **Bug 20: Kehilangan 1 Jam pada Booking Tengah Malam (24:00) Format MySQL (`BookingScheduleService.php`)**:
+     - **Before**: `formatMinutesToDbTime(1440)` menghasilkan format `'23:59:00'`. Namun, `parseEndTimeToMinutes($time)` hanya mencocokkan `23:59:59`, `23:59`, `24:00`, `24:00:00`. Nilai `'23:59:00'` dari kolom `TIME` MySQL gagal cocok dan jatuh ke `parseTimeToMinutes` = 1439 menit, memotong durasi 4 jam menjadi 3 jam pada pembulatan jam.
+     - **After**: Menambahkan format `'23:59:00'` ke dalam kondisi tengah malam `parseEndTimeToMinutes` dan seluruh deteksi blokir libur satu hari penuh, sehingga nilai 1440 menit (24:00) terjaga dengan presisi sempurna.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #14: Standarisasi Tampilan Status Transaksi Berbasis Pure Colored Text.
+  - Rule #16: Standar Proteksi Hak Akses Middleware Berdasarkan Role.
+  - Rule #51: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop (No Buzzwords / Fluff).
+  - Rule #63: Standarisasi Alur Login & Intended Redirection.
+  - Rule #70: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol "&".
+  - Rule #79: Standarisasi Fitur Pengajuan & Persetujuan Jadwal Ulang Sesi Foto (Reschedule).
+  - Rule #89: Standarisasi Anti-AI Slop Dokumen Faktur / Invoice.
+  - Rule #90: Standarisasi Sinkronisasi Status Booking Klien & Fotografer (100% Simetris).
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` seluruh controller, service, dan route: **PASS (0 syntax errors)**.
+  - `php artisan view:clear` & `php artisan view:cache`: **PASS (Blade templates cached successfully)**.
+  - Runtime tinker verification `parseEndTimeToMinutes('23:59:00') === 1440` dan `formatMinutesToDbTime(1440) === '23:59:00'`: **PASS**.
+
+---
+
+### [2026-11-19 15:30 WITA] — Implementasi Perbaikan 5 Bug Logika Antrean Dashboard, Sorting Terpopuler, dan Laporan Keuangan
+
+* **Modul / Fitur**:
+  - Antrean Operasional Dashboard Fotografer (`Photographer/DashboardController`)
+  - Sorting Terpopuler / Paling Banyak Dipesan pada Katalog Publik (`Public/PhotographerController`)
+  - Kebocoran Dana Batal pada Laporan Keuangan Fotografer (`Photographer/ReportController`)
+  - Counter Sesi Selesai Beranda Publik (`Public/PhotographerController`)
+  - Accessor Rating Model Fotografer & Filter Review Tersembunyi (`RolePhotographer` & `PhotographerVerificationController`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Photographer/DashboardController.php`
+  * `app/Http/Controllers/Public/PhotographerController.php`
+  * `app/Http/Controllers/Photographer/ReportController.php`
+  * `app/Models/RolePhotographer.php`
+  * `app/Http/Controllers/Admin/PhotographerVerificationController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Bug 11: Koreksi Antrean Operasional "Kirim Hasil Foto" (`Photographer/DashboardController.php`)**:
+     - **Before**: `where('status_contract', 'active')->count()` menghitung seluruh sesi aktif, sehingga pemotretan yang baru akan berlangsung berminggu-minggu ke depan langsung memicu badge dan tombol peringatan kuning "Kirim Hasil Foto (1)".
+     - **After**: Membatasi antrean hanya untuk sesi yang jadwalnya sudah tiba atau terlewati (`booking_date <= today`) dan file galeri foto belum diunggah (`hasil_foto_url IS NULL` atau kosong).
+  2. **Bug 12: Koreksi Pengurutan Terpopuler / Paling Banyak Dipesan (`Public/PhotographerController.php`)**:
+     - **Before**: Menggunakan `withCount('contracts')` murni yang turut menghitung booking draft, dibatalkan, dan kadaluarsa.
+     - **After**: Mengubah menjadi `withCount(['contracts as contracts_count' => fn($q) => $q->whereIn('status_contract', ['active', 'completed'])])` sehingga fotografer dinilai murni dari pesanan sah yang aktif atau berhasil diselesaikan.
+  3. **Bug 13: Proteksi Kontrak Dibatalkan pada Laporan Pendapatan Fotografer (`Photographer/ReportController.php`)**:
+     - **Before**: Query default `index` dan kartu `totalEscrowPending` menyertakan `status_payout in ('holding', 'ready')` tanpa mengecualikan kontrak yang dibatalkan, menyebabkan pesanan batal yang menunggu refund admin bocor ke laporan fotografer.
+     - **After**: Menambahkan filter `where('status_contract', '!=', 'cancelled')` pada query tabel, settled contracts, dan kalkulasi `totalEscrowPending`.
+  4. **Bug 14: Counter Sesi Selesai Beranda Publik Sesuai Standar Rule #90 (`Public/PhotographerController.php`)**:
+     - **Before**: Menghitung `whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))` tanpa mengecek status kontrak dan validasi klien.
+     - **After**: Menghitung kontrak yang sah selesai dan divalidasi klien: `where('status_contract', 'completed')->where('is_validated_client', true)`.
+  5. **Bug 15: Konsistensi Accessor Rating & Filter Ulasan Tersembunyi (`RolePhotographer.php` & `PhotographerVerificationController.php`)**:
+     - **Before**: Accessor rating fotografer dan eager loading di controller verifikasi fotografer tidak memfilter `where('is_hidden', false)`.
+     - **After**: Menambahkan `getRatingAttribute` sebagai alias aman ke `getRatingAverageAttribute` yang memfilter `visibleTestimonials()`, serta menambahkan closure `where('is_hidden', false)` pada eager loading `PhotographerVerificationController`.
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` seluruh file yang diubah: **PASS (0 syntax errors)**.
+  - `php artisan view:clear; php artisan view:cache`: **PASS (0 compilation errors)**.
+
+---
+
+### [2026-11-19 15:05 WITA] — Implementasi Perbaikan 10 Bug Logika Transaksi, Filter Data, & Anti-AI Slop
+
+* **Modul / Fitur**:
+  - Logika Validasi Hasil Foto Klien (`is_validated_client`)
+  - Sinkronisasi Dana Ditahan & Proteksi Dana Batal pada Monitoring Transaksi & Dashboard Admin
+  - Harmonize Dropdown Filter & Controller Query Tagihan Klien (`client/invoices`)
+  - Harmonize Dropdown Filter & Controller Query Reservasi Klien (`client/bookings`)
+  - Harmonize Dropdown Filter & Controller Query Order Fotografer (`photographer/bookings`)
+  - Presedensi Operator SQL Pencarian Kategori (`Admin/CategoryController`)
+  - Netralisasi Atribusi Pembatalan Otomatis (`BookingExpirationService`)
+  - Pengurutan Numerik Hadiah Lomba Foto (`Admin/ContestController`)
+  - Eliminasi Jargon Bahasa Asing & AI Slop pada Tab Transaksi Admin (`admin/transactions/index.blade.php`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `app/Http/Controllers/Public/ChatController.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `app/Http/Controllers/Admin/DashboardController.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `app/Http/Controllers/Photographer/PhotographerBookingController.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `app/Http/Controllers/Admin/CategoryController.php`
+  * `app/Services/BookingExpirationService.php`
+  * `app/Http/Controllers/Admin/ContestController.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Bug 1: Pembenahan Prematur `is_validated_client` (Rule #90)**:
+     - Mengubah inisialisasi `is_validated_client` dari `true` menjadi `false` pada `BookingController.php:298`, `ChatController.php:1000`, dan `TransactionController.php:247`.
+     - Mereset 4 record kontrak aktif yang terdampak di database agar tidak salah dihitung dalam statistik reputasi fotografer.
+  2. **Bug 2 & 3: Sinkronisasi Dana Ditahan & Pengecualian Kontrak Batal**:
+     - Menambahkan filter `where('status_contract', '!=', 'cancelled')` pada perhitungan `totalEscrowHolding` di `TransactionController.php:121` dan `DashboardController.php:39-42`.
+     - Menyelaraskan nominal Dana Ditahan antara Dashboard dan Monitoring Transaksi menggunakan nilai neto `payout_amount`.
+  3. **Bug 4: Filter Tagihan Klien Lengkap & Sinkron**:
+     - Memperbarui dropdown `resources/views/client/invoices/index.blade.php` dengan opsi riil: `Semua`, `Menunggu Pembayaran`, `DP Terbayar`, `Lunas`, `Dibatalkan`, `Kadaluarsa`.
+     - Memperbaiki query backend di `ClientBookingController.php:199-245` agar membedakan tagihan DP dan lunas penuh secara akurat.
+  4. **Bug 5: Filter Reservasi Klien Lengkap 7 Status**:
+     - Menyinkronkan dropdown `resources/views/client/bookings/index.blade.php` dengan 7 status tabel (`pending_confirmation`, `pending_payment`, `confirmed`, `pending_client`, `completed`, `cancelled`, `expired`).
+     - Memperbarui query backend di `ClientBookingController.php:83-126`.
+  5. **Bug 6: Filter Order Fotografer Lengkap & Label Selaras**:
+     - Menyelaraskan label dropdown filter dengan baris tabel (`Perlu Direview`, `Menunggu Pembayaran Klien`, `Jadwal Terkonfirmasi`, `Menunggu Konfirmasi Klien`, `Selesai`, `Dibatalkan`, `Kadaluarsa`).
+     - Memperbaiki query backend di `PhotographerBookingController.php:75-99` agar filter `confirmed` tidak mencampur pesanan yang belum dibayar.
+  6. **Bug 7: Grouping Closure pada Pencarian Kategori**:
+     - Membungkus klausa `orWhere` dalam closure function `$query->where(function($q) use ($search) { ... })` di `CategoryController.php:40-43` untuk mencegah SQL precedence leak pada soft deletes.
+  7. **Bug 8: Netralisasi Atribusi Pembatalan Otomatis**:
+     - Mengubah `'dibatalkan_oleh' => 'admin'` menjadi `'dibatalkan_oleh' => null` pada pembatalan otomatis di `BookingExpirationService.php:121`.
+  8. **Bug 9: Pengurutan Numerik Hadiah Lomba**:
+     - Mengubah `orderBy('hadiah', 'desc')` menjadi `orderByRaw("CAST(NULLIF(REGEXP_REPLACE(hadiah, '[^0-9]', ''), '') AS UNSIGNED) DESC")` di `Admin/ContestController.php:114` agar pengurutan berbasis angka riil, bukan alfabet.
+  9. **Bug 10: Eliminasi Buzzword Bahasa Asing & AI Slop (Rule #51 & Rule #70)**:
+     - Mengganti teks `100% Platform Revenue` menjadi `Pendapatan Platform` pada `admin/transactions/index.blade.php:865, 1037`.
+     - Mengganti header `Invoice & Tanggal` menjadi `Invoice dan Tanggal` per Rule #70.
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` seluruh controller: **PASS (0 syntax errors)**.
+  - `php artisan view:clear; php artisan view:cache`: **PASS (0 compilation errors)**.
+
+---
+
+### [2026-11-19 14:15 WITA] — Pembersihan Total AI Slop: Eliminasi Card Toolbar & Anti-Code Glorification pada Detail Transaksi serta Penataan Ulang Modal Detail Klien
+
+* **Modul / Fitur**:
+  - Halaman Detail Transaksi Admin (`resources/views/admin/transactions/show.blade.php`).
+  - Manajemen Klien Admin (`resources/views/admin/users/index.blade.php`).
+  - Controller Manajemen Klien Admin (`app/Http/Controllers/Admin/UserController.php`).
+  - Dokumen Pelacakan Perubahan (`TRACKING_PERUBAHAN_FILE.md`).
+* **File yang Diubah**:
+  * `resources/views/admin/transactions/show.blade.php`
+  * `resources/views/admin/users/index.blade.php`
+  * `app/Http/Controllers/Admin/UserController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **1. Restrukturisasi Header Halaman Detail Transaksi (Rule #72, Rule #74, & Rule #89 Point 1)**:
+    - **Before**: Toolbar atas dibungkus dalam kartu putih melayang (`bg-white rounded-2xl p-4 sm:p-5 border shadow-xs`), menempelkan *pill badge* kotak abu-abu yang mengistimewakan kode invoice `INV-20261118-SZX1RR` di samping tombol aksi cetak (*code glorification / AI slop*), serta mencantumkan teks `Audit Operasional Transaksi Escrow`.
+    - **After**: Mengeliminasi total kartu pembungkus putih dan menggantinya dengan **Flat Page Header** standar LensMatch yang menyatu langsung dengan latar halaman (selaras dengan halaman verifikasi fotografer dan formulir admin):
+      - Sisi Kiri: Breadcrumb netral (`Monitoring Transaksi > Detail Transaksi`) dan judul H1 `Detail Transaksi`.
+      - Sisi Kanan: Tombol aksi utama `[ Cetak / Simpan PDF ]` dan tombol sekunder netral `[ Kembali ]` (menggunakan ikon modern single chevron `<` per Rule #72).
+      - Menghapus total *pill badge* kode invoice di samping tombol (kepatuhan mutlak Rule #89 Point 1).
+  * **2. Eliminasi Total Terminologi Asing / Jargon "Escrow" (Rule #89 Point 2)**:
+    - **Before**: Judul panel menggunakan terminologi `Panel Kontrol Transaksi Escrow` dan subjudul status `Status Operasional Escrow`.
+    - **After**: Mengubah judul panel menjadi bahasa Indonesia baku, formal, dan profesional: `Panel Pengawasan Transaksi` serta `Status Operasional` (nol kata "Escrow").
+    - Menghapus badge kode redundan di sebelah kanan judul panel pengawasan.
+  * **3. Penataan Bersih Modal Detail Profil Klien (Anti-AI Slop & Rule #70)**:
+    - **Before**:
+      - Status akun dan status verifikasi email digabung secara horizontal menggunakan dua teks warna hijau terang yang dipisahkan tanda titik bullet (`Email Terverifikasi • Akun Aktif`).
+      - Terdapat tautan teks hijau `Chat WhatsApp` di samping nomor HP klien.
+      - Header kolom riwayat pemesanan menggunakan tanda ampersand: `FOTOGRAFER & PAKET` dan kolom aksi bertuliskan `FAKTUR`.
+      - Subteks baris pesanan menempelkan kode kontrak `#KTRK-00019`.
+      - Empat kotak metrik klien menggunakan label SaaS template generik.
+    - **After**:
+      - Menghapus total tautan `Chat WhatsApp`. Nomor HP klien kini berstatus data kontak murni teks biasa yang netral.
+      - Menghapus tumpukan horizontal warna hijau. Status akun (`Aktif` / `Dibekukan`) dan verifikasi email (`Terverifikasi` / `Belum Terverifikasi`) kini disusun secara struktural dalam baris key-value vertikal yang tenang dan teratur di sebelah kanan.
+      - Mengubah header tabel menjadi bahasa Indonesia baku tanpa simbol `&` redundan: `Layanan Fotografi` dan kolom aksi baku `Aksi` (Rule #70 & Rule #80).
+      - Menghapus teks kode `#KTRK-xxxxx` dari subteks riwayat pemesanan.
+      - Menyelaraskan proporsi 4 ringkasan informasi personal klien (`Total Booking`, `Total Belanja`, `Ulasan Ditulis`, dan `Partisipasi`).
+* **Kepatuhan Standar / Rule**:
+  - **Rule #51**: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop.
+  - **Rule #61**: Standarisasi Hierarki Warna Sistem.
+  - **Rule #67**: Larangan Mutlak Bulatan Status / Dot Badge & Tumpukan Status Warna-Warni.
+  - **Rule #70**: Eliminasi Total Simbol "&" Redundan dan Jargon Asing.
+  - **Rule #72**: Standar Single Chevron `<` untuk Navigasi Kembali.
+  - **Rule #89**: Larangan Mengistimewakan Kode (Anti-Code Glorification) & Eliminasi Jargon Escrow.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear; php artisan view:cache`: **PASS** (Zero error).
+  * `php artisan route:clear; php artisan config:clear`: **PASS**.
+
+---
+
+### [2026-11-19 13:40 WITA] — Implementasi Halaman Audit Detail Transaksi Internal Admin (@extends('layouts.admin')) & Pembersihan Bug Teks Melayang "Tutup" pada Monitoring Transaksi
+
+* **Modul / Fitur**:
+  - Monitoring Transaksi Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Halaman Audit Transaksi Internal Admin (`resources/views/admin/transactions/show.blade.php`).
+  - Controller Transaksi Admin (`app/Http/Controllers/Admin/TransactionController.php`).
+  - Controller Manajemen Klien Admin (`app/Http/Controllers/Admin/UserController.php`).
+  - Cetak Pratinjau Dokumen Invoice (`resources/views/public/booking/invoice-print.blade.php`).
+  - Dokumen Pelacakan Perubahan (`TRACKING_PERUBAHAN_FILE.md`).
+* **File yang Diubah / Dibuat**:
+  * `resources/views/admin/transactions/show.blade.php` (Baru)
+  * `resources/views/admin/transactions/index.blade.php` (Dimodifikasi)
+  * `app/Http/Controllers/Admin/TransactionController.php` (Dimodifikasi)
+  * `app/Http/Controllers/Admin/UserController.php` (Dimodifikasi)
+  * `resources/views/public/booking/invoice-print.blade.php` (Dimodifikasi)
+  * `TRACKING_PERUBAHAN_FILE.md` (Dimodifikasi)
+* **Rincian Perubahan (Before vs After)**:
+  * **1. Pembersihan Bug Teks Melayang "Tutup" pada Tabel Transaksi**:
+    - **Penyebab**: Di `resources/views/admin/transactions/index.blade.php` baris 1142–1268 terdapat sisa kode yatim (*orphaned markup*) dari modal yang tag pembukanya `<template>` telah terhapus, tetapi blok penutup beserta tombol footer `<button @click="detailModalOpen = false">Tutup</button>` tertinggal di luar template dalam aliran HTML reguler. Akibatnya, tombol tersebut merender teks telanjang "Tutup" melayang di tepi kanan tabel monitoring transaksi.
+    - **Perbaikan**: Menghapus 129 baris kode yatim tersebut secara bersih sehingga struktur DOM kembali valid dan bersih tanpa ada teks melayang.
+  * **2. Implementasi Opsi 2: Halaman Audit Transaksi Internal Admin (`@extends('layouts.admin')`)**:
+    - **Before**: Tombol `[ Lihat ]` pada tabel monitoring transaksi admin dan riwayat transaksi pada modal klien mengarahkan admin ke halaman cetak printer `http://127.0.0.1:8000/pembayaran/{id}/cetak` (`invoice-print.blade.php`). Halaman cetak tersebut sengaja berformat `<!DOCTYPE html>` murni tanpa layout dashboard admin (tanpa Sidebar kiri dan tanpa Topbar kanan atas) agar printer tidak mencetak navigasi website.
+    - **After**: Dibuat halaman internal khusus admin `resources/views/admin/transactions/show.blade.php` yang mewarisi layout `@extends('layouts.admin')`. Admin kini tetap berada di dalam ekosistem internal dashboard dengan **Sidebar kiri** dan **Topbar kanan atas** yang utuh dan konsisten.
+    - **Fitur Halaman Audit Transaksi Internal Admin**:
+      - Toolbar navigasi atas: Tombol `[ Kembali ke Monitoring Transaksi ]` dan tombol `[ Cetak / Simpan PDF ]` yang membuka `/pembayaran/{id}/cetak` pada tab baru (`target="_blank"`).
+      - Panel Kontrol Transaksi Escrow:
+        - Finansial Platform: Total pembayaran, Komisi Platform 10%, dan Pendapatan Bersih Mitra 90%.
+        - Rekening Bank Fotografer: Nama bank, nomor rekening, dan nama pemilik rekening.
+        - Status Operasional: Status dana escrow, status sesi pemotretan, catatan/alasan pembatalan (jika ada), dan riwayat waktu transfer (jika ada).
+        - Bukti Transfer Klien: Thumbnail berkas transfer klien dengan modal lightbox resolusi penuh.
+        - Tombol Aksi Operasional Admin: `[ Verifikasi Bayar ]` (POST `admin.transactions.verify-payment`), `[ Tolak Bukti Bayar ]` (modal input alasan penolakan), `[ Transfer Dana Fotografer ]` (modal input rekening, dropzone unggah bukti struk bank transfer, dan catatan transfer), serta `[ Proses Refund ]` (modal input catatan refund jika pesanan dibatalkan).
+      - Penyematan Lembar Dokumen Invoice Resmi: Seluruh rincian tagihan invoice resmi disematkan langsung di dalam kartu dokumen internal agar admin dapat membaca rincian pemesanan klien tanpa berpindah halaman.
+  * **3. Sinkronisasi Controller**:
+    - `TransactionController@show`: Menyiapkan relasi lengkap (`client.user`, `photographer.user`, `photographer.province`, `photographer.city`, `bookingDetail.service`, `bookingDetail.province`, `bookingDetail.city`, `payments`, `testimonial`, `cancellation`), menghitung potongan komisi 10% dan pendapatan bersih 90%, serta merender `view('admin.transactions.show')`.
+    - `UserController@show`: Mengubah `invoice_url` pada riwayat transaksi booking klien dari `booking.invoice.print` menjadi `route('admin.transactions.show', $c->id)`.
+    - `resources/views/admin/transactions/index.blade.php`: Mengubah tautan tombol `[ Lihat ]` dari `route('booking.invoice.print', $c->id)` menjadi `route('admin.transactions.show', $c->id)`.
+    - `resources/views/public/booking/invoice-print.blade.php`: Menyesuaikan tautan tombol kembali khusus admin agar mengarah ke `route('admin.transactions.show', $contract->id)`.
+* **Kepatuhan Standar / Rule**:
+  - **Rule #51 & Rule #70**: Bahasa Indonesia baku, to-the-point, tanpa kata-kata alay, tanpa AI slop, dan nol simbol `&` redundan.
+  - **Rule #59**: Modal konfirmasi diletakkan di tengah (*center*), judul modal bersih tanpa ikon hiasan, maksimal 2 tombol aksi di bagian bawah modal (`Batal` di kiri, aksi submit di kanan).
+  - **Rule #80**: Tombol aksi menggunakan teks murni yang jelas (`Lihat`, `Batal`, `Verifikasi Bayar`, `Tolak Bukti Bayar`, `Cetak / Simpan PDF`).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear; php artisan view:cache`: **PASS** (Zero error).
+  * `php artisan route:clear; php artisan config:clear`: **PASS**.
+  * Navigasi tabel ke detail audit transaksi: Berjalan mulus di dalam layout Admin dengan sidebar dan topbar persisten.
+
+---
+
+### [2026-11-19 13:25 WITA] — Perbaikan Bug Popover Dropdown Kebab Menu pada Tabel Manajemen Klien (Penanganan Clipping Overflow-X-Auto & Standardisasi Ikon SVG)
+
+* **Modul / Fitur**:
+  - Manajemen Klien Admin (`resources/views/admin/users/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/users/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Penyebab Bug**:
+    - Kontainer pembungkus tabel memiliki kelas `overflow-x-auto` tanpa batas tinggi minimum (`min-height`). Ketika data tabel hanya memiliki 1 baris, tinggi tabel hanya ~60px.
+    - Saat tombol titik tiga (`[ ⋮ ]`) diklik, popover menu melayang (`w-44`, tinggi ~85px) berhasil terbuka, tetapi posisinya melebihi batas bawah tabel yang hanya 60px. Akibatnya, menu tersembunyi (*clipped*) di bawah lipatan container tabel dan memicu munculnya scrollbar vertikal di tepi kanan tanpa menampilkan menu ke layar pandang pengguna.
+    - Selain itu, tombol menggunakan karakter teks mentah `⋮` alih-alih ikon Vektor SVG asli bawaan sistem, serta penempatan `@click.away` berada pada wrapper induk tombol.
+  * **Solusi Perbaikan (Rule #6 & Rule #69)**:
+    - Menambahkan `min-h-[220px]` pada kontainer `<div class="overflow-x-auto min-h-[220px]">`, sehingga tabel memiliki ruang bernapas vertikal yang cukup lapang untuk membuka dropdown popover menu ke bawah secara bebas tanpa terpotong dan tanpa memicu scrollbar vertikal pada data 1-2 baris.
+    - Mengganti teks mentah `⋮` dengan Vektor SVG lingkaran 3 titik (`<svg class="w-4 h-4 pointer-events-none" ...>`) sesuai **Rule #6**.
+    - Memindahkan `@click.away="menuOpen = false"` secara presisi ke kontainer popover melayang dengan kelas `top-full mt-1.5` dan transisi Alpine.js standar sistem selaras dengan modul Lomba dan E-Learning.
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear; php artisan view:cache`: **PASS** (Zero error).
+  * Uji klik interaktif: Dropdown popover kini membuka dengan transisi halus langsung di bawah tombol titik tiga tanpa terpotong (*zero vertical clipping*).
+
+---
+
+### [2026-11-19 13:15 WITA] — Implementasi Pola B Cerdas: Bantuan Aktivasi Akun Klien & Peningkatan Fitur Komprehensif Manajemen Klien Admin
+
+* **Modul / Fitur**:
+  - Halaman Verifikasi Email Klien (`resources/views/public/auth/verify-email.blade.php`).
+  - Controller Verifikasi & Bantuan Aktivasi (`app/Http/Controllers/Auth/VerificationController.php`).
+  - Manajemen Klien Admin (`resources/views/admin/users/index.blade.php`).
+  - Controller Manajemen Klien Admin (`app/Http/Controllers/Admin/UserController.php`).
+  - Model Pengguna (`app/Models/User.php`).
+  - Skema Database Pengguna (`database/migrations/2026_11_19_000001_add_activation_and_suspension_to_users_table.php`).
+  - Sidebar Navigasi Admin (`resources/views/partials/admin/sidebar.blade.php`).
+  - Rute Aplikasi (`routes/web.php`).
+  - Pengendali Autentikasi (`app/Http/Controllers/Auth/AuthController.php`).
+* **File yang Diubah / Dibuat**:
+  * `database/migrations/2026_11_19_000001_add_activation_and_suspension_to_users_table.php` (Baru)
+  * `app/Http/Controllers/Auth/VerificationController.php` (Baru)
+  * `resources/views/public/auth/verify-email.blade.php` (Baru)
+  * `app/Models/User.php`
+  * `app/Http/Controllers/Admin/UserController.php`
+  * `resources/views/admin/users/index.blade.php`
+  * `resources/views/partials/admin/sidebar.blade.php`
+  * `routes/web.php`
+  * `app/Http/Controllers/Auth/AuthController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Pola B "Versi Cerdas & Terfokus" untuk Verifikasi Email Klien (Rule #51, #59, #70)**:
+    - **Before**: Sistem belum memiliki halaman resmi notifikasi verifikasi email (`/email/verify`) maupun alur pengaduan jika email OTP/tautan aktivasi tidak masuk ke inbox klien. Klien terdampar tanpa saluran komunikasi langsung ke admin.
+    - **After**:
+      1. Menghadirkan tampilan bersih `resources/views/public/auth/verify-email.blade.php` dengan kartu otentikasi LensMatch berjarak lapang.
+      2. Tombol aksi `[ Butuh Bantuan Aktivasi? ]` memicu modal pop-up interaktif (Rule #59: judul tengah tanpa ikon, formulir pesan kendala singkat, dan maksimal 2 tombol tengah: `Batal` dan `Kirim Permintaan Bantuan`).
+      3. Saat klien mengirim permintaan bantuan, sistem mencatat `activation_requested_at` dan `activation_request_note` pada tabel `users`, serta otomatis mengirimkan **Notifikasi Sistem Real-Time ke seluruh Admin**: *"Permintaan Bantuan: [Nama] ([Email]) meminta verifikasi akun manual."*
+      4. Klien melihat kartu notifikasi bahwa permintaannya sedang ditinjau admin, dan cukup menyegarkan (*refresh*) halaman setelah diverifikasi untuk langsung masuk ke sistem.
+  * **Peningkatan Fitur Komprehensif Manajemen Klien Admin (Rule #64, #68, #69, #80)**:
+    - **Penyelarasan Nama Menu**: Mengubah judul halaman dan menu sidebar dari "Manajemen User" menjadi **"Manajemen Klien"** agar selaras dan tidak rancu dengan Manajemen Fotografer dan Manajemen Admin Staf.
+    - **4 Kartu Metrik KPI (Rule #64 Compliant)**: Terdiri dari 2 baris murni font `text-xs`: `Total Klien Terdaftar`, `Email Terverifikasi`, `Menunggu Aktivasi Manual`, dan `Total Belanja Klien`.
+    - **Indikator Status Akun & Badge Menunggu Aktivasi**:
+      - Pada kolom Klien, akun yang meminta bantuan aktivasi langsung memunculkan penanda badge: `Menunggu Aktivasi Manual`.
+      - Menampilkan status fungsional teks murni (**Rule #14 & Rule #68**): Status Email (`Terverifikasi` vs `Belum Verifikasi`) dan Status Akun Moderasi (`Aktif` vs `Dibekukan`).
+    - **Tombol Aksi Baku (Rule #80 & Rule #69)**:
+      1. **Tombol `[ Lihat ]` (Soft Blue)**: Membuka modal profil komprehensif yang memuat biodata klien, nomor WhatsApp dengan tautan langsung `https://wa.me/...`, domisili, status akun, catatan kendala aktivasi, 4 kartu ringkasan personal, serta tabel 5 riwayat booking terakhir lengkap dengan tautan cetak faktur invoice.
+      2. **Tombol `[ Verifikasi Email ]` (Soft Emerald)**: Tampil satu-klik pada akun yang belum terverifikasi untuk memverifikasi akun klien secara instan (`email_verified_at = now()`), membersihkan antrean permintaan aktivasi, mencatat `ActivityLog`, dan mengirim notifikasi selamat datang ke akun klien.
+      3. **Menu Kebab `⋮`**: Memuat aksi moderasi `[ Bekukan Akun ]` (dengan modal alasan pembekuan) / `[ Aktifkan Akun ]`, serta aksi `[ Hapus Akun ]` yang diproteksi ketat hanya untuk klien dengan 0 riwayat transaksi (Rule #2).
+    - **Proteksi Moderasi pada Login (`AuthController.php`)**:
+      - Akun yang dibekukan (`is_suspended = true`) otomatis ditolak saat login dengan pesan peringatan informatif beserta alasan pembekuannya.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #51**: Copywriting Bersih, Proporsional & Anti-AI Slop (No Buzzwords / Fluff).
+  * **Rule #59**: Standarisasi Global Modal / Pop-Up (Judul Center Tanpa Ikon, Center Buttons, Maksimal 2 Tombol Bawah, Tanpa 'X' jika ada Batal).
+  * **Rule #64**: Standarisasi KPI Metric Cards (2 Baris Murni Ukuran Seragam `text-xs`, Tanpa Teks Ketiga Redundan).
+  * **Rule #67 & #68**: Larangan Bulatan Dot Badge & Pewarnaan Teks Non-Status (Pure Colored Text pada kolom status).
+  * **Rule #69**: Standarisasi Tombol Kolom Aksi Tabel (Maksimal 2 Tombol Horizontal + Kebab Dropdown untuk Aksi Sekunder).
+  * **Rule #70**: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol "&".
+  * **Rule #80**: Standarisasi Teks & Warna Tombol Aksi Tabel (Trio Baku: `Lihat`, `Edit`, `Hapus` + Aksi Khusus `Verifikasi Email`).
+* **Hasil Pengujian & Verifikasi**:
+  * Database Migration: **PASS** (`2026_11_19_000001_add_activation_and_suspension_to_users_table`).
+  * `php artisan view:clear; php artisan route:clear; php artisan view:cache`: **PASS** (Zero error).
+  * Backend Unit Test Script (`test_client_management.php`): **PASS** (Semua alur aktivasi manual, modal show payload, verifikasi email, kirim notifikasi in-app, penangguhan suspend/unsuspend, dan proteksi hapus berjalan 100% sukses).
+
+---
+
+### [2026-11-19 11:45 WITA] — Sinkronisasi Opsi Dropdown Filter Status Transaksi Admin & Fotografer (Penambahan Filter Dibatalkan & Kadaluarsa 1:1 dengan Tabel)
+
+* **Modul / Fitur**:
+  - Monitoring Transaksi Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Controller Transaksi Admin (`app/Http/Controllers/Admin/TransactionController.php`).
+  - Kelola Booking Fotografer (`resources/views/photographer/bookings/index.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/transactions/index.blade.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Sinkronisasi Dropdown Filter Monitoring Transaksi Admin (Rule #70 & Anti-AI Slop)**:
+    - **Before**: Dropdown filter status transaksi hanya menyediakan opsi pencairan dana (`all`, `holding`, `ready`, `paid`, `pending_payment`, `refunded`), sehingga opsi `Dibatalkan` dan `Kadaluarsa` hilang dari filter meskipun datanya tampil di baris tabel (TD). Controller juga belum memiliki handler query untuk `cancelled` dan `expired`.
+    - **After**: Menambahkan opsi `cancelled` (`Dibatalkan`) dan `expired` (`Kadaluarsa`) ke dalam array `$statusLabels` pada `admin/transactions/index.blade.php`. Pada `TransactionController.php`, query filter diperbarui untuk menyaring transaksi `cancelled` (dibatalkan pengguna/fotografer) dan `expired` (dibatalkan otomatis oleh sistem karena batas waktu habis). Hasil audit pengujian: 17 total transaksi terbagi presisi menjadi 4 Dana Ditahan, 9 Sudah Ditransfer, 1 Dibatalkan, dan 3 Kadaluarsa.
+  * **Penyelarasan Filter Kelola Booking Fotografer**:
+    - **Before**: Dropdown filter pada `photographer/bookings/index.blade.php` hanya menampilkan `all`, `pending`, `confirmed`, dan `completed`. Opsi `cancelled` (`Dibatalkan`) hilang dari tampilan dropdown meskipun controller `PhotographerBookingController.php` sudah memiliki penanganan filternya.
+    - **After**: Menambahkan `'cancelled' => 'Dibatalkan'` ke dalam array `$statusLabels`, menyelaraskan 100% opsi filter dengan baris tabel status pesanan fotografer.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #51**: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop (No Buzzwords / Fluff).
+  * **Rule #70**: Anti-AI Slop Terminology & Natural Human Text Standard (Teks to-the-point tanpa tanda `&` redundan).
+  * **Integrasi Status 1:1**: Konsistensi mutlak antara kolom tabel (TD) dengan opsi dropdown penyaring (*Filter Toolbar*).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+  * Query Unit Test: **PASS** (Filter `cancelled`: 1 kontrak, Filter `expired`: 3 kontrak, Filter `all`: 17 kontrak).
+
+---
+
+### [2026-11-19 11:30 WITA] — Konsolidasi Solusi Pilihan A: Eliminasi Redundansi Modal Transaksi, Penyatuan Tampilan Invoice Resmi & Integrasi Panel Audit Admin
+
+* **Modul / Fitur**:
+  - Monitoring Transaksi Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Invoice Resmi Cetak (`resources/views/public/booking/invoice-print.blade.php`).
+  - Controller Booking Publik (`app/Http/Controllers/Public/BookingController.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/public/booking/invoice-print.blade.php`
+  * `app/Http/Controllers/Public/BookingController.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Konsolidasi Kolom Aksi Tabel Monitoring Transaksi (Rule #80 & Rule #69)**:
+    - **Before**: Baris tabel monitoring transaksi memiliki dua aksi redundan: tombol pop-up modal `[ Lihat ]` dan kebab dropdown menu dengan pilihan `[ Lihat Invoice ]`. Modal `[ Lihat ]` memiliki bug header terpotong (*cropped header bug*) akibat kontainer scrollbar sempit `max-h-[85vh] overflow-y-auto`, desain klaustrofobik bertumpuk ("box-in-box" sempit 576px), serta menduplikasi 80% isi dokumen invoice.
+    - **After**: Mengeliminasi modal sempit `detailModalOpen` dan menu kebab redundan pada kolom aksi tabel. Baris tabel kini hanya memiliki **satu tombol tunggal** yang bersih dan elegan: `[ Lihat ]` (warna Soft Blue: `bg-blue-50 text-blue-600 border-blue-200` per **Rule #80**) yang mengarahkan admin langsung dalam tab yang sama ke pratinjau dokumen invoice resmi (`route('booking.invoice.print')`).
+  * **Penambahan Panel Audit Admin pada Invoice Resmi (Rule #51 & Rule #70)**:
+    - **Before**: Halaman invoice resmi (`invoice-print.blade.php`) hanya menampilkan lembar invoice format kertas A4 tanpa informasi internal admin (komisi platform 10%, pendapatan bersih fotografer, nomor rekening bank fotografer, foto bukti transfer, status pencairan, dan kontrol verifikasi/tolak).
+    - **After**: Khusus saat diakses oleh pengguna dengan role Admin / Super Admin (`$isAdminUser`), halaman invoice resmi menampilkan **Panel Audit Admin** (`.no-print`) yang lapang dan proporsional di atas lembar dokumen cetak:
+      1. **Finansial Platform**: Menampilkan Total Nilai Kontrak, Komisi Platform (10%), dan Pendapatan Bersih Fotografer dengan tipografi bersih (*non box-in-box*).
+      2. **Rekening Bank Fotografer**: Menampilkan Nama Bank, Nomor Rekening, dan Nama Pemilik Rekening sesuai profil mitra.
+      3. **Status Operasional**: Menampilkan status dana (Dana Ditahan / Siap Ditransfer / Sudah Ditransfer / Dana Dikembalikan), status sesi, serta riwayat pembatalan (jika ada) tanpa terminologi asing seperti "Escrow" atau "Payout" (**Rule #70**).
+      4. **Bukti Transfer & Aksi Cepat**: Menampilkan miniatur thumbnail bukti transfer dengan modal Lightbox pembesar resolusi penuh, serta tombol aksi operasional terintegrasi: `[ Verifikasi Bayar ]`, `[ Tolak Bukti Bayar ]`, `[ Transfer Dana Fotografer ]`, dan `[ Proses Refund ]` yang langsung memproses dan me-refresh status halaman dengan alert flash notification.
+  * **Integritas Dokumen Cetak (@media print)**:
+    - Seluruh elemen Panel Audit Admin dan tombol navigasi menggunakan kelas `.no-print` (`display: none !important`), memastikan dokumen yang dicetak atau disimpan sebagai PDF melalui tombol `[ Cetak / Simpan PDF ]` tetap 100% berupa lembaran resmi invoice LensMatch yang bersih, profesional, dan bebas dari panel kontrol admin.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #51**: Standarisasi Copywriting Bersih, Proporsional & Anti-AI Slop (No Buzzwords / Fluff).
+  * **Rule #61**: Standarisasi Hierarki Warna Sistem (Aksen Amber Brand, Soft Blue untuk Lihat, Emerald untuk Sukses/Verifikasi, Rose untuk Tolak/Batal).
+  * **Rule #69**: Standarisasi Tombol Kolom Aksi Tabel (Eliminasi Redundansi & Tombol Bertumpuk).
+  * **Rule #70**: Larangan Terminologi Asing & Pemborosan Simbol "&" (Anti-AI Slop Terminology: Penggantian istilah Escrow & Payout, penghilangan tanda & redundan).
+  * **Rule #80**: Standarisasi Teks & Warna Tombol Aksi Tabel (Trio Baku: Tombol Soft Blue `Lihat`).
+  * **Anti-AI Slop Design Principles**: Penghapusan penyakit "Box-in-Box", eliminasi "Amnesia Skala Spasial" dan "Bias Statistik Dataset".
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
+### [2026-11-19 11:10 WITA] — Standarisasi Kebab Action Dropdown Menu, Eliminasi Kebocoran Padding Putih Hover, Penyelarasan Ikon Amber & Koreksi Aksi Invoice
+
+* **Modul / Fitur**:
+  - Monitoring Transaksi Admin (`resources/views/admin/transactions/index.blade.php`).
+  - Kelola Lomba Admin (`resources/views/admin/contests/index.blade.php`).
+  - Materi E-Learning Admin (`resources/views/admin/elearning/index.blade.php`).
+  - Kelola Booking Mitra Fotografer (`resources/views/photographer/bookings/index.blade.php`).
+  - Kelola Booking Klien (`resources/views/client/bookings/index.blade.php`).
+  - Riwayat Pembayaran Invoice Klien (`resources/views/client/invoices/index.blade.php`).
+  - Dropdown Profil Pengguna Navbar Publik (`resources/views/partials/public/navbar.blade.php`).
+* **File yang Diubah**:
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/admin/elearning/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/client/invoices/index.blade.php`
+  * `resources/views/partials/public/navbar.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  * **Koreksi Penamaan Aksi & Eliminasi Tab Baru pada Invoice Transaksi (Rule #69, Rule #70, Rule #80)**:
+    - **Before**: Tombol aksi invoice di tabel transaksi admin tertulis `Cetak Invoice` dan memiliki atribut `target="_blank"`. Padahal rute yang dibuka adalah halaman pratinjau invoice yang di dalamnya sudah memiliki tombol khusus `Cetak / Simpan PDF`. Akibat `target="_blank"`, browser dipaksa membuka tab baru alih-alih navigasi langsung di tab yang sama.
+    - **After**: Mengubah teks tombol menjadi ringkas dan tepat sasaran: `Lihat Invoice` (tanpa kata tambahan berlebihan), serta menghapus `target="_blank"` sehingga transisi membuka dokumen langsung di tab yang sama dengan alur kembali yang mulus via tombol back yang sudah tersedia.
+  * **Eliminasi Kebocoran Padding Putih pada Efek Hover Dropdown Kebab (Rule #61, Rule #70, Micro-Interaction Integrity)**:
+    - **Before**: Kontainer dropdown kebab menu pada tabel transaksi admin, lomba, e-learning, booking fotografer, dan booking klien menggunakan padding vertikal `py-1.5` atau `py-1` tanpa `overflow-hidden`. Hal ini menyebabkan efek sorotan latar `hover:bg-amber-50` pada item terpotong 4px–6px sebelum tepi kartu, menyisakan garis/celah putih di tepi atas dan bawah. Selain itu, pada baris transaksi tanpa aksi persetujuan sebelumnya, divider `<div class="border-t ... my-1">` tetap ter-render di atas item satu-satunya sehingga memperparah celah putih.
+    - **After**: Menghapus `py-1.5`/`py-1` dari kontainer kartu, menambahkan `overflow-hidden` pada kartu sudut `rounded-xl`, membungkus divider dalam kondisi `$hasPriorAction`, dan menerapkan padding item yang presisi `px-4 py-2.5`. Latar hover kini mengisi penuh sudut lengkung kartu (*full-bleed edge-to-edge*) secara solid tanpa kebocoran warna putih, sementara jarak ruang baca konten ke tepi kartu tetap terjaga 100% konsisten dan nyaman dipandang mata.
+  * **Sinkronisasi Ikon SVG Mengikuti Warna Hover Amber (Rule #61 & Visual Harmony)**:
+    - **Before**: Ikon SVG dokumen pada menu invoice admin memiliki kelas warna statis `text-gray-400` tanpa pendeteksi hover grup, sehingga saat item di-hover dan teks berubah menjadi amber (`text-amber-600`), ikon tetap berwarna abu-abu mati.
+    - **After**: Menambahkan kelas `group` pada link dan menerapkan kelas warna dinamis pada ikon: `text-gray-400 group-hover:text-amber-600 dark:text-gray-400 dark:group-hover:text-amber-400 transition-colors`. Ikon dan teks kini berubah warna serempak secara harmonis.
+  * **Pembersihan Copywriting Anti-AI Slop pada Navbar (Rule #70)**:
+    - **Before**: Tombol logout pada navbar publik menggunakan teks bergaya ganda dengan tanda garis miring: `Keluar / Logout`.
+    - **After**: Merapikan teks menjadi ringkas, natural, dan to-the-point: `Keluar Akun` sesuai standar bahasa Indonesia platform LensMatch.
+* **Standar / Rule README yang Dipatuhi**:
+  * **Rule #61**: Standarisasi Hierarki Warna Brand LensMatch & Interactive Color Harmony.
+  * **Rule #69**: Standarisasi Tombol Kolom Aksi Tabel & Kebab Dropdown Menu Popover.
+  * **Rule #70**: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol (Anti-AI Slop Terminology & Natural Human Text Standard).
+  * **Rule #80**: Standarisasi Teks & Warna Tombol Aksi Tabel (Prinsip Kesederhanaan & Eliminasi Redundansi).
+* **Hasil Pengujian & Verifikasi**:
+  * `php artisan view:clear` & `php artisan view:cache`: **PASS** (Zero error).
+
+---
+
 ### [2026-11-17 17:15 WITA] — Sinkronisasi Warna Ikon Aktif & Hover pada Tab Navigasi Aktivitas Komunitas
 
 * **Modul / Fitur**:

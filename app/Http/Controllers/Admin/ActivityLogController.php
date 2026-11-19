@@ -79,6 +79,15 @@ class ActivityLogController extends Controller
             abort(403, 'Akses Ditolak. Fitur pembersihan log hanya dapat diakses oleh Super Admin.');
         }
 
+        $request->validate([
+            'days' => 'required|integer|min:7|max:365',
+        ], [
+            'days.required' => 'Tentukan batas hari penyimpanan log.',
+            'days.integer' => 'Batas hari harus berupa angka.',
+            'days.min' => 'Batas minimal pembersihan log adalah 7 hari untuk menjaga riwayat audit.',
+            'days.max' => 'Batas maksimal pembersihan log adalah 365 hari.',
+        ]);
+
         $days = (int) $request->input('days', 30);
         $deleted = ActivityLog::where('created_at', '<', now()->subDays($days))->delete();
 

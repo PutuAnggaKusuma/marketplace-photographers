@@ -83,6 +83,7 @@ class ForumController extends Controller
     public function destroy($id)
     {
         $post = ForumPost::findOrFail($id);
+        $post->medias()->delete();
         $post->comments()->delete();
         $post->delete();
 
@@ -95,6 +96,7 @@ class ForumController extends Controller
     public function destroyComment($id)
     {
         $comment = ForumComment::findOrFail($id);
+        $comment->replies()->delete();
         \App\Models\ForumCommentReport::where('id_comment', $comment->id)->update(['status' => 'reviewed']);
         $comment->delete();
 

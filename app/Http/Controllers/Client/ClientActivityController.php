@@ -22,7 +22,7 @@ class ClientActivityController extends Controller
 
         // Pastikan transaksi e-learning sukses tersinkronisasi ke tabel progress
         $paidTransactions = ElearningTransaction::where('id_user', $userId)
-            ->where('payment_status', 'sukses')
+            ->where('payment_status', 'completed')
             ->pluck('id_e_learning');
 
         foreach ($paidTransactions as $courseId) {

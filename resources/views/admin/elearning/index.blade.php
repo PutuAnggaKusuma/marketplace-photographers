@@ -195,28 +195,56 @@
                                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Aktif</span>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                                    <div class="flex items-center justify-center gap-1.5">
+                                    <div class="inline-flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
+                                        <!-- 1. Tombol Utama (Primary Action) Sesuai Rule #69 -->
                                         <a href="{{ route('admin.elearning.curriculum', $m->id) }}" 
-                                           class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60 font-bold text-xs transition text-center inline-block">
+                                           class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition cursor-pointer shadow-2xs">
                                             Kurikulum
                                         </a>
-                                        <a href="{{ route('admin.elearning.edit', $m->id) }}" 
-                                           class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block">
-                                            Edit
-                                        </a>
-                                        <button type="button" 
-                                                @click="$dispatch('open-confirm-modal', {
-                                                    title: 'Hapus Materi E-Learning?',
-                                                    message: 'Apakah Anda yakin ingin menghapus materi {{ addslashes($m->judul) }}?',
-                                                    buttonText: 'Ya, Hapus Materi',
-                                                    iconType: 'delete',
-                                                    buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
-                                                    actionUrl: '{{ route('admin.elearning.destroy', $m->id) }}',
-                                                    method: 'POST'
-                                                })"
-                                                class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
-                                            Hapus
-                                        </button>
+
+                                        <!-- 2. Kebab Menu untuk Aksi Sekunder Sesuai Rule #69 -->
+                                        <div class="relative inline-block text-left">
+                                            <button type="button" 
+                                                    @click="menuOpen = !menuOpen" 
+                                                    class="w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition shadow-2xs cursor-pointer">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="5" r="1.75" />
+                                                    <circle cx="12" cy="12" r="1.75" />
+                                                    <circle cx="12" cy="19" r="1.75" />
+                                                </svg>
+                                            </button>
+
+                                            <div x-show="menuOpen" 
+                                                 @click.away="menuOpen = false" 
+                                                 x-transition:enter="transition ease-out duration-100" 
+                                                 x-transition:enter-start="transform opacity-0 scale-95" 
+                                                 x-transition:enter-end="transform opacity-100 scale-100" 
+                                                 x-transition:leave="transition ease-in duration-75" 
+                                                 x-transition:leave-start="transform opacity-100 scale-100" 
+                                                 x-transition:leave-end="transform opacity-0 scale-95" 
+                                                 class="absolute right-0 top-full mt-1.5 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
+                                                 style="display: none;">
+                                                
+                                                <a href="{{ route('admin.elearning.edit', $m->id) }}" 
+                                                   class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block text-left">
+                                                    Edit
+                                                </a>
+
+                                                <button type="button" 
+                                                        @click="menuOpen = false; $dispatch('open-confirm-modal', {
+                                                            title: 'Hapus Materi E-Learning?',
+                                                            message: 'Apakah Anda yakin ingin menghapus materi {{ addslashes($m->judul) }}?',
+                                                            buttonText: 'Ya, Hapus Materi',
+                                                            iconType: 'delete',
+                                                            buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
+                                                            actionUrl: '{{ route('admin.elearning.destroy', $m->id) }}',
+                                                            method: 'POST'
+                                                        })"
+                                                        class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

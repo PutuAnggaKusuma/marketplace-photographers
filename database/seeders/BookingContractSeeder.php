@@ -51,7 +51,7 @@ class BookingContractSeeder extends Seeder
             );
         };
 
-        $clientDian = $resolveClient('dian@gmail.com', 'Dian & Febri', '081234567899', 'Jakarta Selatan');
+        $clientDian = $resolveClient('dian@gmail.com', 'Dian Febri', '081234567899', 'Jakarta Selatan');
         $clientMahkota = $resolveClient('mahkota@event.com', 'PT Mahkota Event Organizer', '081999888777', 'Semarang');
         $clientLilik = $resolveClient('bulilik@kuliner.com', 'Bu Lilik Kuliner Nusantara', '081567891234', 'Bandung');
         $clientReza = $resolveClient('reza.itb@gmail.com', 'Reza Pratama', '081387654321', 'Yogyakarta');
@@ -153,7 +153,7 @@ class BookingContractSeeder extends Seeder
                 'review' => 'Sistem kontrak digitalnya bikin tenang banget. Hak cipta foto dan tanggal sesi foto tercatat resmi. Pembayaran DP aman via sistem escrow.',
                 'rating' => 5,
             ],
-            // Bulan 6: Jun 2026 - Completed (Dian & Febri)
+            // Bulan 6: Jun 2026 - Completed (Dian Febri)
             [
                 'client' => $clientDian,
                 'photographer' => $photoAlex,
@@ -165,7 +165,7 @@ class BookingContractSeeder extends Seeder
                 'status' => 'completed',
                 'payout_status' => 'paid',
                 'drive_url' => 'https://drive.google.com/drive/folders/demo-lensmatch-photos-canggu',
-                'catatan_fotografer' => 'Halo Dian & Febri! Seluruh 50 foto hasil retouching resolusi tinggi sudah siap diunduh melalui tautan Google Drive di atas. Terima kasih telah mempercayakan momen indah Anda bersama Alex Visual Studio!',
+                'catatan_fotografer' => 'Halo Dian Febri, seluruh 50 foto hasil retouching resolusi tinggi sudah siap diunduh melalui tautan Google Drive di atas. Terima kasih telah mempercayakan sesi foto bersama Alex Visual Studio.',
                 'review' => 'Cari fotografer prewedding di Bali jadi cepat banget. Portofolio langsung kelihatan jelas beserta pilihan paket jam fotonya.',
                 'rating' => 5,
             ],
@@ -185,7 +185,7 @@ class BookingContractSeeder extends Seeder
                 'review' => 'Pelayanan ramah, studio nyaman dan ber-AC, fotografer sabar mengarahkan pose orang tua kami.',
                 'rating' => 4,
             ],
-            // Bulan 8: Agu 2026 - Completed (Dian & Febri)
+            // Bulan 8: Agu 2026 - Completed (Dian Febri)
             [
                 'client' => $clientDian,
                 'photographer' => $photoAlex,
@@ -197,7 +197,7 @@ class BookingContractSeeder extends Seeder
                 'status' => 'completed',
                 'payout_status' => 'paid',
                 'drive_url' => 'https://drive.google.com/drive/folders/demo-lensmatch-photos-melasti',
-                'catatan_fotografer' => 'Momen sunset di Pantai Melasti sungguh magis! 45 file hi-res retouching warna sinematik siap diunduh. Terima kasih banyak Dian & Febri.',
+                'catatan_fotografer' => 'Momen sunset di Pantai Melasti sangat berkesan. 45 file resolusi tinggi siap diunduh. Terima kasih banyak Dian Febri.',
                 'review' => 'Keren banget hasil fotonya, pencahayaan alami sunset bener-bener dapet feel romantisnya!',
                 'rating' => 5,
             ],
@@ -217,7 +217,7 @@ class BookingContractSeeder extends Seeder
                 'review' => 'Kualitas kerja tim Mas Budi sangat cepat dan tepat tenggat waktu. Sangat puas.',
                 'rating' => 5,
             ],
-            // Bulan 9: Sep 2026 - Sesi Dikonfirmasi / Active (Klien: Dian & Febri, Fotografer: Alex Visual Studio)
+            // Bulan 9: Sep 2026 - Sesi Dikonfirmasi / Active (Klien: Dian Febri, Fotografer: Alex Visual Studio)
             // INI SESI AKTIF DI MANA FOTOGRAFER BISA KLIK "KIRIM GALERI"
             [
                 'client' => $clientDian,
@@ -250,7 +250,7 @@ class BookingContractSeeder extends Seeder
                 'review' => null,
                 'rating' => null,
             ],
-            // Bulan 10: Okt 2026 - Sesi Menunggu Konfirmasi / Pending (Klien: Dian & Febri, Fotografer: Alex Visual Studio)
+            // Bulan 10: Okt 2026 - Sesi Menunggu Konfirmasi / Pending (Klien: Dian Febri, Fotografer: Alex Visual Studio)
             // INI SESI DI MANA FOTOGRAFER BISA KLIK "KONFIRMASI" ATAU "TOLAK SESI"
             [
                 'client' => $clientDian,
@@ -261,7 +261,7 @@ class BookingContractSeeder extends Seeder
                 'session_date' => Carbon::create(2026, 11, 5),
                 'location' => 'Taman Ujung Sukasada Karangasem, Bali',
                 'status' => 'pending',
-                'payout_status' => 'holding',
+                'payout_status' => null,
                 'drive_url' => null,
                 'catatan_fotografer' => null,
                 'review' => null,
@@ -277,13 +277,13 @@ class BookingContractSeeder extends Seeder
                 'session_date' => Carbon::create(2026, 11, 12),
                 'location' => 'Private Beach Nusa Dua, Bali',
                 'status' => 'pending',
-                'payout_status' => 'holding',
+                'payout_status' => null,
                 'drive_url' => null,
                 'catatan_fotografer' => null,
                 'review' => null,
                 'rating' => null,
             ],
-            // Bulan 11: Nov 2026 - Sesi Dikonfirmasi / Active (Klien: Dian & Febri, Fotografer: Budi Event Captures)
+            // Bulan 11: Nov 2026 - Sesi Dikonfirmasi / Active (Klien: Dian Febri, Fotografer: Budi Event Captures)
             [
                 'client' => $clientDian,
                 'photographer' => $photoBudi,

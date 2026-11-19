@@ -193,6 +193,24 @@ class ElearningController extends Controller
         $course = $lesson->elearning;
         $userId = Auth::id();
 
+        $isPurchased = ($course->harga == 0 || !$course->is_premium);
+        if (!$isPurchased) {
+            $isPurchased = \App\Models\ElearningTransaction::where('id_user', $userId)
+                ->where('id_e_learning', $course->id)
+                ->where('payment_status', 'completed')
+                ->exists();
+            if (!$isPurchased) {
+                $isPurchased = session()->get("elearning_purchased_{$course->id}", false);
+            }
+        }
+
+        if (!$lesson->is_free && !$isPurchased) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Materi ini terkunci. Silakan selesaikan pembayaran kursus terlebih dahulu.',
+            ], 403);
+        }
+
         $lessonProgress = \App\Models\ElearningLessonProgress::firstOrNew([
             'id_user' => $userId,
             'id_elearning' => $course->id,
@@ -270,6 +288,27 @@ class ElearningController extends Controller
         }
 
         $course = Elearning::findOrFail($id);
+
+        $isPurchased = ($course->harga == 0 || !$course->is_premium);
+        if (!$isPurchased) {
+            $isPurchased = \App\Models\ElearningTransaction::where('id_user', Auth::id())
+                ->where('id_e_learning', $course->id)
+                ->where('payment_status', 'completed')
+                ->exists();
+            if (!$isPurchased) {
+                $isPurchased = session()->get("elearning_purchased_{$course->id}", false);
+            }
+        }
+
+        if (!$isPurchased) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kursus ini berbayar. Silakan selesaikan pembayaran terlebih dahulu.',
+                ], 403);
+            }
+            return redirect()->route('public.elearning.checkout', $course->slug)->with('warning', 'Silakan selesaikan pembayaran kursus terlebih dahulu.');
+        }
 
         $progress = \App\Models\ELearningProgress::firstOrNew([
             'id_user' => Auth::id(),
@@ -400,7 +439,7 @@ class ElearningController extends Controller
 
             $formattedHarga = 'Rp ' . number_format($course->harga ?: 0, 0, ',', '.');
 
-            // Kirim Notifikasi in-app
+            // Kirim Notifikasi in-app ke Pembeli
             \App\Models\Notification::send(
                 Auth::id(),
                 'Pembelian Kursus Berhasil',
@@ -408,6 +447,18 @@ class ElearningController extends Controller
                 'course_enrolled',
                 route('public.elearning.show', $course->slug)
             );
+
+            // Kirim Notifikasi in-app ke Staf Admin
+            $adminStaff = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
+            foreach ($adminStaff as $adm) {
+                \App\Models\Notification::send(
+                    $adm->id,
+                    'Pembelian Kursus E-Learning',
+                    "Pengguna {$user->nama} telah membeli kursus '{$course->judul}' ({$formattedHarga}).",
+                    'course_purchased_admin',
+                    route('admin.elearning.curriculum', $course->id)
+                );
+            }
 
             // Rekam ke Activity Log
             \App\Models\ActivityLog::record(
@@ -473,9 +524,15 @@ class ElearningController extends Controller
      */
     public function printInvoice(Request $request, $id)
     {
-        $transaction = \App\Models\ElearningTransaction::with(['elearning', 'user'])
-            ->where('id_user', Auth::id())
-            ->findOrFail($id);
+        $transaction = \App\Models\ElearningTransaction::with(['elearning', 'user'])->findOrFail($id);
+
+        $user = auth()->user();
+        $isAdmin = in_array($user->role, ['admin', 'super_admin']) || $user->roleAdmin()->exists();
+        $isOwner = (int) $transaction->id_user === (int) $user->id;
+
+        if (!$isAdmin && !$isOwner) {
+            abort(403, 'Akses ditolak! Anda tidak memiliki izin untuk melihat atau mencetak dokumen invoice ini.');
+        }
 
         return view('public.elearning.invoice-print', compact('transaction'));
     }

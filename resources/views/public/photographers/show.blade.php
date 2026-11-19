@@ -937,8 +937,11 @@
                 {{ $avgRating }}
               </div>
               <div class="flex items-center justify-center gap-1 text-amber-400">
+                @php
+                  $numericRating = is_numeric($avgRating) ? (float) $avgRating : 0;
+                @endphp
                 @for($i = 1; $i <= 5; $i++)
-                  <svg class="w-4 h-4 {{ $i <= round($avgRating) ? 'fill-current' : 'text-gray-200 dark:text-gray-700 fill-current' }}" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <svg class="w-4 h-4 {{ $i <= round($numericRating) ? 'fill-current' : 'text-gray-200 dark:text-gray-700 fill-current' }}" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                 @endfor
               </div>
               <p class="text-xs text-gray-400 font-medium">Berdasarkan {{ $totalReviews }} ulasan terverifikasi</p>
@@ -948,7 +951,7 @@
             <div class="md:col-span-8 space-y-1.5">
               @foreach([5, 4, 3, 2, 1] as $star)
                 @php
-                  $cnt = $starDistribution[$star] ?? 0;
+                  $cnt = $starDistribution[$star] ?? ($starCounts[$star] ?? 0);
                   $pct = $totalReviews > 0 ? round(($cnt / $totalReviews) * 100) : 0;
                 @endphp
                 <div class="flex items-center gap-2.5 text-xs text-gray-600 dark:text-gray-400">

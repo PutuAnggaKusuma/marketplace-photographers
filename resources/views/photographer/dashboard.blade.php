@@ -496,7 +496,10 @@
                     $isValidated = (bool) $b->is_validated_client;
                   @endphp
                   @if($b->status_contract === 'cancelled')
-                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">Dibatalkan</span>
+                    @php
+                      $isExpired = $b->cancellation && (str_contains(strtolower($b->cancellation->alasan), 'kadaluarsa') || str_contains(strtolower($b->cancellation->alasan), 'terlewati'));
+                    @endphp
+                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">{{ $isExpired ? 'Kadaluarsa' : 'Dibatalkan' }}</span>
                   @elseif($b->status_contract === 'completed' && $isValidated)
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
                   @elseif($hasPhotos && !$isValidated)

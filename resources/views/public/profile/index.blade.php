@@ -304,7 +304,7 @@ function clientProfileApp() {
       nama: {!! json_encode(old('nama', $user->nama ?? '')) !!},
       email: {!! json_encode(old('email', $user->email ?? '')) !!},
       nomor_telepon: {!! json_encode(old('nomor_telepon', $photographer?->nomor_telepon ?: $client?->nomor_telepon ?: '')) !!},
-      alamat: {!! json_encode(old('alamat', $photographer?->alamat ?? '')) !!},
+      alamat: {!! json_encode(old('alamat', $photographer?->alamat ?: $client?->alamat ?: '')) !!},
       deskripsi_bio: {!! json_encode(old('deskripsi_bio', $photographer?->deskripsi_bio ?? '')) !!},
     },
     touched: {

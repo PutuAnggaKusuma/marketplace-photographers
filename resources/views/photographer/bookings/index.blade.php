@@ -513,33 +513,16 @@
 
 
                 @php
-
-
-
                     $statusLabels = [
-
-
-
                         'all' => 'Semua Status Order',
-
-
-
-                        'pending' => 'Menunggu Konfirmasi',
-
-
-
-                        'confirmed' => 'Dikonfirmasi',
-
-
-
-                        'completed' => 'Selesai'
-
-
-
+                        'pending_review' => 'Perlu Direview',
+                        'pending_payment' => 'Menunggu Pembayaran Klien',
+                        'confirmed' => 'Jadwal Terkonfirmasi',
+                        'pending_client' => 'Menunggu Konfirmasi Klien',
+                        'completed' => 'Selesai',
+                        'cancelled' => 'Dibatalkan',
+                        'expired' => 'Kadaluarsa',
                     ];
-
-
-
                     $curStatName = $statusLabels[$filterStatus ?? 'all'] ?? 'Semua Status Order';
 
 
@@ -911,65 +894,35 @@
 
 
                                                     <div class="flex items-center gap-2 pt-1">
+                                                        <button type="button" 
+                                                                @click="$dispatch('open-confirm-modal', {
+                                                                    title: 'Setujui Jadwal Baru?',
+                                                                    message: 'Jadwal pemotretan akan diperbarui sesuai tanggal dan jam pengajuan klien.',
+                                                                    confirmText: 'Ya, Setujui Jadwal',
+                                                                    iconType: 'check',
+                                                                    buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold',
+                                                                    actionUrl: '{{ route('photographer.bookings.reschedule-respond', $c->id) }}',
+                                                                    method: 'POST',
+                                                                    params: { action: 'accept' }
+                                                                })"
+                                                                class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
+                                                            Setujui Jadwal Baru
+                                                        </button>
 
-
-
-                                                        <form action="{{ route('photographer.bookings.reschedule-respond', $c->id) }}" method="POST" class="inline">
-
-
-
-                                                            @csrf
-
-
-
-                                                            <input type="hidden" name="action" value="accept">
-
-
-
-                                                            <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
-
-
-
-                                                                Setujui Jadwal Baru
-
-
-
-                                                            </button>
-
-
-
-                                                        </form>
-
-
-
-                                                        <form action="{{ route('photographer.bookings.reschedule-respond', $c->id) }}" method="POST" class="inline">
-
-
-
-                                                            @csrf
-
-
-
-                                                            <input type="hidden" name="action" value="reject">
-
-
-
-                                                            <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
-
-
-
-                                                                Tolak
-
-
-
-                                                            </button>
-
-
-
-                                                        </form>
-
-
-
+                                                        <button type="button" 
+                                                                @click="$dispatch('open-confirm-modal', {
+                                                                    title: 'Tolak Pengajuan Jadwal?',
+                                                                    message: 'Pengajuan jadwal baru akan ditolak dan sesi pemotretan tetap mengacu pada jadwal sebelumnya.',
+                                                                    confirmText: 'Ya, Tolak Jadwal',
+                                                                    iconType: 'warning',
+                                                                    buttonClass: 'bg-rose-600 hover:bg-rose-700 text-white font-extrabold',
+                                                                    actionUrl: '{{ route('photographer.bookings.reschedule-respond', $c->id) }}',
+                                                                    method: 'POST',
+                                                                    params: { action: 'reject' }
+                                                                })"
+                                                                class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
+                                                            Tolak
+                                                        </button>
                                                     </div>
 
 
@@ -1046,16 +999,11 @@
                                     @php
                                         $hasPhotos = !empty($detail?->hasil_foto_url);
                                         $isValidated = (bool) $c->is_validated_client;
+                                        $isRevision = $hasPhotos && !$isValidated && ($c->status_contract === 'active' || str_starts_with($detail?->catatan_fotografer ?? '', 'Klien meminta revisi:'));
                                         $clientName = $client->nama ?? ($client->user->nama ?? 'Klien');
                                         $serviceName = $detail?->service?->nama_layanan ?? 'sesi pemotretan';
                                         $bookingDateStr = $detail?->booking_date ? \Carbon\Carbon::parse($detail->booking_date)->translatedFormat('d M Y') : '';
                                         $datePhrase = $bookingDateStr ? " pada {$bookingDateStr}" : '';
-
-                                        // Template Draft Chat Kontekstual (Ditahan di kotak input tanpa kirim otomatis)
-                                        $pendingPrefill = "Halo Kak {$clientName}, terima kasih atas reservasi sesi {$serviceName}{$datePhrase}. Sebelum saya konfirmasi, ada beberapa hal terkait lokasi dan konsep yang ingin saya tanyakan.";
-                                        $paymentPrefill = "Halo Kak {$clientName}, jadwal sesi {$serviceName}{$datePhrase} sudah saya setujui. Silakan menyelesaikan pembayaran invoice agar jadwal pemotretan resmi terkunci. Jika ada hal yang ingin didiskusikan terlebih dahulu, silakan kabari saya ya!";
-                                        $activePrefill = "Halo Kak {$clientName}, terkait jadwal sesi pemotretan {$serviceName}{$datePhrase}, apakah ada referensi gaya foto atau titik temu khusus yang ingin kita sepakati bersama?";
-                                        $confirmPrefill = "Halo Kak {$clientName}, hasil foto untuk sesi {$serviceName} sudah selesai saya unggah dan dapat diakses di menu reservasi. Silakan diperiksa ya Kak, dan jika sudah sesuai mohon bantuannya untuk mengonfirmasi penerimaan hasil foto. Terima kasih!";
                                     @endphp
 
                                     @if($c->status_contract === 'cancelled')
@@ -1064,6 +1012,8 @@
                                         </span>
                                     @elseif($c->status_contract === 'completed' && $isValidated)
                                         <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Selesai</span>
+                                    @elseif($isRevision)
+                                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Revisi Diminta</span>
                                     @elseif($hasPhotos && !$isValidated)
                                         <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Menunggu Konfirmasi Klien</span>
                                     @elseif($c->status_contract === 'active')
@@ -1087,17 +1037,20 @@
 
                                         {{-- 1. TOMBOL UTAMA (PRIMARY ACTION) --}}
                                         @if($detail && $detail->status_booking === 'pending')
-                                            <form action="{{ route('photographer.bookings.status', $c->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                <input type="hidden" name="status" value="confirmed">
-                                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
-                                                    Terima
-                                                </button>
-                                            </form>
-                                            <a href="{{ route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $pendingPrefill]) }}" 
-                                               class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
-                                                Chat Klien
-                                            </a>
+                                            <button type="button" 
+                                                    @click="$dispatch('open-confirm-modal', {
+                                                        title: 'Terima Booking Sesi Foto?',
+                                                        message: 'Jadwal sesi foto akan dikonfirmasi dan klien dapat melanjutkan ke tahap pembayaran.',
+                                                        confirmText: 'Ya, Terima Booking',
+                                                        iconType: 'check',
+                                                        buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold',
+                                                        actionUrl: '{{ route('photographer.bookings.status', $c->id) }}',
+                                                        method: 'POST',
+                                                        params: { status: 'confirmed' }
+                                                    })"
+                                                    class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 font-bold text-xs transition min-w-[60px] text-center shadow-2xs cursor-pointer">
+                                                Terima
+                                            </button>
                                         @elseif($c->status_contract === 'active')
                                             <button type="button" 
                                                     @click="selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
@@ -1105,7 +1058,7 @@
                                                 Upload Hasil Foto
                                             </button>
                                         @elseif($c->status_contract === 'pending_payment')
-                                            <a href="{{ route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $paymentPrefill]) }}" 
+                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
                                                class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
                                                 Chat Klien
                                             </a>
@@ -1129,10 +1082,7 @@
                                                 </button>
                                             @endif
                                         @else
-                                            @php
-                                                $chatPrefill = ($hasPhotos && !$isValidated) ? $confirmPrefill : null;
-                                            @endphp
-                                            <a href="{{ $chatPrefill ? route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $chatPrefill]) : route('photographer.chat.client', $c->id_client) }}" 
+                                            <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
                                                class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-bold text-xs transition min-w-[60px] text-center shadow-2xs inline-block">
                                                 Chat Klien
                                             </a>
@@ -1159,30 +1109,22 @@
                                                      x-transition:leave="transition ease-in duration-75" 
                                                      x-transition:leave-start="transform opacity-100 scale-100" 
                                                      x-transition:leave-end="transform opacity-0 scale-95" 
-                                                     class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50 text-left" 
+                                                     class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
                                                      style="display: none;">
 
-                                                    <!-- Chat Klien -->
-                                                    @php
-                                                        $menuPrefill = null;
-                                                        if ($detail && $detail->status_booking === 'pending') {
-                                                            $menuPrefill = $pendingPrefill;
-                                                        } elseif ($c->status_contract === 'pending_payment') {
-                                                            $menuPrefill = $paymentPrefill;
-                                                        } elseif ($hasPhotos && !$isValidated) {
-                                                            $menuPrefill = $confirmPrefill;
-                                                        }
-                                                    @endphp
-                                                    <a href="{{ $menuPrefill ? route('photographer.chat.client', ['clientId' => $c->id_client, 'prefill' => $menuPrefill]) : route('photographer.chat.client', $c->id_client) }}" 
-                                                       class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
-                                                        Chat Klien
-                                                    </a>
+                                                    <!-- Chat Klien (Hanya tampil jika bukan tombol utama di luar agar tidak duplikat per Rule #69) -->
+                                                    @if(($detail && $detail->status_booking === 'pending') || $c->status_contract === 'active' || ($c->status_contract === 'completed' || ($detail && $detail->status_booking === 'completed')))
+                                                        <a href="{{ route('photographer.chat.client', $c->id_client) }}" 
+                                                           class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
+                                                            Chat Klien
+                                                        </a>
+                                                    @endif
 
                                                     <!-- Ajukan Jadwal Ulang -->
                                                     @if($detail && !in_array($c->status_contract, ['completed', 'cancelled']) && $detail->reschedule_status !== 'pending')
                                                         <button type="button" 
                                                                 @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; rescheduleClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; rescheduleModal = true" 
-                                                                class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                                class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
                                                             Ajukan Jadwal Ulang
                                                         </button>
                                                     @endif
@@ -1192,13 +1134,13 @@
                                                         @if($detail && $detail->hasil_foto_url)
                                                             @if(!$c->photographerClientReview)
                                                                 <a href="{{ $detail->hasil_foto_url }}" target="_blank" 
-                                                                   class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
+                                                                   class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left">
                                                                     Buka Link Drive
                                                                 </a>
                                                             @endif
                                                             <button type="button" 
                                                                     @click="menuOpen = false; selectedContractId = {{ $c->id }}; selectedClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; uploadModal = true" 
-                                                                    class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                                    class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
                                                                 Perbarui Link
                                                             </button>
                                                         @endif
@@ -1206,7 +1148,7 @@
                                                         @if($c->photographerClientReview)
                                                             <button type="button" 
                                                                     @click="menuOpen = false; openRateModal({{ $c->id }}, '{{ addslashes($client->nama ?? 'Klien') }}', {{ $c->photographerClientReview->rating }}, '{{ addslashes($c->photographerClientReview->ulasan ?? '') }}', {{ $c->photographerClientReview->ketepatan_waktu }}, {{ $c->photographerClientReview->komunikasi }}, {{ $c->photographerClientReview->kerjasama }})" 
-                                                                    class="w-full px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
+                                                                    class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 block transition text-left cursor-pointer">
                                                                 Ubah Ulasan
                                                             </button>
                                                         @endif
@@ -1216,13 +1158,13 @@
                                                     @if($detail && $detail->status_booking === 'pending')
                                                         <button type="button" 
                                                                 @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
-                                                                class="w-full px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                                class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
                                                             Tolak Sesi
                                                         </button>
                                                     @elseif($detail && $detail->status_booking === 'confirmed')
                                                         <button type="button" 
                                                                 @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelClientName = '{{ addslashes($client->nama ?? 'Klien') }}'; cancelModal = true" 
-                                                                class="w-full px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                                class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 block transition text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
                                                             Batalkan Sesi
                                                         </button>
                                                     @endif

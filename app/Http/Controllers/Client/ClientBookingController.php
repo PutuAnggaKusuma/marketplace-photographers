@@ -82,67 +82,65 @@ class ClientBookingController extends Controller
         $filterStatus = $request->query('status', 'all');
 
         if ($filterStatus && $filterStatus !== 'all') {
-
-            if ($filterStatus === 'pending') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'pending');
-
-                });
-
-            } elseif ($filterStatus === 'confirmed') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'confirmed');
-
-                });
-
-            } elseif ($filterStatus === 'completed') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'completed');
-
-                });
-
-            } elseif ($filterStatus === 'cancelled') {
-
-                $query->where(function ($q) {
-
-                    $q->where('status_contract', 'cancelled')
-
-                      ->orWhereHas('bookingDetail', function ($b) {
-
-                          $b->where('status_booking', 'cancelled');
-
+            if ($filterStatus === 'pending_confirmation' || $filterStatus === 'pending') {
+                $query->whereNotIn('status_contract', ['cancelled'])
+                      ->where(function ($q) {
+                          $q->whereIn('status_contract', ['draft', 'pending'])
+                            ->orWhere('is_validated_photographer', false);
+                      })
+                      ->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'pending'));
+            } elseif ($filterStatus === 'pending_payment') {
+                $query->whereNotIn('status_contract', ['cancelled'])
+                      ->where(function ($q) {
+                          $q->where('status_contract', 'pending_payment')
+                            ->orWhere(function ($sub) {
+                                $sub->where('is_validated_photographer', true)
+                                    ->whereIn('status_contract', ['approved', 'pending_payment']);
+                            });
                       });
-
-                });
-
+            } elseif ($filterStatus === 'confirmed') {
+                $query->where('status_contract', 'active')
+                      ->whereHas('bookingDetail', fn($q) => $q->whereNull('hasil_foto_url'));
+            } elseif ($filterStatus === 'pending_client') {
+                $query->whereNotIn('status_contract', ['cancelled'])
+                      ->where('is_validated_client', false)
+                      ->whereHas('bookingDetail', fn($q) => $q->whereNotNull('hasil_foto_url'));
+            } elseif ($filterStatus === 'completed') {
+                $query->where('status_contract', 'completed')
+                      ->where('is_validated_client', true);
+            } elseif ($filterStatus === 'cancelled') {
+                $query->where('status_contract', 'cancelled')
+                      ->where(function ($q) {
+                          $q->whereDoesntHave('cancellation')
+                            ->orWhereHas('cancellation', function ($cq) {
+                                $cq->where('alasan', 'not like', '%kadaluarsa%')
+                                   ->where('alasan', 'not like', '%terlewati%');
+                            });
+                      });
+            } elseif ($filterStatus === 'expired') {
+                $query->where('status_contract', 'cancelled')
+                      ->whereHas('cancellation', function ($cq) {
+                          $cq->where(function ($sub) {
+                              $sub->where('alasan', 'like', '%kadaluarsa%')
+                                  ->orWhere('alasan', 'like', '%terlewati%');
+                          });
+                      });
             }
-
         }
 
 
 
         $stats = [
-
             'all' => Contract::where('id_client', $clientProfile->id)->count(),
-
             'pending' => Contract::where('id_client', $clientProfile->id)
-
+                ->whereNotIn('status_contract', ['cancelled'])
                 ->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'pending'))->count(),
-
             'confirmed' => Contract::where('id_client', $clientProfile->id)
-
+                ->whereNotIn('status_contract', ['cancelled'])
                 ->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'confirmed'))->count(),
-
             'completed' => Contract::where('id_client', $clientProfile->id)
-
+                ->whereNotIn('status_contract', ['cancelled'])
                 ->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count(),
-
         ];
 
 
@@ -231,47 +229,49 @@ class ClientBookingController extends Controller
         $filterStatus = $request->query('status', 'all');
 
         if ($filterStatus && $filterStatus !== 'all') {
-
             if ($filterStatus === 'completed') {
-
-                $query->where(function ($q) {
-                    $q->whereIn('status_contract', ['active', 'completed'])
-                      ->orWhereHas('payments', function ($p) {
-                          $p->where('payment_status', 'completed');
-                      });
-                });
-
-            } elseif ($filterStatus === 'pending') {
-
-                $query->whereNotIn('status_contract', ['active', 'completed', 'cancelled'])
+                $query->where('status_contract', '!=', 'cancelled')
                       ->where(function ($q) {
-
-                          $q->whereDoesntHave('payments')
-
-                            ->orWhereHas('payments', function ($p) {
-
-                                $p->where('payment_status', 'pending');
-
+                          $q->where('status_contract', 'completed')
+                            ->orWhere(function ($sub) {
+                                $sub->where('payment_type', 'full')
+                                    ->whereHas('payments', fn($p) => $p->where('payment_status', 'completed'));
+                            })
+                            ->orWhere(function ($sub) {
+                                $sub->where('payment_type', 'dp')
+                                    ->where(function ($dpQ) {
+                                        $dpQ->where('status_contract', 'completed')
+                                            ->orWhereHas('payments', fn($p) => $p->where('contract_payment_type', 'full')->where('payment_status', 'completed'));
+                                    });
                             });
-
                       });
-
-            } elseif ($filterStatus === 'failed') {
-
-                $query->where(function ($q) {
-
-                    $q->where('status_contract', 'cancelled')
-
-                      ->orWhereHas('payments', function ($p) {
-
-                          $p->where('payment_status', 'failed');
-
+            } elseif ($filterStatus === 'dp_paid') {
+                $query->where('status_contract', '!=', 'cancelled')
+                      ->where('status_contract', '!=', 'completed')
+                      ->where('payment_type', 'dp')
+                      ->whereHas('payments', fn($p) => $p->where('payment_status', 'completed'))
+                      ->whereDoesntHave('payments', fn($p) => $p->where('contract_payment_type', 'full')->where('payment_status', 'completed'));
+            } elseif ($filterStatus === 'pending') {
+                $query->whereNotIn('status_contract', ['cancelled', 'completed'])
+                      ->whereHas('payments', fn($p) => $p->where('payment_status', 'pending'));
+            } elseif ($filterStatus === 'cancelled') {
+                $query->where('status_contract', 'cancelled')
+                      ->where(function ($q) {
+                          $q->whereDoesntHave('cancellation')
+                            ->orWhereHas('cancellation', function ($cq) {
+                                $cq->where('alasan', 'not like', '%kadaluarsa%')
+                                   ->where('alasan', 'not like', '%terlewati%');
+                            });
                       });
-
-                });
-
+            } elseif ($filterStatus === 'expired') {
+                $query->where('status_contract', 'cancelled')
+                      ->whereHas('cancellation', function ($cq) {
+                          $cq->where(function ($sub) {
+                              $sub->where('alasan', 'like', '%kadaluarsa%')
+                                  ->orWhere('alasan', 'like', '%terlewati%');
+                          });
+                      });
             }
-
         }
 
 
@@ -289,21 +289,15 @@ class ClientBookingController extends Controller
 
 
         if ($filterStatus && $filterStatus !== 'all') {
-
             if ($filterStatus === 'completed') {
-
                 $elearningQuery->where('payment_status', 'completed');
-
             } elseif ($filterStatus === 'pending') {
-
                 $elearningQuery->where('payment_status', 'pending');
-
-            } elseif ($filterStatus === 'failed') {
-
+            } elseif (in_array($filterStatus, ['cancelled', 'expired', 'failed'])) {
                 $elearningQuery->where('payment_status', 'failed');
-
+            } else {
+                $elearningQuery->whereRaw('1 = 0');
             }
-
         }
 
 
@@ -555,43 +549,32 @@ class ClientBookingController extends Controller
 
 
         // Update Contract status
-
         $contractUpdates = ['status_contract' => 'cancelled'];
-
         if ($isPaid) {
-
-            $contractUpdates['status_payout'] = 'refunded';
-
-            $contractUpdates['payout_notes'] = 'Dibatalkan oleh Klien: ' . $request->alasan;
-
+            $contractUpdates['status_payout'] = 'holding';
+            $contractUpdates['payout_notes'] = 'Dibatalkan oleh Klien (Menunggu refund Admin): ' . $request->alasan;
+        } else {
+            $contractUpdates['status_payout'] = null;
+            $contractUpdates['expired_at'] = now();
+            $contract->payments()->where('payment_status', 'pending')->update(['payment_status' => 'failed']);
         }
-
         $contract->update($contractUpdates);
 
-
-
         // Update Booking detail
-
         if ($contract->bookingDetail) {
-
             $contract->bookingDetail->update(['status_booking' => 'cancelled']);
-
         }
 
-
+        // Hitung nominal riil yang sudah dibayarkan klien untuk pencatatan refund
+        $actualPaid = (float) $contract->payments->where('payment_status', 'completed')->sum('payment_amount');
+        $refundAmount = $actualPaid > 0 ? $actualPaid : ($contract->payment_type === 'dp' && $contract->jumlah_dp > 0 ? (float) $contract->jumlah_dp : (float) $contract->jumlah);
 
         // Simpan ke tabel contract_cancellations
-
         \App\Models\ContractCancellation::create([
-
             'id_contract' => $contract->id,
-
             'alasan' => $request->alasan,
-
             'dibatalkan_oleh' => 'client',
-
-            'refund_amount' => $isPaid ? $contract->jumlah : 0,
-
+            'refund_amount' => $isPaid ? $refundAmount : 0,
         ]);
 
 
@@ -691,9 +674,23 @@ class ClientBookingController extends Controller
         }
 
         if (!$contract->bookingDetail || empty($contract->bookingDetail->hasil_foto_url)) {
-
             return redirect()->back()->with('error', 'Fotografer belum mengunggah galeri hasil foto.');
+        }
 
+        // Validasi Pelunasan: Jika tipe DP, pelunasan 70% wajib lunas sebelum konfirmasi selesai
+        if ($contract->payment_type === 'dp') {
+            $fullPayment = $contract->payments->where('contract_payment_type', 'full')->first();
+            $isFullPaid = $fullPayment && $fullPayment->payment_status === 'completed';
+            if (!$isFullPaid) {
+                return redirect()->route('booking.invoice', $contract->id)
+                    ->with('warning', 'Silakan selesaikan pelunasan sisa pembayaran terlebih dahulu sebelum mengonfirmasi hasil foto.');
+            }
+        } else {
+            $hasPaid = $contract->payments->where('payment_status', 'completed')->isNotEmpty();
+            if (!$hasPaid) {
+                return redirect()->route('booking.invoice', $contract->id)
+                    ->with('error', 'Pembayaran untuk pesanan ini belum diselesaikan.');
+            }
         }
 
 
@@ -807,25 +804,17 @@ class ClientBookingController extends Controller
         }
 
         $contract->update([
-
+            'status_contract' => 'active',
             'is_validated_client' => false,
-
             'status_payout' => 'holding',
-
             'payout_notes' => 'Permintaan revisi diajukan Klien: ' . $request->catatan_revisi,
-
         ]);
 
-
-
         if ($contract->bookingDetail) {
-
             $contract->bookingDetail->update([
-
+                'status_booking' => 'confirmed',
                 'catatan_fotografer' => 'Klien meminta revisi: ' . $request->catatan_revisi
-
             ]);
-
         }
 
 
@@ -1062,6 +1051,14 @@ class ClientBookingController extends Controller
                 'jam_selesai' => $rescheduleCheck['new_end_time'],
                 'reschedule_status' => 'accepted',
             ]);
+
+            $contract->refresh();
+
+            if (in_array($contract->status_contract, ['pending_payment', 'draft', 'approved'])) {
+                $contract->update([
+                    'expired_at' => $contract->calculatePaymentDeadline(),
+                ]);
+            }
 
             if ($contract->photographer && $contract->photographer->id_user) {
 

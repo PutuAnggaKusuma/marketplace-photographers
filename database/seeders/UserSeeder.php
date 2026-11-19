@@ -81,7 +81,7 @@ class UserSeeder extends Seeder
         $clients = [
             [
                 'email' => 'dian@gmail.com',
-                'nama' => 'Dian & Febri',
+                'nama' => 'Dian Febri',
                 'nomor_telepon' => '081234567899',
                 'alamat' => 'Jakarta Selatan',
             ],

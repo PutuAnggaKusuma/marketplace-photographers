@@ -327,6 +327,8 @@ class ProfileController extends Controller
 
                     'nomor_telepon' => trim($request->nomor_telepon),
 
+                    'alamat' => $request->filled('alamat') ? trim($request->alamat) : null,
+
                 ];
 
 

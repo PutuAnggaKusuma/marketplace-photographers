@@ -73,65 +73,62 @@ class PhotographerBookingController extends Controller
 
 
         if ($filterStatus !== 'all') {
-
-            if ($filterStatus === 'pending') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'pending');
-
-                });
-
+            if ($filterStatus === 'pending_review' || $filterStatus === 'pending') {
+                $query->whereNotIn('status_contract', ['cancelled', 'completed', 'active', 'pending_payment'])
+                      ->where(function ($q) {
+                          $q->where('is_validated_photographer', false)
+                            ->orWhereHas('bookingDetail', fn($b) => $b->where('status_booking', 'pending'));
+                      });
+            } elseif ($filterStatus === 'pending_payment') {
+                $query->whereNotIn('status_contract', ['cancelled', 'completed'])
+                      ->where(function ($q) {
+                          $q->where('status_contract', 'pending_payment')
+                            ->orWhere(function ($sub) {
+                                $sub->where('is_validated_photographer', true)
+                                    ->whereHas('bookingDetail', fn($b) => $b->where('status_booking', 'confirmed'))
+                                    ->where('status_contract', '!=', 'active');
+                            });
+                      });
             } elseif ($filterStatus === 'confirmed') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'confirmed');
-
-                });
-
+                $query->where('status_contract', 'active')
+                      ->whereHas('bookingDetail', fn($b) => $b->whereNull('hasil_foto_url'));
+            } elseif ($filterStatus === 'pending_client') {
+                $query->whereNotIn('status_contract', ['cancelled'])
+                      ->where('is_validated_client', false)
+                      ->whereHas('bookingDetail', fn($b) => $b->whereNotNull('hasil_foto_url'));
             } elseif ($filterStatus === 'completed') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'completed');
-
-                });
-
+                $query->where('status_contract', 'completed')
+                      ->where('is_validated_client', true);
             } elseif ($filterStatus === 'cancelled') {
-
-                $query->whereHas('bookingDetail', function ($q) {
-
-                    $q->where('status_booking', 'cancelled');
-
-                });
-
+                $query->where('status_contract', 'cancelled')
+                      ->where(function ($q) {
+                          $q->whereDoesntHave('cancellation')
+                            ->orWhereHas('cancellation', function ($cq) {
+                                $cq->where('alasan', 'not like', '%kadaluarsa%')
+                                   ->where('alasan', 'not like', '%terlewati%');
+                            });
+                      });
+            } elseif ($filterStatus === 'expired') {
+                $query->where('status_contract', 'cancelled')
+                      ->whereHas('cancellation', function ($cq) {
+                          $cq->where(function ($sub) {
+                              $sub->where('alasan', 'like', '%kadaluarsa%')
+                                  ->orWhere('alasan', 'like', '%terlewati%');
+                          });
+                      });
             }
-
         }
 
-
-
         $perPage = (int) $request->query('per_page', 10);
-
         if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
-
         $contracts = $query->paginate($perPage)->withQueryString();
 
-
-
         // Stats summary count
-
         $stats = [
-
             'all' => Contract::where('id_photographer', $photographer->id)->count(),
-
-            'pending' => Contract::where('id_photographer', $photographer->id)->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'pending'))->count(),
-
-            'confirmed' => Contract::where('id_photographer', $photographer->id)->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'confirmed'))->count(),
-
-            'completed' => Contract::where('id_photographer', $photographer->id)->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count(),
-
+            'pending' => Contract::where('id_photographer', $photographer->id)->whereNotIn('status_contract', ['cancelled'])->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'pending'))->count(),
+            'confirmed' => Contract::where('id_photographer', $photographer->id)->whereNotIn('status_contract', ['cancelled'])->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'confirmed'))->count(),
+            'completed' => Contract::where('id_photographer', $photographer->id)->whereNotIn('status_contract', ['cancelled'])->whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count(),
         ];
 
 
@@ -139,11 +136,8 @@ class PhotographerBookingController extends Controller
         // Pengingat Sesi Pintar H-1 & Hari-H untuk Fotografer
 
         $urgentSession = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
-
                 $q->where('id_photographer', $photographer->id)
-
-                  ->whereNotIn('status_contract', ['cancelled', 'completed']);
-
+                  ->where('status_contract', 'active');
             })
 
             ->upcomingUrgent()
@@ -221,7 +215,7 @@ class PhotographerBookingController extends Controller
                 }
             }
 
-            $isPaid = in_array($contract->status_payout, ['holding', 'ready']);
+            $isPaid = $contract->payments()->where('payment_status', 'completed')->exists();
             $newContractStatus = $isPaid ? 'active' : 'pending_payment';
 
             $contract->bookingDetail()->update(['status_booking' => 'confirmed']);
@@ -283,54 +277,38 @@ class PhotographerBookingController extends Controller
 
             $alasan = $request->input('alasan') ?: 'Fotografer tidak dapat menerima jadwal sesi pemotretan ini.';
 
-            $isPaid = in_array($contract->status_payout, ['holding', 'ready']);
-
-
+            $isPaid = $contract->payments()->where('payment_status', 'completed')->exists();
+            $actualPaid = (float) $contract->payments->where('payment_status', 'completed')->sum('payment_amount');
+            $refundAmount = $isPaid ? ($actualPaid > 0 ? $actualPaid : ($contract->payment_type === 'dp' && $contract->jumlah_dp > 0 ? (float)$contract->jumlah_dp : (float)$contract->jumlah)) : 0;
 
             $contract->bookingDetail()->update(['status_booking' => 'cancelled']);
-
-            
 
             $contractUpdates = ['status_contract' => 'cancelled'];
 
             if ($isPaid) {
-
-                $contractUpdates['status_payout'] = 'refunded';
-
-                $contractUpdates['payout_notes'] = 'Dibatalkan oleh Fotografer: ' . $alasan;
-
+                $contractUpdates['status_payout'] = 'holding';
+                $contractUpdates['payout_notes'] = 'Dibatalkan oleh Fotografer (Menunggu refund Admin): ' . $alasan;
+            } else {
+                $contractUpdates['status_payout'] = null;
+                $contractUpdates['expired_at'] = now();
+                $contract->payments()->where('payment_status', 'pending')->update(['payment_status' => 'failed']);
             }
 
             $contract->update($contractUpdates);
 
-
-
             // Simpan ke log contract_cancellations
-
             \App\Models\ContractCancellation::create([
-
                 'id_contract' => $contract->id,
-
                 'alasan' => $alasan,
-
                 'dibatalkan_oleh' => 'photographer',
-
-                'refund_amount' => $isPaid ? $contract->jumlah : 0,
-
+                'refund_amount' => $refundAmount,
             ]);
 
-
-
             \App\Models\ActivityLog::record(
-
                 'booking_rejected',
-
                 "Fotografer {$photographer->nama} menolak/membatalkan booking sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . ". Alasan: {$alasan}",
-
                 $contract,
-
-                ['alasan' => $alasan, 'refund_amount' => $isPaid ? $contract->jumlah : 0]
-
+                ['alasan' => $alasan, 'refund_amount' => $refundAmount]
             );
 
 
@@ -381,16 +359,13 @@ class PhotographerBookingController extends Controller
             }
 
         } elseif ($status === 'completed') {
+            if ($contract->status_contract !== 'active') {
+                return redirect()->back()->with('error', 'Pesanan sesi foto belum dapat ditandai selesai karena pembayaran belum terverifikasi.');
+            }
 
             $contract->bookingDetail()->update(['status_booking' => 'completed']);
 
             $contractUpdates = ['status_contract' => 'completed'];
-
-            if ($contract->status_payout === 'holding' || empty($contract->status_payout)) {
-
-                $contractUpdates['status_payout'] = 'ready';
-
-            }
 
             $contract->update($contractUpdates);
 
@@ -459,27 +434,24 @@ class PhotographerBookingController extends Controller
             return redirect()->back()->with('error', 'Pesanan sesi foto yang telah dibatalkan tidak dapat diunggah galeri fotonya.');
         }
 
+        if (!in_array($contract->status_contract, ['active', 'completed'])) {
+            return redirect()->back()->with('error', 'Tautan galeri foto hanya dapat diunggah untuk pesanan yang telah aktif dan terverifikasi pembayarannya.');
+        }
+
         $contract->bookingDetail()->update([
-
             'hasil_foto_url' => $request->input('hasil_foto_url'),
-
             'catatan_fotografer' => $request->input('catatan_fotografer'),
-
             'status_booking' => 'completed',
-
         ]);
 
-
-
         $contractUpdates = [
-
             'status_contract' => 'completed',
-
             'is_validated_client' => false,
-
-            'status_payout' => 'holding', // Escrow ditahan hingga klien mengonfirmasi penerimaan hasil foto
-
         ];
+
+        if (empty($contract->status_payout)) {
+            $contractUpdates['status_payout'] = 'holding';
+        }
 
         $contract->update($contractUpdates);
 
@@ -589,9 +561,11 @@ class PhotographerBookingController extends Controller
 
 
         if (in_array($contract->status_contract, ['completed', 'cancelled'])) {
-
             return redirect()->back()->with('error', 'Pesanan yang sudah selesai atau dibatalkan tidak dapat diubah jadwalnya.');
+        }
 
+        if ($contract->bookingDetail && $contract->bookingDetail->reschedule_status === 'pending') {
+            return redirect()->back()->with('error', 'Sudah ada pengajuan jadwal ulang yang sedang menunggu tanggapan.');
         }
 
 
@@ -743,6 +717,14 @@ class PhotographerBookingController extends Controller
                 'jam_selesai' => $rescheduleCheck['new_end_time'],
                 'reschedule_status' => 'accepted',
             ]);
+
+            $contract->refresh();
+
+            if (in_array($contract->status_contract, ['pending_payment', 'draft', 'approved'])) {
+                $contract->update([
+                    'expired_at' => $contract->calculatePaymentDeadline(),
+                ]);
+            }
 
             if ($contract->client && $contract->client->id_user) {
 
@@ -928,6 +910,30 @@ class PhotographerBookingController extends Controller
 
         return redirect()->back()->with('success', 'Penilaian performa klien berhasil disimpan!');
 
+    }
+
+    /**
+     * Hitung Jumlah Pesanan Booking Pending yang Memerlukan Tindakan Fotografer (Real-Time Badge).
+     */
+    public function pendingCount(Request $request)
+    {
+        $photographer = RolePhotographer::where('id_user', auth()->id())->first();
+        if (!$photographer) {
+            return response()->json(['pending_count' => 0]);
+        }
+
+        $count = Contract::where('id_photographer', $photographer->id)
+            ->whereNotIn('status_contract', ['cancelled'])
+            ->whereHas('bookingDetail', function ($q) {
+                $q->where('status_booking', 'pending')
+                  ->orWhere(function ($rq) {
+                      $rq->where('reschedule_status', 'pending')
+                         ->where('reschedule_by', 'client');
+                  });
+            })
+            ->count();
+
+        return response()->json(['pending_count' => $count]);
     }
 
 }

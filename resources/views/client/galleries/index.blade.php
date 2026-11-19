@@ -375,35 +375,72 @@
             @if(!$c->is_validated_client)
               <div class="pt-2">
                 <div class="space-y-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
-                  <div class="space-y-0.5">
-                    <span class="text-xs font-black text-gray-900 dark:text-white block">Konfirmasi Hasil Pemotretan</span>
-                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                      Silakan periksa album foto di atas. Jika Anda puas, klik tombol konfirmasi untuk menyelesaikan pesanan dan merilis pencairan dana mitra fotografer.
-                    </p>
-                  </div>
+                  @php
+                    $isRevisionPending = str_starts_with($detail?->catatan_fotografer ?? '', 'Klien meminta revisi:');
+                    $isDpBooking = $c->payment_type === 'dp';
+                    $fullPayment = $c->payments->where('contract_payment_type', 'full')->first();
+                    $isPelunasanPending = $isDpBooking && (!$fullPayment || $fullPayment->payment_status !== 'completed');
+                  @endphp
+                  @if($isRevisionPending)
+                    <div class="space-y-0.5">
+                      <span class="text-xs font-black text-amber-600 dark:text-amber-400 block">Permintaan Revisi Sedang Diproses</span>
+                      <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Anda telah mengajukan permintaan revisi. Mitra fotografer sedang memperbaharui hasil foto sesuai catatan Anda.
+                      </p>
+                    </div>
+                  @elseif($isPelunasanPending)
+                    <div class="space-y-0.5">
+                      <span class="text-xs font-black text-amber-600 dark:text-amber-400 block">Pelunasan Pembayaran Diperlukan</span>
+                      <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Sesi ini menggunakan skema uang muka (DP). Silakan selesaikan pelunasan sisa pembayaran untuk dapat mengonfirmasi penerimaan hasil foto.
+                      </p>
+                    </div>
 
-                  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
-                    <!-- Tombol 1: Konfirmasi Selesai -->
-                    <button type="button" 
-                            @click="$dispatch('open-confirm-modal', {
-                                title: 'Konfirmasi Terima Hasil Foto?',
-                                message: 'Apakah Anda sudah memeriksa album foto dan puas dengan hasilnya? Setelah dikonfirmasi, pesanan akan diselesaikan dan dana pembayaran akan diteruskan ke mitra fotografer.',
-                                confirmText: 'Ya, Selesaikan Pesanan',
-                                type: 'success',
-                                actionUrl: '{{ route('client.bookings.confirm-gallery', $c->id) }}',
-                                method: 'POST'
-                            })"
-                            class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition text-center cursor-pointer">
-                      Konfirmasi Terima & Selesaikan
-                    </button>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                      <!-- Tombol Pelunasan (Amber LensMatch) -->
+                      <a href="{{ route('booking.invoice', $c->id) }}"
+                         class="flex-1 py-2.5 px-4 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs shadow-xs transition text-center cursor-pointer">
+                        Selesaikan Pelunasan
+                      </a>
 
-                    <!-- Tombol 2: Minta Revisi -->
-                    <button type="button" 
-                            @click="openRevisionModal = {{ $c->id }}"
-                            class="py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-extrabold text-xs transition text-center cursor-pointer">
-                      Minta Revisi
-                    </button>
-                  </div>
+                      <!-- Tombol Minta Revisi -->
+                      <button type="button" 
+                              @click="openRevisionModal = {{ $c->id }}"
+                              class="py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-extrabold text-xs transition text-center cursor-pointer">
+                        Minta Revisi
+                      </button>
+                    </div>
+                  @else
+                    <div class="space-y-0.5">
+                      <span class="text-xs font-black text-gray-900 dark:text-white block">Konfirmasi Hasil Pemotretan</span>
+                      <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Silakan periksa album foto di atas. Jika Anda puas, klik tombol konfirmasi untuk menyelesaikan pesanan dan merilis pencairan dana mitra fotografer.
+                      </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                      <!-- Tombol 1: Konfirmasi Selesai -->
+                      <button type="button" 
+                              @click="$dispatch('open-confirm-modal', {
+                                  title: 'Konfirmasi Terima Hasil Foto?',
+                                  message: 'Apakah Anda sudah memeriksa album foto dan puas dengan hasilnya? Setelah dikonfirmasi, pesanan akan diselesaikan dan dana pembayaran akan diteruskan ke mitra fotografer.',
+                                  confirmText: 'Ya, Selesaikan Pesanan',
+                                  type: 'success',
+                                  actionUrl: '{{ route('client.bookings.confirm-gallery', $c->id) }}',
+                                  method: 'POST'
+                              })"
+                              class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition text-center cursor-pointer">
+                        Konfirmasi Selesai
+                      </button>
+
+                      <!-- Tombol 2: Minta Revisi -->
+                      <button type="button" 
+                              @click="openRevisionModal = {{ $c->id }}"
+                              class="py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-extrabold text-xs transition text-center cursor-pointer">
+                        Minta Revisi
+                      </button>
+                    </div>
+                  @endif
                 </div>
               </div>
             @endif</div>

@@ -51,13 +51,24 @@ class AuthController extends Controller
         }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+
+            if ($user->is_suspended) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                $reason = $user->suspension_reason ? " Alasan: {$user->suspension_reason}." : '';
+                return back()->withErrors([
+                    'email' => "Akun Anda sedang dibekukan oleh admin.{$reason} Silakan hubungi admin untuk bantuan lebih lanjut.",
+                ])->onlyInput('email');
+            }
+
             $intended = session('url.intended') ?: $request->input('redirect');
             $request->session()->regenerate();
             if ($intended) {
                 session(['url.intended' => $intended]);
             }
 
-            $user = Auth::user();
             return $this->redirectBasedOnRole($user)
                 ->with('success', 'Selamat datang kembali, ' . $user->nama . '!');
         }

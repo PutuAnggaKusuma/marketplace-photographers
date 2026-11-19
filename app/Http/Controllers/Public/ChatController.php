@@ -472,16 +472,6 @@ class ChatController extends Controller
             ]);
         }
 
-        if ($thread->messages()->count() === 0) {
-            ChatMessage::create([
-                'id_chat_booking' => $thread->id,
-                'id_sender' => $photographer->id_user ?? $user->id,
-                'message' => 'Halo Kak ' . $user->nama . '! Ada yang bisa kami bantu mengenai rencana sesi foto Anda bersama ' . $photographer->nama . '?',
-                'is_read' => false,
-            ]);
-            $thread->touch();
-        }
-
         $params = ['thread' => $thread->id];
         if ($request->filled('prefill')) {
             $params['prefill'] = $request->input('prefill');
@@ -632,10 +622,20 @@ class ChatController extends Controller
             $attachmentUrl = asset('storage/' . $path);
         }
 
+        $replyToId = null;
+        if ($request->filled('reply_to_id')) {
+            $validReply = ChatMessage::where('id', $request->reply_to_id)
+                ->where('id_chat_booking', $thread->id)
+                ->exists();
+            if ($validReply) {
+                $replyToId = (int) $request->reply_to_id;
+            }
+        }
+
         $msg = ChatMessage::create([
             'id_chat_booking' => $thread->id,
             'id_sender' => $user->id,
-            'reply_to_id' => $request->reply_to_id,
+            'reply_to_id' => $replyToId,
             'message' => $request->message ?? '',
             'attachment_url' => $attachmentUrl,
             'attachment_type' => $attachmentUrl ? 'image' : null,
@@ -996,8 +996,8 @@ class ChatController extends Controller
                     'fee_marketplace' => $feeMarketplace,
                     'payout_amount' => $netPayout,
                     'status_contract' => 'pending_payment',
-                    'status_payout' => 'holding',
-                    'is_validated_client' => true,
+                    'status_payout' => null,
+                    'is_validated_client' => false,
                     'is_validated_photographer' => true,
                     'payout_notes' => 'Pemesanan Penawaran Khusus Chat: ' . $offer->judul_penawaran,
                 ]);
@@ -1016,7 +1016,7 @@ class ChatController extends Controller
                     'allow_same_location_bypass' => false,
                     'lokasi' => $offer->lokasi,
                     'catatan_khusus' => "Penawaran Khusus Chat: {$offer->judul_penawaran}. " . $offer->deskripsi,
-                    'status_booking' => 'pending',
+                    'status_booking' => 'confirmed',
                 ]);
 
                 // Terapkan batas waktu pembayaran dinamis
@@ -1059,8 +1059,8 @@ class ChatController extends Controller
         $paymentLabel = $result['payment_type'] === 'dp' ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh';
         $contractCode = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
-        // 5. Kirim Pesan Konfirmasi di Chat
-        ChatMessage::create([
+        // 5. Kirim Pesan Konfirmasi di Chat dan Broadcast Real-Time
+        $chatMsg = ChatMessage::create([
             'id_chat_booking' => $offer->id_chat_booking,
             'id_sender' => $user->id,
             'message' => "Saya telah menyetujui penawaran khusus '{$offer->judul_penawaran}' ({$contractCode}) dengan skema {$paymentLabel}. Menuju pembayaran invoice...",
@@ -1068,6 +1068,11 @@ class ChatController extends Controller
         ]);
 
         $offer->chatBooking->touch();
+
+        \App\Services\RealtimeBroadcastService::broadcastSafely(
+            new \App\Events\MessageSent($chatMsg->fresh(['sender', 'replyTo.sender']), $user),
+            true
+        );
 
         // 6. Notifikasi ke Fotografer
         if ($offer->photographer && $offer->photographer->id_user) {
@@ -1090,7 +1095,7 @@ class ChatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Penawaran berhasil disetujui! Mengarahkan ke halaman pembayaran...',
+            'message' => 'Penawaran berhasil disetujui. Mengarahkan ke halaman pembayaran...',
             'invoice_url' => $invoiceUrl,
             'redirect_url' => $invoiceUrl,
         ]);
@@ -1115,7 +1120,7 @@ class ChatController extends Controller
 
         $offer->update(['status' => 'rejected']);
 
-        ChatMessage::create([
+        $chatMsg = ChatMessage::create([
             'id_chat_booking' => $offer->id_chat_booking,
             'id_sender' => $user->id,
             'message' => "Mohon maaf, saya belum dapat menyetujui penawaran khusus '{$offer->judul_penawaran}' saat ini.",
@@ -1123,6 +1128,11 @@ class ChatController extends Controller
         ]);
 
         $offer->chatBooking->touch();
+
+        \App\Services\RealtimeBroadcastService::broadcastSafely(
+            new \App\Events\MessageSent($chatMsg->fresh(['sender', 'replyTo.sender']), $user),
+            true
+        );
 
         if ($offer->photographer && $offer->photographer->id_user) {
             \App\Models\Notification::send(

@@ -38,8 +38,10 @@ class CategoryController extends Controller
         $query = Category::withCount('photographers');
 
         if (!empty($search)) {
-            $query->where('nama_kategori', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_kategori', 'like', "%{$search}%")
                   ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
         }
 
         if ($sort === 'latest') {
@@ -68,24 +70,34 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kategori' => 'required|string|max:255|unique:categories,nama_kategori',
+            'nama_kategori' => 'required|string|max:100|unique:categories,nama_kategori',
             'deskripsi' => 'nullable|string|max:500',
+            'foto_kategori' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'icon_url' => 'nullable|url',
         ], [
             'nama_kategori.required' => 'Nama kategori wajib diisi.',
             'nama_kategori.unique' => 'Nama kategori sudah terdaftar.',
+            'foto_kategori.image' => 'Berkas foto harus berupa gambar.',
+            'foto_kategori.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
+            'foto_kategori.max' => 'Ukuran foto maksimal 10 MB.',
         ]);
 
         $slug = Str::slug($request->nama_kategori);
+        $iconUrl = trim($request->icon_url) ?: null;
+
+        if ($request->hasFile('foto_kategori')) {
+            $path = $request->file('foto_kategori')->store('categories', 'public');
+            $iconUrl = asset('storage/' . $path);
+        }
 
         Category::create([
             'nama_kategori' => trim($request->nama_kategori),
             'slug' => $slug,
             'deskripsi' => trim($request->deskripsi),
-            'icon_url' => trim($request->icon_url) ?: null,
+            'icon_url' => $iconUrl,
         ]);
 
-        return redirect()->back()->with('success', "Kategori '{$request->nama_kategori}' berhasil ditambahkan!");
+        return redirect()->route('admin.categories')->with('success', "Kategori '{$request->nama_kategori}' berhasil ditambahkan!");
     }
 
     /**
@@ -96,21 +108,50 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $request->validate([
-            'nama_kategori' => 'required|string|max:255|unique:categories,nama_kategori,' . $id,
+            'nama_kategori' => 'required|string|max:100|unique:categories,nama_kategori,' . $id,
             'deskripsi' => 'nullable|string|max:500',
+            'foto_kategori' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'icon_url' => 'nullable|url',
+        ], [
+            'nama_kategori.required' => 'Nama kategori wajib diisi.',
+            'nama_kategori.unique' => 'Nama kategori sudah terdaftar.',
+            'foto_kategori.image' => 'Berkas foto harus berupa gambar.',
+            'foto_kategori.mimes' => 'Format foto harus JPG, PNG, atau WEBP.',
+            'foto_kategori.max' => 'Ukuran foto maksimal 10 MB.',
         ]);
 
         $slug = Str::slug($request->nama_kategori);
+        $iconUrl = $category->icon_url;
+
+        // Opsi hapus foto jika diminta
+        if ($request->boolean('hapus_foto')) {
+            if ($category->icon_url && str_contains($category->icon_url, '/storage/categories/')) {
+                $oldPath = str_replace(asset('storage/'), '', $category->icon_url);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete(ltrim($oldPath, '/'));
+            }
+            $iconUrl = null;
+        }
+
+        if ($request->hasFile('foto_kategori')) {
+            // Hapus file lama jika tersimpan di disk lokal
+            if ($category->icon_url && str_contains($category->icon_url, '/storage/categories/')) {
+                $oldPath = str_replace(asset('storage/'), '', $category->icon_url);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete(ltrim($oldPath, '/'));
+            }
+            $path = $request->file('foto_kategori')->store('categories', 'public');
+            $iconUrl = asset('storage/' . $path);
+        } elseif ($request->filled('icon_url')) {
+            $iconUrl = trim($request->icon_url);
+        }
 
         $category->update([
             'nama_kategori' => trim($request->nama_kategori),
             'slug' => $slug,
             'deskripsi' => trim($request->deskripsi),
-            'icon_url' => trim($request->icon_url) ?: $category->icon_url,
+            'icon_url' => $iconUrl,
         ]);
 
-        return redirect()->back()->with('success', 'Master kategori berhasil diperbarui!');
+        return redirect()->route('admin.categories')->with('success', 'Master kategori berhasil diperbarui!');
     }
 
     /**
@@ -119,6 +160,20 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
+
+        $photographerCount = $category->photographers()->count();
+        $portfolioCount = $category->portfolios()->count();
+
+        if ($photographerCount > 0 || $portfolioCount > 0) {
+            return redirect()->back()->with('error', "Kategori '{$category->nama_kategori}' tidak dapat dihapus karena masih terhubung dengan {$photographerCount} fotografer dan {$portfolioCount} portofolio.");
+        }
+
+        // Hapus file foto dari disk jika ada
+        if ($category->icon_url && str_contains($category->icon_url, '/storage/categories/')) {
+            $oldPath = str_replace(asset('storage/'), '', $category->icon_url);
+            \Illuminate\Support\Facades\Storage::disk('public')->delete(ltrim($oldPath, '/'));
+        }
+
         $category->delete();
 
         return redirect()->back()->with('success', 'Master kategori berhasil dihapus.');

@@ -27,9 +27,20 @@ class DashboardController extends Controller
         $paidContests = \App\Models\ContestRegistration::where('status_pembayaran', 'lunas')->with('contest')->get();
         $contestRevenue = $paidContests->sum(fn($r) => (float) ($r->contest->biaya_pendaftaran ?? 0));
 
-        $grossRevenue = Contract::sum('jumlah') + $elearningRevenue + $contestRevenue;
-        $platformFee = (Contract::sum('fee_marketplace') ?: (Contract::sum('jumlah') * 0.10)) + $elearningRevenue + $contestRevenue;
-        $escrowHolding = Contract::whereIn('status_payout', ['holding', 'ready'])->sum('jumlah');
+        $settledContracts = Contract::where(function ($q) {
+            $q->whereIn('status_contract', ['active', 'completed'])
+              ->orWhereIn('status_payout', ['holding', 'ready', 'paid']);
+        })->whereHas('payments', function ($p) {
+            $p->where('payment_status', 'completed');
+        })->get();
+
+        $grossRevenue = $settledContracts->sum('jumlah') + $elearningRevenue + $contestRevenue;
+        $platformFee = $settledContracts->sum(fn($c) => $c->fee_marketplace > 0 ? $c->fee_marketplace : ($c->jumlah * 0.10)) + $elearningRevenue + $contestRevenue;
+        $escrowHolding = Contract::where('status_payout', 'holding')
+            ->where('status_contract', '!=', 'cancelled')
+            ->whereHas('payments', function ($p) {
+                $p->where('payment_status', 'completed');
+            })->sum('payout_amount');
         
         // 2. Actionable Operational Alerts (100% Dynamic)
         $pendingVerifications = RolePhotographer::where(function ($q) {
@@ -40,15 +51,16 @@ class DashboardController extends Controller
               });
         })->count();
         $pendingPayouts = Contract::where('status_payout', 'ready')->count();
-        $pendingContestReviews = PhotoContest::where('status', 'pending')->count();
+        $pendingContestReviews = PhotoContest::where('status', 'pending_review')->count();
 
-        // 3. Monthly Financial & Booking Trends (Jan - Des 2026)
+        // 3. Monthly Financial & Booking Trends (Jan - Des Tahun Berjalan)
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         $monthlyRevenue = array_fill(0, 12, 0);
         $monthlyCommission = array_fill(0, 12, 0);
+        $currentYear = (int) date('Y');
 
-        foreach (Contract::all() as $c) {
-            if ($c->created_at) {
+        foreach ($settledContracts as $c) {
+            if ($c->created_at && (int) $c->created_at->format('Y') === $currentYear) {
                 $mIdx = (int) $c->created_at->format('n') - 1;
                 $monthlyRevenue[$mIdx] += ($c->jumlah / 1000000); // Dalam Juta Rupiah
                 $fee = $c->fee_marketplace > 0 ? $c->fee_marketplace : ($c->jumlah * 0.10);
@@ -56,7 +68,7 @@ class DashboardController extends Controller
             }
         }
 
-        foreach (\App\Models\ElearningTransaction::where('payment_status', 'completed')->get() as $el) {
+        foreach (\App\Models\ElearningTransaction::where('payment_status', 'completed')->whereYear('created_at', $currentYear)->get() as $el) {
             if ($el->created_at) {
                 $mIdx = (int) $el->created_at->format('n') - 1;
                 $monthlyRevenue[$mIdx] += ($el->nominal / 1000000);
@@ -65,7 +77,7 @@ class DashboardController extends Controller
         }
 
         foreach ($paidContests as $pc) {
-            if ($pc->created_at && $pc->contest && $pc->contest->biaya_pendaftaran > 0) {
+            if ($pc->created_at && (int) $pc->created_at->format('Y') === $currentYear && $pc->contest && $pc->contest->biaya_pendaftaran > 0) {
                 $mIdx = (int) $pc->created_at->format('n') - 1;
                 $monthlyRevenue[$mIdx] += ($pc->contest->biaya_pendaftaran / 1000000);
                 $monthlyCommission[$mIdx] += ($pc->contest->biaya_pendaftaran / 1000000);
@@ -79,14 +91,15 @@ class DashboardController extends Controller
 
         // 4. Category Demand Breakdown (100% Dynamic from Contracts & Categories)
         $categories = Category::all();
-        $totalBookings = Contract::count();
+        $totalBookings = Contract::whereIn('status_contract', ['active', 'completed'])->count();
         $palette = ['bg-amber-400', 'bg-gray-800 dark:bg-gray-200', 'bg-amber-600', 'bg-gray-500', 'bg-gray-400'];
         $categoryStats = [];
 
         foreach ($categories as $cat) {
-            $catCount = Contract::whereHas('photographer.categories', function ($q) use ($cat) {
-                $q->where('categories.id', $cat->id);
-            })->count();
+            $catCount = Contract::whereIn('status_contract', ['active', 'completed'])
+                ->whereHas('photographer.categories', function ($q) use ($cat) {
+                    $q->where('categories.id', $cat->id);
+                })->count();
 
             $share = $totalBookings > 0 ? round(($catCount / $totalBookings) * 100) : 0;
             $categoryStats[] = [
@@ -125,7 +138,8 @@ class DashboardController extends Controller
             'client.user',
             'photographer.user',
             'bookingDetail.service',
-            'payments'
+            'payments',
+            'cancellation'
         ])
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')

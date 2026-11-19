@@ -84,7 +84,7 @@ class PhotoContest extends Model
      */
     public function getCurrentStageAttribute(): string
     {
-        if ($this->status === 'selesai') {
+        if (in_array($this->status, ['selesai', 'ditutup', 'ditolak'])) {
             return 'selesai';
         }
 
@@ -94,20 +94,38 @@ class PhotoContest extends Model
             return 'selesai';
         }
 
-        if ($this->judging_start && $this->judging_end && $now->between($this->judging_start, $this->judging_end)) {
+        // Jika batas akhir lomba (end_date) sudah terlewat, tahapan resmi berakhir/selesai
+        if ($this->end_date && $now->gt(\Carbon\Carbon::parse($this->end_date)->endOfDay())) {
+            return 'selesai';
+        }
+
+        $regStart = $this->registration_start ? \Carbon\Carbon::parse($this->registration_start)->startOfDay() : null;
+        $regEnd = $this->registration_end ? \Carbon\Carbon::parse($this->registration_end)->endOfDay() : null;
+
+        $subStart = $this->submission_start ? \Carbon\Carbon::parse($this->submission_start)->startOfDay() : null;
+        $subEnd = $this->submission_end ? \Carbon\Carbon::parse($this->submission_end)->endOfDay() : null;
+
+        $judgeStart = $this->judging_start ? \Carbon\Carbon::parse($this->judging_start)->startOfDay() : null;
+        $judgeEnd = $this->judging_end ? \Carbon\Carbon::parse($this->judging_end)->endOfDay() : null;
+
+        if ($judgeStart && $judgeEnd && $now->between($judgeStart, $judgeEnd)) {
             return 'penjurian';
         }
 
-        if ($this->submission_start && $this->submission_end && $now->between($this->submission_start, $this->submission_end)) {
+        if ($subStart && $subEnd && $now->between($subStart, $subEnd)) {
             return 'pengumpulan_karya';
         }
 
-        if ($this->registration_start && $this->registration_end) {
-            if ($now->between($this->registration_start, $this->registration_end)) {
+        if ($regStart && $regEnd) {
+            if ($now->between($regStart, $regEnd)) {
                 return 'pendaftaran';
-            } elseif ($now->gt($this->registration_end) && (!$this->submission_start || $now->lt($this->submission_start))) {
+            } elseif ($now->gt($regEnd) && (!$subStart || $now->lt($subStart))) {
                 return 'verifikasi';
             }
+        }
+
+        if ($subEnd && $now->gt($subEnd) && (!$judgeStart || $now->lt($judgeStart))) {
+            return 'verifikasi';
         }
 
         // Fallback berdasarkan status umum lomba

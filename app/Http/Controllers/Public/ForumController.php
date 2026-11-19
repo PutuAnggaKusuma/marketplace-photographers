@@ -8,6 +8,7 @@ use App\Models\ForumComment;
 use App\Models\ForumPostMedia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class ForumController extends Controller
@@ -180,28 +181,88 @@ class ForumController extends Controller
             'comment' => trim($request->comment),
         ]);
 
-        return redirect()->back()->with('success', $parentId ? 'Balasan komentar berhasil dikirimkan.' : 'Balasan komentar berhasil dikirimkan.');
+        if ($post->id_user && (int) $post->id_user !== (int) $user->id) {
+            \App\Models\Notification::send(
+                $post->id_user,
+                'Balasan Baru di Forum',
+                "{$user->nama} membalas topik diskusi Anda: '{$post->judul}'.",
+                'forum_reply',
+                route('public.forum.show', $post->id)
+            );
+        }
+
+        return redirect()->back()->with('success', 'Balasan komentar berhasil dikirimkan.');
     }
 
     public function likeComment($id)
     {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
         $comment = ForumComment::findOrFail($id);
-        $comment->increment('likes');
+        $userId = Auth::id();
+        $voteKey = "forum_comment_vote_{$userId}_{$id}";
+        $existingVote = Cache::get($voteKey);
+
+        if ($existingVote === 'like') {
+            if ($comment->likes > 0) $comment->decrement('likes');
+            Cache::forget($voteKey);
+            $userVote = null;
+        } elseif ($existingVote === 'dislike') {
+            if ($comment->dislikes > 0) $comment->decrement('dislikes');
+            $comment->increment('likes');
+            Cache::put($voteKey, 'like', now()->addYear());
+            $userVote = 'like';
+        } else {
+            $comment->increment('likes');
+            Cache::put($voteKey, 'like', now()->addYear());
+            $userVote = 'like';
+        }
+
+        $comment->refresh();
+
         return response()->json([
             'success' => true,
-            'likes' => $comment->likes,
-            'dislikes' => $comment->dislikes
+            'user_vote' => $userVote,
+            'likes' => (int) $comment->likes,
+            'dislikes' => (int) $comment->dislikes
         ]);
     }
 
     public function dislikeComment($id)
     {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
         $comment = ForumComment::findOrFail($id);
-        $comment->increment('dislikes');
+        $userId = Auth::id();
+        $voteKey = "forum_comment_vote_{$userId}_{$id}";
+        $existingVote = Cache::get($voteKey);
+
+        if ($existingVote === 'dislike') {
+            if ($comment->dislikes > 0) $comment->decrement('dislikes');
+            Cache::forget($voteKey);
+            $userVote = null;
+        } elseif ($existingVote === 'like') {
+            if ($comment->likes > 0) $comment->decrement('likes');
+            $comment->increment('dislikes');
+            Cache::put($voteKey, 'dislike', now()->addYear());
+            $userVote = 'dislike';
+        } else {
+            $comment->increment('dislikes');
+            Cache::put($voteKey, 'dislike', now()->addYear());
+            $userVote = 'dislike';
+        }
+
+        $comment->refresh();
+
         return response()->json([
             'success' => true,
-            'likes' => $comment->likes,
-            'dislikes' => $comment->dislikes
+            'user_vote' => $userVote,
+            'likes' => (int) $comment->likes,
+            'dislikes' => (int) $comment->dislikes
         ]);
     }
 
@@ -282,6 +343,7 @@ class ForumController extends Controller
             abort(403, 'Aksi tidak diizinkan.');
         }
 
+        $comment->replies()->delete();
         $comment->delete();
         return redirect()->back()->with('success', 'Komentar Anda berhasil dihapus.');
     }

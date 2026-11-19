@@ -24,7 +24,7 @@
         <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
           <a href="{{ route('public.contests.index') }}" class="hover:text-amber-500 transition">Informasi Lomba</a>
           <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-          <span class="text-gray-900 dark:text-white font-bold">Ajukan Event Lomba</span>
+          <span class="text-gray-400 dark:text-gray-500 font-bold">Ajukan Event Lomba</span>
         </nav>
 
         <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -169,7 +169,7 @@
 
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                Total Hadiah & Benefit Apresiasi <span class="text-rose-500">*</span>
+                Total Hadiah Lomba <span class="text-rose-500">*</span>
               </label>
               <input 
                 type="text" 
@@ -178,7 +178,7 @@
                 x-model="form.hadiah"
                 @input="touched.hadiah = true; validateHadiah()"
                 @blur="touched.hadiah = true; validateHadiah()"
-                placeholder="mis. Rp 15.000.000 + E-Sertifikat + Publikasi Eksklusif" 
+                placeholder="mis. Rp 15.000.000, sertifikat digital, dan publikasi media" 
                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                 :class="touched.hadiah && errors.hadiah ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
               >
@@ -303,12 +303,12 @@
           <!-- Section 3: Deskripsi & Syarat Ketentuan Dinamis -->
           <div class="space-y-4 pt-2">
             <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">
-              3. Konten & Aturan Lomba
+              3. Deskripsi dan Ketentuan Lomba
             </h3>
 
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                Deskripsi & Konsep Tema Lomba <span class="text-rose-500">*</span>
+                Deskripsi Tema Lomba <span class="text-rose-500">*</span>
               </label>
               <textarea 
                 name="deskrpisi_lomba" 
@@ -326,7 +326,7 @@
 
             <div>
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                Syarat & Ketentuan Teknis Lomba <span class="text-rose-500">*</span>
+                Syarat dan Ketentuan Lomba <span class="text-rose-500">*</span>
               </label>
               <textarea 
                 name="syarat_ketentuan" 
@@ -335,11 +335,11 @@
                 x-model="form.syarat_ketentuan"
                 @input="touched.syarat_ketentuan = true; validateSyarat()"
                 @blur="touched.syarat_ketentuan = true; validateSyarat()"
-                placeholder="1. Orisinalitas karya foto dan kepemilikan hak cipta.&#10;2. Ketentuan teknis file (resolusi, format gambar, batas olah digital dasar).&#10;3. Kriteria penilaian dewan juri (storytelling, komposisi, pencahayaan).&#10;4. Mekanisme pengumuman pemenang & distribusi hadiah.&#10;5. Keputusan juri bersifat mutlak." 
+                placeholder="1. Orisinalitas karya foto dan kepemilikan hak cipta.&#10;2. Ketentuan teknis file (resolusi, format gambar, batas olah digital dasar).&#10;3. Kriteria penilaian dewan juri (storytelling, komposisi, pencahayaan).&#10;4. Mekanisme pengumuman pemenang dan distribusi hadiah.&#10;5. Keputusan juri bersifat mutlak." 
                 class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed font-mono"
                 :class="touched.syarat_ketentuan && errors.syarat_ketentuan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'"
               ></textarea>
-              <span class="text-[11px] text-gray-400 block mt-1">Poin-poin syarat & ketentuan ini akan ditampilkan secara utuh pada halaman detail lomba.</span>
+              <span class="text-[11px] text-gray-400 block mt-1">Syarat dan ketentuan ini akan ditampilkan pada halaman detail lomba.</span>
               <p x-show="touched.syarat_ketentuan && errors.syarat_ketentuan" x-text="errors.syarat_ketentuan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
           </div>
@@ -595,7 +595,7 @@ function proposeContestApp() {
     },
     validateHadiah() {
       const val = (this.form.hadiah || '').trim();
-      if (!val) this.errors.hadiah = 'Total hadiah & benefit wajib diisi.';
+      if (!val) this.errors.hadiah = 'Total hadiah lomba wajib diisi.';
       else this.errors.hadiah = '';
     },
     validateDates() {
@@ -623,8 +623,8 @@ function proposeContestApp() {
     },
     validateSyarat() {
       const val = (this.form.syarat_ketentuan || '').trim();
-      if (!val) this.errors.syarat_ketentuan = 'Syarat & ketentuan lomba wajib diisi.';
-      else if (val.length < 30) this.errors.syarat_ketentuan = 'Syarat & ketentuan minimal 30 karakter.';
+      if (!val) this.errors.syarat_ketentuan = 'Syarat dan ketentuan lomba wajib diisi.';
+      else if (val.length < 30) this.errors.syarat_ketentuan = 'Syarat dan ketentuan minimal 30 karakter.';
       else this.errors.syarat_ketentuan = '';
     },
     submitForm(e) {

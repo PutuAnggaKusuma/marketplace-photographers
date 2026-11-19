@@ -50,10 +50,9 @@ class PhotographerController extends Controller
         $avgRating = \App\Models\Testimonial::where('is_hidden', false)->count() > 0
             ? number_format(\App\Models\Testimonial::where('is_hidden', false)->avg('rating'), 1)
             : '-';
-        $totalCompletedBookings = \App\Models\Contract::whereHas('bookingDetail', fn($q) => $q->where('status_booking', 'completed'))->count();
-        if ($totalCompletedBookings === 0) {
-            $totalCompletedBookings = \App\Models\Contract::count();
-        }
+        $totalCompletedBookings = \App\Models\Contract::where('status_contract', 'completed')
+            ->where('is_validated_client', true)
+            ->count();
 
         return view('public.photographers.index', compact(
             'categories',
@@ -115,7 +114,7 @@ class PhotographerController extends Controller
         // Subqueries for Real Sorting & Minimum Rating Filter (hanya ulasan klien aktif / tidak disembunyikan)
         $query->withAvg(['testimonials as testimonials_avg_rating' => fn($q) => $q->where('is_hidden', false)], 'rating')
               ->withCount(['testimonials as testimonials_count' => fn($q) => $q->where('is_hidden', false)])
-              ->withCount('contracts')
+              ->withCount(['contracts as contracts_count' => fn($q) => $q->whereIn('status_contract', ['active', 'completed'])])
               ->withMin(['services' => function ($sq) {
                   $sq->whereNotNull('tarif_harga')
                      ->where('tarif_harga', '>', 0)
@@ -284,7 +283,7 @@ class PhotographerController extends Controller
 
         $testimonials = $photographer->visibleTestimonials()->with('client.user')->orderBy('created_at', 'desc')->get();
         $totalReviews = $testimonials->count();
-        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : '0.0';
+        $avgRating = $totalReviews > 0 ? number_format($testimonials->avg('rating'), 1) : '-';
         $completedSessionsCount = $photographer->contracts()
             ->where('status_contract', 'completed')
             ->where('is_validated_client', true)
@@ -297,6 +296,7 @@ class PhotographerController extends Controller
             2 => $testimonials->where('rating', 2)->count(),
             1 => $testimonials->where('rating', 1)->count(),
         ];
+        $starDistribution = $starCounts;
 
         // Real-Time Calendar Availability Data (Blocked & Booked Dates)
         $blockedDates = $photographer->availabilities
@@ -312,6 +312,31 @@ class PhotographerController extends Controller
                 ]];
             })
             ->toArray();
+
+        // Tambahkan hari libur rutin mingguan dari jam kerja (is_open = false)
+        $closedDays = \App\Models\PhotographerWorkingHour::where('id_photographer', $photographer->id)
+            ->where('is_open', false)
+            ->pluck('day_name', 'day_of_week')
+            ->toArray();
+
+        if (!empty($closedDays)) {
+            $startDate = \Carbon\Carbon::today();
+            $endDate = \Carbon\Carbon::today()->addDays(90);
+            $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+            foreach ($period as $dt) {
+                $dow = (int) $dt->dayOfWeekIso;
+                if (isset($closedDays[$dow])) {
+                    $dateKey = $dt->format('Y-m-d');
+                    if (!isset($blockedDates[$dateKey])) {
+                        $blockedDates[$dateKey] = [
+                            'keterangan' => 'Libur Rutin (' . $closedDays[$dow] . ')',
+                            'time_info' => 'Seharian Penuh',
+                            'is_all_day' => true,
+                        ];
+                    }
+                }
+            }
+        }
 
         $contractBookings = \App\Models\ContractBooking::whereHas('contract', function ($q) use ($photographer) {
             $q->where('id_photographer', $photographer->id)
@@ -369,6 +394,7 @@ class PhotographerController extends Controller
             'avgRating', 
             'completedSessionsCount',
             'starCounts',
+            'starDistribution',
             'blockedDates',
             'bookedDates',
             'isFavorited',

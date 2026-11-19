@@ -31,7 +31,7 @@ class BookingScheduleService
             return null;
         }
         $clean = substr(trim($time), 0, 8);
-        if ($clean === '23:59:59' || $clean === '23:59' || $clean === '24:00' || $clean === '24:00:00') {
+        if ($clean === '23:59:59' || $clean === '23:59:00' || $clean === '23:59' || $clean === '24:00' || $clean === '24:00:00') {
             return 1440;
         }
         return self::parseTimeToMinutes($time);
@@ -122,7 +122,7 @@ class BookingScheduleService
         foreach ($manualFullBlocks as $blk) {
             $isFullDay = !$blk->jam_mulai
                 || !$blk->jam_selesai
-                || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59');
+                || ($blk->jam_mulai === '00:00:00' && in_array($blk->jam_selesai, ['23:59:59', '23:59:00']));
             if ($isFullDay && $blk->tanggal) {
                 $dates[] = $blk->tanggal;
             }
@@ -153,6 +153,23 @@ class BookingScheduleService
             );
             foreach ($period as $dt) {
                 $dates[] = $dt->format('Y-m-d');
+            }
+        }
+
+        // Tambahkan hari libur rutin mingguan dari jam kerja (is_open = false) untuk rentang 90 hari ke depan
+        $closedDays = PhotographerWorkingHour::where('id_photographer', $photographerId)
+            ->where('is_open', false)
+            ->pluck('day_of_week')
+            ->toArray();
+
+        if (!empty($closedDays)) {
+            $startDate = Carbon::parse($fromDate);
+            $endDate = (clone $startDate)->addDays(90);
+            $calendarPeriod = CarbonPeriod::create($startDate, $endDate);
+            foreach ($calendarPeriod as $cDate) {
+                if (in_array((int) $cDate->dayOfWeekIso, $closedDays)) {
+                    $dates[] = $cDate->format('Y-m-d');
+                }
             }
         }
 
@@ -246,7 +263,7 @@ class BookingScheduleService
         foreach ($blockedAvailabilities as $blk) {
             $isFullDay = !$blk->jam_mulai
                 || !$blk->jam_selesai
-                || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59');
+                || ($blk->jam_mulai === '00:00:00' && in_array($blk->jam_selesai, ['23:59:59', '23:59:00']));
             if ($isFullDay) {
                 return 'Fotografer libur pada tanggal tersebut (' . ($blk->keterangan ?: 'Libur Penuh') . ').';
             }
@@ -345,7 +362,7 @@ class BookingScheduleService
             foreach ($blocks as $blk) {
                 $isFullDay = !$blk->jam_mulai
                     || !$blk->jam_selesai
-                    || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59');
+                    || ($blk->jam_mulai === '00:00:00' && in_array($blk->jam_selesai, ['23:59:59', '23:59:00']));
 
                 if ($isFullDay || !$isSingleDay || $startMin === null || $endMin === null) {
                     return 'Tanggal ' . $dt->format('d M Y') . ' ditandai libur oleh fotografer (' . ($blk->keterangan ?: 'Jadwal Ditutup') . ').';
@@ -478,7 +495,7 @@ class BookingScheduleService
                     ->where('tanggal', $date)
                     ->get();
                 foreach ($blocks as $blk) {
-                    if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai === '00:00:00' && $blk->jam_selesai === '23:59:59')) {
+                    if (!$blk->jam_mulai || !$blk->jam_selesai || ($blk->jam_mulai === '00:00:00' && in_array($blk->jam_selesai, ['23:59:59', '23:59:00']))) {
                         $reason = 'Fotografer libur pada tanggal ini (' . ($blk->keterangan ?: 'Libur Penuh') . ').';
                         break;
                     }

@@ -180,6 +180,18 @@ class ElearningController extends Controller
     public function destroy($id)
     {
         $material = Elearning::findOrFail($id);
+
+        $hasPaidEnrollments = \App\Models\ElearningTransaction::where('id_elearning', $material->id)
+            ->where('payment_status', 'completed')
+            ->exists();
+
+        if ($hasPaidEnrollments) {
+            return redirect()->back()->with('error', 'Materi e-learning tidak dapat dihapus karena sudah memiliki siswa terdaftar yang telah menyelesaikan pembayaran.');
+        }
+
+        \App\Models\ElearningLessonProgress::where('id_elearning', $material->id)->delete();
+        $material->lessons()->delete();
+        $material->modules()->delete();
         $material->delete();
 
         return redirect()->route('admin.elearning')->with('success', 'Materi E-Learning berhasil dihapus.');
@@ -248,6 +260,9 @@ class ElearningController extends Controller
     {
         $module = \App\Models\ElearningModule::findOrFail($id);
         $courseId = $module->id_elearning;
+
+        // Lepas asosiasi modul dari seluruh materi anak agar tidak meninggalkan data tanpa induk
+        $module->lessons()->update(['id_module' => null]);
         $module->delete();
 
         return redirect()->route('admin.elearning.curriculum', $courseId)->with('success', 'Topik modul berhasil dihapus.');
@@ -369,6 +384,7 @@ class ElearningController extends Controller
     {
         $lesson = \App\Models\ElearningLesson::findOrFail($id);
         $courseId = $lesson->id_elearning;
+        $lesson->progress()->delete();
         $lesson->delete();
 
         return redirect()->route('admin.elearning.curriculum', $courseId)->with('success', 'Tahapan materi berhasil dihapus.');

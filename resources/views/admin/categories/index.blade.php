@@ -147,8 +147,20 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">
                         @forelse($categories as $cat)
                             <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
-                                <td class="py-4 px-4 sm:px-6 align-top font-black text-gray-900 dark:text-white text-xs">
-                                    {{ $cat->nama_kategori }}
+                                <td class="py-4 px-4 sm:px-6 align-top">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 shrink-0 flex items-center justify-center">
+                                            @if($cat->icon_url)
+                                                <img src="{{ $cat->icon_url }}" alt="{{ $cat->nama_kategori }}" class="w-full h-full object-cover">
+                                            @else
+                                                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/></svg>
+                                            @endif
+                                        </div>
+                                        <div class="min-w-0">
+                                            <span class="font-black text-gray-900 dark:text-white text-xs block truncate">{{ $cat->nama_kategori }}</span>
+                                            <span class="text-[11px] text-gray-400 dark:text-gray-500 block">{{ $cat->photographers_count ?? 0 }} fotografer</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top text-gray-600 dark:text-gray-400 leading-relaxed">
                                     {{ $cat->deskripsi ?: '-' }}

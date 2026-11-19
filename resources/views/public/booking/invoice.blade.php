@@ -89,7 +89,7 @@
             <p>
               Status: 
               @if($contract->status_contract === 'cancelled')
-                <span class="font-bold text-rose-600 dark:text-rose-400">Kadaluarsa</span>
+                <span class="font-bold text-rose-600 dark:text-rose-400">{{ $contract->cancellation ? 'Dibatalkan' : 'Kadaluarsa' }}</span>
               @elseif($payment && $payment->payment_status === 'completed')
                 <span class="font-bold text-emerald-600 dark:text-emerald-400">Lunas</span>
               @elseif($payment && $payment->bukti_transfer && $payment->payment_status === 'pending')

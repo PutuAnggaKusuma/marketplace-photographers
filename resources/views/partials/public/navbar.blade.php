@@ -113,9 +113,12 @@
                   <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
                 </div>
                 <button type="button" 
-                        @click="markAllRead()" 
+                        @click="if (unreadCount > 0 && !isMarkingAll) markAllRead()" 
                         :disabled="isMarkingAll || unreadCount === 0"
-                        class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                        class="inline-flex items-center gap-1.5 text-[11px] font-bold transition select-none"
+                        :class="unreadCount > 0 
+                            ? 'text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 cursor-pointer' 
+                            : 'text-gray-400 dark:text-gray-500 no-underline cursor-default'">
                   <svg x-show="isMarkingAll" 
                        x-cloak 
                        class="animate-spin h-3 w-3 text-amber-500 dark:text-amber-400 shrink-0" 
@@ -369,7 +372,7 @@ function headerNotifApp() {
                       @click="open = false; $dispatch('open-confirm-modal', { title: 'Konfirmasi Keluar Akun', message: 'Apakah Anda yakin ingin keluar dari akun LensMatch?', actionUrl: '{{ route('logout') }}', method: 'POST', buttonText: 'Ya, Keluar Akun', iconType: 'logout', buttonClass: 'bg-red-600 hover:bg-red-700 text-white' })" 
                       class="w-full text-left px-5 pt-4 pb-5 text-xs sm:text-sm font-extrabold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition flex items-center gap-3 group cursor-pointer">
                 <svg class="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                <span>Keluar / Logout</span>
+                <span>Keluar Akun</span>
               </button>
             </div>
           </div>

@@ -292,12 +292,13 @@ class AvailabilityController extends Controller
 
         if ($tipeBlokir === 'time_slot') {
             $request->validate([
-                'tanggal' => 'required|date',
+                'tanggal' => 'required|date|after_or_equal:today',
                 'jam_mulai' => 'required|string',
                 'jam_selesai' => 'required|string',
                 'keterangan' => 'nullable|string|max:500',
             ], [
                 'tanggal.required' => 'Tanggal jadwal wajib diisi.',
+                'tanggal.after_or_equal' => 'Tanggal penutupan jadwal minimal hari ini.',
                 'jam_mulai.required' => 'Jam mulai penutupan jadwal wajib diisi.',
                 'jam_selesai.required' => 'Jam selesai penutupan jadwal wajib diisi.',
             ]);
@@ -352,11 +353,12 @@ class AvailabilityController extends Controller
             $tanggalSelesai = $request->input('tanggal_selesai', $tanggalMulai);
 
             $request->validate([
-                'tanggal_mulai' => 'required|date',
+                'tanggal_mulai' => 'required|date|after_or_equal:today',
                 'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
                 'keterangan' => 'nullable|string|max:500',
             ], [
                 'tanggal_mulai.required' => 'Tanggal libur wajib diisi.',
+                'tanggal_mulai.after_or_equal' => 'Tanggal awal libur minimal hari ini.',
                 'tanggal_selesai.after_or_equal' => 'Tanggal selesai libur tidak boleh lebih awal dari tanggal mulai.',
             ]);
 
@@ -388,12 +390,17 @@ class AvailabilityController extends Controller
 
             foreach ($period as $dt) {
                 $curDate = $dt->format('Y-m-d');
-                PhotographerAvailability::firstOrCreate([
+
+                // Bersihkan blokir parsial lama di tanggal yang sama agar tidak terjadi duplikasi baris
+                PhotographerAvailability::where('id_photographer', $photographer->id)
+                    ->where('tanggal', $curDate)
+                    ->delete();
+
+                PhotographerAvailability::create([
                     'id_photographer' => $photographer->id,
                     'tanggal' => $curDate,
                     'jam_mulai' => '00:00:00',
                     'jam_selesai' => '23:59:59',
-                ], [
                     'status' => 'blocked',
                     'keterangan' => trim($request->keterangan) ?: 'Libur seharian penuh',
                 ]);

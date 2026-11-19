@@ -111,9 +111,7 @@ class ContestController extends Controller
             $query->orderBy('created_at', 'asc');
 
         } elseif ($sort === 'highest_prize') {
-
-            $query->orderBy('hadiah', 'desc');
-
+            $query->orderByRaw("CAST(NULLIF(REGEXP_REPLACE(hadiah, '[^0-9]', ''), '') AS UNSIGNED) DESC");
         } else {
 
             $query->orderBy('created_at', 'desc');
@@ -233,20 +231,13 @@ class ContestController extends Controller
 
 
         if (request()->wantsJson()) {
-
             return response()->json([
-
                 'success' => true,
-
-                'message' => "Event lomba '{$contest->judul_lomba}' berhasil disetujui & dipublikasikan!"
-
+                'message' => "Event lomba '{$contest->judul_lomba}' berhasil disetujui dan dipublikasikan."
             ]);
-
         }
 
-
-
-        return redirect()->back()->with('success', "Event lomba '{$contest->judul_lomba}' berhasil disetujui & dipublikasikan!");
+        return redirect()->back()->with('success', "Event lomba '{$contest->judul_lomba}' berhasil disetujui dan dipublikasikan.");
 
     }
 
@@ -643,21 +634,19 @@ class ContestController extends Controller
      */
 
     public function destroy($id)
-
     {
-
         $contest = PhotoContest::findOrFail($id);
 
+        $hasPaidRegistrations = $contest->registrations()->where('status_pembayaran', 'lunas')->exists();
+        if ($hasPaidRegistrations && $contest->status === 'buka') {
+            return redirect()->back()->with('error', 'Lomba ini tidak dapat dihapus karena sedang berlangsung dan memiliki peserta yang telah membayar biaya pendaftaran.');
+        }
+
         $contest->submissions()->delete();
-
         $contest->registrations()->delete();
-
         $contest->delete();
 
-
-
         return redirect()->back()->with('success', 'Event lomba foto berhasil dihapus.');
-
     }
 
 
@@ -971,9 +960,8 @@ class ContestController extends Controller
 
 
         $registration->update([
-
             'status_pembayaran' => 'lunas',
-
+            'status_pendaftaran' => 'disetujui',
         ]);
 
 
@@ -1305,14 +1293,56 @@ class ContestController extends Controller
 
 
         $submission->update([
-
             'status_submission' => $request->status_submission,
-
             'catatan_juri' => $request->catatan_juri,
-
         ]);
 
+        $contest = $submission->contest;
+        if ($contest) {
+            $hasAnyWinners = ContestSubmission::where('id_contest', $contest->id)
+                ->whereIn('status_submission', ['winner_1', 'winner_2', 'winner_3'])
+                ->exists();
 
+            if ($hasAnyWinners && $contest->status !== 'selesai') {
+                $contest->update(['status' => 'selesai']);
+            } elseif (!$hasAnyWinners && $contest->status === 'selesai') {
+                $isPastDeadline = $contest->end_date && \Carbon\Carbon::parse($contest->end_date)->endOfDay()->isPast();
+                $contest->update(['status' => $isPastDeadline ? 'ditutup' : 'buka']);
+            }
+        }
+
+        if ($submission->id_user) {
+            $contestTitle = $submission->contest ? $submission->contest->judul_lomba : 'Lomba Foto';
+            $rankLabels = [
+                'winner_1' => 'Juara 1',
+                'winner_2' => 'Juara 2',
+                'winner_3' => 'Juara 3',
+                'rejected' => 'Ditolak',
+                'disqualified' => 'Didiskualifikasi',
+            ];
+            if (isset($rankLabels[$request->status_submission])) {
+                $statusLabel = $rankLabels[$request->status_submission];
+                $isWinner = str_contains($request->status_submission, 'winner');
+                $notifTitle = $isWinner
+                    ? "Selamat! Karya Terpilih Sebagai {$statusLabel}"
+                    : "Status Penilaian Karya Lomba Foto";
+                $notifMsg = $isWinner
+                    ? "Karya foto '{$submission->judul_karya}' ditetapkan sebagai {$statusLabel} pada lomba '{$contestTitle}'."
+                    : "Karya foto '{$submission->judul_karya}' pada lomba '{$contestTitle}' dinyatakan {$statusLabel}. " . ($request->catatan_juri ? "Catatan dewan juri: {$request->catatan_juri}" : '');
+
+                Notification::create([
+                    'id_user' => $submission->id_user,
+                    'type' => 'contest_submission_evaluated',
+                    'title' => $notifTitle,
+                    'message' => trim($notifMsg),
+                    'data' => [
+                        'contest_id' => $submission->id_contest,
+                        'url' => route('public.contests.show', $submission->id_contest),
+                    ],
+                    'is_read' => false,
+                ]);
+            }
+        }
 
         return redirect()->back()->with('success', "Penilaian karya '{$submission->judul_karya}' berhasil disimpan.");
 

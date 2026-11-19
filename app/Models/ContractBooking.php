@@ -143,7 +143,7 @@ class ContractBooking extends Model
                   });
             })
             ->whereHas('contract', function ($q) {
-                $q->whereNotIn('status_contract', ['cancelled', 'completed']);
+                $q->where('status_contract', 'active');
             })
             ->orderBy('booking_date', 'asc')
             ->orderBy('jam_mulai', 'asc');

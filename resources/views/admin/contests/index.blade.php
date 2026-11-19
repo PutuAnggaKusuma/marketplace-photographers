@@ -773,7 +773,7 @@
 
                                                  x-transition:leave-end="transform opacity-0 scale-95" 
 
-                                                 class="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 text-left" 
+                                                 class="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
 
                                                  style="display: none;">
 
@@ -803,7 +803,7 @@
 
                                                             })"
 
-                                                            class="w-full px-3.5 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition block text-left cursor-pointer">
+                                                            class="w-full px-4 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition block text-left cursor-pointer">
 
                                                         Setujui Lomba
 
@@ -817,7 +817,7 @@
 
                                                             @click="menuOpen = false; openRejectModal('{{ route('admin.contests.reject', $c->id) }}', '{{ addslashes($c->judul_lomba) }}')"
 
-                                                            class="w-full px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-b border-gray-50 dark:border-gray-700/40 cursor-pointer">
+                                                            class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-b border-gray-100 dark:border-gray-700/60 cursor-pointer">
 
                                                         Tolak Pengajuan
 
@@ -829,7 +829,7 @@
 
                                                 <!-- Edit Lomba -->
 
-                                                <a href="{{ route('admin.contests.edit', $c->id) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                                                <a href="{{ route('admin.contests.edit', $c->id) }}" class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
 
                                                     Edit
 
@@ -839,7 +839,7 @@
 
                                                 <!-- Lihat Halaman Publik -->
 
-                                                <a href="{{ route('public.contests.show', $c->id) }}" target="_blank" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                                                <a href="{{ route('public.contests.show', $c->id) }}" class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
 
                                                     Lihat
 
@@ -869,7 +869,7 @@
 
                                                         })"
 
-                                                        class="w-full px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                        class="w-full px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
 
                                                     Hapus
 

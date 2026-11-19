@@ -16,6 +16,7 @@ class RoleClient extends Model
         'id_user',
         'nama',
         'nomor_telepon',
+        'alamat',
         'foto',
     ];
 

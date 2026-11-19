@@ -51,8 +51,8 @@ class ContestProposalController extends Controller
             'end_date.after' => 'Tanggal batas akhir harus setelah tanggal mulai.',
             'deskrpisi_lomba.required' => 'Deskripsi konsep dan tema lomba wajib diisi.',
             'deskrpisi_lomba.min' => 'Deskripsi lomba minimal 30 karakter agar informatif.',
-            'syarat_ketentuan.required' => 'Syarat & ketentuan teknis lomba wajib dicantumkan.',
-            'syarat_ketentuan.min' => 'Syarat & ketentuan minimal 30 karakter.',
+            'syarat_ketentuan.required' => 'Syarat dan ketentuan lomba wajib dicantumkan.',
+            'syarat_ketentuan.min' => 'Syarat dan ketentuan minimal 30 karakter.',
             'banner_file.image' => 'File banner harus berupa gambar.',
             'banner_file.mimes' => 'Format file banner harus JPG, PNG, atau WEBP.',
             'banner_file.max' => 'Ukuran file banner maksimal 5 MB.',
@@ -65,7 +65,7 @@ class ContestProposalController extends Controller
         }
 
         $adminRole = DB::table('role_admins')->first();
-        $adminId = $adminRole ? $adminRole->id : 1;
+        $adminId = $adminRole ? $adminRole->id : null;
 
         $contest = PhotoContest::create([
             'id_admin' => $adminId,
@@ -101,7 +101,7 @@ class ContestProposalController extends Controller
             ]);
         }
 
-        return redirect()->route('public.contests.propose.history')->with('success', 'Pengajuan event lomba foto berhasil dikirim! Menunggu proses review & verifikasi oleh Tim Admin.');
+        return redirect()->route('public.contests.propose.history')->with('success', 'Pengajuan event lomba foto berhasil dikirim dan menunggu verifikasi Tim Admin.');
     }
 
     /**

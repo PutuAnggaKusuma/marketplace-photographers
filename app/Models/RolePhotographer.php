@@ -147,6 +147,11 @@ class RolePhotographer extends Model
         return $avg !== null ? round((float) $avg, 1) : null;
     }
 
+    public function getRatingAttribute()
+    {
+        return $this->getRatingAverageAttribute();
+    }
+
     public function getFotoUrlAttribute()
     {
         if (!$this->foto) {
@@ -328,12 +333,20 @@ class RolePhotographer extends Model
 
         $items = [];
 
-        // 1. Rating & Ulasan (Format seragam numerik: misal 4.9 (12 ulasan) atau 0.0 (0 ulasan))
-        $items[] = [
-            'type' => 'rating',
-            'text' => number_format($avgRating, 1) . ' (' . $reviewCount . ' ulasan)',
-            'highlight' => $reviewCount > 0,
-        ];
+        // 1. Rating & Ulasan (Format seragam numerik: misal 4.9 (12 ulasan) atau Belum ada ulasan jika 0)
+        if ($reviewCount > 0) {
+            $items[] = [
+                'type' => 'rating',
+                'text' => number_format($avgRating, 1) . ' (' . $reviewCount . ' ulasan)',
+                'highlight' => true,
+            ];
+        } else {
+            $items[] = [
+                'type' => 'rating',
+                'text' => 'Belum ada ulasan',
+                'highlight' => false,
+            ];
+        }
 
         // 2. Sesi Selesai (Format: 10+ Sesi Selesai / X Sesi Selesai / 0 Sesi Selesai)
         if ($completedSessions >= 10) {

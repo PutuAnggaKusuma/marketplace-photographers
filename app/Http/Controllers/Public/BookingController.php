@@ -295,9 +295,10 @@ class BookingController extends Controller
             'fee_marketplace' => $feeMarketplace,
             'payout_amount' => $payoutAmount,
             'is_validated_photographer' => false,
-            'is_validated_client' => true,
+            'is_validated_client' => false,
             'expired_at' => $draftExpired,
             'status_contract' => 'draft',
+            'status_payout' => null,
         ]);
 
         ContractBooking::create([
@@ -494,40 +495,30 @@ class BookingController extends Controller
      */
 
     public function showInvoice(Request $request, $id)
-
     {
-
-        $clientProfile = RoleClient::where('id_user', auth()->id())->first();
-
-        
+        if (!auth()->check()) {
+            return redirect()->guest(route('login'))->with('error', 'Silakan masuk ke akun Anda terlebih dahulu untuk melihat invoice.');
+        }
 
         $contract = Contract::with([
-
             'client.user',
-
             'photographer.user',
-
             'photographer.province',
-
             'photographer.city',
-
             'bookingDetail.service',
-
             'bookingDetail.province',
-
             'bookingDetail.city',
-
             'payments'
+        ])->findOrFail($id);
 
-        ])
+        $user = auth()->user();
+        $isAdmin = in_array($user->role, ['admin', 'super_admin']) || $user->roleAdmin()->exists();
+        $isClientOwner = $user->roleClient && (int) $contract->id_client === (int) $user->roleClient->id;
+        $isPhotographerOwner = $user->rolePhotographer && (int) $contract->id_photographer === (int) $user->rolePhotographer->id;
 
-        ->when($clientProfile, function ($q) use ($clientProfile) {
-
-            $q->where('id_client', $clientProfile->id);
-
-        })
-
-        ->findOrFail($id);
+        if (!$isAdmin && !$isClientOwner && !$isPhotographerOwner) {
+            abort(403, 'Akses ditolak! Anda tidak memiliki izin untuk melihat invoice ini.');
+        }
 
         // Auto-heal status jika kontrak sudah pending_payment
         if ($contract->status_contract === 'pending_payment' && !$contract->is_validated_photographer) {
@@ -661,21 +652,18 @@ class BookingController extends Controller
      */
 
     public function confirmPayment(Request $request, $id)
-
     {
-
         $clientProfile = RoleClient::where('id_user', auth()->id())->first();
-
-
+        if (!$clientProfile) {
+            abort(403, 'Akses ditolak! Anda tidak memiliki izin untuk melakukan pembayaran.');
+        }
 
         $contract = Contract::with([
             'client.user',
             'photographer.user',
             'payments'
         ])
-        ->when($clientProfile, function ($q) use ($clientProfile) {
-            $q->where('id_client', $clientProfile->id);
-        })
+        ->where('id_client', $clientProfile->id)
         ->findOrFail($id);
 
         if ($contract->status_contract === 'cancelled' || app(\App\Services\BookingExpirationService::class)->checkAndExpireSingle($contract)) {
@@ -712,236 +700,57 @@ class BookingController extends Controller
 
 
 
-        $buktiUrl = null;
-
-        if ($request->hasFile('bukti_transfer')) {
-
-            $request->validate([
-
-                'bukti_transfer' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
-
-            ], [
-
-                'bukti_transfer.image' => 'Bukti transfer harus berupa gambar.',
-
-                'bukti_transfer.mimes' => 'Format bukti transfer harus JPG, PNG, atau WEBP.',
-
-                'bukti_transfer.max' => 'Ukuran file bukti transfer maksimal 10 MB.',
-
-            ]);
-
-            $path = $request->file('bukti_transfer')->store('booking_payment_proofs', 'public');
-
-            $buktiUrl = asset('storage/' . $path);
-
-
-
-            if ($payment) {
-
-                $payment->update([
-
-                    'payment_status' => 'pending',
-
-                    'bukti_transfer' => $buktiUrl,
-
-                    'payment_type' => 'transfer',
-
-                ]);
-
-            }
-
-
-
-            $contract->update([
-
-                'status_contract' => 'pending_payment',
-
-            ]);
-
-
-
-            $paidAmount = $payment ? $payment->payment_amount : $contract->jumlah;
-
-            $formattedPaidAmount = 'Rp ' . number_format($paidAmount, 0, ',', '.');
-
-            $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
-
-
-
-            $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
-
-            foreach ($admins as $adm) {
-
-                \App\Models\Notification::send(
-
-                    $adm->id,
-
-                    'Bukti Transfer Baru Diunggah',
-
-                    "Klien {$contract->client->nama} telah mengunggah bukti transfer untuk sesi {$code} ({$formattedPaidAmount}). Mohon segera diverifikasi di panel admin.",
-
-                    'payment_proof_uploaded',
-
-                    url('/admin/transactions')
-
-                );
-
-            }
-
-
-
-            \App\Models\ActivityLog::record(
-
-                'payment_proof_uploaded',
-
-                "Klien {$contract->client->nama} mengunggah bukti transfer untuk sesi {$code} ({$formattedPaidAmount})",
-
-                $contract,
-
-                ['bukti_transfer' => $buktiUrl]
-
-            );
-
-
-
-            return redirect()->route('booking.invoice', $contract->id)->with('success', 'Bukti transfer berhasil diunggah! Pembayaran Anda sedang diverifikasi oleh Tim Admin.');
-
+        if (!$request->hasFile('bukti_transfer')) {
+            return redirect()->back()->with('error', 'Silakan pilih dan unggah berkas bukti transfer Anda.');
         }
 
-
-
-        // Update Payment Record
-
-        if ($payment) {
-
-            $payment->update([
-
-                'payment_status' => 'completed',
-
-                'bukti_transfer' => $buktiUrl ?: ($payment->bukti_transfer ?: 'SIMULASI_ESCROW_TRANSFER_OK'),
-
-                'payment_type' => $request->input('payment_method', 'transfer'),
-
-            ]);
-
-        }
-
-
-
-        // Identifikasi jenis pembayaran
-
-        $isDpPayment = $payment && $payment->contract_payment_type === 'dp';
-
-        $isPelunasanPayment = $payment && $payment->contract_payment_type === 'full' && $contract->payment_type === 'dp';
-
-
-
-        // Update Contract & Escrow
-
-        $contract->update([
-
-            'status_contract' => 'active',
-
-            'status_payout' => 'holding',
-
-            'is_validated_client' => true,
-
+        $request->validate([
+            'bukti_transfer' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+        ], [
+            'bukti_transfer.required' => 'Silakan pilih dan unggah berkas bukti transfer Anda.',
+            'bukti_transfer.image' => 'Bukti transfer harus berupa gambar.',
+            'bukti_transfer.mimes' => 'Format bukti transfer harus JPG, PNG, atau WEBP.',
+            'bukti_transfer.max' => 'Ukuran file bukti transfer maksimal 10 MB.',
         ]);
 
+        $path = $request->file('bukti_transfer')->store('booking_payment_proofs', 'public');
+        $buktiUrl = asset('storage/' . $path);
 
+        if ($payment) {
+            $payment->update([
+                'payment_status' => 'pending',
+                'bukti_transfer' => $buktiUrl,
+                'payment_type' => 'transfer',
+            ]);
+        }
+
+        $contract->update([
+            'status_contract' => 'pending_payment',
+        ]);
 
         $paidAmount = $payment ? $payment->payment_amount : $contract->jumlah;
-
         $formattedPaidAmount = 'Rp ' . number_format($paidAmount, 0, ',', '.');
-
         $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
-
-
-        $notifTitle = 'Pembayaran Sesi Foto Masuk ke Escrow';
-
-        $notifDesc = "Pembayaran sebesar {$formattedPaidAmount} untuk sesi {$code} telah diterima di Rekening Bersama Escrow LensMatch.";
-
-
-
-        if ($isDpPayment) {
-
-            $notifTitle = 'Pembayaran DP Booking Diterima';
-
-            $notifDesc = "Pembayaran Uang Muka (DP 30%) sebesar {$formattedPaidAmount} untuk sesi {$code} telah diterima di Escrow. Jadwal pemotretan aktif.";
-
-        } elseif ($isPelunasanPayment) {
-
-            $notifTitle = 'Pelunasan Sisa Sesi Foto Berhasil';
-
-            $notifDesc = "Pembayaran pelunasan sisa tagihan sebesar {$formattedPaidAmount} untuk sesi {$code} telah diterima di Escrow. Sesi kini lunas 100%.";
-
-        }
-
-
-
-        // Notifikasi ke Mitra Fotografer
-
-        if ($contract->photographer && $contract->photographer->id_user) {
-
+        $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
+        foreach ($admins as $adm) {
             \App\Models\Notification::send(
-
-                $contract->photographer->id_user,
-
-                $notifTitle,
-
-                $notifDesc,
-
-                'booking_paid',
-
-                url('/photographer/bookings')
-
+                $adm->id,
+                'Bukti Transfer Baru Diunggah',
+                "Klien {$contract->client->nama} telah mengunggah bukti transfer untuk sesi {$code} ({$formattedPaidAmount}). Mohon segera diverifikasi di panel admin.",
+                'payment_proof_uploaded',
+                url('/admin/transactions')
             );
-
         }
-
-
-
-        // Notifikasi ke Klien
-
-        if ($contract->client && $contract->client->id_user) {
-
-            \App\Models\Notification::send(
-
-                $contract->client->id_user,
-
-                $notifTitle,
-
-                $notifDesc . " Dana Anda tersimpan aman dengan garansi Escrow.",
-
-                'payment_success',
-
-                url('/pembayaran/' . $contract->id)
-
-            );
-
-        }
-
-
-
-        // Record Activity Log
 
         \App\Models\ActivityLog::record(
-
-            'payment_confirmed',
-
-            $notifDesc,
-
+            'payment_proof_uploaded',
+            "Klien {$contract->client->nama} mengunggah bukti transfer untuk sesi {$code} ({$formattedPaidAmount})",
             $contract,
-
-            ['amount' => $paidAmount, 'payment_type' => $payment ? $payment->contract_payment_type : 'full']
-
+            ['bukti_transfer' => $buktiUrl]
         );
 
-
-
-        return redirect()->route('booking.invoice', $contract->id)->with('success', 'Pembayaran berhasil dikonfirmasi! Dana disimpan aman di Rekening Bersama Escrow LensMatch.');
-
+        return redirect()->route('booking.invoice', $contract->id)->with('success', 'Bukti transfer berhasil diunggah. Pembayaran Anda sedang diverifikasi oleh Tim Admin.');
     }
 
 
@@ -972,11 +781,20 @@ class BookingController extends Controller
 
             'bookingDetail.city',
 
-            'payments'
+            'payments',
+
+            'cancellation'
 
         ])->findOrFail($id);
 
+        $user = auth()->user();
+        $isAdmin = in_array($user->role, ['admin', 'super_admin']) || $user->roleAdmin()->exists();
+        $isClientOwner = $user->roleClient && (int) $contract->id_client === (int) $user->roleClient->id;
+        $isPhotographerOwner = $user->rolePhotographer && (int) $contract->id_photographer === (int) $user->rolePhotographer->id;
 
+        if (!$isAdmin && !$isClientOwner && !$isPhotographerOwner) {
+            abort(403, 'Akses ditolak! Anda tidak memiliki izin untuk melihat atau mencetak dokumen invoice ini.');
+        }
 
         $dpPayment = $contract->payments->where('contract_payment_type', 'dp')->first();
 

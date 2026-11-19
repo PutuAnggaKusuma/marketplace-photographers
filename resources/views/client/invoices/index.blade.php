@@ -143,8 +143,10 @@
             $statusLabels = [
               'all' => 'Semua Status Tagihan',
               'pending' => 'Menunggu Pembayaran',
+              'dp_paid' => 'DP Terbayar',
               'completed' => 'Lunas',
-              'failed' => 'Gagal'
+              'cancelled' => 'Dibatalkan',
+              'expired' => 'Kadaluarsa',
             ];
             $curStatName = $statusLabels[$filterStatus ?? 'all'] ?? 'Semua Status Tagihan';
           @endphp
@@ -201,7 +203,7 @@
                 $isDp = $c->payment_type === 'dp';
                 $isDpPaid = $dpPayment && $dpPayment->payment_status === 'completed';
                 $isFullPaid = $fullPayment && $fullPayment->payment_status === 'completed';
-                $isFullySettled = in_array($c->status_contract, ['active', 'completed']) || ($isDp ? ($isDpPaid && $isFullPaid) : ($c->payments->first() && $c->payments->first()->payment_status === 'completed'));
+                $isFullySettled = $c->status_contract !== 'cancelled' && ($isDp ? ($isDpPaid && $isFullPaid) : ($isFullPaid || ($c->payments->first() && $c->payments->first()->payment_status === 'completed') || $c->status_contract === 'completed'));
 
                 $payment = $c->payments->first();
                 $pStatus = $payment->payment_status ?? 'pending';
@@ -251,17 +253,17 @@
 
                 <!-- Status Pembayaran (Rule #14: Pure Colored Text) -->
                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                  @if($isFullySettled)
+                  @if($c->status_contract === 'cancelled')
+                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
+                      {{ $c->cancellation ? 'Dibatalkan' : 'Kadaluarsa' }}
+                    </span>
+                  @elseif($isFullySettled)
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                       Lunas
                     </span>
                   @elseif($isDp && $isDpPaid && !$isFullPaid)
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
                       DP Terbayar
-                    </span>
-                  @elseif($c->status_contract === 'cancelled')
-                    <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
-                      Kadaluarsa
                     </span>
                   @elseif($pStatus === 'failed')
                     <span class="text-xs font-bold text-rose-600 dark:text-rose-400">
@@ -368,7 +370,7 @@
                 <!-- Aksi -->
                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
                   <div class="inline-flex items-center gap-3">
-                    <a href="{{ route('elearning.invoice.print', $el->id) }}" target="_blank" class="text-xs font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition">
+                    <a href="{{ route('elearning.invoice.print', $el->id) }}" class="text-xs font-bold text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 transition">
                       Cetak Struk
                     </a>
                     @if($el->elearning)

@@ -31,17 +31,34 @@ class TransactionController extends Controller
         if ($statusFilter !== 'all') {
             if ($statusFilter === 'pending_payment') {
                 $query->where('status_contract', 'pending_payment');
+            } elseif ($statusFilter === 'cancelled') {
+                $query->where('status_contract', 'cancelled')
+                      ->where(function ($q) {
+                          $q->whereDoesntHave('cancellation')
+                            ->orWhereHas('cancellation', function ($cq) {
+                                $cq->where('alasan', 'not like', '%kadaluarsa%')
+                                   ->where('alasan', 'not like', '%terlewati%');
+                            });
+                      });
+            } elseif ($statusFilter === 'expired') {
+                $query->where('status_contract', 'cancelled')
+                      ->whereHas('cancellation', function ($cq) {
+                          $cq->where(function ($sub) {
+                              $sub->where('alasan', 'like', '%kadaluarsa%')
+                                  ->orWhere('alasan', 'like', '%terlewati%');
+                          });
+                      });
             } else {
                 $query->where('status_payout', $statusFilter);
                 if ($statusFilter === 'holding') {
-                    $query->where('status_contract', '!=', 'pending_payment');
+                    $query->whereNotIn('status_contract', ['pending_payment', 'cancelled']);
                 }
             }
         }
 
         if (!empty($search)) {
             $extractedId = null;
-            if (preg_match('/INV-LM-\d+-0*(\d+)/i', $search, $matches)) {
+            if (preg_match('/(?:INV-LM-\d+-0*|#?KTRK-0*)(\d+)/i', $search, $matches)) {
                 $extractedId = (int) $matches[1];
             } elseif (is_numeric($search)) {
                 $extractedId = (int) $search;
@@ -77,7 +94,7 @@ class TransactionController extends Controller
         $contracts = $query->paginate($perPage)->withQueryString();
 
         // Calculate Overview Statistics
-        $allContracts = Contract::all();
+        $allContracts = Contract::with('payments')->get();
         $allElearning = \App\Models\ElearningTransaction::all();
         
         $totalElearningRevenue = $allElearning->where('payment_status', 'completed')->sum('nominal');
@@ -95,11 +112,16 @@ class TransactionController extends Controller
         $totalContestRevenue = $allPaidContests->sum(fn($r) => (float) ($r->contest->biaya_pendaftaran ?? 0));
         $totalContestSales = $allPaidContests->count();
 
-        $totalGrossVolume = $allContracts->where('status_payout', '!=', 'refunded')->sum('jumlah') + $totalElearningRevenue + $totalContestRevenue;
-        $totalEscrowHolding = $allContracts->where('status_payout', 'holding')->sum('payout_amount');
-        $totalEscrowReady = $allContracts->where('status_payout', 'ready')->sum('payout_amount');
+        $settledContracts = $allContracts->filter(fn($c) => 
+            $c->payments->where('payment_status', 'completed')->isNotEmpty() || 
+            (in_array($c->status_contract, ['active', 'completed']) && $c->status_payout !== null)
+        );
+
+        $totalGrossVolume = $settledContracts->sum('jumlah') + $totalElearningRevenue + $totalContestRevenue;
+        $totalEscrowHolding = $allContracts->where('status_payout', 'holding')->where('status_contract', '!=', 'cancelled')->filter(fn($c) => $c->payments->where('payment_status', 'completed')->isNotEmpty())->sum('payout_amount');
+        $totalEscrowReady = $allContracts->where('status_payout', 'ready')->filter(fn($c) => $c->payments->where('payment_status', 'completed')->isNotEmpty())->sum('payout_amount');
         $totalPayoutPaid = $allContracts->where('status_payout', 'paid')->sum('payout_amount');
-        $totalMarketplaceFee = $allContracts->where('status_payout', '!=', 'refunded')->sum('fee_marketplace');
+        $totalMarketplaceFee = $settledContracts->sum('fee_marketplace');
         $totalPlatformRevenue = $totalMarketplaceFee + $totalElearningRevenue + $totalContestRevenue;
 
         // Query Elearning Transactions
@@ -135,6 +157,8 @@ class TransactionController extends Controller
         $contract = Contract::with([
             'client.user',
             'photographer.user',
+            'photographer.province',
+            'photographer.city',
             'bookingDetail.service',
             'bookingDetail.province',
             'bookingDetail.city',
@@ -144,7 +168,11 @@ class TransactionController extends Controller
         ])->findOrFail($id);
 
         $feeAmount = $contract->fee_marketplace > 0 ? $contract->fee_marketplace : ($contract->jumlah * 0.10);
-        $netPayout = $contract->payout_amount > 0 ? $contract->payout_amount : ($contract->jumlah - $feeAmount);
+        $netPayout = $contract->payout_amount > 0 ? $contract->payout_amount : max(0, $contract->jumlah - $feeAmount);
+
+        $dpPayment = $contract->payments->where('contract_payment_type', 'dp')->first();
+        $fullPayment = $contract->payments->where('contract_payment_type', 'full')->first();
+        $activePayment = $contract->payments->last();
 
         $data = [
             'id' => $contract->id,
@@ -190,7 +218,7 @@ class TransactionController extends Controller
             return response()->json(['success' => true, 'data' => $data]);
         }
 
-        return redirect()->route('admin.transactions', ['search' => 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT)]);
+        return view('admin.transactions.show', compact('contract', 'data', 'feeAmount', 'netPayout', 'dpPayment', 'fullPayment', 'activePayment'));
     }
 
     /**
@@ -204,38 +232,62 @@ class TransactionController extends Controller
             return redirect()->back()->with('error', 'Pesanan sesi foto yang telah dibatalkan tidak dapat diverifikasi pembayarannya.');
         }
 
-        $existingPayment = $contract->payments->where('payment_status', 'completed')->first();
-        if ($contract->status_contract === 'active' && $existingPayment) {
-            return redirect()->back()->with('error', 'Pembayaran sesi ini sudah diverifikasi sebelumnya.');
+        $payment = $contract->payments->where('payment_status', 'pending')->first();
+        if (!$payment) {
+            return redirect()->back()->with('error', 'Seluruh pembayaran untuk pesanan sesi ini telah diverifikasi sebelumnya.');
         }
 
-        $payment = $contract->payments->where('payment_status', 'pending')->first() ?: $contract->payments->first();
-        if ($payment) {
-            $payment->update([
-                'payment_status' => 'completed',
+        $payment->update([
+            'payment_status' => 'completed',
+        ]);
+
+        // Jika kontrak bertipe DP dan ini adalah verifikasi DP awal, terbitkan record tagihan pelunasan
+        if ($contract->payment_type === 'dp' && !$contract->payments()->where('contract_payment_type', 'full')->exists()) {
+            $sisaPelunasan = max(0, $contract->jumlah - $contract->jumlah_dp);
+            \App\Models\Payment::create([
+                'id_contract' => $contract->id,
+                'payment_amount' => $sisaPelunasan,
+                'payment_status' => 'pending',
+                'contract_payment_type' => 'full',
+                'payment_type' => 'transfer',
+                'external_id' => 'INV-LNS-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6)),
             ]);
         }
 
-        $contract->update([
-            'status_contract' => 'active',
-            'status_payout' => 'holding',
-            'is_validated_client' => true,
-        ]);
+        $alreadyCompleted = $contract->status_contract === 'completed' || ($contract->bookingDetail && $contract->bookingDetail->status_booking === 'completed');
 
-        if ($contract->bookingDetail) {
+        $contractUpdates = [
+            'status_contract' => $alreadyCompleted ? 'completed' : 'active',
+        ];
+
+        if ($alreadyCompleted && $contract->is_validated_client) {
+            $contractUpdates['status_payout'] = 'ready';
+        } elseif (empty($contract->status_payout) || $contract->status_payout === 'holding') {
+            $contractUpdates['status_payout'] = 'holding';
+        }
+
+        $contract->update($contractUpdates);
+
+        if ($contract->bookingDetail && $contract->bookingDetail->status_booking !== 'completed') {
             $contract->bookingDetail->update([
                 'status_booking' => 'confirmed'
             ]);
         }
 
         $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
+        $isPelunasan = $contract->payment_type === 'dp' && $payment->contract_payment_type === 'full';
 
         // Notifikasi ke Klien
         if ($contract->client && $contract->client->id_user) {
+            $clientNotifTitle = $isPelunasan ? 'Pelunasan Sesi Foto Terverifikasi' : 'Pembayaran Sesi Foto Terverifikasi';
+            $clientNotifDesc = $isPelunasan 
+                ? "Pembayaran pelunasan untuk sesi {$code} telah diverifikasi oleh Admin. Sesi pemotretan Anda kini lunas."
+                : "Pembayaran untuk sesi {$code} telah diverifikasi oleh Admin. Jadwal pemotretan Anda kini aktif.";
+
             \App\Models\Notification::send(
                 $contract->client->id_user,
-                'Pembayaran Sesi Foto Terverifikasi',
-                "Pembayaran untuk sesi {$code} telah diverifikasi oleh Admin. Jadwal pemotretan Anda kini aktif!",
+                $clientNotifTitle,
+                $clientNotifDesc,
                 'payment_verified',
                 url('/client/bookings')
             );
@@ -243,10 +295,15 @@ class TransactionController extends Controller
 
         // Notifikasi ke Fotografer
         if ($contract->photographer && $contract->photographer->id_user) {
+            $photoNotifTitle = $isPelunasan ? 'Pelunasan Pesanan Foto Dikonfirmasi' : 'Pesanan Foto Baru Dikonfirmasi';
+            $photoNotifDesc = $isPelunasan
+                ? "Klien telah menyelesaikan pelunasan pembayaran sesi {$code} dan telah diverifikasi oleh Admin."
+                : "Klien telah menyelesaikan pembayaran sesi {$code} dan telah diverifikasi oleh Admin. Jadwal pemotretan siap dilaksanakan.";
+
             \App\Models\Notification::send(
                 $contract->photographer->id_user,
-                'Pesanan Foto Baru Dikonfirmasi',
-                "Klien telah melunasi pembayaran sesi {$code} dan telah diverifikasi oleh Admin. Jadwal pemotretan siap dilaksanakan.",
+                $photoNotifTitle,
+                $photoNotifDesc,
                 'booking_confirmed',
                 url('/photographer/bookings')
             );
@@ -258,7 +315,7 @@ class TransactionController extends Controller
             $contract
         );
 
-        return redirect()->back()->with('success', "Pembayaran sesi {$code} berhasil diverifikasi! Jadwal sesi telah aktif.");
+        return redirect()->back()->with('success', "Pembayaran sesi {$code} berhasil diverifikasi. Jadwal sesi kini aktif.");
     }
 
     /**
@@ -284,6 +341,11 @@ class TransactionController extends Controller
                 'bukti_transfer' => null, // reset agar klien dapat mengunggah ulang
             ]);
         }
+
+        // Perpanjang tenggat pembayaran 24 jam agar pesanan tidak langsung kadaluarsa otomatis
+        $contract->update([
+            'expired_at' => now()->addHours(24),
+        ]);
 
         $code = 'KTRK-' . str_pad($contract->id, 5, '0', STR_PAD_LEFT);
 
@@ -375,14 +437,23 @@ class TransactionController extends Controller
      */
     public function processRefund(Request $request, $id)
     {
-        $contract = Contract::with(['client.user', 'photographer.user', 'bookingDetail', 'cancellation'])->findOrFail($id);
+        $contract = Contract::with(['client.user', 'photographer.user', 'bookingDetail', 'cancellation', 'payments'])->findOrFail($id);
 
         if ($contract->status_payout === 'paid') {
-            return redirect()->back()->with('error', 'Transaksi tidak dapat direfund karena dana payout sudah dicairkan ke fotografer.');
+            return redirect()->back()->with('error', 'Transaksi tidak dapat direfund karena dana sudah dicairkan ke fotografer.');
         }
 
         if ($contract->status_payout === 'refunded') {
             return redirect()->back()->with('error', 'Transaksi ini sudah direfund sebelumnya.');
+        }
+
+        $hasPaid = $contract->payments->where('payment_status', 'completed')->isNotEmpty();
+        if (!$hasPaid) {
+            return redirect()->back()->with('error', 'Transaksi tidak dapat direfund karena tidak ada pembayaran yang diterima dari klien.');
+        }
+
+        if ($contract->status_contract !== 'cancelled') {
+            return redirect()->back()->with('error', 'Refund hanya dapat diproses untuk pesanan yang telah dibatalkan.');
         }
 
         $request->validate([
@@ -397,29 +468,40 @@ class TransactionController extends Controller
             'fee_marketplace' => 0,
             'payout_amount' => 0,
             'payout_notes' => $notes,
+            'expired_at' => now(),
         ]);
+
+        $contract->payments()->where('payment_status', 'pending')->update(['payment_status' => 'failed']);
 
         if ($contract->bookingDetail) {
             $contract->bookingDetail->update(['status_booking' => 'cancelled']);
         }
 
-        if (!$contract->cancellation) {
+        $actualPaid = (float) $contract->payments->where('payment_status', 'completed')->sum('payment_amount');
+        $refundAmount = $actualPaid > 0 ? $actualPaid : ($contract->payment_type === 'dp' && $contract->jumlah_dp > 0 ? (float)$contract->jumlah_dp : (float)$contract->jumlah);
+
+        if ($contract->cancellation) {
+            $contract->cancellation->update([
+                'refund_amount' => $refundAmount,
+                'alasan' => $contract->cancellation->alasan ? $contract->cancellation->alasan . " | Admin: {$notes}" : $notes,
+            ]);
+        } else {
             \App\Models\ContractCancellation::create([
                 'id_contract' => $contract->id,
                 'alasan' => $notes,
                 'dibatalkan_oleh' => 'admin',
-                'refund_amount' => $contract->jumlah,
+                'refund_amount' => $refundAmount,
             ]);
         }
 
         $clientName = $contract->client->nama ?? 'Klien';
-        $formattedAmount = 'Rp ' . number_format($contract->jumlah, 0, ',', '.');
+        $formattedAmount = 'Rp ' . number_format($refundAmount, 0, ',', '.');
 
         // Kirim Notifikasi in-app ke Klien
         if ($contract->client && $contract->client->id_user) {
             \App\Models\Notification::send(
                 $contract->client->id_user,
-                'Pengembalian Dana (Refund) Berhasil',
+                'Pengembalian Dana Berhasil',
                 "Dana sebesar {$formattedAmount} untuk sesi KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah disetujui untuk dikembalikan ke akun Anda. Catatan: {$notes}",
                 'refund',
                 url('/client/bookings')
@@ -430,8 +512,8 @@ class TransactionController extends Controller
         if ($contract->photographer && $contract->photographer->id_user) {
             \App\Models\Notification::send(
                 $contract->photographer->id_user,
-                'Pembatalan & Refund Sesi Booking',
-                "Sesi booking KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dibatalkan dan dana direfund ke klien. Catatan: {$notes}",
+                'Pembatalan dan Pengembalian Dana Sesi',
+                "Sesi booking KTRK-" . str_pad($contract->id, 5, '0', STR_PAD_LEFT) . " telah dibatalkan dan pengembalian dana diproses ke klien. Catatan: {$notes}",
                 'refund',
                 url('/photographer/bookings')
             );

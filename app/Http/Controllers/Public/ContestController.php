@@ -167,8 +167,8 @@ class ContestController extends Controller
         }
 
         $contest = PhotoContest::findOrFail($id);
-        if ($contest->status !== 'buka') {
-            return redirect()->back()->with('error', 'Pendaftaran untuk event lomba ini tidak sedang dibuka.');
+        if ($contest->status !== 'buka' || ($contest->end_date && \Carbon\Carbon::parse($contest->end_date)->endOfDay()->isPast())) {
+            return redirect()->back()->with('error', 'Pendaftaran untuk event lomba ini tidak sedang dibuka atau batas waktu telah berakhir.');
         }
 
         $existing = \App\Models\ContestRegistration::where('id_contest', $contest->id)
@@ -221,7 +221,7 @@ class ContestController extends Controller
             'status_pembayaran' => $statusBayar,
         ]);
 
-        return redirect()->back()->with('success', 'Formulir pendaftaran calon peserta berhasil dikirim! Menunggu kurasi & verifikasi oleh Tim Admin.');
+        return redirect()->back()->with('success', 'Formulir pendaftaran calon peserta berhasil dikirim dan menunggu verifikasi oleh Tim Admin.');
     }
 
     /**
@@ -260,7 +260,25 @@ class ContestController extends Controller
             'status_pembayaran' => 'menunggu_konfirmasi',
         ]);
 
-        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diunggah! Admin akan segera memverifikasi transaksi Anda.');
+        $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
+        foreach ($admins as $adm) {
+            \App\Models\Notification::send(
+                $adm->id,
+                'Bukti Bayar Lomba Diunggah',
+                "Peserta {$user->nama} telah mengunggah bukti transfer untuk lomba '{$contest->judul_lomba}'. Mohon verifikasi pendaftaran.",
+                'contest_payment_uploaded',
+                route('admin.contests.manage', $contest->id)
+            );
+        }
+
+        \App\Models\ActivityLog::record(
+            'contest_payment_uploaded',
+            "Peserta {$user->nama} mengunggah bukti transfer biaya pendaftaran untuk lomba '{$contest->judul_lomba}'",
+            $contest,
+            ['bukti_transfer' => $buktiUrl]
+        );
+
+        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diunggah. Admin akan segera memverifikasi transaksi Anda.');
     }
 
     /**
@@ -317,7 +335,7 @@ class ContestController extends Controller
                 ->withInput();
         }
 
-        ContestSubmission::create([
+        $submission = ContestSubmission::create([
             'id_contest' => $contest->id,
             'id_user' => $user->id,
             'id_registration' => $registration->id,
@@ -328,6 +346,24 @@ class ContestController extends Controller
             'status_submission' => 'verified',
         ]);
 
-        return redirect()->back()->with('success', 'Karya foto Anda berhasil dikirimkan! Karya telah tersimpan untuk tahap penjurian dewan juri.');
+        $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
+        foreach ($admins as $adm) {
+            \App\Models\Notification::send(
+                $adm->id,
+                'Karya Lomba Baru Diterima',
+                "Peserta {$user->nama} telah mengunggah karya foto '{$request->judul_karya}' untuk lomba '{$contest->judul_lomba}'.",
+                'contest_submission_received',
+                route('admin.contests.submissions', $contest->id)
+            );
+        }
+
+        \App\Models\ActivityLog::record(
+            'contest_submission_uploaded',
+            "Peserta {$user->nama} mengunggah karya '{$request->judul_karya}' untuk lomba '{$contest->judul_lomba}'",
+            $contest,
+            ['id_submission' => $submission->id, 'judul_karya' => $request->judul_karya]
+        );
+
+        return redirect()->back()->with('success', 'Karya foto berhasil dikirimkan dan tersimpan untuk tahap penjurian.');
     }
 }

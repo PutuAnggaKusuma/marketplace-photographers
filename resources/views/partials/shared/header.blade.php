@@ -83,9 +83,12 @@
                   <span x-show="unreadCount > 0" class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-extrabold text-[10px]" x-text="unreadCount + ' Baru'"></span>
                 </div>
                 <button type="button" 
-                        @click="markAllRead()" 
+                        @click="if (unreadCount > 0 && !isMarkingAll) markAllRead()" 
                         :disabled="isMarkingAll || unreadCount === 0"
-                        class="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                        class="inline-flex items-center gap-1.5 text-[11px] font-bold transition select-none"
+                        :class="unreadCount > 0 
+                            ? 'text-amber-500 dark:text-amber-400 underline underline-offset-4 decoration-amber-400 hover:text-amber-600 hover:decoration-amber-500 cursor-pointer' 
+                            : 'text-gray-400 dark:text-gray-500 no-underline cursor-default'">
                   <svg x-show="isMarkingAll" 
                        x-cloak 
                        class="animate-spin h-3 w-3 text-amber-500 dark:text-amber-400 shrink-0" 

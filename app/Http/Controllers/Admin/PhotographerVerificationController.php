@@ -35,7 +35,7 @@ class PhotographerVerificationController extends Controller
             'portfolios.medias',
             'portfolios.category',
             'workingHours',
-            'testimonials',
+            'testimonials' => fn($q) => $q->where('is_hidden', false),
         ]);
 
         if (in_array($statusFilter, ['pending', 'menunggu'])) {
@@ -171,11 +171,15 @@ class PhotographerVerificationController extends Controller
                 ->with('error', "Profil belum lengkap. Lengkapi terlebih dahulu: {$missingList}.");
         }
 
-        $photographer->update([
+        $updatePayload = [
             'status_verifikasi' => $newVerified ? 'terverifikasi' : 'menunggu',
             'is_verified' => $newVerified,
             'catatan_penolakan' => null,
-        ]);
+        ];
+        if (!$newVerified) {
+            $updatePayload['status_etalase'] = 'belum_diajukan';
+        }
+        $photographer->update($updatePayload);
 
         $statusText = $newVerified ? 'diverifikasi' : 'dibatalkan verifikasinya';
 
@@ -391,6 +395,7 @@ class PhotographerVerificationController extends Controller
 
         $photographer->update([
             'status_verifikasi' => 'ditolak',
+            'status_etalase' => 'belum_diajukan',
             'is_verified' => false,
             'catatan_penolakan' => trim($request->catatan_penolakan),
         ]);
@@ -433,12 +438,15 @@ class PhotographerVerificationController extends Controller
 
         $photographer = RolePhotographer::findOrFail($id);
 
-        $hasActive = Contract::where('id_photographer', $photographer->id)
-            ->whereIn('status_contract', ['pending', 'active'])
+        $hasActiveOrUnsettled = Contract::where('id_photographer', $photographer->id)
+            ->where(function ($q) {
+                $q->whereIn('status_contract', ['draft', 'approved', 'pending_payment', 'active'])
+                  ->orWhereIn('status_payout', ['holding', 'ready']);
+            })
             ->exists();
 
-        if ($hasActive) {
-            return redirect()->back()->with('error', "Fotografer '{$photographer->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif.");
+        if ($hasActiveOrUnsettled) {
+            return redirect()->back()->with('error', "Fotografer '{$photographer->nama}' tidak dapat dihapus karena masih memiliki pesanan sesi aktif atau dana pembayaran yang belum diselesaikan (payout).");
         }
 
         $user = $photographer->user;

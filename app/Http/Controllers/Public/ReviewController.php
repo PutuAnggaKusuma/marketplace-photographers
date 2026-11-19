@@ -44,12 +44,9 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengulas pesanan ini.');
         }
 
-        // Verifikasi status selesai
-        $isCompleted = $contract->status_contract === 'completed' || 
-                       ($contract->bookingDetail && $contract->bookingDetail->status_booking === 'completed');
-
-        if (!$isCompleted) {
-            return redirect()->back()->with('error', 'Ulasan hanya dapat diberikan setelah sesi foto selesai.');
+        // Verifikasi status selesai dan telah divalidasi klien (Rule #90)
+        if ($contract->status_contract !== 'completed' || !$contract->is_validated_client) {
+            return redirect()->back()->with('error', 'Ulasan hanya dapat diberikan setelah Anda memeriksa dan menyetujui hasil foto.');
         }
 
         // Check if already reviewed

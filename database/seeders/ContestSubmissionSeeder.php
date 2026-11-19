@@ -30,12 +30,12 @@ class ContestSubmissionSeeder extends Seeder
             ContestSubmission::where('id_contest', 9)->forceDelete();
             ContestRegistration::where('id_contest', 9)->forceDelete();
 
-            // Pendaftar 1: Dian & Febri (Disetujui & Lunas)
+            // Pendaftar 1: Dian Febri (Disetujui & Lunas)
             if ($userDianId) {
                 $reg1 = ContestRegistration::create([
                     'id_contest' => 9,
                     'id_user' => $userDianId,
-                    'nama_lengkap' => 'Dian & Febri',
+                    'nama_lengkap' => 'Dian Febri',
                     'email' => 'dian@gmail.com',
                     'no_wa' => '081298765432',
                     'asal_kota' => 'Jakarta Pusat',

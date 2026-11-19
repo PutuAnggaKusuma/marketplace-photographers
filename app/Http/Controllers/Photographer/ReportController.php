@@ -32,7 +32,15 @@ class ReportController extends Controller
         if ($statusFilter === 'paid') {
             $query->where('status_payout', 'paid');
         } elseif ($statusFilter === 'holding') {
-            $query->whereIn('status_payout', ['holding', 'ready']);
+            $query->whereIn('status_payout', ['holding', 'ready'])->where('status_contract', '!=', 'cancelled');
+        } else {
+            $query->where(function ($q) {
+                $q->whereIn('status_contract', ['active', 'completed'])
+                  ->orWhere(function ($sub) {
+                      $sub->whereIn('status_payout', ['holding', 'ready', 'paid'])
+                          ->where('status_contract', '!=', 'cancelled');
+                  });
+            });
         }
 
         if ($sort === 'oldest') {
@@ -50,20 +58,27 @@ class ReportController extends Controller
         $contracts = $query->paginate($perPage)->withQueryString();
 
         // 4 Summary Metrics
-        $allContracts = Contract::where('id_photographer', $photographer->id)->get();
+        $allContracts = Contract::where('id_photographer', $photographer->id)->with('payments')->get();
+        $settledContracts = $allContracts->where('status_contract', '!=', 'cancelled')->filter(fn($c) => 
+            $c->payments->where('payment_status', 'completed')->isNotEmpty() || 
+            (in_array($c->status_contract, ['active', 'completed']) && $c->status_payout !== null)
+        );
 
         $totalNetIncome = $allContracts->where('status_payout', 'paid')->sum('payout_amount');
-        $totalEscrowPending = $allContracts->whereIn('status_payout', ['holding', 'ready'])->sum('payout_amount');
+        $totalEscrowPending = $allContracts->whereIn('status_payout', ['holding', 'ready'])
+            ->where('status_contract', '!=', 'cancelled')
+            ->filter(fn($c) => $c->payments->where('payment_status', 'completed')->isNotEmpty())
+            ->sum('payout_amount');
         $completedCount = $allContracts->where('status_contract', 'completed')->count();
         $avgRevenuePerSession = $completedCount > 0 ? ($totalNetIncome / $completedCount) : 0;
-        $totalMarketplaceFee = $allContracts->sum('fee_marketplace');
+        $totalMarketplaceFee = $settledContracts->sum('fee_marketplace');
 
         // Monthly Revenue Calculation for Chart (Current Year)
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         $monthlyRevenue = array_fill(1, 12, 0);
         $monthlyBookings = array_fill(1, 12, 0);
 
-        foreach ($allContracts as $c) {
+        foreach ($settledContracts as $c) {
             if ($c->created_at->format('Y') == $selectedYear) {
                 $m = (int) $c->created_at->format('n');
                 $monthlyRevenue[$m] += $c->payout_amount > 0 ? $c->payout_amount : ($c->jumlah * 0.9);
@@ -103,14 +118,22 @@ class ReportController extends Controller
         $selectedYear = $request->query('year', date('Y'));
 
         $contracts = Contract::where('id_photographer', $photographer->id)
+            ->whereNotIn('status_contract', ['cancelled'])
             ->with(['client.user', 'bookingDetail.service', 'payments'])
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $settledContracts = $contracts->filter(fn($c) => 
+            $c->payments->where('payment_status', 'completed')->isNotEmpty() || 
+            (in_array($c->status_contract, ['active', 'completed']) && $c->status_payout !== null)
+        );
+
         $totalNetIncome = $contracts->where('status_payout', 'paid')->sum('payout_amount');
-        $totalEscrowPending = $contracts->whereIn('status_payout', ['holding', 'ready'])->sum('payout_amount');
-        $totalMarketplaceFee = $contracts->sum('fee_marketplace');
-        $totalGrossVolume = $contracts->sum('jumlah');
+        $totalEscrowPending = $contracts->whereIn('status_payout', ['holding', 'ready'])
+            ->filter(fn($c) => $c->payments->where('payment_status', 'completed')->isNotEmpty())
+            ->sum('payout_amount');
+        $totalMarketplaceFee = $settledContracts->sum('fee_marketplace');
+        $totalGrossVolume = $settledContracts->sum('jumlah');
 
         return view('photographer.reports.export', compact(
             'photographer',
@@ -138,6 +161,10 @@ class ReportController extends Controller
 
         if ($contract->status_payout !== 'ready') {
             return redirect()->back()->with('error', 'Status pesanan belum siap dicairkan atau dana telah diproses sebelumnya.');
+        }
+
+        if ($contract->payout_requested_at !== null) {
+            return redirect()->back()->with('info', 'Pencairan dana untuk pesanan ini sudah diajukan dan sedang menunggu verifikasi Admin.');
         }
 
         if (empty($photographer->nama_bank) || empty($photographer->nomor_rekening)) {
@@ -183,6 +210,6 @@ class ReportController extends Controller
             ]
         );
 
-        return redirect()->back()->with('success', "Permintaan pencairan payout sebesar {$formattedAmount} berhasil diajukan ke Admin!");
+        return redirect()->back()->with('success', "Permintaan pencairan payout sebesar {$formattedAmount} berhasil diajukan ke Admin.");
     }
 }

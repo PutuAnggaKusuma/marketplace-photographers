@@ -64,6 +64,17 @@ class ClientFavoriteController extends Controller
         }
 
         $user = Auth::user();
+        if ($user->role !== 'client') {
+            $msg = 'Fitur simpan favorit hanya tersedia untuk akun klien.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                ], 403);
+            }
+            return redirect()->back()->with('error', $msg);
+        }
+
         $photographer = RolePhotographer::findOrFail($photographerId);
 
         $clientProfile = RoleClient::firstOrCreate(

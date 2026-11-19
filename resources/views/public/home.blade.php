@@ -91,33 +91,33 @@
 
       </form>
 
-      <!-- 5-Photo Staggered Floating Wave Gallery (Pasted Image 1 Floating Animation) -->
-      <!-- Dynamic Wave Showcase of 5 Hero Photos from Database (Rule #94) -->
+      <!-- 5-Photo Staggered Floating Wave Gallery (Folder Sistem: public/images/beranda) -->
+      <!-- Dynamic Wave Showcase of 5 Hero Photos from System Directory (Rule #94) -->
       <div class="grid grid-cols-5 gap-3.5 sm:gap-6 items-end max-w-7xl mx-auto pt-4 sm:pt-6">
         
         <!-- Image 1 (Far Left - Floating Animation 1) -->
         <div class="h-40 sm:h-56 lg:h-64 rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-1 shadow-md hover:shadow-xl">
-          <img src="{{ $heroPhotos[0] ?? asset('images/avatar-default.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
+          <img src="{{ $heroPhotos[0] ?? asset('images/avatar-default.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Fotografer LensMatch" />
         </div>
 
         <!-- Image 2 (Mid Left - Floating Animation 2) -->
         <div class="h-56 sm:h-76 lg:h-[330px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-2 shadow-md hover:shadow-xl">
-          <img src="{{ $heroPhotos[1] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
+          <img src="{{ $heroPhotos[1] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Fotografer LensMatch" />
         </div>
 
         <!-- Image 3 (Center - TALLEST HIGHLIGHT - Floating Animation 3) -->
         <div class="h-72 sm:h-96 lg:h-[400px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-3 shadow-lg hover:shadow-2xl">
-          <img src="{{ $heroPhotos[2] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
+          <img src="{{ $heroPhotos[2] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Fotografer LensMatch" />
         </div>
 
         <!-- Image 4 (Mid Right - Floating Animation 4) -->
         <div class="h-60 sm:h-80 lg:h-[350px] rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-4 shadow-md hover:shadow-xl">
-          <img src="{{ $heroPhotos[3] ?? ($heroPhotos[1] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
+          <img src="{{ $heroPhotos[3] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Fotografer LensMatch" />
         </div>
 
         <!-- Image 5 (Far Right - Floating Animation 5) -->
         <div class="h-40 sm:h-56 lg:h-64 rounded-2xl overflow-hidden group border-2 border-white dark:border-gray-800 transition animate-float-5 shadow-md hover:shadow-xl">
-          <img src="{{ $heroPhotos[4] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Portofolio Fotografer" />
+          <img src="{{ $heroPhotos[4] ?? ($heroPhotos[0] ?? asset('images/avatar-default.png')) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Karya Fotografer LensMatch" />
         </div>
 
       </div>
@@ -240,7 +240,7 @@
             Cara Kerja Praktis & Aman di LensMatch
           </h2>
           <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl">
-            Kami memastikan setiap pesanan terlindungi dengan **Kontrak Digital resmi** dan sistem **pembayaran aman bergaransi**. Uang Anda aman sampai hasil foto dikirimkan.
+            Kami memastikan setiap pesanan terlindungi dengan Kontrak Digital resmi dan sistem pembayaran aman bergaransi. Uang Anda aman sampai hasil foto dikirimkan.
           </p>
           <div class="pt-2">
             <a href="{{ url('/fotografer') }}" class="inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#222222] text-white hover:bg-amber-400 hover:text-gray-900 font-bold text-xs rounded-xl transition shadow-xs">
@@ -386,7 +386,7 @@
     x-data="{ 
       activeIndex: 1, 
       items: [
-        { initial: 'DF', name: 'Dian & Febri', category: 'Sesi Prewedding — DKI Jakarta', quote: 'Cari fotografer prewedding di Jakarta jadi cepat banget. Portofolio langsung kelihatan jelas beserta pilihan paket jam fotonya.' },
+        { initial: 'DF', name: 'Dian Febri', category: 'Sesi Prewedding — DKI Jakarta', quote: 'Cari fotografer prewedding di Jakarta jadi cepat banget. Portofolio langsung kelihatan jelas beserta pilihan paket jam fotonya.' },
         { initial: 'SR', name: 'Siti Rahmawati', category: 'Sesi Foto Liburan — Bali', quote: 'Sistem kontrak digitalnya bikin tenang banget. Hak cipta foto dan tanggal sesi foto tercatat resmi. Pembayaran DP aman terverifikasi.' },
         { initial: 'RP', name: 'Reza Pratama', category: 'Sesi Wisuda — DI Yogyakarta', quote: 'Hasil foto wisuda saya sangat memuaskan! Fotografer ramah, datang tepat waktu, dan proses serah terima galeri foto sangat cepat.' },
         { initial: 'MK', name: 'Maya & Kevin', category: 'Ulang Tahun & Family — Bandung', quote: 'Sangat puas dengan dokumentasi foto ulang tahun anak kami di Bandung. Fotografernya pandai mengambil momen candid yang natural!' },

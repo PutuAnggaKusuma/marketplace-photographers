@@ -202,12 +202,35 @@
 
                             <td class="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <form action="{{ route('admin.reviews.toggle_hide', $rev->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-bold transition min-w-[70px] text-center {{ $rev->is_hidden ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-900/60' : 'bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60' }}">
-                                            {{ $rev->is_hidden ? 'Tampilkan' : 'Sembunyikan' }}
+                                    @if($rev->is_hidden)
+                                        <button type="button" 
+                                                @click="$dispatch('open-confirm-modal', {
+                                                    title: 'Tampilkan Ulasan Klien?',
+                                                    message: 'Ulasan ini akan kembali dipublikasikan pada profil publik fotografer.',
+                                                    confirmText: 'Ya, Tampilkan',
+                                                    iconType: 'check',
+                                                    buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold',
+                                                    actionUrl: '{{ route('admin.reviews.toggle_hide', $rev->id) }}',
+                                                    method: 'POST'
+                                                })"
+                                                class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-900/60 font-bold text-xs transition min-w-[70px] text-center cursor-pointer">
+                                            Tampilkan
                                         </button>
-                                    </form>
+                                    @else
+                                        <button type="button" 
+                                                @click="$dispatch('open-confirm-modal', {
+                                                    title: 'Sembunyikan Ulasan Klien?',
+                                                    message: 'Ulasan ini tidak akan ditampilkan lagi pada profil publik fotografer.',
+                                                    confirmText: 'Ya, Sembunyikan',
+                                                    iconType: 'warning',
+                                                    buttonClass: 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs',
+                                                    actionUrl: '{{ route('admin.reviews.toggle_hide', $rev->id) }}',
+                                                    method: 'POST'
+                                                })"
+                                                class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[70px] text-center cursor-pointer">
+                                            Sembunyikan
+                                        </button>
+                                    @endif
 
                                     <button type="button" 
                                             @click="$dispatch('open-confirm-modal', {
@@ -218,7 +241,7 @@
                                                 actionUrl: '{{ route('admin.reviews.destroy', $rev->id) }}',
                                                 method: 'POST'
                                             })"
-                                            class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
+                                            class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center cursor-pointer">
                                         Hapus
                                     </button>
                                 </div>

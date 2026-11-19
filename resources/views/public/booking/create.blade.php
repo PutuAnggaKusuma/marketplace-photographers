@@ -1540,7 +1540,7 @@
           <div x-show="selectedDate" x-cloak class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 space-y-1">
             <div class="flex items-center justify-between text-xs gap-2">
               <span class="text-gray-500 dark:text-gray-400">Jadwal Sesi:</span>
-              <span class="font-bold text-amber-600 dark:text-amber-400"
+              <span class="font-bold text-gray-700 dark:text-gray-300 font-medium truncate"
                     x-text="(selectedStartTime && selectedEndTime) ? (selectedStartTime + ' - ' + selectedEndTime + ' WIB') : 'Pilih jam sesi'"></span>
             </div>
             <p class="text-[11px] text-gray-700 dark:text-gray-300 font-medium truncate" x-text="formatDateIndo(selectedDate)"></p>
@@ -1577,7 +1577,7 @@
                   </span>
                 </div>
                 <p class="text-[11px] text-gray-500 dark:text-gray-400">Sisa 70% dilunasi kemudian</p>
-                <p class="text-xs font-black text-amber-600 dark:text-amber-400 pt-1" x-text="'Rp ' + dpAmount.toLocaleString('id-ID')"></p>
+                <p class="text-xs font-black text-gray-900 dark:text-white pt-1" x-text="'Rp ' + dpAmount.toLocaleString('id-ID')"></p>
               </label>
             </div>
           </div>

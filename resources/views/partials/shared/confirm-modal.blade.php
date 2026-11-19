@@ -10,6 +10,7 @@
     modalButtonText: 'Ya, Lanjutkan',
     modalButtonClass: 'bg-red-600 hover:bg-red-700 text-white',
     iconType: 'warning',
+    modalParams: {},
     targetForm: null,
     submitButton: null,
     onConfirmCallback: null,
@@ -21,8 +22,9 @@
       this.modalActionUrl = data.actionUrl || '';
       this.modalMethod = data.method || 'POST';
       this.modalButtonText = data.buttonText || data.confirmText || 'Ya, Lanjutkan';
-      this.modalButtonClass = data.buttonClass || (data.type === 'save' || data.type === 'primary' ? 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs' : (data.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'));
+      this.modalButtonClass = data.buttonClass || (data.type === 'save' || data.type === 'primary' ? 'bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold shadow-xs' : (data.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold' : 'bg-red-600 hover:bg-red-700 text-white font-extrabold'));
       this.iconType = data.iconType || data.type || 'warning';
+      this.modalParams = data.params || data.hiddenInputs || {};
       this.targetForm = data.targetForm || null;
       this.submitButton = data.submitButton || null;
       this.onConfirmCallback = data.onConfirm || null;
@@ -36,6 +38,7 @@
         delete this.targetForm.__isPendingConfirm;
       }
       this.onConfirmCallback = null;
+      this.modalParams = {};
       this.confirmOpen = false;
     },
 
@@ -83,6 +86,17 @@
           }
           if (this.modalMethod) {
             formEl.method = this.modalMethod === 'GET' ? 'GET' : 'POST';
+          }
+          formEl.querySelectorAll('.modal-custom-param').forEach(el => el.remove());
+          if (this.modalParams && typeof this.modalParams === 'object') {
+            for (const [key, val] of Object.entries(this.modalParams)) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = val;
+              input.className = 'modal-custom-param';
+              formEl.appendChild(input);
+            }
           }
           formEl.submit();
         }

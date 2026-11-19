@@ -12,8 +12,6 @@
 
     activeTab: 'booking',
 
-    detailModalOpen: false,
-
     payoutModalOpen: false,
 
     refundModalOpen: false,
@@ -33,14 +31,6 @@
     payoutProofLightboxOpen: false,
 
     refundNotes: '',
-
-    openDetail(c) {
-
-        this.activeContract = c;
-
-        this.detailModalOpen = true;
-
-    },
 
     openPayout(c) {
 
@@ -410,6 +400,10 @@
 
                         'pending_payment' => 'Menunggu Pembayaran',
 
+                        'cancelled' => 'Dibatalkan',
+
+                        'expired' => 'Kadaluarsa',
+
                         'refunded' => 'Refund'
 
                     ];
@@ -674,6 +668,14 @@
 
                                     </span>
 
+                                @elseif($c->status_contract === 'draft' || ($c->status_contract === 'pending' && !$c->is_validated_photographer))
+
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+
+                                        Menunggu Konfirmasi
+
+                                    </span>
+
                                 @elseif($c->status_contract === 'pending_payment')
 
                                     <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
@@ -683,18 +685,26 @@
                                     </span>
 
                                 @elseif($c->status_contract === 'cancelled')
-
+                                    @php
+                                        $isExpired = $c->cancellation && (str_contains(strtolower($c->cancellation->alasan), 'kadaluarsa') || str_contains(strtolower($c->cancellation->alasan), 'terlewati'));
+                                    @endphp
                                     <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
+                                        {{ $isExpired ? 'Kadaluarsa' : 'Dibatalkan' }}
+                                    </span>
 
-                                        Dibatalkan
+                                @elseif($c->payments->where('payment_status', 'completed')->isNotEmpty() && ($c->status_payout === 'holding' || $c->status_contract === 'active'))
+
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+
+                                        Dana Ditahan
 
                                     </span>
 
                                 @else
 
-                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                    <span class="text-xs font-bold text-gray-400 dark:text-gray-500">
 
-                                        Dana Ditahan
+                                        -
 
                                     </span>
 
@@ -705,285 +715,15 @@
 
 
                             <!-- Aksi -->
-
                             <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-
-                                @php
-
-                                    $contractData = [
-
-                                        'id' => $c->id,
-
-                                        'code' => 'KTRK-' . str_pad($c->id, 5, '0', STR_PAD_LEFT),
-
-                                        'created_at' => $c->created_at->format('d M Y, H:i'),
-
-                                        'status_contract' => $c->status_contract,
-
-                                        'status_payout' => $c->status_payout ?? 'holding',
-
-                                        'payout_at' => $c->payout_at ? $c->payout_at->format('d M Y, H:i') : null,
-
-                                        'payout_notes' => $c->payout_notes,
-
-                                        'jumlah_formatted' => 'Rp ' . number_format($c->jumlah, 0, ',', '.'),
-
-                                        'fee_formatted' => 'Rp ' . number_format($feeAmount, 0, ',', '.'),
-
-                                        'net_payout_formatted' => 'Rp ' . number_format($netPayout, 0, ',', '.'),
-
-                                        'client_name' => $c->client->nama ?? 'Klien',
-
-                                        'client_email' => $c->client->user->email ?? '-',
-
-                                        'client_phone' => $c->client->nomor_telepon ?? '-',
-
-                                        'photographer_name' => $c->photographer->nama ?? 'Fotografer',
-
-                                        'photographer_email' => $c->photographer->user->email ?? '-',
-
-                                        'photographer_phone' => $c->photographer->nomor_telepon ?? '-',
-
-                                        'photographer_bank_name' => $c->photographer->nama_bank ?? null,
-
-                                        'photographer_bank_account' => $c->photographer->nomor_rekening ?? null,
-
-                                        'photographer_bank_holder' => $c->photographer->atas_nama_rekening ?? null,
-
-                                        'service_name' => $c->bookingDetail->service->nama_layanan ?? 'Paket Kustom',
-
-                                        'booking_date' => $c->bookingDetail ? $c->bookingDetail->date_range_label : '-',
-
-                                        'booking_time' => ($c->bookingDetail && $c->bookingDetail->jam_mulai) ? (substr($c->bookingDetail->jam_mulai, 0, 5) . ($c->bookingDetail->jam_selesai ? ' - ' . substr($c->bookingDetail->jam_selesai, 0, 5) . ' WIB' : ' WIB')) : '-',
-
-                                        'location' => $c->bookingDetail->lokasi ?? '-',
-
-                                        'status_booking' => $c->bookingDetail->status_booking ?? 'pending',
-
-                                        'hasil_foto_url' => $c->bookingDetail->hasil_foto_url ?? null,
-
-                                        'catatan_fotografer' => $c->bookingDetail->catatan_fotografer ?? null,
-
-                                        'external_id' => $c->invoice_code,
-
-                                        'payment_status' => $c->payments->first()->payment_status ?? 'pending',
-
-                                        'payment_type' => $c->payments->first()->payment_type ?? 'transfer',
-
-                                        'bukti_transfer' => $c->payments->first()->bukti_transfer ?? null,
-
-                                        'cancellation_reason' => $c->cancellation->alasan ?? null,
-
-                                        'cancelled_by' => $c->cancellation->dibatalkan_oleh ?? null,
-
-                                        'refund_amount' => $c->cancellation ? ('Rp ' . number_format($c->cancellation->refund_amount, 0, ',', '.')) : null,
-
-                                    ];
-
-                                @endphp
-
-                                <div class="flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
-
-                                    <!-- Tombol Utama: Lihat Detail Transaksi -->
-
-                                    <button type="button" 
-
-                                            @click="openDetail({{ json_encode($contractData) }})" 
-
-                                            class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center cursor-pointer shadow-2xs">
-
+                                <div class="flex items-center justify-center">
+                                    <a href="{{ route('admin.transactions.show', $c->id) }}" 
+                                       class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[60px] text-center inline-block cursor-pointer shadow-2xs">
                                         Lihat
-
-                                    </button>
-
-
-
-                                    <!-- Dropdown Menu Opsi Lainnya (⋮) -->
-
-                                    <div class="relative inline-block text-left">
-
-                                        <button type="button" 
-
-                                                @click="menuOpen = !menuOpen" 
-
-                                                class="w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition shadow-2xs cursor-pointer">
-
-                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-
-                                                <circle cx="12" cy="5" r="1.75" />
-
-                                                <circle cx="12" cy="12" r="1.75" />
-
-                                                <circle cx="12" cy="19" r="1.75" />
-
-                                            </svg>
-
-                                        </button>
-
-
-
-                                        <!-- Floating Dropdown Menu -->
-
-                                        <div x-show="menuOpen" 
-
-                                             @click.away="menuOpen = false" 
-
-                                             x-transition:enter="transition ease-out duration-100" 
-
-                                             x-transition:enter-start="transform opacity-0 scale-95" 
-
-                                             x-transition:enter-end="transform opacity-100 scale-100" 
-
-                                             x-transition:leave="transition ease-in duration-75" 
-
-                                             x-transition:leave-start="transform opacity-100 scale-100" 
-
-                                             x-transition:leave-end="transform opacity-0 scale-95" 
-
-                                             class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50 text-left" 
-
-                                             style="display: none;">
-
-                                            
-
-                                            @if($c->payments->first() && $c->payments->first()->bukti_transfer && $c->payments->first()->payment_status === 'pending')
-
-                                                <!-- Verifikasi Pembayaran Transfer (Universal Confirm Modal per Rule #18) -->
-
-                                                <button type="button" 
-
-                                                        @click="menuOpen = false; $dispatch('open-confirm-modal', {
-
-                                                            title: 'Verifikasi Pembayaran Transfer?',
-
-                                                            message: 'Apakah Anda yakin pembayaran transfer untuk pesanan ini sudah valid dan dana telah masuk ke rekening resmi LensMatch?',
-
-                                                            confirmText: 'Ya, Verifikasi Bayar',
-
-                                                            type: 'success',
-
-                                                            actionUrl: '{{ route('admin.transactions.verify-payment', $c->id) }}',
-
-                                                            method: 'POST'
-
-                                                        })"
-
-                                                        class="w-full px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition block text-left cursor-pointer">
-
-                                                    <span>Verifikasi Bayar</span>
-
-                                                </button>
-
-
-
-                                                <!-- Tolak Bukti Transfer (Universal Confirm Modal per Rule #18) -->
-
-                                                <button type="button" 
-
-                                                        @click="menuOpen = false; $dispatch('open-confirm-modal', {
-
-                                                            title: 'Tolak Bukti Transfer?',
-
-                                                            message: 'Apakah Anda yakin ingin menolak bukti transfer ini dan meminta klien untuk mengunggah ulang bukti pembayaran?',
-
-                                                            confirmText: 'Ya, Tolak Bukti Bayar',
-
-                                                            type: 'danger',
-
-                                                            actionUrl: '{{ route('admin.transactions.reject-payment', $c->id) }}',
-
-                                                            method: 'POST'
-
-                                                        })"
-
-                                                        class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer">
-
-                                                    <span>Tolak Bukti Bayar</span>
-
-                                                </button>
-
-                                                <div class="border-t border-gray-100 dark:border-gray-700/60 my-1"></div>
-
-                                            @endif
-
-
-
-                                            @if(in_array($c->status_payout, ['ready', 'holding']))
-
-                                                <!-- Transfer Dana -->
-
-                                                <button type="button" 
-
-                                                        @click="menuOpen = false; openPayout({{ json_encode($contractData) }})"
-
-                                                        class="w-full px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition block text-left cursor-pointer">
-
-                                                    <span>Transfer Dana</span>
-
-                                                </button>
-
-                                            @endif
-
-
-
-                                            @if($c->status_payout !== 'refunded' && $c->status_payout !== 'paid')
-
-                                                <!-- Proses Refund -->
-
-                                                <button type="button" 
-
-                                                        @click="menuOpen = false; openRefund({{ json_encode($contractData) }})"
-
-                                                        class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer">
-
-                                                    <span>Proses Refund</span>
-
-                                                </button>
-
-                                            @endif
-
-
-
-                                            @if($c->status_payout === 'paid')
-
-                                                <div class="px-3.5 py-1.5 text-xs font-bold text-gray-400 dark:text-gray-500 block"><span>Transfer Selesai</span></div>
-
-                                            @elseif($c->status_payout === 'refunded')
-
-                                                <div class="px-3.5 py-1.5 text-xs font-bold text-gray-400 dark:text-gray-500 block">
-
-                                                    <span>Refund Selesai</span>
-
-                                                </div>
-
-                                            @endif
-
-
-
-                                            <div class="border-t border-gray-100 dark:border-gray-700/60 my-1"></div>
-
-
-
-                                            <!-- Cetak / Invoice -->
-
-                                            <a href="{{ route('booking.invoice.print', $c->id) }}" target="_blank" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center gap-2 text-left">
-
-                                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-
-                                                <span>Cetak Invoice</span>
-
-                                            </a>
-
-                                        </div>
-
-                                    </div>
-
+                                    </a>
                                 </div>
-
                             </td>
-
                         </tr>
-
                     @empty
 
                         <tr>
@@ -1034,7 +774,7 @@
 
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
 
-                        <th class="py-3.5 px-4 sm:px-6">Invoice & Tanggal</th>
+                        <th class="py-3.5 px-4 sm:px-6">Invoice dan Tanggal</th>
 
                         <th class="py-3.5 px-4 sm:px-6">Pembeli (User)</th>
 
@@ -1058,7 +798,7 @@
 
                         <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
 
-                            <!-- Invoice & Tanggal -->
+                            <!-- Invoice dan Tanggal -->
 
                             <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
 
@@ -1122,7 +862,7 @@
 
                                 Rp {{ number_format($el->nominal, 0, ',', '.') }}
 
-                                <span class="block text-xs text-gray-400 font-medium">100% Platform Revenue</span>
+                                <span class="block text-xs text-gray-400 font-medium">Pendapatan Platform</span>
 
                             </td>
 
@@ -1240,7 +980,7 @@
 
                         <tr class="hover:bg-amber-50/30 dark:hover:bg-amber-950/20 transition">
 
-                            <!-- Kode & Tanggal -->
+                            <!-- Kode dan Tanggal -->
 
                             <td class="py-4 px-4 sm:px-6 align-middle font-mono font-bold text-gray-900 dark:text-white">
 
@@ -1294,7 +1034,7 @@
 
                                 Rp {{ number_format($cr->contest->biaya_pendaftaran ?? 0, 0, ',', '.') }}
 
-                                <span class="block text-xs text-gray-400 font-medium">100% Platform Revenue</span>
+                                <span class="block text-xs text-gray-400 font-medium">Pendapatan Platform</span>
 
                             </td>
 
@@ -1400,440 +1140,55 @@
 
     </div>
 
-
-
-    <!-- 1. Modal Detail Transaksi & Escrow (Universal Clean & Structured) -->
-
-    <div x-show="detailModalOpen" 
-
-         x-cloak 
-
-         @keydown.escape.window="detailModalOpen = false" 
-
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-
-         x-transition>
-
-        <div @click.away="detailModalOpen = false" 
-
-             class="bg-white dark:bg-gray-800 max-w-2xl w-full p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
-
-            
-
-            <!-- Modal Header (No Icon, No X button because Tutup button exists - Rule #59 & Rule #89) -->
-            <div class="border-b border-gray-100 dark:border-gray-700/80 pb-4 text-center flex flex-col gap-1">
-                <h3 class="text-lg font-black text-gray-900 dark:text-white">Detail Transaksi</h3>
-                <p class="text-xs text-gray-500"><span class="font-mono text-gray-600 dark:text-gray-300 font-bold" x-text="activeContract?.code"></span> • Dibuat pada <span x-text="activeContract?.created_at"></span></p>
-            </div>
-
-
-
-            <template x-if="activeContract">
-
-                <div class="flex flex-col gap-6">
-
-                    <!-- Ringkasan Nominal 3 Kolom -->
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-
-                        <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-700/60 space-y-1">
-
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Total Bruto</span>
-
-                            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight" x-text="activeContract.jumlah_formatted"></div>
-
-                            <span class="text-xs text-gray-500 block">Nilai invoice sesi</span>
-
-                        </div>
-
-                        <div class="bg-amber-50/60 dark:bg-amber-950/30 p-4 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-1">
-
-                            <span class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">Fee Platform (10%)</span>
-
-                            <div class="text-xs font-black text-amber-600 dark:text-amber-400 tracking-tight" x-text="activeContract.fee_formatted"></div>
-
-                            <span class="text-xs text-amber-700/70 dark:text-amber-400/70 block">Pendapatan LensMatch</span>
-
-                        </div>
-
-                        <div class="bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 space-y-1">
-
-                            <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Pendapatan Bersih (90%)</span>
-
-                            <div class="text-xs font-black text-emerald-600 dark:text-emerald-400 tracking-tight" x-text="activeContract.net_payout_formatted"></div>
-
-                            <span class="text-xs text-emerald-700/70 dark:text-emerald-400/70 block">Hak mitra fotografer</span>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- Informasi 2 Pihak (Klien vs Fotografer) -->
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-
-                        <!-- Pihak Klien -->
-
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-1.5">
-
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block mb-1">Pihak Pemesan (Klien)</span>
-
-                            <div class="font-bold text-sm text-gray-900 dark:text-white" x-text="activeContract.client_name"></div>
-
-                            <p class="text-gray-500" x-text="'Email: ' + activeContract.client_email"></p>
-
-                            <p class="text-gray-500" x-text="'Telepon: ' + activeContract.client_phone"></p>
-
-                        </div>
-
-
-
-                        <!-- Pihak Fotografer -->
-
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col gap-1.5">
-
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-1">Mitra Fotografer</span>
-
-                            <div class="font-bold text-sm text-gray-900 dark:text-white" x-text="activeContract.photographer_name"></div>
-
-                            <p class="text-gray-500" x-text="'Email: ' + activeContract.photographer_email"></p>
-
-                            <p class="text-gray-500" x-text="'Telepon: ' + activeContract.photographer_phone"></p>
-
-                            <template x-if="activeContract.photographer_bank_account">
-
-                                <div class="pt-2 mt-2 border-t border-gray-100 dark:border-gray-800 text-[11px] space-y-0.5">
-
-                                    <span class="text-gray-400 block font-bold uppercase text-[9px]">Rekening Tujuan:</span>
-
-                                    <p class="font-bold text-gray-900 dark:text-white" x-text="activeContract.photographer_bank_name + ' — ' + activeContract.photographer_bank_account"></p>
-
-                                    <p class="text-gray-500" x-text="'a.n. ' + (activeContract.photographer_bank_holder || activeContract.photographer_name)"></p>
-
-                                </div>
-
-                            </template>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- Rincian Layanan & Sesi Booking -->
-
-                    <div class="p-4 rounded-xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 space-y-2 text-xs">
-
-                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Rincian Paket & Jadwal Acara</span>
-
-                        <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-
-                            <span class="text-gray-500">Nama Layanan:</span>
-
-                            <span class="font-bold text-gray-900 dark:text-white" x-text="activeContract.service_name"></span>
-
-                        </div>
-
-                        <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-
-                            <span class="text-gray-500">Jadwal Sesi:</span>
-
-                            <span class="font-bold text-gray-900 dark:text-white" x-text="activeContract.booking_date + ' (' + activeContract.booking_time + ')'"></span>
-
-                        </div>
-
-                        <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-
-                            <span class="text-gray-500">Lokasi Acara:</span>
-
-                            <span class="font-bold text-gray-900 dark:text-white text-right max-w-xs" x-text="activeContract.location"></span>
-
-                        </div>
-
-                        <div class="flex justify-between py-1 border-b border-gray-100 dark:border-gray-800">
-                            <span class="text-gray-500">Nomor Invoice:</span>
-                            <span class="font-bold text-gray-700 dark:text-gray-300 font-mono" x-text="activeContract.external_id"></span>
-                        </div>
-
-                        <div class="flex justify-between py-1">
-
-                            <span class="text-gray-500">Status Sesi Booking:</span>
-
-                            <span class="font-bold uppercase text-[11px]" 
-
-                                  :class="{
-
-                                      'text-emerald-600': activeContract.status_booking === 'completed',
-
-                                      'text-blue-600': activeContract.status_booking === 'confirmed',
-
-                                      'text-amber-600': activeContract.status_booking === 'pending',
-
-                                      'text-rose-600': activeContract.status_booking === 'cancelled'
-
-                                  }" 
-
-                                  x-text="activeContract.status_booking"></span>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- Galeri Hasil Foto (jika sudah ada) -->
-
-                    <template x-if="activeContract.hasil_foto_url">
-
-                        <div class="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 flex flex-col gap-2 text-xs">
-
-                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">Tautan Galeri Hasil Foto</span>
-
-                            <a :href="activeContract.hasil_foto_url" target="_blank" class="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300 hover:underline break-all">
-
-                                <span x-text="activeContract.hasil_foto_url"></span>
-
-                            </a>
-
-                            <template x-if="activeContract.catatan_fotografer">
-
-                                <p class="text-gray-600 dark:text-gray-400 italic mt-1" x-text="'Catatan: ' + activeContract.catatan_fotografer"></p>
-
-                            </template>
-
-                        </div>
-
-                    </template>
-
-
-
-                    <!-- Bukti Transfer Pembayaran Klien (jika ada) -->
-
-                    <template x-if="activeContract.bukti_transfer">
-
-                        <div class="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-800/50 space-y-2 text-xs">
-
-                            <div class="flex items-center justify-between">
-
-                                <span class="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 block">Bukti Transfer Pembayaran Klien</span>
-
-                                <span class="text-[10px] font-bold" :class="activeContract.payment_status === 'completed' ? 'text-emerald-600' : 'text-amber-600'" x-text="activeContract.payment_status === 'completed' ? 'Terverifikasi' : 'Menunggu Verifikasi'"></span>
-
-                            </div>
-
-                            <a :href="activeContract.bukti_transfer" target="_blank" class="block rounded-lg overflow-hidden border border-blue-200 dark:border-blue-700 max-h-48 group relative">
-
-                                <img :src="activeContract.bukti_transfer" alt="Bukti Transfer" class="w-full h-40 object-cover group-hover:scale-102 transition" />
-
-                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white font-bold text-xs">
-
-                                    Buka Struk Ukuran Penuh
-
-                                </div>
-
-                            </a>
-
-                        </div>
-
-                    </template>
-
-
-
-                    <!-- Info Riwayat Pembatalan Pesanan (jika ada) -->
-
-                    <template x-if="activeContract.cancellation_reason">
-
-                        <div class="p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex flex-col gap-1.5 text-xs text-left">
-
-                            <div class="flex items-center justify-between">
-
-                                <span class="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400">Riwayat Pembatalan Pesanan</span>
-
-                                <span class="text-[10px] font-bold text-gray-500 uppercase" x-text="'Dibatalkan oleh: ' + (activeContract.cancelled_by === 'client' ? 'Klien' : 'Fotografer')"></span>
-
-                            </div>
-
-                            <p class="text-rose-800 dark:text-rose-300 font-medium" x-text="'Alasan: ' + activeContract.cancellation_reason"></p>
-
-                            <template x-if="activeContract.refund_amount">
-
-                                <p class="text-gray-600 dark:text-gray-400 text-[11px]" x-text="'Nominal Refund: ' + activeContract.refund_amount"></p>
-
-                            </template>
-
-                        </div>
-
-                    </template>
-
-
-
-                    <!-- Status Escrow & Catatan Admin -->
-
-                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col gap-2 text-xs">
-
-                        <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">Status Dana</span>
-
-                        <div class="flex items-center justify-between">
-
-                            <span class="text-gray-500">Status Pencairan:</span>
-
-                            <span class="font-bold text-xs" 
-
-                                  :class="{
-
-                                      'text-emerald-600': activeContract.status_payout === 'paid',
-
-                                      'text-blue-600': activeContract.status_payout === 'ready',
-
-                                      'text-rose-600': activeContract.status_payout === 'refunded',
-
-                                      'text-gray-400': activeContract.status_contract === 'cancelled',
-
-                                      'text-amber-600': activeContract.status_payout === 'holding' || activeContract.status_contract === 'pending_payment'
-
-                                  }"
-
-                                  x-text="activeContract.status_payout === 'paid' ? 'Sudah Ditransfer' : (activeContract.status_payout === 'ready' ? 'Siap Dicairkan' : (activeContract.status_payout === 'refunded' ? 'Refund' : (activeContract.status_contract === 'pending_payment' ? 'Menunggu Pembayaran' : (activeContract.status_contract === 'cancelled' ? 'Dibatalkan' : 'Dana Ditahan'))))">
-
-                            </span>
-
-                        </div>
-
-                        <template x-if="activeContract.payout_at">
-
-                            <div class="flex items-center justify-between">
-
-                                <span class="text-gray-500">Waktu Pencairan:</span>
-
-                                <span class="font-bold text-gray-800 dark:text-gray-200" x-text="activeContract.payout_at"></span>
-
-                            </div>
-
-                        </template>
-
-                        <template x-if="activeContract.payout_notes">
-
-                            <div class="pt-2 border-t border-gray-100 dark:border-gray-700/60">
-
-                                <span class="text-gray-500 block mb-1">Catatan Admin:</span>
-
-                                <p class="text-gray-800 dark:text-gray-200 italic" x-text="activeContract.payout_notes"></p>
-
-                            </div>
-
-                        </template>
-
-                    </div>
-
+    <!-- 2. Modal Konfirmasi Transfer Dana -->
+    <template x-teleport="body">
+        <div x-show="payoutModalOpen" 
+             x-cloak 
+             @keydown.escape.window="payoutModalOpen = false" 
+             class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+
+            <div @click.away="payoutModalOpen = false" 
+                 class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6 max-h-[85vh] overflow-y-auto">
+                
+                <!-- Modal Title (No Icon, Centered) -->
+                <div class="flex flex-col gap-2 text-center">
+                    <h3 class="text-base font-black text-gray-900 dark:text-white">Transfer Dana ke Fotografer?</h3>
+                    <p class="text-xs text-gray-500">
+                        Anda akan mentransfer dana sebesar <strong class="text-emerald-600 dark:text-emerald-400" x-text="activeContract?.net_payout_formatted"></strong> ke rekening mitra <strong class="text-gray-900 dark:text-white" x-text="activeContract?.photographer_name"></strong>.
+                    </p>
                 </div>
 
-            </template>
-
-
-
-            <!-- Modal Footer (Centered) -->
-
-            <div class="flex justify-center pt-4 border-t border-gray-100 dark:border-gray-700/80">
-
-                <button type="button" @click="detailModalOpen = false" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold text-xs rounded-xl transition cursor-pointer">
-
-                    Tutup
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- 2. Modal Konfirmasi Transfer Dana -->
-
-    <div x-show="payoutModalOpen" 
-
-         x-cloak 
-
-         @keydown.escape.window="payoutModalOpen = false" 
-
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-
-         x-transition>
-
-        <div @click.away="payoutModalOpen = false" 
-
-             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6">
-
-            
-
-            <!-- Modal Title (No Icon, Centered) -->
-
-            <div class="flex flex-col gap-2 text-center">
-
-                <h3 class="text-base font-black text-gray-900 dark:text-white">Transfer Dana ke Fotografer?</h3>
-
-                <p class="text-xs text-gray-500">
-
-                    Anda akan mentransfer dana sebesar <strong class="text-emerald-600 dark:text-emerald-400" x-text="activeContract?.net_payout_formatted"></strong> ke rekening mitra <strong class="text-gray-900 dark:text-white" x-text="activeContract?.photographer_name"></strong>.
-
-                </p>
-
-            </div>
-
-
-
-            <!-- Rincian Rekening Bank Fotografer -->
-
-            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700/80 flex flex-col gap-2 text-xs text-left">
-
-                <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rekening Tujuan Transfer</span>
-
-                <template x-if="activeContract?.photographer_bank_account">
-
-                    <div class="space-y-1">
-
-                        <div class="flex justify-between">
-
-                            <span class="text-gray-500">Nama Bank:</span>
-
-                            <span class="font-bold text-gray-900 dark:text-white uppercase" x-text="activeContract?.photographer_bank_name || '-'"></span>
-
+                <!-- Rincian Rekening Bank Fotografer -->
+                <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700/80 flex flex-col gap-2 text-xs text-left">
+                    <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Rekening Tujuan Transfer</span>
+                    <template x-if="activeContract?.photographer_bank_account">
+                        <div class="space-y-1">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Nama Bank:</span>
+                                <span class="font-bold text-gray-900 dark:text-white uppercase" x-text="activeContract?.photographer_bank_name || '-'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Nomor Rekening:</span>
+                                <span class="font-mono font-black text-gray-900 dark:text-white" x-text="activeContract?.photographer_bank_account"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Atas Nama:</span>
+                                <span class="font-bold text-gray-900 dark:text-white" x-text="activeContract?.photographer_bank_holder || activeContract?.photographer_name"></span>
+                            </div>
                         </div>
-
-                        <div class="flex justify-between">
-
-                            <span class="text-gray-500">Nomor Rekening:</span>
-
-                            <span class="font-mono font-black text-gray-900 dark:text-white" x-text="activeContract?.photographer_bank_account"></span>
-
-                        </div>
-
-                        <div class="flex justify-between">
-
-                            <span class="text-gray-500">Atas Nama:</span>
-
-                            <span class="font-bold text-gray-900 dark:text-white" x-text="activeContract?.photographer_bank_holder || activeContract?.photographer_name"></span>
-
-                        </div>
-
-                    </div>
-
-                </template>
-
-                <template x-if="!activeContract?.photographer_bank_account">
-
-                    <p class="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-
-                        Mitra fotografer belum melengkapi informasi nomor rekening bank di profilnya.
-
-                    </p>
-
-                </template>
-
-            </div>
+                    </template>
+                    <template x-if="!activeContract?.photographer_bank_account">
+                        <p class="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                            Mitra fotografer belum melengkapi informasi nomor rekening bank di profilnya.
+                        </p>
+                    </template>
+                </div>
 
 
 
@@ -1928,24 +1283,26 @@
         </div>
 
     </div>
+    </template>
 
 
 
     <!-- 3. Modal Konfirmasi Refund Dana (Process Refund) -->
 
+    <template x-teleport="body">
     <div x-show="refundModalOpen" 
-
          x-cloak 
-
          @keydown.escape.window="refundModalOpen = false" 
-
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-
-         x-transition>
+         class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
 
         <div @click.away="refundModalOpen = false" 
-
-             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6">
+             class="bg-white dark:bg-gray-800 max-w-md w-full p-6 sm:p-7 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl flex flex-col gap-6 max-h-[85vh] overflow-y-auto">
 
             
 
@@ -2009,8 +1366,10 @@
         </div>
 
     </div>
+    </template>
 
     <!-- Lightbox Pratinjau Bukti Transfer Payout (Rule #97) -->
+    <template x-teleport="body">
     <div x-show="payoutProofLightboxOpen"
          x-cloak
          @keydown.escape.window="payoutProofLightboxOpen = false"
@@ -2024,6 +1383,7 @@
         </button>
         <img :src="payoutProofPreviewUrl" :alt="payoutProofFileName" class="max-w-full max-h-[82vh] object-contain rounded-2xl shadow-2xl border border-white/10 select-none">
     </div>
+    </template>
 
 </div>
 

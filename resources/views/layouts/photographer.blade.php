@@ -70,6 +70,55 @@
             }
           }
         });
+
+        Alpine.store('bookingNotifier', {
+          pendingCount: 0,
+          _pollTimer: null,
+          _abortController: null,
+          _isUnloading: false,
+          init() {
+            this.fetchCount();
+            this._pollTimer = setInterval(() => {
+              this.fetchCount();
+            }, 5000);
+
+            const stopPolling = () => {
+              this._isUnloading = true;
+              if (this._pollTimer) {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+              }
+              if (this._abortController) {
+                this._abortController.abort();
+                this._abortController = null;
+              }
+            };
+            window.addEventListener('beforeunload', stopPolling);
+            window.addEventListener('pagehide', stopPolling);
+          },
+          async fetchCount() {
+            if (this._isUnloading) return;
+            try {
+              if (this._abortController) {
+                this._abortController.abort();
+              }
+              this._abortController = new AbortController();
+              const res = await fetch('{{ route('photographer.bookings.pending-count') }}', {
+                headers: {
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'Accept': 'application/json'
+                },
+                signal: this._abortController.signal
+              });
+              if (res.ok) {
+                const data = await res.json();
+                this.pendingCount = data.pending_count || 0;
+              }
+            } catch (err) {
+              // silent
+            }
+          }
+        });
       });
     </script>
   </head>

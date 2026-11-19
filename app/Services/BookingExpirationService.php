@@ -118,7 +118,7 @@ class BookingExpirationService
                 ['id_contract' => $contract->id],
                 [
                     'alasan' => $reason,
-                    'dibatalkan_oleh' => 'admin',
+                    'dibatalkan_oleh' => null,
                     'refund_amount' => 0,
                 ]
             );

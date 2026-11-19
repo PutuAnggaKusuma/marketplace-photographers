@@ -34,9 +34,26 @@ Route::get('/', function () {
         $totalSessions = \App\Models\Contract::count();
     }
     $avgRating = \App\Models\Testimonial::where('is_hidden', false)->count() > 0 ? number_format(\App\Models\Testimonial::where('is_hidden', false)->avg('rating'), 1) : '-';
-    $heroPhotos = \App\Models\PortfolioMedia::whereHas('portfolio.photographer', function ($q) {
-        $q->published();
-    })->take(5)->pluck('media')->toArray();
+
+    // Memuat foto hero dinamis langsung dari folder sistem (public/images/beranda)
+    $berandaPath = public_path('images/beranda');
+    $heroPhotos = [];
+    if (is_dir($berandaPath)) {
+        $scannedFiles = glob($berandaPath . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
+        if (!empty($scannedFiles)) {
+            // Urutkan berdasarkan angka urutan pada nama file (contoh: born-1.jpg, familiy-2.jpg, wedding-3.jpg, travel-4.jpg, graduation-5.jpg)
+            usort($scannedFiles, function ($a, $b) {
+                preg_match('/(\d+)/', basename($a), $matchA);
+                preg_match('/(\d+)/', basename($b), $matchB);
+                $numA = isset($matchA[1]) ? (int)$matchA[1] : 999;
+                $numB = isset($matchB[1]) ? (int)$matchB[1] : 999;
+                return $numA === $numB ? strnatcasecmp(basename($a), basename($b)) : $numA <=> $numB;
+            });
+            foreach ($scannedFiles as $file) {
+                $heroPhotos[] = asset('images/beranda/' . basename($file));
+            }
+        }
+    }
 
     return view('public.home', compact(
         'testimonials', 
@@ -72,10 +89,10 @@ Route::get('/forum', [\App\Http\Controllers\Public\ForumController::class, 'inde
 Route::get('/forum/{id}', [\App\Http\Controllers\Public\ForumController::class, 'show'])->name('public.forum.show');
 Route::post('/forum/store', [\App\Http\Controllers\Public\ForumController::class, 'storePost'])->name('public.forum.store')->middleware(['auth', 'photographer.verified']);
 Route::post('/forum/{id}/comment', [\App\Http\Controllers\Public\ForumController::class, 'storeComment'])->name('public.forum.comment')->middleware(['auth', 'photographer.verified']);
-Route::post('/forum/comment/{id}/like', [\App\Http\Controllers\Public\ForumController::class, 'likeComment'])->name('public.forum.comment.like')->middleware(['auth', 'photographer.verified']);
-Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumController::class, 'dislikeComment'])->name('public.forum.comment.dislike')->middleware(['auth', 'photographer.verified']);
-Route::post('/forum/comment/{id}/report', [\App\Http\Controllers\Public\ForumController::class, 'reportComment'])->name('public.forum.comment.report')->middleware(['auth', 'photographer.verified']);
-Route::post('/forum/comment/{id}/user-delete', [\App\Http\Controllers\Public\ForumController::class, 'deleteComment'])->name('public.forum.comment.delete')->middleware(['auth', 'photographer.verified']);
+Route::post('/forum/comment/{id}/like', [\App\Http\Controllers\Public\ForumController::class, 'likeComment'])->name('public.forum.comment.like')->middleware(['auth']);
+Route::post('/forum/comment/{id}/dislike', [\App\Http\Controllers\Public\ForumController::class, 'dislikeComment'])->name('public.forum.comment.dislike')->middleware(['auth']);
+Route::post('/forum/comment/{id}/report', [\App\Http\Controllers\Public\ForumController::class, 'reportComment'])->name('public.forum.comment.report')->middleware(['auth']);
+Route::post('/forum/comment/{id}/user-delete', [\App\Http\Controllers\Public\ForumController::class, 'deleteComment'])->name('public.forum.comment.delete')->middleware(['auth']);
 
 // Public Photo Contest Routes
 Route::get('/lomba', [\App\Http\Controllers\Public\ContestController::class, 'index'])->name('public.contests.index');
@@ -118,6 +135,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/unread', [\App\Http\Controllers\Public\NotificationController::class, 'getUnread'])->name('notifications.unread');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Public\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\Public\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+    // Email Verification & Activation Help Routes
+    Route::get('/email/verify', [\App\Http\Controllers\Auth\VerificationController::class, 'notice'])->name('verification.notice');
+    Route::post('/email/verification-notification', [\App\Http\Controllers\Auth\VerificationController::class, 'send'])->name('verification.send');
+    Route::post('/email/request-activation', [\App\Http\Controllers\Auth\VerificationController::class, 'requestActivation'])->name('verification.request_activation');
+    Route::get('/email/verify/{id}/{hash}', [\App\Http\Controllers\Auth\VerificationController::class, 'verify'])->name('verification.verify');
 });
 
 // Universal Dashboard & Base Route Role Dispatcher
@@ -141,6 +164,17 @@ Route::get('/client', fn() => redirect('/'));
 
 /*
 |--------------------------------------------------------------------------
+| Printable Official Invoice Documents (Multi-Role: Admin, Client, Photographer)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pembayaran/{id}/cetak', [BookingController::class, 'printInvoice'])->name('booking.invoice.print');
+    Route::get('/elearning/transaksi/{id}/cetak', [\App\Http\Controllers\Public\ElearningController::class, 'printInvoice'])->name('elearning.invoice.print');
+    Route::get('/pembayaran/{id}', [BookingController::class, 'showInvoice'])->name('booking.invoice');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Protected Client Routes (Client Only)
 |--------------------------------------------------------------------------
 */
@@ -149,10 +183,7 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/booking/available-slots', [BookingController::class, 'availableSlots'])->name('booking.available-slots');
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
     Route::post('/booking/custom-request', [BookingController::class, 'sendCustomPlanRequest'])->name('booking.custom-request');
-    Route::get('/pembayaran/{id}', [BookingController::class, 'showInvoice'])->name('booking.invoice');
-    Route::get('/pembayaran/{id}/cetak', [BookingController::class, 'printInvoice'])->name('booking.invoice.print');
     Route::post('/pembayaran/{id}/konfirmasi', [BookingController::class, 'confirmPayment'])->name('booking.pay.confirm');
-    Route::get('/elearning/transaksi/{id}/cetak', [\App\Http\Controllers\Public\ElearningController::class, 'printInvoice'])->name('elearning.invoice.print');
 
     // Client Dashboard & Order History
     Route::get('/client/bookings', [ClientBookingController::class, 'index'])->name('client.bookings');
@@ -195,6 +226,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
     // Admin User & Client Management Routes
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
+    Route::get('/users/{id}', [\App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
+    Route::post('/users/{id}/verify-email', [\App\Http\Controllers\Admin\UserController::class, 'verifyEmail'])->name('users.verify-email');
+    Route::post('/users/{id}/toggle-suspend', [\App\Http\Controllers\Admin\UserController::class, 'toggleSuspend'])->name('users.toggle-suspend');
     Route::post('/users/{id}/delete', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
 
     // Admin Dedicated Photographer & Verification Routes
@@ -309,6 +343,7 @@ Route::prefix('photographer')->name('photographer.')->middleware(['auth', 'role:
 
         // Photographer Booking Order Management & Gallery Upload Routes
         Route::get('/bookings', [PhotographerBookingController::class, 'index'])->name('bookings');
+        Route::get('/bookings/pending-count', [PhotographerBookingController::class, 'pendingCount'])->name('bookings.pending-count');
         Route::post('/bookings/{id}/status', [PhotographerBookingController::class, 'updateStatus'])->name('bookings.status');
         Route::post('/bookings/{id}/gallery', [PhotographerBookingController::class, 'uploadGallery'])->name('bookings.gallery');
         Route::post('/bookings/{id}/reschedule', [PhotographerBookingController::class, 'requestReschedule'])->name('bookings.reschedule');

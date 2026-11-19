@@ -54,7 +54,9 @@ class AdminStaffController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('no_hp', 'like', "%{$search}%");
+                  ->orWhereHas('roleAdmin', function ($sq) use ($search) {
+                      $sq->where('no_telepon', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -119,7 +121,7 @@ class AdminStaffController extends Controller
             'no_telepon' => $validated['no_hp'] ?? null,
         ]);
 
-        return redirect()->back()->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
+        return redirect()->route('admin.admins.index')->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
     }
 
     /**
@@ -141,6 +143,7 @@ class AdminStaffController extends Controller
             return redirect()->back()->with('error', 'Akun Super Admin terlindungi dan tidak dapat dihapus.');
         }
 
+        $user->roleAdmin?->delete();
         $user->delete();
 
         return redirect()->back()->with('success', "Staf Admin '{$user->nama}' berhasil dihapus.");

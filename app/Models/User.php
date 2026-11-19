@@ -19,9 +19,14 @@ class User extends Authenticatable
     protected $fillable = [
         'nama',
         'email',
+        'email_verified_at',
+        'activation_requested_at',
+        'activation_request_note',
         'password',
         'role',
         'is_protected',
+        'is_suspended',
+        'suspension_reason',
         'last_seen_at',
     ];
 
@@ -45,8 +50,10 @@ class User extends Authenticatable
         return [
             'last_seen_at' => 'datetime',
             'email_verified_at' => 'datetime',
+            'activation_requested_at' => 'datetime',
             'password' => 'hashed',
             'is_protected' => 'boolean',
+            'is_suspended' => 'boolean',
         ];
     }
 
@@ -167,7 +174,7 @@ class User extends Authenticatable
     public function delete()
     {
         if ($this->isProtected()) {
-            throw new \Exception("Akses Ditolak! Akun Super Admin bersifat permanen & protected, tidak dapat dihapus dari sistem.");
+            throw new \Exception("Akses ditolak. Akun Super Admin berstatus protected dan tidak dapat dihapus dari sistem.");
         }
 
         return parent::delete();
@@ -221,5 +228,37 @@ class User extends Authenticatable
     public function elearningProgresses()
     {
         return $this->hasMany(ELearningProgress::class, 'id_user');
+    }
+
+    /**
+     * Relasi ke seluruh transaksi kontrak klien
+     */
+    public function clientContracts()
+    {
+        return $this->hasManyThrough(Contract::class, RoleClient::class, 'id_user', 'id_client');
+    }
+
+    /**
+     * Helper status verifikasi email
+     */
+    public function isEmailVerified(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Helper status permintaan aktivasi manual
+     */
+    public function isActivationRequested(): bool
+    {
+        return !is_null($this->activation_requested_at) && is_null($this->email_verified_at);
+    }
+
+    /**
+     * Helper status pembekuan akun
+     */
+    public function isSuspended(): bool
+    {
+        return (bool) $this->is_suspended;
     }
 }

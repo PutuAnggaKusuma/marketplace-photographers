@@ -169,23 +169,17 @@
         <div class="flex items-center gap-3 w-full md:w-auto">
 
           @php
-
             $statusLabels = [
-
               'all' => 'Semua Status Reservasi',
-
-              'pending' => 'Menunggu Konfirmasi',
-
-              'confirmed' => 'Jadwal Dikonfirmasi',
-
-              'completed' => 'Sesi Selesai',
-
-              'cancelled' => 'Dibatalkan'
-
+              'pending_confirmation' => 'Menunggu Konfirmasi',
+              'pending_payment' => 'Menunggu Pembayaran',
+              'confirmed' => 'Jadwal Terkonfirmasi',
+              'pending_client' => 'Menunggu Konfirmasi Klien',
+              'completed' => 'Selesai',
+              'cancelled' => 'Dibatalkan',
+              'expired' => 'Kadaluarsa',
             ];
-
             $curStatName = $statusLabels[$filterStatus ?? 'all'] ?? 'Semua Status Reservasi';
-
           @endphp
 
           <div class="relative w-full sm:w-auto min-w-[220px]" x-data="{ open: false, selectedId: '{{ $filterStatus ?? 'all' }}', selectedName: '{{ $curStatName }}' }">
@@ -420,35 +414,35 @@
                           </div>
 
                           <div class="flex items-center gap-2 pt-1">
+                            <button type="button" 
+                                    @click="$dispatch('open-confirm-modal', {
+                                        title: 'Setujui Jadwal Baru?',
+                                        message: 'Jadwal pemotretan akan diperbarui sesuai tanggal dan jam pengajuan fotografer.',
+                                        confirmText: 'Ya, Setujui Jadwal',
+                                        iconType: 'check',
+                                        buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold',
+                                        actionUrl: '{{ route('client.bookings.reschedule-respond', $c->id) }}',
+                                        method: 'POST',
+                                        params: { action: 'accept' }
+                                    })"
+                                    class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
+                              Setujui Jadwal Baru
+                            </button>
 
-                            <form action="{{ route('client.bookings.reschedule-respond', $c->id) }}" method="POST" class="inline">
-
-                              @csrf
-
-                              <input type="hidden" name="action" value="accept">
-
-                              <button type="submit" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-gray-950 font-extrabold text-xs rounded-lg shadow-2xs transition cursor-pointer">
-
-                                Setujui Jadwal Baru
-
-                              </button>
-
-                            </form>
-
-                            <form action="{{ route('client.bookings.reschedule-respond', $c->id) }}" method="POST" class="inline">
-
-                              @csrf
-
-                              <input type="hidden" name="action" value="reject">
-
-                              <button type="submit" class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
-
-                                Tolak
-
-                              </button>
-
-                            </form>
-
+                            <button type="button" 
+                                    @click="$dispatch('open-confirm-modal', {
+                                        title: 'Tolak Pengajuan Jadwal?',
+                                        message: 'Pengajuan jadwal baru akan ditolak dan sesi pemotretan tetap mengacu pada jadwal sebelumnya.',
+                                        confirmText: 'Ya, Tolak Jadwal',
+                                        iconType: 'warning',
+                                        buttonClass: 'bg-rose-600 hover:bg-rose-700 text-white font-extrabold',
+                                        actionUrl: '{{ route('client.bookings.reschedule-respond', $c->id) }}',
+                                        method: 'POST',
+                                        params: { action: 'reject' }
+                                    })"
+                                    class="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs rounded-lg transition cursor-pointer">
+                              Tolak
+                            </button>
                           </div>
 
                         </div>
@@ -482,6 +476,7 @@
                   @php
                     $hasPhotos = !empty($detail?->hasil_foto_url);
                     $isValidated = (bool) $c->is_validated_client;
+                    $isRevision = $hasPhotos && !$isValidated && ($c->status_contract === 'active' || str_starts_with($detail?->catatan_fotografer ?? '', 'Klien meminta revisi:'));
                   @endphp
 
                   @if($c->status_contract === 'cancelled')
@@ -491,6 +486,10 @@
                   @elseif($c->status_contract === 'completed' && $isValidated)
                     <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                       Selesai
+                    </span>
+                  @elseif($isRevision)
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                      Revisi Diminta
                     </span>
                   @elseif($hasPhotos && !$isValidated)
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
@@ -570,16 +569,16 @@
                            x-transition:leave="transition ease-in duration-75" 
                            x-transition:leave-start="transform opacity-100 scale-100" 
                            x-transition:leave-end="transform opacity-0 scale-95" 
-                           class="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 text-left" 
+                           class="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
                            style="display: none;">
                         
                         <!-- Lihat Invoice -->
-                        <a href="{{ route('booking.invoice', ['id' => $c->id, 'view' => 'invoice', 'from' => 'bookings']) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                        <a href="{{ route('booking.invoice', ['id' => $c->id, 'view' => 'invoice', 'from' => 'bookings']) }}" class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                           Lihat Invoice
                         </a>
 
                         @if($c->status_contract === 'pending_payment' || ($c->is_validated_photographer && in_array($c->status_contract, ['approved', 'pending_payment'])))
-                          <a href="{{ route('chat.start', $c->id_photographer) }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
+                          <a href="{{ route('chat.start', $c->id_photographer) }}" class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block">
                             Chat Fotografer
                           </a>
                         @endif
@@ -590,7 +589,7 @@
 
                         @if($detail && $detail->hasil_foto_url)
 
-                          <a href="{{ route('client.galleries') }}" class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block border-t border-gray-50 dark:border-gray-700/40">
+                          <a href="{{ route('client.galleries') }}" class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block border-t border-gray-50 dark:border-gray-700/40">
 
                             Hasil Foto
 
@@ -600,9 +599,8 @@
 
 
 
-                        <!-- Beri Ulasan / Edit Ulasan (Seluruhnya Tombol Aksi Aktif) -->
-
-                        @if($detail && $detail->status_booking === 'completed')
+                        <!-- Beri Ulasan / Edit Ulasan (Hanya jika sesi sudah selesai dan divalidasi klien - Rule #90) -->
+                        @if($c->status_contract === 'completed' && $c->is_validated_client)
 
                           @if($c->testimonial)
 
@@ -626,7 +624,7 @@
 
                                     })"
 
-                                    class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
+                                    class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
 
                               Edit Ulasan
 
@@ -648,7 +646,7 @@
 
                                     })"
 
-                                    class="w-full px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
+                                    class="w-full px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
 
                               Beri Ulasan
 
@@ -664,7 +662,7 @@
                         @if($detail && !in_array($detail->status_booking, ['completed', 'cancelled']) && $detail->reschedule_status !== 'pending')
                           <button type="button" 
                                   @click="menuOpen = false; rescheduleContractId = {{ $c->id }}; reschedulePhotographerName = '{{ addslashes($photographer->nama ?? 'Mitra Fotografer') }}'; rescheduleServiceName = '{{ addslashes($detail->service->nama_layanan ?? 'Sesi Fotografi') }}'; rescheduleModalOpen = true;"
-                                  class="w-full px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
+                                  class="w-full px-4 py-2.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
                             Ajukan Jadwal Ulang
                           </button>
                         @endif
@@ -673,7 +671,7 @@
                         @if($detail && !in_array($detail->status_booking, ['completed', 'cancelled']))
                           <button type="button" 
                                   @click="menuOpen = false; cancelContractId = {{ $c->id }}; cancelPhotographerName = '{{ addslashes($photographer->nama ?? 'Mitra Fotografer') }}'; cancelServiceName = '{{ addslashes($detail->service->nama_layanan ?? 'Sesi Fotografi') }}'; cancelModalOpen = true;"
-                                  class="w-full px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
+                                  class="w-full px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left border-t border-gray-50 dark:border-gray-700/40 cursor-pointer">
                             Batalkan Reservasi
                           </button>
                         @endif

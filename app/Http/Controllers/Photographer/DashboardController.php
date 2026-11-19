@@ -33,29 +33,35 @@ class DashboardController extends Controller
         // 1. Actionable Operational Queues (100% Dynamic from Database)
         // Queue 1: Order Booking Baru Perlu Dikonfirmasi
         $pendingBookingsCount = Contract::where('id_photographer', $photographerId)
+            ->where('status_contract', '!=', 'cancelled')
             ->whereHas('bookingDetail', function ($q) {
                 $q->where('status_booking', 'pending');
             })
             ->count();
 
-        // Queue 2: Galeri Hasil Foto Perlu Diunggah (Sesi Dikonfirmasi/Active tapi belum selesai)
+        // Queue 2: Galeri Hasil Foto Perlu Diunggah (Sesi Aktif yang jadwalnya sudah tiba dan foto belum diunggah)
+        $today = date('Y-m-d');
         $needGalleryUploadCount = Contract::where('id_photographer', $photographerId)
             ->where('status_contract', 'active')
+            ->whereHas('bookingDetail', function ($q) use ($today) {
+                $q->whereDate('booking_date', '<=', $today)
+                  ->where(function ($sub) {
+                      $sub->whereNull('hasil_foto_url')
+                          ->orWhere('hasil_foto_url', '');
+                  });
+            })
             ->count();
 
-        // Queue 3: Payout Siap Dicairkan (Holding/Ready)
+        // Queue 3: Payout Siap Dicairkan (Ready)
         $readyPayoutCount = Contract::where('id_photographer', $photographerId)
-            ->whereIn('status_payout', ['ready', 'holding'])
+            ->where('status_payout', 'ready')
             ->count();
 
         // 2. 4 Core Financial & System Metric Cards (100% Dynamic from Database)
-        // Card 1: Total Omzet Bersih Fotografer (90% Payout)
+        // Card 1: Total Omzet Bersih Fotografer (90% Payout yang telah dicairkan)
         $totalNetRevenue = Contract::where('id_photographer', $photographerId)
             ->where('status_payout', 'paid')
             ->sum('payout_amount');
-        if ($totalNetRevenue == 0) {
-            $totalNetRevenue = (int)(Contract::where('id_photographer', $photographerId)->sum('jumlah') * 0.9);
-        }
 
         // Card 2: Total Order Booking Masuk & Selesai (Tervalidasi Klien)
         $totalBookingsCount = Contract::where('id_photographer', $photographerId)->count();
@@ -130,7 +136,7 @@ class DashboardController extends Controller
 
         // 5. Recent Booking Contracts (100% Dynamic)
         $recentBookings = Contract::where('id_photographer', $photographerId)
-            ->with(['client.user', 'bookingDetail.service', 'payments'])
+            ->with(['client.user', 'bookingDetail.service', 'payments', 'cancellation'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
