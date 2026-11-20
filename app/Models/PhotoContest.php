@@ -60,7 +60,7 @@ class PhotoContest extends Model
 
     public function admin()
     {
-        return $this->belongsTo(User::class, 'id_admin');
+        return $this->belongsTo(RoleAdmin::class, 'id_admin');
     }
 
     public function creator()

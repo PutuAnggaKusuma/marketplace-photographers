@@ -19,6 +19,17 @@ class Category extends Model
         'icon_url',
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function ($category) {
+            if (!$category->isForceDeleting()) {
+                $category->nama_kategori = $category->nama_kategori . ' [deleted-' . $category->id . ']';
+                $category->slug = $category->slug . '-deleted-' . $category->id;
+                $category->saveQuietly();
+            }
+        });
+    }
+
     public function photographers()
     {
         return $this->belongsToMany(RolePhotographer::class, 'photographer_categories', 'id_category', 'id_photographer');

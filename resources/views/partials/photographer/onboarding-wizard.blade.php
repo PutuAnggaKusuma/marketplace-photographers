@@ -23,7 +23,7 @@
           Lengkapi Profil Fotografer Anda untuk Mulai Menerima Pesanan
         </h2>
         <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl">
-          Selesaikan 3 langkah mudah onboarding (Domisili & Kategori Spesialisasi, Portofolio & Paket Layanan, serta Rekening Payout) agar profil Anda resmi aktif dan dapat ditemukan oleh calon klien di seluruh Indonesia.
+          Selesaikan 3 langkah mudah onboarding (Domisili & Kategori Spesialisasi, Portofolio & Paket Layanan, serta Rekening Bank) agar profil Anda resmi aktif dan dapat ditemukan oleh calon klien di seluruh Indonesia.
         </p>
       </div>
       <button type="button" 
@@ -86,7 +86,7 @@
                    :class="step >= 3 ? 'bg-amber-400' : 'bg-gray-200 dark:bg-gray-700'"></div>
               <p class="text-[10px] font-extrabold uppercase tracking-wider"
                  :class="step === 3 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'">
-                3. Rekening Payout
+                3. Rekening Bank
               </p>
             </div>
           </div>
@@ -344,11 +344,11 @@
           </div>
         </div>
 
-        <!-- ==================== STEP 3: REKENING BANK PENCAIRAN (PAYOUT) ==================== -->
+        <!-- ==================== STEP 3: REKENING BANK PENCAIRAN ==================== -->
         <div x-show="step === 3" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="flex flex-col gap-6" style="display: none;">
           <div class="border-b border-gray-100 dark:border-gray-700/60 pb-3">
             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
-              Langkah 3: Rekening Bank Pencairan Dana (Payout)
+              Langkah 3: Rekening Bank Pencairan Dana
             </h3>
             <p class="text-xs text-gray-500 dark:text-gray-400">
               Rekening ini digunakan oleh Admin untuk mentransfer omzet bersih pemotretan Anda ke rekening pribadi Anda.

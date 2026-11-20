@@ -51,10 +51,10 @@ class ForumController extends Controller
 
         // Popular Categories List for Sidebar (Real Accurate Counts)
         $categoriesList = [
-            ['name' => 'Teknis & Pengaturan Lensa', 'slug' => 'teknis', 'count' => ForumPost::where('kategori', 'teknis')->count()],
-            ['name' => 'Rekomendasi Spot Foto Outdoor', 'slug' => 'spot_foto', 'count' => ForumPost::where('kategori', 'spot_foto')->count()],
-            ['name' => 'Peralatan & Aksesoris Studio', 'slug' => 'peralatan', 'count' => ForumPost::where('kategori', 'peralatan')->count()],
-            ['name' => 'Lainnya & Diskusi Umum', 'slug' => 'lainnya', 'count' => ForumPost::where('kategori', 'lainnya')->count()],
+            ['name' => 'Teknik Fotografi', 'slug' => 'teknis', 'count' => ForumPost::where('kategori', 'teknis')->count()],
+            ['name' => 'Spot Foto', 'slug' => 'spot_foto', 'count' => ForumPost::where('kategori', 'spot_foto')->count()],
+            ['name' => 'Peralatan Kamera', 'slug' => 'peralatan', 'count' => ForumPost::where('kategori', 'peralatan')->count()],
+            ['name' => 'Diskusi Umum', 'slug' => 'lainnya', 'count' => ForumPost::where('kategori', 'lainnya')->count()],
         ];
 
         return view('public.forum.index', compact('posts', 'search', 'category', 'sort', 'totalPosts', 'categoriesList'));
@@ -87,10 +87,10 @@ class ForumController extends Controller
         $relatedPosts = ForumPost::with('medias')->where('id', '!=', $post->id)->latest()->take(5)->get();
 
         $categoriesList = [
-            ['name' => 'Teknis & Pengaturan Lensa', 'slug' => 'teknis', 'count' => ForumPost::where('kategori', 'teknis')->count()],
-            ['name' => 'Rekomendasi Spot Foto Outdoor', 'slug' => 'spot_foto', 'count' => ForumPost::where('kategori', 'spot_foto')->count()],
-            ['name' => 'Peralatan & Aksesoris Studio', 'slug' => 'peralatan', 'count' => ForumPost::where('kategori', 'peralatan')->count()],
-            ['name' => 'Lainnya & Diskusi Umum', 'slug' => 'lainnya', 'count' => ForumPost::where('kategori', 'lainnya')->count()],
+            ['name' => 'Teknik Fotografi', 'slug' => 'teknis', 'count' => ForumPost::where('kategori', 'teknis')->count()],
+            ['name' => 'Spot Foto', 'slug' => 'spot_foto', 'count' => ForumPost::where('kategori', 'spot_foto')->count()],
+            ['name' => 'Peralatan Kamera', 'slug' => 'peralatan', 'count' => ForumPost::where('kategori', 'peralatan')->count()],
+            ['name' => 'Diskusi Umum', 'slug' => 'lainnya', 'count' => ForumPost::where('kategori', 'lainnya')->count()],
         ];
 
         return view('public.forum.show', compact('post', 'relatedPosts', 'categoriesList', 'commentSort'));

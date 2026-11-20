@@ -55,22 +55,61 @@
 
         </div>
 
-        <!-- Right Column: Dynamic Floating Portfolio Moments Showcase (100% Dynamic Database Portfolios) -->
+        <!-- Right Column: Curated Floating Portfolio Moments Showcase (Hardcode Ready for User Unsplash Photos) -->
         <div class="lg:col-span-5 relative flex items-center justify-center min-h-[420px] sm:min-h-[480px] lg:min-h-[500px]">
           
           @php
-            $p0 = $showcasePortfolios[0] ?? null;
-            $img0 = $p0?->medias?->first()?->media ?? asset('images/avatar-default.png');
-            $title0 = $p0?->judul ?? 'Portofolio Karya';
-            $p1 = $showcasePortfolios[1] ?? null;
-            $img1 = $p1?->medias?->first()?->media ?? $img0;
-            $title1 = $p1?->judul ?? 'Portofolio Karya';
-            $p2 = $showcasePortfolios[2] ?? null;
-            $img2 = $p2?->medias?->first()?->media ?? $img0;
-            $title2 = $p2?->judul ?? 'Portofolio Karya';
-            $p3 = $showcasePortfolios[3] ?? null;
-            $img3 = $p3?->medias?->first()?->media ?? $img1;
-            $title3 = $p3?->judul ?? 'Portofolio Karya';
+            /*
+            |--------------------------------------------------------------------------
+            | DAFTAR FOTO SHOWCASE HERO (HARDCODE / LOKAL PUBLIC ATAU URL UNSPLASH)
+            |--------------------------------------------------------------------------
+            | Anda dapat menggunakan:
+            | 1. URL External langsung dari Unsplash: 'https://images.unsplash.com/...'
+            | 2. Berkas Foto Lokal di folder public: 'images/hero/nama-file.jpg' (atau asset('...'))
+            |
+            | Slot 0: Foto Kiri Atas (Tilted Left)
+            | Slot 1: Foto Kanan Atas (Tilted Right)
+            | Slot 2: Foto Tengah Utama (Paling Besar & Menonjol)
+            | Slot 3: Foto Kanan Bawah (Slight Tilt)
+            */
+            $curatedHeroPhotos = [
+                [
+                    'title' => 'Prewedding in Bali',
+                    'image' => 'images/cari-fotografers/prewedding-bali.jpg',
+                ],
+                [
+                    'title' => 'Live Music Festival',
+                    'image' => 'images/cari-fotografers/concert-moments.jpg',
+                ],
+                [
+                    'title' => 'Culinary Product Shoot',
+                    'image' => 'images/cari-fotografers/food-main.jpg',
+                ],
+                [
+                    'title' => 'Labuan Bajo Vacation',
+                    'image' => 'images/cari-fotografers/labuan-bajo.jpg',
+                ],
+            ];
+
+            $resolveHeroPhotoUrl = function($img) {
+                if (empty($img)) return asset('images/avatar-default.png');
+                if (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://', '//'])) {
+                    return $img;
+                }
+                return asset(ltrim($img, '/'));
+            };
+
+            $img0   = $resolveHeroPhotoUrl($curatedHeroPhotos[0]['image'] ?? null);
+            $title0 = $curatedHeroPhotos[0]['title'] ?? 'Portofolio Karya';
+
+            $img1   = $resolveHeroPhotoUrl($curatedHeroPhotos[1]['image'] ?? null);
+            $title1 = $curatedHeroPhotos[1]['title'] ?? 'Portofolio Karya';
+
+            $img2   = $resolveHeroPhotoUrl($curatedHeroPhotos[2]['image'] ?? null);
+            $title2 = $curatedHeroPhotos[2]['title'] ?? 'Portofolio Karya';
+
+            $img3   = $resolveHeroPhotoUrl($curatedHeroPhotos[3]['image'] ?? null);
+            $title3 = $curatedHeroPhotos[3]['title'] ?? 'Portofolio Karya';
           @endphp
 
           <!-- Background Organic Soft Amber Glow Backdrop -->

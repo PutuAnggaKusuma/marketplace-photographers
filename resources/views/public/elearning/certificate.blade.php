@@ -163,7 +163,7 @@
             {{ $course->judul }}
           </h3>
           <p class="text-[10px] text-gray-500 font-semibold tracking-wider uppercase mt-0.5">
-            Kategori: {{ $course->kategori }} • {{ $totalLessons }} Materi Pembelajaran Tuntas
+            Tingkat: {{ $course->level ?? $course->kategori ?? 'Pemula' }} • {{ $totalLessons }} Materi Pembelajaran Tuntas
           </p>
         </div>
       </div>

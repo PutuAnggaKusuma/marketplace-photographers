@@ -296,7 +296,7 @@
             
             <!-- Modal Title & Subtitle (Centered, No Icon on Title - Rule #59) -->
             <div class="text-center flex flex-col gap-1">
-                <h3 class="text-lg font-black text-gray-900 dark:text-white">Ajukan Pencairan Dana Payout</h3>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white">Ajukan Pencairan Dana</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400">Pastikan informasi rekening bank Anda sudah sesuai sebelum melanjutkan pengajuan.</p>
             </div>
 

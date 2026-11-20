@@ -251,14 +251,20 @@
                 <div class="flex flex-wrap items-center gap-2">
                     
                     @if($pendingPayment && $pendingPayment->bukti_transfer && $contract->status_contract !== 'cancelled')
-                        <!-- Verifikasi Bayar Form -->
-                        <form action="{{ route('admin.transactions.verify-payment', $contract->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin verifikasi pembayaran ini sudah valid dan dana telah masuk ke rekening resmi LensMatch?')">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs cursor-pointer inline-flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                <span>Verifikasi Bayar</span>
-                            </button>
-                        </form>
+                        <!-- Verifikasi Bayar Button (Shared Confirm Modal - Rule #18) -->
+                        <button type="button" 
+                                @click="$dispatch('open-confirm-modal', {
+                                    title: 'Verifikasi Pembayaran?',
+                                    message: 'Apakah Anda yakin verifikasi pembayaran ini sudah valid dan dana telah masuk ke rekening resmi LensMatch?',
+                                    buttonText: 'Ya, Verifikasi Pembayaran',
+                                    type: 'success',
+                                    actionUrl: '{{ route('admin.transactions.verify-payment', $contract->id) }}',
+                                    method: 'POST'
+                                })" 
+                                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-2xs cursor-pointer inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            <span>Verifikasi Bayar</span>
+                        </button>
 
                         <!-- Tolak Bukti Bayar Button -->
                         <button type="button" @click="rejectModalOpen = true" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition cursor-pointer inline-flex items-center gap-1.5">
@@ -473,53 +479,53 @@
                     @endif
                 </p>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider {{ $isCancelled ? 'bg-rose-600 text-white' : ($isAllPaid ? 'bg-emerald-600 text-white' : ($contract->payment_type === 'dp' && $isDpPaid ? 'bg-blue-600 text-white' : 'bg-amber-500 text-gray-950')) }}">
-                {{ $isCancelled ? 'Kadaluarsa' : ($isAllPaid ? 'Lunas' : ($contract->payment_type === 'dp' && $isDpPaid ? 'DP Lunas' : 'Menunggu')) }}
+            <span class="text-xs font-black {{ $isCancelled ? 'text-rose-600' : ($isAllPaid ? 'text-emerald-600' : ($contract->payment_type === 'dp' && $isDpPaid ? 'text-blue-600' : 'text-amber-600')) }}">
+                {{ $isCancelled ? 'Kadaluarsa' : ($isAllPaid ? 'Lunas' : ($contract->payment_type === 'dp' && $isDpPaid ? 'DP Lunas' : 'Menunggu Pembayaran')) }}
             </span>
         </div>
 
         <!-- 2 Column Meta: Klien vs Fotografer -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs border-b border-gray-100 pb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs border-b border-gray-100 pb-6">
             <!-- Pihak Klien -->
-            <div class="space-y-1.5">
-                <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">DITAGIHKAN KEPADA (KLIEN)</span>
-                <p class="text-sm font-extrabold text-gray-900">{{ $contract->client->nama ?? 'Klien' }}</p>
-                <p class="text-gray-600">Email: {{ $contract->client->user->email ?? '-' }}</p>
-                <p class="text-gray-600">WhatsApp / Telp: {{ $contract->client->nomor_telepon ?? '-' }}</p>
+            <div class="space-y-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Ditagihkan Kepada:</span>
+                <p class="text-xs font-bold text-gray-900">{{ $contract->client->nama ?? 'Klien' }}</p>
+                <p class="text-gray-500">{{ $contract->client->user->email ?? '-' }}</p>
+                <p class="text-gray-500">{{ $contract->client->nomor_telepon ?? '-' }}</p>
             </div>
 
             <!-- Pihak Fotografer Mitra -->
-            <div class="space-y-1.5 sm:text-right">
-                <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">PENYEDIA JASA (FOTOGRAFER)</span>
-                <p class="text-sm font-extrabold text-gray-900">{{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</p>
-                <p class="text-gray-600">Lokasi: {{ $contract->photographer->city->name ?? '-' }}, {{ $contract->photographer->province->name ?? '-' }}</p>
-                <p class="text-gray-600">Email: {{ $contract->photographer->user->email ?? '-' }}</p>
+            <div class="space-y-1 sm:text-right">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Penyedia Jasa:</span>
+                <p class="text-xs font-bold text-gray-900">{{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</p>
+                <p class="text-gray-500">{{ $contract->photographer->city->name ?? '-' }}, {{ $contract->photographer->province->name ?? '-' }}</p>
+                <p class="text-gray-500">{{ $contract->photographer->user->email ?? '-' }}</p>
             </div>
         </div>
 
         <!-- Rincian Layanan & Sesi Booking -->
-        <div class="space-y-3">
-            <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 block">RINCIAN SESI PEMOTRETAN</span>
+        <div class="space-y-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block">Rincian Sesi Pemotretan</span>
             <div class="bg-gray-50/80 rounded-2xl p-4 border border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                 <div>
-                    <span class="text-gray-400 block text-[10px]">Paket Layanan:</span>
-                    <strong class="font-bold text-gray-900">{{ $contract->bookingDetail->service->nama_layanan ?? 'Paket Fotografi' }}</strong>
+                    <span class="text-gray-400 block text-xs">Paket Layanan:</span>
+                    <strong class="font-bold text-gray-900 text-xs">{{ $contract->bookingDetail->service->nama_layanan ?? 'Paket Fotografi' }}</strong>
                 </div>
                 <div>
-                    <span class="text-gray-400 block text-[10px]">Tanggal Sesi:</span>
-                    <strong class="font-bold text-gray-900">{{ $contract->bookingDetail ? $contract->bookingDetail->date_range_label : '-' }}</strong>
+                    <span class="text-gray-400 block text-xs">Tanggal Sesi:</span>
+                    <strong class="font-bold text-gray-900 text-xs">{{ $contract->bookingDetail ? $contract->bookingDetail->date_range_label : '-' }}</strong>
                 </div>
                 <div>
-                    <span class="text-gray-400 block text-[10px]">Waktu Pemotretan:</span>
+                    <span class="text-gray-400 block text-xs">Waktu Pemotretan:</span>
                     @php
                         $prtStart = $contract->bookingDetail?->jam_mulai ? substr($contract->bookingDetail->jam_mulai, 0, 5) : null;
                         $prtEnd = $contract->bookingDetail?->jam_selesai ? substr($contract->bookingDetail->jam_selesai, 0, 5) : null;
                     @endphp
-                    <strong class="font-bold text-gray-900">{{ $prtStart ? ($prtEnd ? "{$prtStart} - {$prtEnd} WIB" : "{$prtStart} WIB") . ' (' . ($contract->bookingDetail->effective_duration_hours ?? 1) . ' Jam)' : '-' }}</strong>
+                    <strong class="font-bold text-gray-900 text-xs">{{ $prtStart ? ($prtEnd ? "{$prtStart} - {$prtEnd} WIB" : "{$prtStart} WIB") . ' (' . ($contract->bookingDetail->effective_duration_hours ?? 1) . ' Jam)' : '-' }}</strong>
                 </div>
                 <div>
-                    <span class="text-gray-400 block text-[10px]">Lokasi Acara:</span>
-                    <strong class="font-bold text-gray-900 truncate block">{{ $contract->bookingDetail->lokasi ?? '-' }}</strong>
+                    <span class="text-gray-400 block text-xs">Lokasi Acara:</span>
+                    <strong class="font-bold text-gray-900 truncate block text-xs">{{ $contract->bookingDetail->lokasi ?? '-' }}</strong>
                 </div>
             </div>
         </div>
@@ -528,22 +534,21 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
                 <thead>
-                    <tr class="border-b-2 border-gray-200 text-[10px] font-black uppercase tracking-wider text-gray-400">
+                    <tr class="border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-400">
                         <th class="py-3 pr-4">Deskripsi Item</th>
                         <th class="py-3 px-4 text-center">Tipe Pembayaran</th>
                         <th class="py-3 px-4 text-center">Status</th>
-                        <th class="py-3 pl-4 text-right">Jumlah (IDR)</th>
+                        <th class="py-3 pl-4 text-right">Jumlah</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-100 text-xs">
                     <!-- Paket Utama -->
                     <tr>
                         <td class="py-3.5 pr-4">
-                            <strong class="font-bold text-gray-900 block">{{ $contract->bookingDetail->service->nama_layanan ?? 'Paket Foto' }}</strong>
-                            <span class="text-xs text-gray-500">Sesi pemotretan resolusi tinggi oleh {{ $contract->photographer->nama ?? 'Mitra Fotografer' }}</span>
+                            <span class="font-bold text-gray-900 block">{{ $contract->bookingDetail->service->nama_layanan ?? 'Paket Foto' }}</span>
                         </td>
-                        <td class="py-3.5 px-4 text-center uppercase font-bold text-gray-600">
-                            {{ $contract->payment_type === 'dp' ? 'Uang Muka 30%' : 'Bayar Penuh 100%' }}
+                        <td class="py-3.5 px-4 text-center text-gray-600">
+                            {{ $contract->payment_type === 'dp' ? 'Uang Muka (DP 30%)' : 'Pembayaran Penuh' }}
                         </td>
                         <td class="py-3.5 px-4 text-center">
                             @if($isAllPaid)
@@ -585,20 +590,14 @@
                             </td>
                         </tr>
                     @endif
-
-                    <!-- Biaya Layanan Platform -->
-                    <tr>
-                        <td class="py-3 pr-4 text-gray-600" colspan="2">
-                            Biaya Layanan Platform
-                        </td>
-                        <td class="py-3 px-4 text-center font-bold text-gray-700">GRATIS</td>
-                        <td class="py-3 pl-4 text-right font-mono font-bold text-gray-900">Rp 0</td>
-                    </tr>
                 </tbody>
                 <tfoot>
-                    <tr class="border-t-2 border-gray-900">
-                        <td colspan="3" class="pt-4 text-right font-black text-sm uppercase">Total Nilai Kontrak:</td>
-                        <td class="pt-4 text-right font-black text-base text-gray-900 font-mono">
+                    <tr class="border-t border-gray-200">
+                        <td colspan="2"></td>
+                        <td class="pt-4 px-4 text-center font-bold text-xs text-gray-700 whitespace-nowrap">
+                            Total Nilai Kontrak:
+                        </td>
+                        <td class="pt-4 pl-4 text-right font-black text-xs text-gray-900 font-mono">
                             Rp {{ number_format($contract->jumlah, 0, ',', '.') }}
                         </td>
                     </tr>
@@ -606,22 +605,9 @@
             </table>
         </div>
 
-        <!-- Footer Notice -->
-        <div class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-xs text-gray-500">
-            <div class="space-y-1 max-w-lg">
-                <p class="font-bold text-gray-800">Keterangan:</p>
-                <p class="text-[11px] leading-relaxed text-gray-500">
-                    Dokumen ini merupakan bukti tagihan sah yang diterbitkan secara elektronik oleh sistem LensMatch.
-                </p>
-            </div>
-            <div class="text-right text-[11px] text-gray-400">
-                <p class="font-medium">LensMatch Indonesia</p>
-                <p>Dokumen Digital Resmi</p>
-            </div>
-        </div>
-
     </div>
 
+    @include('partials.shared.confirm-modal')
 </body>
 </html>
 

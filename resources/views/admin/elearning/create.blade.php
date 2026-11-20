@@ -83,78 +83,41 @@
 
 
             <div>
-
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-
-                    Kategori Materi <span class="text-rose-500">*</span>
-
+                    Tingkat Kesulitan <span class="text-rose-500">*</span>
                 </label>
 
                 @php
-
-                    $selectedCatId = old('id_kategori', '');
-
-                    $selectedCatName = '';
-
-                    foreach($categories as $cat) {
-
-                        if ($cat->id == $selectedCatId) {
-
-                            $selectedCatName = $cat->nama_kategori;
-
-                            break;
-
-                        }
-
-                    }
-
-                    if (!$selectedCatName) {
-
-                        $selectedCatName = '-- Pilih Kategori Materi --';
-
-                    }
-
+                    $selectedLevel = old('level', '');
+                    $selectedLevelName = $selectedLevel ?: '-- Pilih Tingkat Kesulitan --';
                 @endphp
 
                 <div class="relative w-full">
+                    <input type="hidden" name="level" :value="form.level">
 
-                    <input type="hidden" name="id_kategori" :value="form.id_kategori">
-
-                    <button @click="catOpen = !catOpen" type="button" 
-                            x-ref="fieldKategori"
+                    <button @click="levelOpen = !levelOpen" type="button" 
+                            x-ref="fieldLevel"
                             class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs font-bold flex items-center justify-between gap-2 shadow-2xs cursor-pointer transition outline-none"
-                            :class="touched.id_kategori && errors.id_kategori ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'">
-
-                        <span x-text="form.selectedCatName" :class="form.id_kategori ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
-
-                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="catOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-
+                            :class="touched.level && errors.level ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'">
+                        <span x-text="form.selectedLevelName" :class="form.level ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'" class="truncate"></span>
+                        <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200" :class="levelOpen ? 'rotate-180 text-amber-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
 
-                    <div x-show="catOpen" @click.away="catOpen = false" x-transition 
-                         class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 max-h-60 overflow-y-auto" style="display: none;">
-
-                        @foreach($categories as $cat)
-
+                    <div x-show="levelOpen" @click.away="levelOpen = false" x-transition 
+                         class="absolute z-50 left-0 mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden" style="display: none;">
+                        @foreach(['Pemula', 'Menengah', 'Mahir'] as $lvl)
                             <button type="button" 
-                                    @click="selectCategory('{{ $cat->id }}', '{{ addslashes($cat->nama_kategori) }}')" 
+                                    @click="selectLevel('{{ $lvl }}')" 
                                     class="w-full px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition flex items-center justify-between text-left cursor-pointer border-b border-gray-50 dark:border-gray-700/40 last:border-0"
-                                    :class="form.id_kategori == '{{ $cat->id }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
-
-                                <span>{{ $cat->nama_kategori }}</span>
-
-                                <span x-show="form.id_kategori == '{{ $cat->id }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
-
+                                    :class="form.level == '{{ $lvl }}' ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-600 font-extrabold' : ''">
+                                <span>{{ $lvl }}</span>
+                                <span x-show="form.level == '{{ $lvl }}'" class="shrink-0"><svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
                             </button>
-
                         @endforeach
-
                     </div>
-
                 </div>
 
-                <p x-show="touched.id_kategori && errors.id_kategori" x-text="errors.id_kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-
+                <p x-show="touched.level && errors.level" x-text="errors.level" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
             </div>
 
 
@@ -460,12 +423,12 @@ function elearningFormApp() {
             this.thumbnailError = '';
             this.previewUrl = null;
         },
-        catOpen: false,
+        levelOpen: false,
         openAccess: false,
         form: {
             judul: @js(old('judul', '')),
-            id_kategori: @js(old('id_kategori', '')),
-            selectedCatName: @js($selectedCatName ?? '-- Pilih Kategori Materi --'),
+            level: @js(old('level', '')),
+            selectedLevelName: @js($selectedLevelName ?? '-- Pilih Tingkat Kesulitan --'),
             isPremium: @js(old('is_premium', '0')),
             accessName: @js(old('is_premium', '0') == '1' ? 'Berbayar (Akses Kursus Berbayar)' : 'Akses Gratis (Semua Pengguna)'),
             harga: @js(old('harga', '')),
@@ -474,22 +437,22 @@ function elearningFormApp() {
         },
         touched: {
             judul: {{ $errors->has('judul') ? 'true' : 'false' }},
-            id_kategori: {{ $errors->has('id_kategori') ? 'true' : 'false' }},
+            level: {{ $errors->has('level') ? 'true' : 'false' }},
             harga: {{ $errors->has('harga') ? 'true' : 'false' }},
             konten: {{ $errors->has('konten') ? 'true' : 'false' }}
         },
         errors: {
             judul: '{{ $errors->first('judul') ?: '' }}',
-            id_kategori: '{{ $errors->first('id_kategori') ?: '' }}',
+            level: '{{ $errors->first('level') ?: '' }}',
             harga: '{{ $errors->first('harga') ?: '' }}',
             konten: '{{ $errors->first('konten') ?: '' }}'
         },
-        selectCategory(id, name) {
-            this.form.id_kategori = id;
-            this.form.selectedCatName = name;
-            this.catOpen = false;
-            this.touched.id_kategori = true;
-            this.validateCategory();
+        selectLevel(level) {
+            this.form.level = level;
+            this.form.selectedLevelName = level;
+            this.levelOpen = false;
+            this.touched.level = true;
+            this.validateLevel();
         },
         selectAccess(premium, name) {
             this.form.isPremium = premium;
@@ -510,11 +473,11 @@ function elearningFormApp() {
                 this.errors.judul = '';
             }
         },
-        validateCategory() {
-            if (!this.form.id_kategori) {
-                this.errors.id_kategori = 'Kategori materi wajib dipilih.';
+        validateLevel() {
+            if (!this.form.level) {
+                this.errors.level = 'Tingkat kesulitan materi wajib dipilih.';
             } else {
-                this.errors.id_kategori = '';
+                this.errors.level = '';
             }
         },
         validateHarga() {
@@ -539,7 +502,7 @@ function elearningFormApp() {
         },
         submitForm(e) {
             this.touched.judul = true;
-            this.touched.id_kategori = true;
+            this.touched.level = true;
             this.touched.konten = true;
             if (this.form.isPremium === '1') {
                 this.touched.harga = true;
@@ -547,16 +510,16 @@ function elearningFormApp() {
             }
 
             this.validateJudul();
-            this.validateCategory();
+            this.validateLevel();
             this.validateKonten();
 
             let firstInvalidRef = null;
             if (this.errors.judul) firstInvalidRef = firstInvalidRef || this.$refs.fieldJudul;
-            if (this.errors.id_kategori) firstInvalidRef = firstInvalidRef || this.$refs.fieldKategori;
+            if (this.errors.level) firstInvalidRef = firstInvalidRef || this.$refs.fieldLevel;
             if (this.form.isPremium === '1' && this.errors.harga) firstInvalidRef = firstInvalidRef || this.$refs.fieldHarga;
             if (this.errors.konten) firstInvalidRef = firstInvalidRef || this.$refs.fieldKonten;
 
-            if (this.errors.judul || this.errors.id_kategori || (this.form.isPremium === '1' && this.errors.harga) || this.errors.konten) {
+            if (this.errors.judul || this.errors.level || (this.form.isPremium === '1' && this.errors.harga) || this.errors.konten) {
                 e.preventDefault();
                 if (firstInvalidRef) {
                     firstInvalidRef.focus();

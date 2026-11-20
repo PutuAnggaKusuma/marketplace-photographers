@@ -317,50 +317,37 @@
 
 
 
-    <!-- Status Tabs / Filter Pills -->
-
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-
+    <!-- Status Tabs (Rule #78 Horizontal Active Text Underline Standard & Counter Pill Badge) -->
+    <div class="flex items-center gap-6 overflow-x-auto pb-1 text-xs sm:text-sm">
         <button type="button" @click="applyFilter('status', 'all')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Semua ({{ $totalContests ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? 'all') === 'all' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Semua</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? 'all') === 'all' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalContests ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'pending_review')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'pending_review' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Perlu Review ({{ $pendingContests ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'pending_review' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'pending_review' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Perlu Review</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'pending_review' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $pendingContests ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'buka')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'buka' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Aktif Buka ({{ $openContests ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'buka' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'buka' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Aktif Buka</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'buka' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $openContests ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'selesai')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'selesai' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Selesai ({{ $completedContests ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'selesai' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'selesai' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Selesai</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'selesai' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $completedContests ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'ditolak')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'ditolak' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Ditolak ({{ $rejectedContests ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'ditolak' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'ditolak' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Ditolak</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'ditolak' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $rejectedContests ?? 0 }}</span>
         </button>
-
     </div>
 
 

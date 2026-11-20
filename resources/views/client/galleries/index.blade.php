@@ -8,6 +8,7 @@
   openRevisionModal: null,
   isLoading: false,
   currentStatus: '{{ $filterStatus ?? 'all' }}',
+  searchTimer: null,
 
   applyFilter(val) {
     this.currentStatus = val;
@@ -22,23 +23,23 @@
   },
 
   handleSearch(e) {
-    let q = e.target.value.toLowerCase().trim();
-    let cards = document.querySelectorAll('.gallery-card');
-    let visible = 0;
-    cards.forEach(card => {
-      let text = card.innerText.toLowerCase();
-      let match = text.includes(q);
-      card.style.display = match ? '' : 'none';
-      if (match) visible++;
-    });
-    let emptyEl = document.getElementById('search-empty-state');
-    if (emptyEl) {
-      emptyEl.style.display = (visible === 0 && cards.length > 0) ? 'block' : 'none';
-    }
+    clearTimeout(this.searchTimer);
+    let q = e.target.value.trim();
+    this.searchTimer = setTimeout(() => {
+      let url = new URL(window.location.href);
+      if (q !== '') {
+        url.searchParams.set('q', q);
+      } else {
+        url.searchParams.delete('q');
+      }
+      url.searchParams.set('page', '1');
+      this.fetchTable(url.toString());
+    }, 350);
   },
 
   fetchTable(url) {
     this.isLoading = true;
+    window.history.pushState({}, '', url);
     fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(res => {
         if (!res.ok) throw new Error('Network error');
@@ -58,6 +59,15 @@
         if (newStats && curStats) {
           curStats.innerHTML = newStats.innerHTML;
         }
+      })
+      .catch(err => {
+        console.error(err);
+      })
+      .finally(() => {
+        this.isLoading = false;
+      });
+  }
+}">
         window.history.pushState(null, '', url);
         this.isLoading = false;
       })
@@ -156,12 +166,6 @@
 
     <!-- Galleries Card Grid (2 Kolom Horizontal, Diperpanjang ke Bawah / Vertikal) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-      <!-- Empty State Khusus Pencarian Real-Time -->
-      <div id="search-empty-state" class="col-span-1 md:col-span-2 bg-white dark:bg-gray-800 p-12 text-center rounded-3xl border border-gray-200 dark:border-gray-700/80 space-y-3" style="display: none;">
-        <h3 class="text-xs font-extrabold text-gray-900 dark:text-white">Tidak Ada Hasil Sesuai Pencarian</h3>
-        <p class="text-xs text-gray-500">Coba gunakan kata kunci nama fotografer, layanan, atau lokasi yang berbeda.</p>
-      </div>
 
       @forelse($contracts as $c)
 

@@ -729,7 +729,7 @@ class ClientBookingController extends Controller
 
                 'Hasil Foto Dikonfirmasi Klien',
 
-                "Klien {$clientProfile->nama} telah memeriksa dan mengonfirmasi penerimaan hasil foto sesi {$code}. Dana escrow Anda kini siap dicairkan (ready for payout).",
+                "Klien {$clientProfile->nama} telah memeriksa dan mengonfirmasi penerimaan hasil foto sesi {$code}. Dana hasil pemotretan Anda kini siap dicairkan.",
 
                 'gallery_confirmed',
 

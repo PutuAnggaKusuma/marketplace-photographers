@@ -240,42 +240,31 @@
 
 
 
-    <!-- Status Tabs / Filter Pills -->
-
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-
+    <!-- Status Tabs (Rule #78 Horizontal Active Text Underline Standard & Counter Pill Badge) -->
+    <div class="flex items-center gap-6 overflow-x-auto pb-1 text-xs sm:text-sm">
         <button type="button" @click="applyFilter('status', 'all')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Semua ({{ $totalSubmissions ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? 'all') === 'all' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Semua</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? 'all') === 'all' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalSubmissions ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'winners')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'winners' ? 'bg-amber-400 text-gray-950 font-black shadow-xs' : 'bg-white dark:bg-gray-800 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 hover:bg-amber-50' }}">
-
-            Juara 1-3 ({{ $totalWinners ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'winners' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'winners' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Juara 1-3</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'winners' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalWinners ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'verified')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'verified' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Tidak Mendapat Juara ({{ $totalVerified ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'verified' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'verified' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Tidak Mendapat Juara</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'verified' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalVerified ?? 0 }}</span>
         </button>
 
         <button type="button" @click="applyFilter('status', 'rejected_disqualified')" 
-
-                class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'rejected_disqualified' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-            Ditolak / Diskualifikasi ({{ $totalRejected ?? 0 }})
-
+                class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'rejected_disqualified' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+            <span class="{{ ($status ?? '') === 'rejected_disqualified' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Ditolak / Diskualifikasi</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'rejected_disqualified' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalRejected ?? 0 }}</span>
         </button>
-
     </div>
 
 
@@ -490,7 +479,7 @@
 
                                 <div class="space-y-0.5">
 
-                                    <span class="font-bold text-gray-900 dark:text-white block">
+                                    <span class="text-xs font-bold text-gray-900 dark:text-white block">
 
                                         {{ $sub->user->nama ?? 'Peserta' }}
 

@@ -133,7 +133,6 @@ class PhotographerVerificationController extends Controller
             'portfolios.medias',
             'portfolios.category',
             'workingHours',
-            'availabilities',
             'testimonials.client.user'
         ])->findOrFail($id);
 

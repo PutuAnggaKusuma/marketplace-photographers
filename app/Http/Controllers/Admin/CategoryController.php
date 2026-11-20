@@ -8,6 +8,7 @@ use App\Models\PhotographerService;
 use App\Models\RolePhotographer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -26,6 +27,41 @@ class CategoryController extends Controller
     {
         $category = \App\Models\Category::findOrFail($id);
         return view('admin.categories.edit', compact('category'));
+    }
+
+    /**
+     * Tampilkan Detail Kategori dan Daftar Fotografer Terkait.
+     */
+    public function show(Request $request, $id)
+    {
+        $category = Category::withCount(['photographers', 'portfolios'])->findOrFail($id);
+
+        $photographerIds = $category->photographers()->pluck('role_photographers.id');
+        $totalServices = PhotographerService::whereIn('id_photographer', $photographerIds)->count();
+
+        $search = $request->query('search', '');
+        $photographersQuery = $category->photographers()
+            ->with(['user', 'city', 'province'])
+            ->withCount('services');
+
+        if (!empty($search)) {
+            $photographersQuery->where(function ($q) use ($search) {
+                $q->where('role_photographers.nama', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('nama', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [10, 20, 50, 100])) {
+            $perPage = 10;
+        }
+
+        $photographers = $photographersQuery->paginate($perPage)->withQueryString();
+
+        return view('admin.categories.show', compact('category', 'photographers', 'totalServices', 'search'));
     }
 
     /**
@@ -70,7 +106,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kategori' => 'required|string|max:100|unique:categories,nama_kategori',
+            'nama_kategori' => ['required', 'string', 'max:100', Rule::unique('categories', 'nama_kategori')->whereNull('deleted_at')],
             'deskripsi' => 'nullable|string|max:500',
             'foto_kategori' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'icon_url' => 'nullable|url',
@@ -108,7 +144,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
 
         $request->validate([
-            'nama_kategori' => 'required|string|max:100|unique:categories,nama_kategori,' . $id,
+            'nama_kategori' => ['required', 'string', 'max:100', Rule::unique('categories', 'nama_kategori')->whereNull('deleted_at')->ignore($category->id)],
             'deskripsi' => 'nullable|string|max:500',
             'foto_kategori' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'icon_url' => 'nullable|url',
@@ -168,13 +204,13 @@ class CategoryController extends Controller
             return redirect()->back()->with('error', "Kategori '{$category->nama_kategori}' tidak dapat dihapus karena masih terhubung dengan {$photographerCount} fotografer dan {$portfolioCount} portofolio.");
         }
 
-        // Hapus file foto dari disk jika ada
+        // Hapus berkas foto dari disk jika ada
         if ($category->icon_url && str_contains($category->icon_url, '/storage/categories/')) {
             $oldPath = str_replace(asset('storage/'), '', $category->icon_url);
             \Illuminate\Support\Facades\Storage::disk('public')->delete(ltrim($oldPath, '/'));
         }
 
-        $category->delete();
+        $category->forceDelete();
 
         return redirect()->back()->with('success', 'Master kategori berhasil dihapus.');
     }

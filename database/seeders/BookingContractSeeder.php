@@ -457,7 +457,7 @@ class BookingContractSeeder extends Seeder
                 'id_photographer' => $photoBudi->id,
                 'tanggal' => '2026-11-14',
                 'status' => 'blocked',
-                'keterangan' => 'Libur Operasional Studio & Maintenance Alat Kamera',
+                'keterangan' => 'Perawatan Peralatan Kamera',
             ],
             [
                 'id_photographer' => $photoBudi->id,
@@ -477,7 +477,7 @@ class BookingContractSeeder extends Seeder
                 'id_photographer' => $photoClara->id,
                 'tanggal' => '2026-11-26',
                 'status' => 'blocked',
-                'keterangan' => 'Upgrade Lighting & Studio Renovation',
+                'keterangan' => 'Renovasi Studio',
             ],
         ];
 

@@ -73,8 +73,8 @@
 
         <!-- Card 3 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Kategori Edukasi</span>
-            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $categories->count() }} Kategori</div>
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Tingkat Kesulitan</span>
+            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">3 Tingkat Modul</div>
         </div>
 
         <!-- Card 4 -->
@@ -124,7 +124,7 @@
                 <input type="text" 
                        name="search" 
                        value="{{ $search }}" @input="handleSearch($event)" 
-                       placeholder="Cari judul materi atau kategori..." 
+                       placeholder="Cari judul materi atau tingkat kesulitan..." 
                        class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition">
                 <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
@@ -138,7 +138,7 @@
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             <th class="py-3.5 px-4 sm:px-6 w-4/12">Materi</th>
-                            <th class="py-3.5 px-4 sm:px-6 w-2/12">Kategori</th>
+                            <th class="py-3.5 px-4 sm:px-6 w-2/12">Tingkat Kesulitan</th>
                             <th class="py-3.5 px-4 sm:px-6 w-3/12">Harga & Akses</th>
                             <th class="py-3.5 px-4 sm:px-6 w-1/12 text-center">Status</th>
                             <th class="py-3.5 px-4 sm:px-6 w-2/12 text-center">Aksi</th>
@@ -167,7 +167,7 @@
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
                                     <span class="font-bold text-gray-700 dark:text-gray-300 text-xs">
-                                        {{ $m->kategori ?? ($m->category ? $m->category->nama_kategori : 'Umum') }}
+                                        {{ $m->level ?? $m->kategori ?? 'Pemula' }}
                                     </span>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">

@@ -127,7 +127,7 @@
           </div>
           <div class="space-y-2">
             <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-gray-900 dark:text-white">{{ $totalCategories }}+ Kategori Utama</span>
+              <span class="font-bold text-gray-900 dark:text-white">3 Tingkat Kesulitan</span>
               <span class="font-medium text-gray-500 dark:text-gray-400">100% Gratis</span>
             </div>
             <div class="flex items-center justify-between text-xs">
@@ -172,8 +172,8 @@
       <div class="py-14 sm:py-20 grid grid-cols-2 lg:grid-cols-3 gap-8 text-center items-center">
         
         <div class="space-y-1">
-          <p class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ $totalCategories }} Kategori</p>
-          <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Lighting, editing, bisnis studio</p>
+          <p class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">3 Tingkat Modul</p>
+          <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pemula, menengah, mahir</p>
         </div>
 
         <div class="space-y-1 lg:border-l lg:border-gray-200/80 lg:dark:border-gray-800 lg:pl-6">

@@ -54,9 +54,6 @@
                        class="w-full px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition"
                        :class="touched.nama_kategori && errors.nama_kategori ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">
                 <p x-show="touched.nama_kategori && errors.nama_kategori" x-text="errors.nama_kategori" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                @error('nama_kategori')
-                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-                @enderror
             </div>
 
             <!-- 2. Deskripsi Kategori -->
@@ -74,9 +71,6 @@
                           class="w-full min-h-[110px] px-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 transition resize-y leading-relaxed"
                           :class="touched.deskripsi && errors.deskripsi ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500 focus:border-amber-500'">{{ old('deskripsi', $category->deskripsi) }}</textarea>
                 <p x-show="touched.deskripsi && errors.deskripsi" x-text="errors.deskripsi" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
-                @error('deskripsi')
-                    <p class="text-[11px] font-bold text-red-500 mt-1">{{ $message }}</p>
-                @enderror
             </div>
 
             <!-- 3. Unggah Foto Kategori (Dropzone & Lightbox - Rule #97 Compliant) -->

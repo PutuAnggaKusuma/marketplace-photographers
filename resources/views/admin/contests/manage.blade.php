@@ -454,42 +454,31 @@
 
 
 
-        <!-- Filter Status Pills Pendaftar -->
-
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-
+        <!-- Filter Status Pendaftar (Rule #78 Horizontal Active Text Underline Standard & Counter Pill Badge) -->
+        <div class="flex items-center gap-6 overflow-x-auto pb-1 text-xs sm:text-sm">
             <button type="button" @click="applyFilter('status', 'all')" 
-
-                    class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-                Semua ({{ $totalParticipants ?? 0 }})
-
+                    class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? 'all') === 'all' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+                <span class="{{ ($status ?? 'all') === 'all' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Semua</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? 'all') === 'all' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $totalParticipants ?? 0 }}</span>
             </button>
 
             <button type="button" @click="applyFilter('status', 'pending')" 
-
-                    class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'pending' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-950 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-                Menunggu Verifikasi ({{ $pendingParticipants ?? 0 }})
-
+                    class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'pending' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+                <span class="{{ ($status ?? '') === 'pending' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Menunggu Verifikasi</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'pending' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $pendingParticipants ?? 0 }}</span>
             </button>
 
             <button type="button" @click="applyFilter('status', 'disetujui')" 
-
-                    class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'disetujui' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-                Disetujui ({{ $approvedParticipants ?? 0 }})
-
+                    class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'disetujui' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+                <span class="{{ ($status ?? '') === 'disetujui' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Disetujui</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'disetujui' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $approvedParticipants ?? 0 }}</span>
             </button>
 
             <button type="button" @click="applyFilter('status', 'ditolak')" 
-
-                    class="px-4 py-2 rounded-xl transition cursor-pointer shrink-0 {{ ($status ?? '') === 'ditolak' ? 'bg-rose-600 text-white shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300' }}">
-
-                Ditolak ({{ $rejectedParticipants ?? 0 }})
-
+                    class="py-2 transition flex items-center gap-2 cursor-pointer shrink-0 {{ ($status ?? '') === 'ditolak' ? 'text-amber-600 dark:text-amber-400 font-black' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-bold' }}">
+                <span class="{{ ($status ?? '') === 'ditolak' ? 'underline underline-offset-8 decoration-2 decoration-amber-500 dark:decoration-amber-400' : '' }}">Ditolak</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ ($status ?? '') === 'ditolak' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }}">{{ $rejectedParticipants ?? 0 }}</span>
             </button>
-
         </div>
 
 
@@ -668,7 +657,7 @@
 
                                 <td class="py-4 px-4 sm:px-6 align-top whitespace-nowrap">
 
-                                    <div class="font-medium text-gray-800 dark:text-gray-200">{{ $p->email }}</div>
+                                    <div class="text-xs font-medium text-gray-800 dark:text-gray-200">{{ $p->email }}</div>
 
                                     <div class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">WA: {{ $p->no_wa }}</div>
 
@@ -1160,7 +1149,7 @@
 
                                     <div class="space-y-0.5">
 
-                                        <span class="font-bold text-gray-900 dark:text-white block">{{ $sub->user->nama ?? 'Peserta' }}</span>
+                                        <span class="text-xs font-bold text-gray-900 dark:text-white block">{{ $sub->user->nama ?? 'Peserta' }}</span>
 
                                         <span class="text-xs text-gray-400 block">{{ $sub->user->email ?? '-' }}</span>
 

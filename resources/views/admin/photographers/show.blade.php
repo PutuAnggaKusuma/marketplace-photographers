@@ -57,7 +57,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <nav class="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 mb-1.5">
-                <a href="{{ route('admin.photographers') }}" class="hover:text-amber-500 transition">Manajemen Fotografer</a>
+                @if(request('from') === 'category' && request('category_id'))
+                    <a href="{{ route('admin.categories') }}" class="hover:text-amber-500 transition">Kategori</a>
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    <a href="{{ route('admin.categories.show', request('category_id')) }}" class="hover:text-amber-500 transition">Detail Kategori</a>
+                @else
+                    <a href="{{ route('admin.photographers') }}" class="hover:text-amber-500 transition">Manajemen Fotografer</a>
+                @endif
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
                 <span>{{ $photographer->nama }}</span>
             </nav>
@@ -75,10 +81,18 @@
                 </a>
             @endif
 
-            <a href="{{ route('admin.photographers') }}"
+            @php
+                $backUrl = (request('from') === 'category' && request('category_id'))
+                    ? route('admin.categories.show', request('category_id'))
+                    : route('admin.photographers');
+                $backLabel = (request('from') === 'category' && request('category_id'))
+                    ? 'Kembali ke Detail Kategori'
+                    : 'Kembali';
+            @endphp
+            <a href="{{ $backUrl }}"
                class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-                <span>Kembali</span>
+                <span>{{ $backLabel }}</span>
             </a>
         </div>
     </div>
@@ -698,7 +712,6 @@
 
             @php
                 $workingHours = $photographer->workingHours->sortBy('day_of_week');
-                $upcomingBlocks = $photographer->availabilities->where('tanggal', '>=', date('Y-m-d'))->sortBy('tanggal')->values();
             @endphp
 
             @if($workingHours->isEmpty())
@@ -707,45 +720,25 @@
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
                     @foreach($workingHours as $wh)
                         <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-1">
+                        <div class="p-3.5 rounded-xl {{ $wh->is_open ? 'bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80' : 'bg-gray-50/50 dark:bg-gray-900/30 border border-dashed border-gray-200 dark:border-gray-700/50 opacity-75' }} space-y-1">
                             <div class="text-xs font-black text-gray-900 dark:text-white">{{ $wh->day_name }}</div>
                             @if(!$wh->is_open)
                                 <div class="text-xs font-bold text-gray-400 dark:text-gray-500">Libur</div>
+                                <div class="text-[11px] font-bold text-gray-400 dark:text-gray-500">Libur</div>
                             @elseif($wh->is_24_hours)
                                 <div class="text-xs font-bold text-emerald-600 dark:text-emerald-400">24 Jam</div>
+                                <div class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">24 Jam</div>
                             @else
                                 <div class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                <div class="text-[11px] font-bold text-gray-800 dark:text-gray-200">
                                     {{ substr($wh->jam_buka, 0, 5) }} - {{ substr($wh->jam_tutup, 0, 5) }} WIB
                                 </div>
                             @endif
                         </div>
                     @endforeach
-                </div>
-            @endif
-
-            @if($upcomingBlocks->isNotEmpty())
-                <div class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 space-y-3">
-                    <span class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tanggal Ditutup Mendatang</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        @foreach($upcomingBlocks as $block)
-                            @php
-                                $isFullDay = (!$block->jam_mulai && !$block->jam_selesai) || ($block->jam_mulai === '00:00:00' && $block->jam_selesai === '23:59:59');
-                                $blockTimeLabel = $isFullDay
-                                    ? 'Seharian penuh'
-                                    : substr($block->jam_mulai, 0, 5) . ' - ' . substr($block->jam_selesai, 0, 5) . ' WIB';
-                            @endphp
-                            <div class="px-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs flex items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="font-bold text-gray-900 dark:text-white">{{ date('d M Y', strtotime($block->tanggal)) }}</div>
-                                    @if(!empty($block->keterangan))
-                                        <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ $block->keterangan }}</div>
-                                    @endif
-                                </div>
-                                <span class="text-[11px] font-bold text-rose-600 dark:text-rose-400 shrink-0">{{ $blockTimeLabel }}</span>
-                            </div>
-                        @endforeach
-                    </div>
                 </div>
             @endif
         </div>

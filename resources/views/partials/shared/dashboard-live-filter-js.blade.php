@@ -61,10 +61,17 @@ window.dashboardLiveTable = function() {
                 if (newStats && currentStats) {
                     currentStats.innerHTML = newStats.innerHTML;
                 }
+
+                if (window.Alpine && currentTable) {
+                    try {
+                        window.Alpine.initTree(currentTable);
+                    } catch (alpineErr) {
+                        console.warn('Alpine tree init error in live table:', alpineErr);
+                    }
+                }
             })
             .catch(err => {
                 console.error('Error fetching live data:', err);
-                window.location.href = url;
             })
             .finally(() => {
                 this.isLoading = false;
@@ -77,17 +84,26 @@ window.dashboardLiveTable = function() {
 document.addEventListener('click', function(e) {
     const link = e.target.closest('#dashboard-table-container a');
     if (link && link.href && !link.hasAttribute('download') && !link.getAttribute('href').startsWith('#') && !link.getAttribute('href').startsWith('javascript:')) {
+        // Links with data-ajax-page are already handled smoothly by loadAjaxPage
+        if (link.hasAttribute('data-ajax-page')) {
+            return;
+        }
+
         if (link.href.includes('page=') || link.href.includes('sort=') || link.href.includes('status=')) {
-            e.preventDefault();
             const liveCompEl = document.querySelector('[x-data*="dashboardLiveTable"]');
             if (liveCompEl && window.Alpine) {
                 const stack = Alpine.$data(liveCompEl);
                 if (stack && typeof stack.fetchData === 'function') {
+                    e.preventDefault();
                     stack.fetchData(link.href);
                     return;
                 }
             }
-            window.location.href = link.href;
+            if (typeof window.loadAjaxPage === 'function') {
+                e.preventDefault();
+                window.loadAjaxPage(link.href);
+                return;
+            }
         }
     }
 });

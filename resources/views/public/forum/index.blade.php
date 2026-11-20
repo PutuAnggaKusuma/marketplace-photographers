@@ -111,10 +111,10 @@
           @php
             $catNames = [
               'semua' => 'Semua Kategori',
-              'teknis' => 'Teknis & Pengaturan Lensa',
-              'spot_foto' => 'Spot Foto Outdoor',
-              'peralatan' => 'Peralatan Studio',
-              'lainnya' => 'Lainnya & Diskusi Umum',
+              'teknis' => 'Teknik Fotografi',
+              'spot_foto' => 'Spot Foto',
+              'peralatan' => 'Peralatan Kamera',
+              'lainnya' => 'Diskusi Umum',
             ];
             $curCatName = $catNames[$category] ?? 'Semua Kategori';
           @endphp
@@ -136,13 +136,13 @@
 
               <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'semua', 'page' => 1])) }}'); open = false; selectedText = 'Semua Kategori'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition" :class="'{{ $category }}' === 'semua' ? 'bg-amber-50/70 text-amber-600' : ''">Semua Kategori</a>
 
-              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'teknis', 'page' => 1])) }}'); open = false; selectedText = 'Teknis & Pengaturan Lensa'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'teknis' ? 'bg-amber-50/70 text-amber-600' : ''">Teknis & Pengaturan Lensa</a>
+              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'teknis', 'page' => 1])) }}'); open = false; selectedText = 'Teknik Fotografi'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'teknis' ? 'bg-amber-50/70 text-amber-600' : ''">Teknik Fotografi</a>
 
-              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'spot_foto', 'page' => 1])) }}'); open = false; selectedText = 'Spot Foto Outdoor'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'spot_foto' ? 'bg-amber-50/70 text-amber-600' : ''">Spot Foto Outdoor</a>
+              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'spot_foto', 'page' => 1])) }}'); open = false; selectedText = 'Spot Foto'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'spot_foto' ? 'bg-amber-50/70 text-amber-600' : ''">Spot Foto</a>
 
-              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'peralatan', 'page' => 1])) }}'); open = false; selectedText = 'Peralatan Studio'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'peralatan' ? 'bg-amber-50/70 text-amber-600' : ''">Peralatan Studio</a>
+              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'peralatan', 'page' => 1])) }}'); open = false; selectedText = 'Peralatan Kamera'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'peralatan' ? 'bg-amber-50/70 text-amber-600' : ''">Peralatan Kamera</a>
 
-              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'lainnya', 'page' => 1])) }}'); open = false; selectedText = 'Lainnya & Diskusi Umum'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'lainnya' ? 'bg-amber-50/70 text-amber-600' : ''">Lainnya & Diskusi Umum</a>
+              <a @click.prevent="loadAjaxPage('{{ route('public.forum.index', array_merge(request()->query(), ['cat' => 'lainnya', 'page' => 1])) }}'); open = false; selectedText = 'Diskusi Umum'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition" :class="'{{ $category }}' === 'lainnya' ? 'bg-amber-50/70 text-amber-600' : ''">Diskusi Umum</a>
 
             </div>
 
@@ -546,10 +546,10 @@
               <p x-show="touched.kategori && errors.kategori" x-text="errors.kategori" x-cloak class="text-[11px] font-bold text-red-500"></p>
             </div>
 
-            <!-- Field 3: Penjelasan & Detail Isi Diskusi -->
+            <!-- Field 3: Isi Diskusi -->
             <div class="flex flex-col gap-1.5">
               <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                Penjelasan & Isi Diskusi <span class="text-rose-500">*</span>
+                Isi Diskusi <span class="text-rose-500">*</span>
               </label>
               <textarea name="deskripsi" 
                         rows="6" 
@@ -776,13 +776,13 @@
   $forumPostErrors = (isset($errors) && $errors->any()) ? $errors : new \Illuminate\Support\ViewErrorBag();
   $hasForumPostErrors = $forumPostErrors->hasAny(['judul', 'kategori', 'deskripsi', 'foto_files', 'foto_files.*']);
   $forumCategoryLabels = [
-      'teknis' => 'Teknis & Pengaturan Lensa',
-      'spot_foto' => 'Rekomendasi Spot Foto Outdoor',
-      'peralatan' => 'Peralatan & Aksesoris Studio',
-      'lainnya' => 'Lainnya & Diskusi Umum',
+      'teknis' => 'Teknik Fotografi',
+      'spot_foto' => 'Spot Foto',
+      'peralatan' => 'Peralatan Kamera',
+      'lainnya' => 'Diskusi Umum',
   ];
   $oldForumKategori = old('kategori', 'lainnya');
-  $oldForumKategoriLabel = $forumCategoryLabels[$oldForumKategori] ?? 'Lainnya & Diskusi Umum';
+  $oldForumKategoriLabel = $forumCategoryLabels[$oldForumKategori] ?? 'Diskusi Umum';
 @endphp
 
 function forumPostUpload() {
@@ -793,10 +793,10 @@ function forumPostUpload() {
     categoryDropdownOpen: false,
     selectedCategoryLabel: @js($oldForumKategoriLabel),
     categories: {
-      'teknis': 'Teknis & Pengaturan Lensa',
-      'spot_foto': 'Rekomendasi Spot Foto Outdoor',
-      'peralatan': 'Peralatan & Aksesoris Studio',
-      'lainnya': 'Lainnya & Diskusi Umum'
+      'teknis': 'Teknik Fotografi',
+      'spot_foto': 'Spot Foto',
+      'peralatan': 'Peralatan Kamera',
+      'lainnya': 'Diskusi Umum'
     },
     formData: {
       judul: @js(old('judul', '')),
@@ -825,7 +825,7 @@ function forumPostUpload() {
     },
     validateDeskripsi() {
       const val = (this.formData.deskripsi || '').trim();
-      if (!val) this.errors.deskripsi = 'Penjelasan & isi diskusi wajib diisi.';
+      if (!val) this.errors.deskripsi = 'Isi diskusi wajib diisi.';
       else if (val.length < 15) this.errors.deskripsi = 'Isi diskusi minimal 15 karakter.';
       else this.errors.deskripsi = '';
     },

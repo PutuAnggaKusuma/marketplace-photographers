@@ -16,10 +16,10 @@ class ElearningController extends Controller
     {
         // Overview preview: Take top 6 MOST READ courses (sorted by view_count DESC)
         $elearnings = Elearning::orderBy('view_count', 'desc')->take(6)->get();
-        $categories = Elearning::distinct()->pluck('kategori');
+        $categories = ['Pemula', 'Menengah', 'Mahir'];
 
         // Dynamic Aggregate Stats
-        $totalCategories = Elearning::distinct('kategori')->count();
+        $totalCategories = 3;
         $totalViews = Elearning::sum('view_count');
         $totalCourses = Elearning::count();
         $heroCourses = Elearning::take(3)->get();
@@ -37,23 +37,26 @@ class ElearningController extends Controller
     /**
      * Tampilkan Halaman Full Data Katalog E-Learning (Search, Filter & Pagination).
      */
-        public function katalog(Request $request)
+    public function katalog(Request $request)
     {
-        $selectedCategory = $request->query('category');
+        $selectedCategory = $request->query('category') ?: $request->query('level');
         $sort = $request->query('sort', 'latest');
         $search = $request->query('q');
 
         $query = Elearning::query();
 
         if ($selectedCategory && $selectedCategory !== 'all') {
-            $query->where('kategori', $selectedCategory);
+            $query->where(function($q) use ($selectedCategory) {
+                $q->where('level', $selectedCategory)
+                  ->orWhere('kategori', $selectedCategory);
+            });
         }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
                   ->orWhere('ringkasan', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
+                  ->orWhere('konten', 'like', "%{$search}%");
             });
         }
 
@@ -71,7 +74,7 @@ class ElearningController extends Controller
         }
 
         $elearnings = $query->paginate($perPage)->withQueryString();
-        $categories = Elearning::distinct()->pluck('kategori');
+        $categories = ['Pemula', 'Menengah', 'Mahir'];
 
         return view('public.elearning.katalog', compact(
             'elearnings', 
@@ -405,6 +408,7 @@ class ElearningController extends Controller
             return redirect()->guest(route('login'))->with('warning', 'Silakan masuk ke akun Anda terlebih dahulu untuk menyelesaikan pembayaran.');
         }
 
+        $user = Auth::user();
         $course = Elearning::where('slug', $slug)->firstOrFail();
 
         $request->validate([

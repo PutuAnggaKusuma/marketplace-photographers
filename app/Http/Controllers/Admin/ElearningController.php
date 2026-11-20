@@ -44,9 +44,8 @@ class ElearningController extends Controller
         if (!in_array($perPage, [10, 20, 50, 100])) $perPage = 10;
         
         $materials = $query->paginate($perPage)->withQueryString();
-        $categories = Category::orderBy('nama_kategori', 'asc')->get();
 
-        return view('admin.elearning.index', compact('materials', 'categories', 'search', 'sort'));
+        return view('admin.elearning.index', compact('materials', 'search', 'sort'));
     }
 
     /**
@@ -54,8 +53,7 @@ class ElearningController extends Controller
      */
     public function create()
     {
-        $categories = Category::orderBy('nama_kategori', 'asc')->get();
-        return view('admin.elearning.create', compact('categories'));
+        return view('admin.elearning.create');
     }
 
     /**
@@ -65,7 +63,7 @@ class ElearningController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'id_kategori' => 'nullable|exists:categories,id',
+            'level' => 'required|in:Pemula,Menengah,Mahir',
             'is_premium' => 'nullable|in:0,1',
             'harga' => 'nullable|numeric|min:0',
             'video_url' => 'nullable|url|max:500',
@@ -73,17 +71,13 @@ class ElearningController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
         ], [
             'judul.required' => 'Judul materi wajib diisi.',
+            'level.required' => 'Tingkat kesulitan materi wajib dipilih.',
+            'level.in' => 'Pilihan tingkat kesulitan tidak valid.',
             'konten.required' => 'Isi modul pembelajaran wajib diisi.',
             'thumbnail.image' => 'File thumbnail harus berupa gambar.',
             'thumbnail.mimes' => 'Format thumbnail harus JPG, PNG, atau WEBP.',
             'thumbnail.max' => 'Ukuran thumbnail maksimal 10 MB.',
         ]);
-
-        $kategoriName = 'Umum';
-        if ($request->id_kategori) {
-            $cat = Category::find($request->id_kategori);
-            if ($cat) $kategoriName = $cat->nama_kategori;
-        }
 
         $thumbnailPath = null;
         if ($request->hasFile('thumbnail')) {
@@ -94,12 +88,13 @@ class ElearningController extends Controller
         $ringkasan = Str::limit(strip_tags($request->konten), 180);
         $isPremium = $request->input('is_premium') == '1';
         $harga = $isPremium ? (int) $request->input('harga', 0) : 0;
+        $level = $request->input('level', 'Pemula');
 
         Elearning::create([
             'judul' => $request->judul,
             'slug' => $slug,
-            'kategori' => $kategoriName,
-            'level' => 'Pemula',
+            'kategori' => $level,
+            'level' => $level,
             'durasi' => '15 Menit',
             'harga' => $harga,
             'is_premium' => $isPremium,
@@ -118,8 +113,7 @@ class ElearningController extends Controller
     public function edit($id)
     {
         $material = Elearning::findOrFail($id);
-        $categories = Category::orderBy('nama_kategori', 'asc')->get();
-        return view('admin.elearning.edit', compact('material', 'categories'));
+        return view('admin.elearning.edit', compact('material'));
     }
 
     /**
@@ -131,7 +125,7 @@ class ElearningController extends Controller
 
         $request->validate([
             'judul' => 'required|string|max:255',
-            'id_kategori' => 'nullable|exists:categories,id',
+            'level' => 'required|in:Pemula,Menengah,Mahir',
             'is_premium' => 'nullable|in:0,1',
             'harga' => 'nullable|numeric|min:0',
             'video_url' => 'nullable|url|max:500',
@@ -139,17 +133,13 @@ class ElearningController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
         ], [
             'judul.required' => 'Judul materi wajib diisi.',
+            'level.required' => 'Tingkat kesulitan materi wajib dipilih.',
+            'level.in' => 'Pilihan tingkat kesulitan tidak valid.',
             'konten.required' => 'Isi modul pembelajaran wajib diisi.',
             'thumbnail.image' => 'File thumbnail harus berupa gambar.',
             'thumbnail.mimes' => 'Format thumbnail harus JPG, PNG, atau WEBP.',
             'thumbnail.max' => 'Ukuran thumbnail maksimal 10 MB.',
         ]);
-
-        $kategoriName = $material->kategori ?: 'Umum';
-        if ($request->id_kategori) {
-            $cat = Category::find($request->id_kategori);
-            if ($cat) $kategoriName = $cat->nama_kategori;
-        }
 
         $thumbnailUrl = $material->thumbnail_url;
         if ($request->hasFile('thumbnail')) {
@@ -160,10 +150,12 @@ class ElearningController extends Controller
         $ringkasan = Str::limit(strip_tags($request->konten), 180);
         $isPremium = $request->input('is_premium') == '1';
         $harga = $isPremium ? (int) $request->input('harga', 0) : 0;
+        $level = $request->input('level', $material->level ?? 'Pemula');
 
         $material->update([
             'judul' => $request->judul,
-            'kategori' => $kategoriName,
+            'kategori' => $level,
+            'level' => $level,
             'harga' => $harga,
             'is_premium' => $isPremium,
             'thumbnail_url' => $thumbnailUrl,

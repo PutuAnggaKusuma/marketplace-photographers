@@ -392,7 +392,8 @@ class TransactionController extends Controller
         $feeMarketplace = $contract->jumlah * $feeRate;
         $payoutAmount = $contract->jumlah - $feeMarketplace;
 
-        $notes = $request->input('payout_notes') ?: 'Pencairan dana payout disetujui Admin.';
+        $adminNote = $request->input('payout_notes') ?: 'Pencairan disetujui Admin.';
+        $notes = $contract->payout_notes ? $contract->payout_notes . " | [Pencairan: {$adminNote}]" : $adminNote;
         if ($request->hasFile('bukti_transfer_payout')) {
             $path = $request->file('bukti_transfer_payout')->store('payout_proofs', 'public');
             $payoutSlipUrl = asset('storage/' . $path);

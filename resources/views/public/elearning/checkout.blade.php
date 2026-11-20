@@ -31,7 +31,7 @@
             />
             <div class="space-y-1.5 flex-1 min-w-0">
               <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
-                {{ $course->kategori }}
+                Tingkat {{ $course->level ?? $course->kategori ?? 'Pemula' }}
               </span>
               <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-snug">
                 {{ $course->judul }}

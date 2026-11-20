@@ -23,12 +23,12 @@
     <div class="bg-white dark:bg-gray-800 p-7 sm:p-8 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6 items-end">
         
-        <!-- Filter 1: Kategori -->
+        <!-- Filter 1: Tingkat Kesulitan -->
         <div class="md:col-span-3">
           <label class="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2">
-            KATEGORI
+            TINGKAT KESULITAN
           </label>
-          <div class="relative" x-data="{ open: false, selectedText: '{{ empty($selectedCategory) || $selectedCategory === 'all' ? 'Semua Kategori' : $selectedCategory }}' }">
+          <div class="relative" x-data="{ open: false, selectedText: '{{ empty($selectedCategory) || $selectedCategory === 'all' ? 'Semua Tingkat' : $selectedCategory }}' }">
             <button @click="open = !open" type="button" class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-800 dark:text-white text-left flex items-center justify-between shadow-xs relative">
               <span x-text="selectedText" class="truncate"></span>
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
@@ -36,7 +36,7 @@
               </div>
             </button>
             <div x-show="open" @click.away="open = false" x-transition class="absolute z-30 left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700/80 py-1 overflow-hidden max-h-60 overflow-y-auto" style="display: none;">
-              <a @click.prevent="applyCategory('all'); open = false; selectedText = 'Semua Kategori'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition">Semua Kategori</a>
+              <a @click.prevent="applyCategory('all'); open = false; selectedText = 'Semua Tingkat'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 transition">Semua Tingkat</a>
               @foreach($categories as $cat)
                 <a @click.prevent="applyCategory('{{ $cat }}'); open = false; selectedText = '{{ $cat }}'" href="#" class="block px-4 py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 border-t border-gray-100 dark:border-gray-700/60 transition">{{ $cat }}</a>
               @endforeach

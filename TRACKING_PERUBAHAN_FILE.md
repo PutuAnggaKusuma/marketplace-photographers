@@ -20,6 +20,69 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-20 10:05 WITA] — Implementasi Perbaikan Bug Riil 2 s/d 5: Pembersihan Jargon Payout/Escrow (Rule #70), Standarisasi Tab Teks Horizontal Lomba Foto (Rule #78), Tipografi Seragam text-xs Sel Tabel (Rule #106), dan Sinkronisasi Server-Side Search Galeri Klien
+
+* **Modul / Fitur**:
+  - Wizard Onboarding Mitra Fotografer (`resources/views/partials/photographer/onboarding-wizard.blade.php`)
+  - Laporan Keuangan Fotografer (`resources/views/photographer/reports/index.blade.php`)
+  - Notifikasi Selesai Foto Booking Klien (`app/Http/Controllers/Client/ClientBookingController.php`)
+  - Manajemen Lomba Foto Admin (`resources/views/admin/contests/index.blade.php`, `manage.blade.php`, `submissions.blade.php`)
+  - Galeri Foto Klien (`resources/views/client/galleries/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/partials/photographer/onboarding-wizard.blade.php`
+  * `resources/views/photographer/reports/index.blade.php`
+  * `app/Http/Controllers/Client/ClientBookingController.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/admin/contests/manage.blade.php`
+  * `resources/views/admin/contests/submissions.blade.php`
+  * `resources/views/client/galleries/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Bug 2 (Pembersihan Jargon Asing Payout & Escrow - Rule #70 Point 3 & 4)**:
+    - *Before*: Teks UI dan notifikasi in-app menggunakan istilah asing: *"Rekening Payout"*, *"Ajukan Pencairan Dana Payout"*, dan *"Dana escrow Anda kini siap dicairkan (ready for payout)"*.
+    - *After*: Diganti menjadi istilah padanan bahasa Indonesia yang alami dan lugas: *"Rekening Bank"*, *"Ajukan Pencairan Dana"*, dan *"Dana hasil pemotretan Anda kini siap dicairkan."*.
+  - **Bug 3 (Standarisasi Navigasi Tab Rule #78 pada Lomba Foto Admin)**:
+    - *Before*: Filter status pada halaman indeks lomba, detail peserta lomba, dan submisi lomba menggunakan tombol kotak pill tebal (`rounded-xl bg-gray-900 text-white`).
+    - *After*: Diubah 100% mengikuti standar **Rule #78 Horizontal Active Text Underline Standard**: teks tab aktif bergaris bawah aksen amber (`underline underline-offset-8 decoration-2 decoration-amber-500`) didampingi badge counter data bundar kecil (`rounded-full bg-amber-100 text-amber-700`), bebas dari tombol box/pill yang kaku.
+  - **Bug 4 (Standarisasi Tipografi text-xs Sel Tabel Admin - Rule #106 Point 1)**:
+    - *Before*: Sel email dan nama peserta pada tabel manajemen peserta dan submisi lomba tidak memiliki kelas `text-xs`, sehingga mewarisi ukuran 16px (text-base) yang jomplang dari sel lainnya.
+    - *After*: Ditambahkan kelas `text-xs` pada seluruh sel bersangkutan sehingga tipografi tabel seragam dan proporsional.
+  - **Bug 5 (Sinkronisasi Server-Side Search Galeri Klien)**:
+    - *Before*: Pencarian galeri hanya memfilter kartu DOM di halaman aktif via JavaScript, menyebabkan pencarian gagal pada halaman 2+, serta hasil pencarian terhapus saat filter status dropdown diubah.
+    - *After*: Fungsi `handleSearch` diperbarui dengan debouncing 350ms yang memperbarui parameter URL `q` via `pushState` dan memanggil backend AJAX `fetchTable()`. Pencarian kini berjalan menyeluruh di seluruh halaman basis data dan tetap sinkron dengan filter status.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Strict Scope & Zero Unrequested Side-Effects.
+  - Rule #70: Larangan Terminologi Teknis, Kata Kaku & Istilah Asing (Anti-AI Slop).
+  - Rule #78: Standarisasi Tampilan Navigasi Tab Teks Horizontal (Active Text Underline).
+  - Rule #106: Standarisasi Tipografi Seragam text-xs Sel Tabel.
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l app/Http/Controllers/Client/ClientBookingController.php`: **PASS (No syntax errors)**.
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS (Zero template errors)**.
+
+---
+
+### [2026-11-20 09:55 WITA] — Penyiapan Struktur Hardcode Foto Kurasi Unsplash pada Hero Showcase Eksplorasi Fotografer
+
+* **Modul / Fitur**:
+  - Halaman Eksplorasi Publik Fotografer (`resources/views/public/photographers/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/public/photographers/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: 4 kartu foto melayang (*floating showcase collage*) di kolom kanan hero banner mengambil foto pertama dari portofolio database secara dinamis. Jika portofolio di database belum memiliki media atau foto seeder kurang representatif, tampilan hero dapat terlihat kurang konsisten.
+  - **After**:
+    1. Menyediakan blok variabel array `$curatedHeroPhotos` yang terisolasi dan terdokumentasi rapi di bagian atas komponen hero.
+    2. Format array memuat 4 slot (Slot 0: Kiri Atas, Slot 1: Kanan Atas, Slot 2: Tengah Utama, Slot 3: Kanan Bawah) dengan pasangan key `'title'` dan `'image'` siap pakai.
+    3. User dapat langsung menyalin dan menempelkan tautan URL gambar Unsplash pilihan beserta judulnya secara mudah tanpa perlu menyentuh markup HTML/CSS kartu.
+    4. Dilengkapi mekanisme fallback gambar default agar view tetap aman dan tidak pernah mengalami crash/error rendering.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Strict Scope & Zero Unrequested Side-Effects.
+  - Rule #89: Presisi Spasial 2D dan Komposisi Visual Hero Showcase.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS (Zero template errors)**.
+
+---
+
 ### [2026-11-19 17:50 WITA] — Implementasi Perbaikan Bug 31 s/d 35: Eliminasi Fatal TypeError Profil Fotografer Tanpa Review, Sinkronisasi Tagihan DP & Pelunasan, Status Booking Penawaran Khusus Chat, Navigasi Form Admin, dan Filter Metrik Booking Klien
 
 * **Modul / Fitur**:
