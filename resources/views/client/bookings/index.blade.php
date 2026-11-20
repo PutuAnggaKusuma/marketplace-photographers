@@ -239,7 +239,7 @@
 
       <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[240px]">
 
         <table class="w-full text-left border-collapse">
 
@@ -512,6 +512,9 @@
 
                 <!-- Aksi (Chat Utama + Dropdown Menu '•••' untuk Opsi Lain) -->
                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                  @php
+                    $isDropup = ($loop->count > 2 && ($loop->last || $loop->remaining < 2)) || ($loop->count === 2 && $loop->last);
+                  @endphp
                   <div class="inline-flex items-center justify-center gap-2" x-data="{ menuOpen: false }">
                     
                     @php
@@ -569,7 +572,7 @@
                            x-transition:leave="transition ease-in duration-75" 
                            x-transition:leave-start="transform opacity-100 scale-100" 
                            x-transition:leave-end="transform opacity-0 scale-95" 
-                           class="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
+                           class="absolute right-0 {{ $isDropup ? 'bottom-full mb-1.5 origin-bottom-right' : 'top-full mt-1.5 origin-top-right' }} w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
                            style="display: none;">
                         
                         <!-- Lihat Invoice -->

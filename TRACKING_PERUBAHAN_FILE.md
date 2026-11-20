@@ -20,6 +20,43 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-20 14:05 WITA] — Standarisasi Mekanisme Smart Dropup pada Seluruh Kebab Menu Tabel & Pencegahan Scrollbar Vertikal
+
+* **Modul / Fitur**:
+  - Tabel Admin Materi E-Learning (`resources/views/admin/elearning/index.blade.php`)
+  - Tabel Admin Master Kategori Layanan (`resources/views/admin/categories/index.blade.php`)
+  - Tabel Admin Manajemen User & Klien (`resources/views/admin/users/index.blade.php`)
+  - Tabel Admin Manajemen Lomba Foto (`resources/views/admin/contests/index.blade.php`)
+  - Tabel Mitra Fotografer Manajemen Pesanan / Booking (`resources/views/photographer/bookings/index.blade.php`)
+  - Tabel Klien Riwayat Pesanan / Booking (`resources/views/client/bookings/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/elearning/index.blade.php`
+  * `resources/views/admin/categories/index.blade.php`
+  * `resources/views/admin/users/index.blade.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**:
+    1. Kebab menu aksi sekunder (`•••`) pada seluruh baris tabel menggunakan posisi statis membuka ke bawah (`top-full mt-1.5`).
+    2. Pada baris-baris terbawah tabel (terutama baris terakhir atau saat data tabel sedikit), menu yang menjulur melewati batas bawah kontainer `overflow-x-auto` memicu aturan browser `overflow-y: auto`, sehingga memunculkan *vertical scrollbar* abu-abu panjang yang merusak tampilan kartu tabel dan memotong menu opsi.
+  - **After**:
+    1. Mengimplementasikan logika cerdas **Smart Dropup**: `$isDropup = ($loop->count > 2 && ($loop->last || $loop->remaining < 2)) || ($loop->count === 2 && $loop->last);`.
+    2. Baris atas dan tengah tetap membuka ke bawah (`top-full mt-1.5 origin-top-right`), sedangkan baris-baris bawah otomatis beralih membuka ke atas (`bottom-full mb-1.5 origin-bottom-right`) memanfaatkan ruang kosong di atasnya.
+    3. Menambahkan batas aman ketinggian minimum `min-h-[240px]` pada seluruh pembungkus `overflow-x-auto` agar tabel dengan 1-2 data tetap memiliki ruang gerak bebas tanpa *clipping*.
+    4. Menghilangkan potensi kemunculan scrollbar vertikal di seluruh tabel dan memastikan kelancaran interaksi animasi transisi popover.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Strict Scope & Zero Unrequested Side-Effects.
+  - Rule #69: Standarisasi Tombol Kolom Aksi Tabel (Maksimal 2 Tombol Inline & Kebab Menu Dropdown).
+  - Rule #70: Anti-AI Slop Terminology & Natural Human Text Standard.
+  - Rule #96: Standarisasi Proporsi Card Media & Komposisi Bebas Sesak.
+  - Rule #106: Tampilan UI Rapi, Responsif & Tipografi Seragam.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS (Semua Blade views berhasil dikompilasi tanpa galat)**.
+
+---
+
 ### [2026-11-20 11:45 WITA] — Implementasi Penuh Modul E-Learning Berbasis Database Dinamis & Aset Foto Lokal
 
 * **Modul / Fitur**:

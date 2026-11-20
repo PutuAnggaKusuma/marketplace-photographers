@@ -154,8 +154,8 @@
 
         <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
-        <!-- Table (min-h-[220px] untuk memastikan popover dropdown tidak terpotong saat data 1-2 baris) -->
-        <div class="overflow-x-auto min-h-[220px]">
+        <!-- Table (min-h-[240px] untuk memastikan popover dropdown tidak terpotong saat data 1-2 baris) -->
+        <div class="overflow-x-auto min-h-[240px]">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -229,6 +229,9 @@
 
                             <!-- Aksi (Rule #80 & Rule #69 Compliant) -->
                             <td class="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
+                                @php
+                                    $isDropup = ($loop->count > 2 && ($loop->last || $loop->remaining < 2)) || ($loop->count === 2 && $loop->last);
+                                @endphp
                                 <div class="inline-flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
                                     <!-- 1. Tombol Utama: Lihat (Soft Blue Rule #80) -->
                                     <button type="button" 
@@ -273,7 +276,7 @@
                                              x-transition:leave="transition ease-in duration-75" 
                                              x-transition:leave-start="transform opacity-100 scale-100" 
                                              x-transition:leave-end="transform opacity-0 scale-95" 
-                                             class="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden py-1"
+                                             class="absolute right-0 {{ $isDropup ? 'bottom-full mb-1.5 origin-bottom-right' : 'top-full mt-1.5 origin-top-right' }} w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden py-1"
                                              style="display: none;">
                                             <!-- Aksi Bekukan / Aktifkan Akun -->
                                             @if($usr->is_suspended)

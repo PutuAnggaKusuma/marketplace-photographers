@@ -659,7 +659,7 @@
 
 
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto min-h-[240px]">
 
 
 
@@ -1033,6 +1033,9 @@
 
                                 <!-- Aksi (Pure Text Buttons per Rule #10, #69 & #80) -->
                                 <td class="py-4 px-4 sm:px-6 align-top text-center whitespace-nowrap">
+                                    @php
+                                        $isDropup = ($loop->count > 2 && ($loop->last || $loop->remaining < 2)) || ($loop->count === 2 && $loop->last);
+                                    @endphp
                                     <div class="flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
 
                                         {{-- 1. TOMBOL UTAMA (PRIMARY ACTION) --}}
@@ -1109,7 +1112,7 @@
                                                      x-transition:leave="transition ease-in duration-75" 
                                                      x-transition:leave-start="transform opacity-100 scale-100" 
                                                      x-transition:leave-end="transform opacity-0 scale-95" 
-                                                     class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
+                                                     class="absolute right-0 {{ $isDropup ? 'bottom-full mb-1.5 origin-bottom-right' : 'top-full mt-1.5 origin-top-right' }} w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden" 
                                                      style="display: none;">
 
                                                     <!-- Chat Klien (Hanya tampil jika bukan tombol utama di luar agar tidak duplikat per Rule #69) -->
