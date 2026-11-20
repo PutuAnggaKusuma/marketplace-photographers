@@ -20,6 +20,35 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-20 11:06 WITA] — Pemindahan Relasi Kategori Fotografer & Penghapusan Kategori Duplikat Wedding & Vacation oleh Admin
+
+* **Modul / Fitur**:
+  - Manajemen Master Kategori Admin (`/admin/categories`)
+  - Profil Spesialisasi Fotografer & Portofolio Karya
+  - Pill Kategori Populer Halaman Utama (`resources/views/public/photographers/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/public/photographers/index.blade.php`
+  * Basis data: Tabel `categories`, `photographer_categories`, dan `photographer_portofolios`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Tahap 1 (Sisi Fotografer)**:
+    1. *Alex Visual Studio* (ID: 1): Portofolio *"Romantic Sunset at Melasti Beach"* dialihkan ke kategori aktif `Studio & Portrait` (ID: 12), dan spesialisasi akun disinkronkan ke `Studio & Portrait`.
+    2. *Dewa Portrait Studio* (ID: 4): Spesialisasi akun disinkronkan ke `Studio & Portrait` (ID: 12), melepaskan kategori duplikat ID: 9.
+    3. *Bali Lens Holiday Photography* (ID: 5): Portofolio *"Exploring Nusa Penida & Uluwatu Cliff"* dialihkan ke kategori aktif `Event & Konser` (ID: 11), dan spesialisasi akun disinkronkan ke `Event & Konser`.
+  - **Tahap 2 (Sisi Admin)**:
+    1. Melakukan verifikasi relasi pada kategori `Wedding & Prewedding` (ID: 9) dan `Vacation & Travel` (ID: 10) yang kini telah mencapai 0 fotografer dan 0 portofolio.
+    2. Admin berhasil menghapus kedua kategori duplikat tersebut secara permanen dari basis data tanpa error proteksi.
+    3. Memperbarui tautan chip filter populer pada hero banner beranda agar mengarah ke kategori aktif sistem (`Studio & Portrait`, `Event & Konser`, `Commercial & Produk`).
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Strict Scope & Zero Unrequested Side-Effects.
+  - Rule #70: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol "&".
+  - Rule #94: Standarisasi Integritas Basis Data & Eliminasi Rekord Duplikat/Orphan.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS (Zero Blade compilation errors)**.
+  - Relasi database diverifikasi: ID 9 dan ID 10 terhapus 100%, seluruh fotografer dan portofolio tetap aktif dan utuh.
+
+---
+
 ### [2026-11-20 10:05 WITA] — Implementasi Perbaikan Bug Riil 2 s/d 5: Pembersihan Jargon Payout/Escrow (Rule #70), Standarisasi Tab Teks Horizontal Lomba Foto (Rule #78), Tipografi Seragam text-xs Sel Tabel (Rule #106), dan Sinkronisasi Server-Side Search Galeri Klien
 
 * **Modul / Fitur**:

@@ -39,17 +39,17 @@
             </form>
           </div>
 
-          <!-- Quick Topic Pills (Sesuai Pasted Image 1) -->
+          <!-- Quick Topic Pills (Sesuai Kategori Aktif) -->
           <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
             <span class="text-gray-400 font-bold text-[11px] uppercase tracking-wider">Populer:</span>
-            <a href="{{ route('public.photographers.katalog', ['category' => '1']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
-              Wedding & Prewedding
+            <a href="{{ route('public.photographers.katalog', ['category' => '12']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
+              Studio & Portrait
             </a>
-            <a href="{{ route('public.photographers.katalog', ['category' => '2']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
-              Vacation & Travel
+            <a href="{{ route('public.photographers.katalog', ['category' => '11']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
+              Event & Konser
             </a>
-            <a href="{{ route('public.photographers.katalog', ['category' => '4']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
-              Studio Portrait
+            <a href="{{ route('public.photographers.katalog', ['category' => '13']) }}" class="px-3 py-1 bg-white dark:bg-gray-800 hover:bg-amber-100 hover:text-amber-900 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200/80 dark:border-gray-700 font-medium transition text-xs shadow-2xs">
+              Commercial & Produk
             </a>
           </div>
 
