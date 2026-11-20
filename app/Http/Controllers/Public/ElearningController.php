@@ -22,7 +22,7 @@ class ElearningController extends Controller
         $totalCategories = 3;
         $totalViews = Elearning::sum('view_count');
         $totalCourses = Elearning::count();
-        $heroCourses = Elearning::take(3)->get();
+        $heroCourses = Elearning::all();
 
         return view('public.elearning.index', compact(
             'elearnings', 

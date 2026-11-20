@@ -92,33 +92,36 @@
         </div>
 
         @php
-          $h0 = $heroCourses[0] ?? null;
-          $h1 = $heroCourses[1] ?? null;
-          $h2 = $heroCourses[2] ?? null;
+          $h0 = $heroCourses->firstWhere('level', 'pemula') ?? ($heroCourses[0] ?? null);
+          $h1 = $heroCourses->firstWhere('level', 'menengah') ?? ($heroCourses[1] ?? null);
+          $h2 = $heroCourses->firstWhere('level', 'mahir') ?? ($heroCourses[2] ?? null);
 
-          $card0Thumb = !empty($h0?->thumbnail_url) ? $h0->thumbnail_url : 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80';
+          $card0Thumb = !empty($h0?->thumbnail_url) ? $h0->thumbnail_url : asset('images/e-learning/lighting-portrait.jpg');
           $card0Level = !empty($h0?->level) ? strtoupper($h0->level) : 'PEMULA';
           $card0Title = !empty($h0?->judul) ? $h0->judul : 'Teknik Lighting Portrait';
+          $card0Link  = $h0 ? route('public.elearning.show', $h0->slug) : route('public.elearning.katalog', ['level' => 'pemula']);
 
-          $card1Thumb = !empty($h1?->thumbnail_url) ? $h1->thumbnail_url : 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=400&q=80';
+          $card1Thumb = !empty($h1?->thumbnail_url) ? $h1->thumbnail_url : asset('images/e-learning/color-grading.jpg');
           $card1Level = !empty($h1?->level) ? strtoupper($h1->level) : 'MENENGAH';
           $card1Title = !empty($h1?->judul) ? $h1->judul : 'Mastering Color Grading';
+          $card1Link  = $h1 ? route('public.elearning.show', $h1->slug) : route('public.elearning.katalog', ['level' => 'menengah']);
 
-          $card2Thumb = !empty($h2?->thumbnail_url) ? $h2->thumbnail_url : 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=400&q=80';
+          $card2Thumb = !empty($h2?->thumbnail_url) ? $h2->thumbnail_url : asset('images/e-learning/bisnis-studio.jpg');
           $card2Level = !empty($h2?->level) ? strtoupper($h2->level) : 'MAHIR';
           $card2Title = !empty($h2?->judul) ? $h2->judul : 'Bisnis Studio & Keuangan';
+          $card2Link  = $h2 ? route('public.elearning.show', $h2->slug) : route('public.elearning.katalog', ['level' => 'mahir']);
         @endphp
 
         <!-- Floating Card 1 (Top-Left Mini Course Card) -->
-        <div class="hidden lg:block absolute -left-4 xl:-left-8 top-6 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-6 animate-float-1">
+        <a href="{{ $card0Link }}" class="hidden lg:block absolute -left-4 xl:-left-8 top-6 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-6 animate-float-1 group hover:scale-105 hover:shadow-2xl transition-all duration-300">
           <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="{{ $card0Thumb }}" class="w-full h-full object-cover" alt="{{ $card0Title }}" />
+            <img src="{{ $card0Thumb }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="{{ $card0Title }}" />
           </div>
           <div class="p-3.5 space-y-1 text-left">
             <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $card0Level }}</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $card0Title }}</h4>
+            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">{{ $card0Title }}</h4>
           </div>
-        </div>
+        </a>
 
         <!-- Floating Card 2 (Bottom-Left Course Overview Card) -->
         <div class="hidden lg:block absolute -left-8 xl:-left-12 bottom-4 w-56 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 space-y-2.5 z-20 text-left transform -rotate-3 animate-float-2">
@@ -138,26 +141,26 @@
         </div>
 
         <!-- Floating Card 3 (Top-Right Mini Course Card) -->
-        <div class="hidden lg:block absolute -right-4 xl:-right-8 top-4 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform rotate-6 animate-float-3">
+        <a href="{{ $card1Link }}" class="hidden lg:block absolute -right-4 xl:-right-8 top-4 w-52 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform rotate-6 animate-float-3 group hover:scale-105 hover:shadow-2xl transition-all duration-300">
           <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="{{ $card1Thumb }}" class="w-full h-full object-cover" alt="{{ $card1Title }}" />
+            <img src="{{ $card1Thumb }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="{{ $card1Title }}" />
           </div>
           <div class="p-3.5 space-y-1 text-left">
             <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $card1Level }}</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $card1Title }}</h4>
+            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">{{ $card1Title }}</h4>
           </div>
-        </div>
+        </a>
 
         <!-- Floating Card 4 (Bottom-Right Mini Course Card) -->
-        <div class="hidden lg:block absolute -right-8 xl:-right-12 bottom-6 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-3 animate-float-1">
+        <a href="{{ $card2Link }}" class="hidden lg:block absolute -right-8 xl:-right-12 bottom-6 w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden z-20 transform -rotate-3 animate-float-1 group hover:scale-105 hover:shadow-2xl transition-all duration-300">
           <div class="aspect-[16/10] bg-gray-100 overflow-hidden">
-            <img src="{{ $card2Thumb }}" class="w-full h-full object-cover" alt="{{ $card2Title }}" />
+            <img src="{{ $card2Thumb }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="{{ $card2Title }}" />
           </div>
           <div class="p-3.5 space-y-1 text-left">
             <span class="px-2 py-0.5 bg-amber-400 text-gray-900 font-black text-[9px] rounded-md uppercase">{{ $card2Level }}</span>
-            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate">{{ $card2Title }}</h4>
+            <h4 class="font-bold text-xs text-gray-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">{{ $card2Title }}</h4>
           </div>
-        </div>
+        </a>
 
       </div>
 

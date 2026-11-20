@@ -14,18 +14,102 @@ class ElearningCurriculumSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Data Induk Kursus E-Learning Resmi (Tersimpan 100% di Database dengan Thumbnail Lokal)
+        $courseDataList = [
+            [
+                'judul' => 'Teknik Lighting Portrait',
+                'slug' => 'teknik-lighting-portrait-outdoor-golden-hour',
+                'kategori' => 'Pemula',
+                'level' => 'pemula',
+                'durasi' => '45 Menit',
+                'harga' => 0,
+                'is_premium' => false,
+                'thumbnail_url' => 'images/e-learning/lighting-portrait.jpg',
+                'ringkasan' => 'Panduan penguasaan teknik pencahayaan alami golden hour dan flash portabel untuk menghasilkan foto portrait yang dramatis dan berkarakter.',
+                'konten' => 'Kuasai segitiga exposure, arah datangnya cahaya (backlight, rim light, fill light), serta modifikasi cahaya dengan reflector portabel.',
+                'view_count' => 1420,
+            ],
+            [
+                'judul' => 'Mastering Color Grading',
+                'slug' => 'mastering-color-grading-lightroom-untuk-prewedding',
+                'kategori' => 'Menengah',
+                'level' => 'menengah',
+                'durasi' => '1.5 Jam',
+                'harga' => 149000,
+                'is_premium' => true,
+                'thumbnail_url' => 'images/e-learning/color-grading.jpg',
+                'ringkasan' => 'Alur kerja pembentukan tone warna sinematik khas fotografer internasional menggunakan Adobe Lightroom Classic.',
+                'konten' => 'Pelajari kurva warna HSL, color wheels split toning, kalibrasi kamera, serta teknik masking AI khusus kulit (skin tone preservation).',
+                'view_count' => 980,
+            ],
+            [
+                'judul' => 'Bisnis Studio & Keuangan',
+                'slug' => 'strategi-manajemen-bisnis-studio-keuangan-fotografi',
+                'kategori' => 'Mahir',
+                'level' => 'mahir',
+                'durasi' => '2 Jam',
+                'harga' => 149000,
+                'is_premium' => true,
+                'thumbnail_url' => 'images/e-learning/bisnis-studio.jpg',
+                'ringkasan' => 'Strategi merintis studio foto komersial profesional, penyusunan HPP paket layanan, dan tata kelola arus kas.',
+                'konten' => 'Bedah struktur kontrak kerja sama legal, mitigasi risiko pembatalan, dan teknik negosiasi bernilai tinggi dengan klien korporat.',
+                'view_count' => 750,
+            ],
+            [
+                'judul' => 'Panduan Komposisi Arsitektur',
+                'slug' => 'panduan-komposisi-foto-arsitektur-interior-studio',
+                'kategori' => 'Menengah',
+                'level' => 'menengah',
+                'durasi' => '1 Jam',
+                'harga' => 149000,
+                'is_premium' => true,
+                'thumbnail_url' => 'images/e-learning/main-foto-elearning.jpg',
+                'ringkasan' => 'Memotret arsitektur dan interior studio dengan pemahaman mendalam tentang perspektif ruang dan penataan bidang geometri.',
+                'konten' => 'Pelajari kaidah dasar pembingkaian ruang, leading lines, dan pemilihan focal length lensa untuk menghindari distorsi perspektif.',
+                'view_count' => 520,
+            ],
+            [
+                'judul' => 'Teknik Foto Panggung Konser',
+                'slug' => 'teknik-foto-event-malam-hari-concert-stage',
+                'kategori' => 'Menengah',
+                'level' => 'menengah',
+                'durasi' => '1.5 Jam',
+                'harga' => 149000,
+                'is_premium' => true,
+                'thumbnail_url' => 'images/cari-fotografers/concert-moments.jpg',
+                'ringkasan' => 'Pemotretan panggung konser dan event malam hari dengan dinamika visual cepat dan kondisi pencahayaan menantang.',
+                'konten' => 'Kuasai teknik autofocus cepat, batas toleransi ISO tinggi tanpa noise, dan cara memanfaatkan tata lampu panggung secara dinamis.',
+                'view_count' => 640,
+            ],
+            [
+                'judul' => 'Strategi Promosi & Negosiasi',
+                'slug' => 'strategi-promosi-portofolio-negosiasi-klien',
+                'kategori' => 'Mahir',
+                'level' => 'mahir',
+                'durasi' => '2 Jam',
+                'harga' => 149000,
+                'is_premium' => true,
+                'thumbnail_url' => 'images/cari-fotografers/labuan-bajo.jpg',
+                'ringkasan' => 'Strategi memasarkan karya foto secara terarah, menentukan target audiens premium, dan memenangkan tender proyek visual.',
+                'konten' => 'Pelajari psikologi penawaran proposal, tiered pricing, dan teknik follow-up calon klien yang profesional.',
+                'view_count' => 890,
+            ],
+        ];
+
+        foreach ($courseDataList as $data) {
+            Elearning::updateOrCreate(
+                ['slug' => $data['slug']],
+                $data
+            );
+        }
+
+        // 2. Buat Kurikulum & Pelajaran Detail untuk Setiap Modul
         $courses = Elearning::all();
 
         foreach ($courses as $course) {
-            // Set default harga & premium untuk demo
-            $course->update([
-                'harga' => 149000,
-                'is_premium' => true,
-            ]);
-
             // Jika modul belum ada, kita buat modul & pelajarannya
             if (!$course->modules()->exists()) {
-                if ($course->slug === 'strategi-manajemen-bisnis-studio-escrow-marketplace') {
+                if ($course->slug === 'strategi-manajemen-bisnis-studio-keuangan-fotografi') {
                     // MODUL 1: Dasar & Pondasi Bisnis Studio Fotografi
                     $modul1 = ElearningModule::create([
                         'id_elearning' => $course->id,
@@ -58,20 +142,20 @@ class ElearningCurriculumSeeder extends Seeder
                         'is_free' => true, // Free preview
                     ]);
 
-                    // MODUL 2: Sistem Escrow & Manajemen Keuangan
+                    // MODUL 2: Sistem Transaksi Aman & Manajemen Keuangan
                     $modul2 = ElearningModule::create([
                         'id_elearning' => $course->id,
-                        'judul_modul' => 'Sistem Transaksi Aman Escrow & Perlindungan Kontrak',
-                        'deskripsi' => 'Strategi mengamankan dana DP pembayaran melalui sistem escrow LensMatch serta klausul kontrak legal perlindungan fotografer.',
+                        'judul_modul' => 'Sistem Transaksi Aman & Perlindungan Kontrak',
+                        'deskripsi' => 'Strategi mengamankan dana DP pembayaran melalui sistem rekening aman LensMatch serta klausul kontrak legal perlindungan fotografer.',
                         'urutan' => 2,
                     ]);
 
                     ElearningLesson::create([
                         'id_elearning' => $course->id,
                         'id_module' => $modul2->id,
-                        'judul' => 'Podcast Audio: Mengapa Sistem Rekening Bersama Escrow Melindungi Studio?',
+                        'judul' => 'Podcast Audio: Mengapa Sistem Rekening Bersama Aman Melindungi Studio?',
                         'tipe' => 'audio',
-                        'konten' => "Dengarkan diskusi eksklusif bersama praktisi hukum bisnis kreatif dan konsultan keuangan mengenai peran krusial sistem rekening bersama penampung (escrow). Rekaman ini menjelaskan bagaimana pembayaran berskema escrow memberikan kepastian pencairan dana bagi fotografer sekaligus membangun rasa aman bagi klien.\n\nPelajari langkah-langkah mitigasi risiko gagal bayar, penanganan pembatalan jadwal sepihak, dan cara memanfaatkan invoice digital LensMatch sebagai bukti sah penerimaan order pekerjaan fotografi komersial.",
+                        'konten' => "Dengarkan diskusi eksklusif bersama praktisi hukum bisnis kreatif dan konsultan keuangan mengenai peran krusial sistem rekening bersama penampung. Rekaman ini menjelaskan bagaimana pembayaran berskema rekening aman memberikan kepastian pencairan dana bagi fotografer sekaligus membangun rasa aman bagi klien.\n\nPelajari langkah-langkah mitigasi risiko gagal bayar, penanganan pembatalan jadwal sepihak, dan cara memanfaatkan invoice digital LensMatch sebagai bukti sah penerimaan order pekerjaan fotografi komersial.",
                         'media_type' => 'external',
                         'media_url' => 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
                         'durasi_menit' => 15,
@@ -97,7 +181,7 @@ class ElearningCurriculumSeeder extends Seeder
                         'id_module' => $modul2->id,
                         'judul' => 'Video Masterclass: Menutup Negosiasi dengan Klien Korporat B2B',
                         'tipe' => 'video',
-                        'konten' => "Pelajari teknik dan psikologi negosiasi proyek komersial bernilai puluhan juta rupiah bersama klien korporat berskala besar. Sesi video ini mengajarkan cara mempresentasikan proposal kerja yang berbobot, menyusun ruang lingkup deliverables yang terukur, dan menjawab keberatan anggaran secara elegan.\n\nAnda juga akan dibekali strategi menyepakati skema termin pembayaran uang muka dan pelunasan melalui platform escrow secara transparan, sehingga proses kerja sama terlindungi dari awal hingga tahap penyerahan aset akhir.",
+                        'konten' => "Pelajari teknik dan psikologi negosiasi proyek komersial bernilai puluhan juta rupiah bersama klien korporat berskala besar. Sesi video ini mengajarkan cara mempresentasikan proposal kerja yang berbobot, menyusun ruang lingkup deliverables yang terukur, dan menjawab keberatan anggaran secara elegan.\n\nAnda juga akan dibekali strategi menyepakati skema termin pembayaran uang muka dan pelunasan melalui platform secara transparan, sehingga proses kerja sama terlindungi dari awal hingga tahap penyerahan aset akhir.",
                         'media_type' => 'youtube',
                         'media_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                         'durasi_menit' => 22,
@@ -218,7 +302,7 @@ class ElearningCurriculumSeeder extends Seeder
                         'tipe' => 'reading',
                         'konten' => $kontenFoto,
                         'media_type' => 'external',
-                        'media_url' => $course->thumbnail_url ?: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=1200&q=80',
+                        'media_url' => $course->thumbnail_url ? asset(ltrim($course->thumbnail_url, '/')) : asset('images/e-learning/main-foto-elearning.jpg'),
                         'durasi_menit' => 8,
                         'urutan' => 4,
                         'is_free' => false,

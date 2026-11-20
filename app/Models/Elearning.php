@@ -94,4 +94,20 @@ class Elearning extends Model
 
         return min(100, (int) round(($completedLessons / $totalLessons) * 100));
     }
+
+    /**
+     * Accessor untuk thumbnail_url agar selalu mengembalikan URL aset lokal yang valid atau tautan eksternal.
+     */
+    public function getThumbnailUrlAttribute(?string $value): string
+    {
+        if (empty($value)) {
+            return asset('images/e-learning/lighting-portrait.jpg');
+        }
+
+        if (\Illuminate\Support\Str::startsWith($value, ['http://', 'https://', '//'])) {
+            return $value;
+        }
+
+        return asset(ltrim($value, '/'));
+    }
 }

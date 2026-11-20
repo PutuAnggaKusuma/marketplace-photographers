@@ -20,6 +20,46 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-20 11:45 WITA] — Implementasi Penuh Modul E-Learning Berbasis Database Dinamis & Aset Foto Lokal
+
+* **Modul / Fitur**:
+  - Landing Page E-Learning Hero Section (`resources/views/public/elearning/index.blade.php`)
+  - Model & Accessor E-Learning (`app/Models/Elearning.php`)
+  - Controller Publik E-Learning (`app/Http/Controllers/Public/ElearningController.php`)
+  - Seeder Kurikulum & Modul E-Learning (`database/seeders/ElearningCurriculumSeeder.php`)
+  - Aset Gambar Lokal E-Learning (`public/images/e-learning/`)
+* **File yang Diubah**:
+  * `app/Models/Elearning.php`
+  * `app/Http/Controllers/Public/ElearningController.php`
+  * `database/seeders/ElearningCurriculumSeeder.php`
+  * `resources/views/public/elearning/index.blade.php`
+  * `public/images/e-learning/lighting-portrait.jpg` (Aset Baru)
+  * `public/images/e-learning/color-grading.jpg` (Aset Baru)
+  * `public/images/e-learning/bisnis-studio.jpg` (Aset Baru)
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**:
+    1. Tiga kartu melayang (floating cards) pada hero section landing page e-learning menggunakan fallback tautan gambar eksternal Unsplash secara statis / hardcode.
+    2. Data e-learning di database belum memiliki modul dan pelajaran kurikulum terstruktur.
+    3. Gambar kartu melayang belum tersimpan lokal di dalam folder `public/images/e-learning/`.
+  - **After**:
+    1. Mengunduh dan menempatkan foto lokal resolusi tinggi di folder `public/images/e-learning/`: `lighting-portrait.jpg`, `color-grading.jpg`, dan `bisnis-studio.jpg` melengkapi `main-foto-elearning.jpg`.
+    2. Menambahkan `getThumbnailUrlAttribute(?string $value): string` accessor pada model `Elearning.php` sehingga setiap akses thumbnail secara otomatis menyelesaikan path lokal menjadi URL aset yang valid (`asset(...)`) tanpa hardcode domain.
+    3. Memperbarui `ElearningCurriculumSeeder.php` untuk men-seed 6 kursus resmi lengkap dengan modul (`ElearningModule`) dan bab materi (`ElearningLesson`), serta membersihkan terminologi asing/escrow sesuai Rule #70.
+    4. Menyesuaikan controller `ElearningController.php` agar `$heroCourses` mengambil seluruh koleksi kursus sehingga hero section dapat memetakan kartu berdasarkan tingkat kesulitan (`pemula`, `menengah`, `mahir`) secara dinamis 100% dari database.
+    5. Menghubungkan kartu melayang pada hero section menjadi komponen interaktif dengan efek hover halus yang mengarah langsung ke halaman detail kursus (`route('public.elearning.show', $slug)`).
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Strict Scope & Zero Unrequested Side-Effects.
+  - Rule #70: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol "&".
+  - Rule #94: Standarisasi Integritas Basis Data & Eliminasi Rekord Duplikat/Orphan.
+  - Rule #106: Tampilan UI Rapi & Responsive.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan db:seed --class=Database\Seeders\ElearningCurriculumSeeder`: **PASS**.
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS**.
+  - Render test untuk halaman Index, Katalog, dan Detail Kursus: **PASS (100% data dinamis dari DB dan thumbnail lokal ter-render sempurna)**.
+
+---
+
 ### [2026-11-20 11:06 WITA] — Pemindahan Relasi Kategori Fotografer & Penghapusan Kategori Duplikat Wedding & Vacation oleh Admin
 
 * **Modul / Fitur**:
