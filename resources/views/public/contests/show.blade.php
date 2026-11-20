@@ -802,6 +802,28 @@
                   @csrf
                   <div class="space-y-3">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Unggah Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
+                    <!-- 1. Pratinjau Bukti Transfer di ATAS -->
+                    <template x-if="transferPreview">
+                      <div class="max-w-xs mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                        <div @click="openLightbox(transferPreview, transferFileName || 'Bukti Transfer')"
+                             class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                          <img :src="transferPreview" :alt="transferFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                          <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                          </div>
+                        </div>
+                        <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                          <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="transferFileName + (transferFileSize ? ' • ' + transferFileSize : '')"></span>
+                          <button type="button"
+                                  @click.stop="removeTransferFile(); touched = true; error = 'File struk / bukti transfer wajib dipilih.'"
+                                  class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- 2. Kotak Unggah Berkas di BAWAH -->
                     <div x-ref="transferDropzone"
                          tabindex="0"
                          role="button"
@@ -833,26 +855,6 @@
                         Format gambar JPG, PNG, WEBP maksimal 5 MB.
                       </p>
                     </div>
-
-                    <template x-if="transferPreview">
-                      <div class="max-w-xs mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
-                        <div @click="openLightbox(transferPreview, transferFileName || 'Bukti Transfer')"
-                             class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
-                          <img :src="transferPreview" :alt="transferFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                          <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                          </div>
-                        </div>
-                        <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
-                          <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="transferFileName + (transferFileSize ? ' • ' + transferFileSize : '')"></span>
-                          <button type="button"
-                                  @click.stop="removeTransferFile(); touched = true; error = 'File struk / bukti transfer wajib dipilih.'"
-                                  class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
-                            Hapus
-                          </button>
-                        </div>
-                      </div>
-                    </template>
 
                     <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                   </div>
@@ -1076,6 +1078,28 @@
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                           Foto Karya dari Perangkat <span class="text-rose-500">*</span>
                         </label>
+                        <!-- 1. Pratinjau Karya Foto di ATAS (Jika ada berkas dipilih) -->
+                        <template x-if="preview">
+                          <div class="max-w-md mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                            <div @click="openLightbox(preview, judul_karya || fileName || 'Pratinjau Karya Foto')"
+                                 class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                              <img :src="preview" :alt="fileName || 'Preview Foto Karya'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                              <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                              </div>
+                            </div>
+                            <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                              <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSize ? ' • ' + fileSize : '')"></span>
+                              <button type="button"
+                                      @click.stop="removeKaryaFile(); touched.foto = true; validateFoto()"
+                                      class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                                Hapus
+                              </button>
+                            </div>
+                          </div>
+                        </template>
+
+                        <!-- 2. Kotak Unggah Berkas di BAWAH -->
                         <div x-ref="karyaDropzone"
                              tabindex="0"
                              role="button"
@@ -1107,26 +1131,6 @@
                             Format JPG, PNG, WEBP maksimal 10 MB.
                           </p>
                         </div>
-
-                        <template x-if="preview">
-                          <div class="max-w-md mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
-                            <div @click="openLightbox(preview, judul_karya || fileName || 'Pratinjau Karya Foto')"
-                                 class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
-                              <img :src="preview" :alt="fileName || 'Preview Foto Karya'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                              <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                              </div>
-                            </div>
-                            <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
-                              <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSize ? ' • ' + fileSize : '')"></span>
-                              <button type="button"
-                                      @click.stop="removeKaryaFile(); touched.foto = true; validateFoto()"
-                                      class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
-                                Hapus
-                              </button>
-                            </div>
-                          </div>
-                        </template>
 
                         <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                       </div>

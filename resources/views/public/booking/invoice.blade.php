@@ -334,6 +334,24 @@
           <div>
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Foto Struk / Bukti Transfer <span class="text-rose-500">*</span></label>
             <div class="flex flex-col gap-3">
+              <!-- 1. Pratinjau Bukti Transfer di ATAS -->
+              <template x-if="previewUrl">
+                <div class="max-w-sm mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xs">
+                  <div @click="lightboxUrl = previewUrl; lightboxOpen = true"
+                       class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-950 cursor-pointer group">
+                    <img :src="previewUrl" alt="Pratinjau Bukti Transfer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                    </div>
+                  </div>
+                  <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                    <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSizeText ? ' • ' + fileSizeText : '')"></span>
+                    <button type="button" @click="clearFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                  </div>
+                </div>
+              </template>
+
+              <!-- 2. Kotak Unggah Berkas di BAWAH -->
               <div x-ref="proofDropzone"
                    tabindex="0"
                    role="button"
@@ -365,22 +383,6 @@
                   Format JPG, PNG, WEBP maksimal 10 MB.
                 </p>
               </div>
-
-              <template x-if="previewUrl">
-                <div class="max-w-sm mx-auto rounded-xl overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xs">
-                  <div @click="lightboxUrl = previewUrl; lightboxOpen = true"
-                       class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-950 cursor-pointer group">
-                    <img :src="previewUrl" alt="Pratinjau Bukti Transfer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                    </div>
-                  </div>
-                  <div class="px-3.5 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
-                    <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="fileName + (fileSizeText ? ' • ' + fileSizeText : '')"></span>
-                    <button type="button" @click="clearFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
-                  </div>
-                </div>
-              </template>
             </div>
             <p x-show="touched && error" x-text="error" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
           </div>

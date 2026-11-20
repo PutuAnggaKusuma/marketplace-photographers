@@ -608,7 +608,33 @@
 
 
 
-              <!-- Interactive Pure-Text Dropzone (Rule #22 Compliant) -->
+              <!-- 1. Live Image Previews Grid di ATAS (Clean Cards + Lightbox + Per-File Remove) -->
+              <div x-show="photos.length > 0" x-cloak class="pb-1">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+                  <template x-for="(p, index) in photos" :key="index">
+                    <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                      <div @click="openForumLightbox(photos, index)"
+                           class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                        <img :src="p.url" :alt="p.name || 'Foto diskusi'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                          <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                        </div>
+                      </div>
+                      <div class="px-2.5 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                        <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate"
+                              x-text="'Foto ' + (index + 1) + ' • ' + p.size"></span>
+                        <button type="button"
+                                @click.stop="removePhoto(index)"
+                                class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- 2. Kotak Unggah Berkas di BAWAH (Rule #22 Compliant) -->
               <div x-ref="photoDropzone"
                    tabindex="0"
                    role="button"
@@ -638,32 +664,6 @@
 
               <!-- Validation Error Message Alert -->
               <p x-show="errorMsg" x-text="errorMsg" x-cloak class="text-[11px] font-bold text-red-500"></p>
-
-              <!-- Live Image Previews Grid (Clean Cards + Lightbox + Per-File Remove) -->
-              <div x-show="photos.length > 0" x-cloak class="pt-2">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
-                  <template x-for="(p, index) in photos" :key="index">
-                    <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
-                      <div @click="openForumLightbox(photos, index)"
-                           class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
-                        <img :src="p.url" :alt="p.name || 'Foto diskusi'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                          <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                        </div>
-                      </div>
-                      <div class="px-2.5 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
-                        <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate"
-                              x-text="'Foto ' + (index + 1) + ' • ' + p.size"></span>
-                        <button type="button"
-                                @click.stop="removePhoto(index)"
-                                class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  </template>
-                </div>
-              </div>
 
 
 

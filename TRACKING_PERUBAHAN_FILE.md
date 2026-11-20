@@ -20,6 +20,56 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-20 14:25 WITA] — Standarisasi Tata Letak Unggah Foto & Dokumen (Pratinjau di ATAS, Kotak Dropzone di BAWAH) di Seluruh Sistem
+
+* **Modul / Fitur**:
+  - Admin E-Learning: Tambah & Edit Materi Modul (`admin/elearning/create.blade.php`, `admin/elearning/edit.blade.php`, `admin/elearning/curriculum.blade.php`)
+  - Admin Master Kategori: Tambah & Edit Kategori Layanan (`admin/categories/create.blade.php`, `admin/categories/edit.blade.php`)
+  - Admin Manajemen Lomba Foto: Tambah & Edit Event Lomba (`admin/contests/create.blade.php`, `admin/contests/edit.blade.php`)
+  - Admin Monitoring Transaksi: Struk Bukti Transfer Payout Fotografer (`admin/transactions/index.blade.php`)
+  - Mitra Fotografer Portofolio: Tambah & Edit Album Foto (`photographer/portfolio/create.blade.php`, `photographer/portfolio/edit.blade.php`)
+  - Klien & Publik Booking: Unggah Bukti Transfer Invoice & Checkout (`public/booking/checkout.blade.php`, `public/booking/invoice.blade.php`)
+  - Publik Lomba Foto: Proposal Pengajuan Lomba, Bukti Pembayaran & Submisi Karya Foto Peserta (`public/contests/propose.blade.php`, `public/contests/show.blade.php`)
+  - Publik Forum Komunitas: Unggah Lampiran Foto Topik Diskusi (`public/forum/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/categories/create.blade.php`
+  * `resources/views/admin/categories/edit.blade.php`
+  * `resources/views/admin/contests/create.blade.php`
+  * `resources/views/admin/contests/edit.blade.php`
+  * `resources/views/admin/elearning/create.blade.php`
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `resources/views/admin/elearning/edit.blade.php`
+  * `resources/views/admin/transactions/index.blade.php`
+  * `resources/views/photographer/portfolio/create.blade.php`
+  * `resources/views/photographer/portfolio/edit.blade.php`
+  * `resources/views/public/booking/checkout.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `resources/views/public/contests/propose.blade.php`
+  * `resources/views/public/contests/show.blade.php`
+  * `resources/views/public/forum/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**:
+    1. Pada 15 formulir unggah gambar/media di atas, kotak upload (*dropzone* putus-putus *"Seret dan lepas di sini"*) diletakkan di bagian atas, mendahului kotak pratinjau (*preview image*).
+    2. Ketika pengguna membuka formulir edit atau memilih berkas foto baru, foto aktif/baru justru terlempar jauh ke bawah di bawah kotak dropzone kosong yang besar, merusak hierarki visual alami form dan menyulitkan pengguna memeriksa foto saat ini.
+  - **After**:
+    1. Mengubah struktur vertikal secara seragam mengikuti tata letak standar pada `photographer/profile/index.blade.php` dan `public/profile/index.blade.php`:
+       - **Pratinjau Foto (Preview Box / Lightbox Clickable)**: Ditempatkan di **ATAS** tepat di bawah label input, sehingga foto saat ini atau berkas yang baru dipilih langsung terlihat jelas secara utuh.
+       - **Kotak Unggah (Dropzone Area)**: Ditempatkan di **BAWAH** pratinjau dengan fungsi interaktif drag-and-drop dan klik picker untuk mengganti berkas dengan foto baru.
+    2. Menjaga 100% fungsionalitas interaktif: Lightbox resolusi penuh, penghapusan berkas baru via tombol *"Hapus File Baru"*, validasi ukuran dan format, serta fallback SVG.
+    3. Memastikan copywriting tetap to the point, bebas dari bahasa berbelit-belit, dan tanpa simbol `&` yang menduplikasi informasi sesuai Rule #70.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #21: Standarisasi Manajemen Upload Media & Batas Ukuran File.
+  - Rule #49: Fokus Ketat Terhadap Instruksi User (Strict Scope & Zero Unrequested Side-Effects).
+  - Rule #70: Larangan Terminologi Teknis, Kata Kaku & Pemborosan Simbol "&" (Anti-AI Slop Terminology & Natural Human Text Standard).
+  - Rule #73: Standar Tata Letak Form Hybrid Responsif.
+  - Rule #96: Standarisasi Proporsi Card Media & Larangan Pemanipulasian Tinggi Seragam.
+  - Rule #97: Standarisasi Pratinjau Modal (Lightbox) Interaktif pada Seluruh Input Field & Kotak Pratinjau Media Gambar.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:clear; php artisan view:cache; php artisan view:clear`: **PASS (Semua Blade views berhasil dikompilasi tanpa galat)**.
+
+---
+
 ### [2026-11-20 14:05 WITA] — Standarisasi Mekanisme Smart Dropup pada Seluruh Kebab Menu Tabel & Pencegahan Scrollbar Vertikal
 
 * **Modul / Fitur**:

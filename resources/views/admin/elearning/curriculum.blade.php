@@ -1143,6 +1143,30 @@
 
             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">Upload File Media (Maks. 50 MB)</label>
 
+            <!-- 1. Pratinjau Media di ATAS -->
+            <template x-if="lessonForm.mediaFileName && lessonMediaPreviewUrl">
+              <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs mx-auto shadow-2xs">
+                <div @click="lessonLightboxOpen = true" class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                  <img :src="lessonMediaPreviewUrl" :alt="lessonForm.mediaFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                  </div>
+                </div>
+                <div class="px-3 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
+                  <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
+                  <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="lessonForm.mediaFileName && !lessonMediaPreviewUrl">
+              <div class="px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
+                <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
+              </div>
+            </template>
+
+            <!-- 2. Kotak Unggah Berkas di BAWAH -->
             <div tabindex="0"
                  role="button"
                  @click="$refs.lessonMediaInput.click()"
@@ -1166,28 +1190,6 @@
               </p>
               <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Maksimal 50 MB.</p>
             </div>
-
-            <template x-if="lessonForm.mediaFileName && lessonMediaPreviewUrl">
-              <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-w-xs mx-auto shadow-2xs">
-                <div @click="lessonLightboxOpen = true" class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
-                  <img :src="lessonMediaPreviewUrl" :alt="lessonForm.mediaFileName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                  <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                  </div>
-                </div>
-                <div class="px-3 py-2 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-700/80">
-                  <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
-                  <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
-                </div>
-              </div>
-            </template>
-
-            <template x-if="lessonForm.mediaFileName && !lessonMediaPreviewUrl">
-              <div class="px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
-                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate" x-text="lessonForm.mediaFileName"></span>
-                <button type="button" @click="clearLessonMediaFile()" class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">Hapus</button>
-              </div>
-            </template>
 
             <p x-show="lessonForm.errors && lessonForm.errors.media_file" x-text="lessonForm.errors.media_file" x-cloak class="text-[11px] font-bold text-red-500"></p>
 

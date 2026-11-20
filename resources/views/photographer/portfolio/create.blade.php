@@ -135,6 +135,33 @@
                 </div>
 
                 <div class="space-y-4">
+                    <!-- 1. Multiple Preview Grid di ATAS (Clean Cards + Lightbox + Per-File Remove) -->
+                    <template x-if="selectedFiles.length > 0">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-1">
+                            <template x-for="(item, idx) in selectedFiles" :key="item.key">
+                                <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
+                                    <div @click="openLightbox(idx)"
+                                         class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
+                                        <img :src="item.url" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                        <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                            <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
+                                        </div>
+                                    </div>
+                                    <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
+                                        <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate"
+                                              x-text="(idx === 0 ? 'Utama' : 'Foto ' + (idx + 1)) + ' • ' + item.sizeText"></span>
+                                        <button type="button"
+                                                @click.stop="removeFile(idx)"
+                                                class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- 2. Kotak Unggah Berkas di BAWAH -->
                     <div x-ref="fotoDropzone"
                          tabindex="0"
                          role="button"
@@ -167,32 +194,6 @@
                             Minimal 4 foto sekaligus atau bertahap. Format JPG, PNG, WEBP maksimal 20 MB per file.
                         </p>
                     </div>
-
-                    <!-- Multiple Preview Grid (Clean Cards + Lightbox + Per-File Remove) -->
-                    <template x-if="selectedFiles.length > 0">
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pt-1">
-                            <template x-for="(item, idx) in selectedFiles" :key="item.key">
-                                <div class="rounded-xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xs flex flex-col">
-                                    <div @click="openLightbox(idx)"
-                                         class="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-900 cursor-pointer group">
-                                        <img :src="item.url" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                        <div class="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                                            <span class="text-xs font-bold text-white tracking-wide">Pratinjau</span>
-                                        </div>
-                                    </div>
-                                    <div class="px-3 py-2 flex items-center justify-between gap-2 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700/80">
-                                        <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate"
-                                              x-text="(idx === 0 ? 'Utama' : 'Foto ' + (idx + 1)) + ' • ' + item.sizeText"></span>
-                                        <button type="button"
-                                                @click.stop="removeFile(idx)"
-                                                class="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline shrink-0 cursor-pointer">
-                                            Hapus
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
                 </div>
                 <p x-show="uploadNotice" x-text="uploadNotice" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
                 <p x-show="touched.foto && errors.foto" x-text="errors.foto" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
