@@ -103,25 +103,24 @@ class AdminStaffController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'no_hp' => 'nullable|string|max:20',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,super_admin',
         ], [
             'nama.required' => 'Nama lengkap admin wajib diisi.',
             'nama.min' => 'Nama lengkap minimal 3 karakter.',
             'email.required' => 'Alamat email login wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email sudah digunakan oleh akun lain.',
-            'role.required' => 'Pilih role pengelola akun.',
-            'role.in' => 'Role pengelola tidak valid.',
             'password.required' => 'Kata sandi akun wajib diisi.',
             'password.min' => 'Kata sandi akun minimal 8 karakter.',
         ]);
 
+        // Seluruh admin baru yang dibuat melalui manajemen admin selalu ber-role 'admin' (Admin Operasional)
+        // Super Admin hanya ada 1 (Root Administrator) dan tidak dapat dibuat tambahan
         $user = User::create([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'is_protected' => ($validated['role'] === 'super_admin'),
+            'role' => 'admin',
+            'is_protected' => false,
             'email_verified_at' => now(),
         ]);
 
@@ -131,7 +130,7 @@ class AdminStaffController extends Controller
             'no_telepon' => $validated['no_hp'] ?? null,
         ]);
 
-        return redirect()->route('admin.admins')->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
+        return redirect()->route('admin.admins')->with('success', "Akun staf admin operasional '{$validated['nama']}' berhasil ditambahkan.");
     }
 
     /**
@@ -186,7 +185,6 @@ class AdminStaffController extends Controller
             'nama' => 'required|string|min:3|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'no_hp' => 'nullable|string|max:20',
-            'role' => 'required|in:admin,super_admin',
             'password' => 'nullable|string|min:8',
         ], [
             'nama.required' => 'Nama lengkap admin wajib diisi.',
@@ -194,26 +192,13 @@ class AdminStaffController extends Controller
             'email.required' => 'Alamat email login wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email sudah digunakan oleh akun lain.',
-            'role.required' => 'Pilih role pengelola akun.',
-            'role.in' => 'Role pengelola tidak valid.',
             'password.min' => 'Kata sandi baru minimal 8 karakter.',
         ]);
 
-        // Proteksi: Super Admin tidak boleh downgrade akun sendiri menjadi Admin biasa
-        if (Auth::id() === $user->id && $validated['role'] !== 'super_admin') {
-            return redirect()->back()->withInput()->with('error', 'Anda tidak dapat menurunkan role akun Anda sendiri.');
-        }
-
-        // Proteksi: Akun root terlindungi tidak boleh diubah role-nya
-        if ($user->is_protected && $validated['role'] !== 'super_admin') {
-            return redirect()->back()->withInput()->with('error', 'Akun Super Admin terlindungi tidak dapat diubah rolenya.');
-        }
-
+        // Role tidak dapat diubah: Super Admin tunggal tetap super_admin, Staf admin tetap admin
         $userData = [
             'nama' => $validated['nama'],
             'email' => $validated['email'],
-            'role' => $validated['role'],
-            'is_protected' => ($user->is_protected || $validated['role'] === 'super_admin'),
         ];
 
         if (!empty($validated['password'])) {

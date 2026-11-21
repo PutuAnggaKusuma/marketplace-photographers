@@ -88,39 +88,30 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Role Pengelola <span class="text-rose-500">*</span>
+                        Role Pengelola
                     </label>
 
-                    @if(auth()->id() === $admin->id || $admin->is_protected)
-                        <!-- Role Terkunci untuk Akun Sendiri atau Root Super Admin -->
-                        <input type="hidden" name="role" value="super_admin">
+                    @if($admin->role === 'super_admin')
+                        <!-- Role Terkunci untuk Root Super Admin -->
                         <div class="p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/60 dark:bg-amber-950/20 flex items-center justify-between">
                             <div>
                                 <span class="block text-xs font-bold text-amber-900 dark:text-amber-200">Super Admin (Terkunci)</span>
                                 <span class="block text-[10px] text-amber-700 dark:text-amber-400">
-                                    {{ auth()->id() === $admin->id ? 'Role akun aktif tidak dapat diubah sendiri' : 'Akun terlindungi platform' }}
+                                    Root Administrator Platform
                                 </span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-md bg-amber-200/70 dark:bg-amber-900/50 text-[10px] font-extrabold text-amber-800 dark:text-amber-300">Protected</span>
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Protected</span>
                         </div>
                     @else
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="relative flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition"
-                                   :class="form.role === 'admin' ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'">
-                                <input type="radio" name="role" value="admin" x-model="form.role" class="text-amber-500 focus:ring-amber-400">
-                                <div>
-                                    <span class="block text-xs font-bold text-gray-900 dark:text-white">Admin Operasional</span>
-                                    <span class="block text-[10px] text-gray-500 dark:text-gray-400">Kelola operasional & kurasi</span>
-                                </div>
-                            </label>
-                            <label class="relative flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition"
-                                   :class="form.role === 'super_admin' ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'">
-                                <input type="radio" name="role" value="super_admin" x-model="form.role" class="text-amber-500 focus:ring-amber-400">
-                                <div>
-                                    <span class="block text-xs font-bold text-gray-900 dark:text-white">Super Admin</span>
-                                    <span class="block text-[10px] text-gray-500 dark:text-gray-400">Akses penuh & staf admin</span>
-                                </div>
-                            </label>
+                        <!-- Role Terkunci untuk Staf Admin Operasional -->
+                        <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs font-bold text-blue-600 dark:text-blue-400">Admin Operasional (Terkunci)</span>
+                                <span class="block text-[10px] text-gray-500 dark:text-gray-400">
+                                    Staf Pengelola Platform
+                                </span>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Staf Admin</span>
                         </div>
                     @endif
                 </div>

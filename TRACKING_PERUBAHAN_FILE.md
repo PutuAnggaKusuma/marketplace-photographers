@@ -20,6 +20,28 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 11:25 WITA] — Penguncian Status Super Admin Tunggal (Root Administrator) & Eliminasi Opsi Radio Role
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Penguncian Role Super Admin Tunggal & Staf Admin Operasional (`AdminStaffController.php`, `create.blade.php`, `edit.blade.php`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/AdminStaffController.php`
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/admins/edit.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Form tambah admin baru (`create.blade.php`) dan edit admin (`edit.blade.php`) menyediakan opsi radio button untuk memilih peran `Super Admin` vs `Admin Operasional`. Hal ini bertentangan dengan arsitektur sistem di mana Super Admin merupakan Root Administrator tunggal platform yang tidak boleh dibuat ganda atau diduplikasi.
+  - **After**:
+    - **Form Tambah Admin Baru (`create.blade.php`)**: Menghilangkan radio button pilihan role. Seluruh akun yang ditambah melalui form ini otomatis ber-role `admin` (Admin Operasional). Tampilan role berupa informasi statis terproteksi `Admin Operasional (Staf Admin)`.
+    - **Form Edit Admin (`edit.blade.php`)**: Menghilangkan radio button pilihan role. Role bersifat terkunci dan tidak dapat diubah (Super Admin tetap `Super Admin (Terkunci)` dengan badge Protected; Staf Admin tetap `Admin Operasional (Terkunci)`).
+    - **Backend Controller (`AdminStaffController.php`)**: Pada `store()`, role secara mutlak disetel `admin` (`is_protected = false`). Pada `update()`, pembaruan role diabaikan sehingga role pengguna tetap mengacu ke role asli tanpa celah eskalasi hak akses menjadi Super Admin kedua.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
+
+---
+
 ### [2026-11-21 11:20 WITA] — Penyeragaman Tombol Aksi Tabel Manajemen Admin (Kebab Dropdown untuk Seluruh Role Termasuk Super Admin)
 
 * **Modul / Fitur**:
@@ -88,6 +110,28 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian & Verifikasi**:
   - `php -l`: **PASS (0 syntax errors)**.
   - `php artisan view:cache ; php artisan view:clear`: **PASS (0 compilation errors)**.
+
+---
+
+### [2026-11-21 11:25 WITA] — Penguncian Status Super Admin Tunggal (Root Administrator) & Eliminasi Opsi Radio Role
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Penguncian Role Super Admin Tunggal & Staf Admin Operasional (`AdminStaffController.php`, `create.blade.php`, `edit.blade.php`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/AdminStaffController.php`
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/admins/edit.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Form tambah admin baru (`create.blade.php`) dan edit admin (`edit.blade.php`) menyediakan opsi radio button untuk memilih peran `Super Admin` vs `Admin Operasional`. Hal ini bertentangan dengan arsitektur sistem di mana Super Admin merupakan Root Administrator tunggal platform yang tidak boleh dibuat ganda atau diduplikasi.
+  - **After**:
+    - **Form Tambah Admin Baru (`create.blade.php`)**: Menghilangkan radio button pilihan role. Seluruh akun yang ditambah melalui form ini otomatis ber-role `admin` (Admin Operasional). Tampilan role berupa informasi statis terproteksi `Admin Operasional (Staf Admin)`.
+    - **Form Edit Admin (`edit.blade.php`)**: Menghilangkan radio button pilihan role. Role bersifat terkunci dan tidak dapat diubah (Super Admin tetap `Super Admin (Terkunci)` dengan badge Protected; Staf Admin tetap `Admin Operasional (Terkunci)`).
+    - **Backend Controller (`AdminStaffController.php`)**: Pada `store()`, role secara mutlak disetel `admin` (`is_protected = false`). Pada `update()`, pembaruan role diabaikan sehingga role pengguna tetap mengacu ke role asli tanpa celah eskalasi hak akses menjadi Super Admin kedua.
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
 
 ---
 

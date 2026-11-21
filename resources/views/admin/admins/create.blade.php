@@ -84,25 +84,14 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Role Pengelola <span class="text-rose-500">*</span>
+                        Role Pengelola
                     </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="relative flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition"
-                               :class="form.role === 'admin' ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'">
-                            <input type="radio" name="role" value="admin" x-model="form.role" class="text-amber-500 focus:ring-amber-400">
-                            <div>
-                                <span class="block text-xs font-bold text-gray-900 dark:text-white">Admin Operasional</span>
-                                <span class="block text-[10px] text-gray-500 dark:text-gray-400">Kelola operasional & kurasi</span>
-                            </div>
-                        </label>
-                        <label class="relative flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition"
-                               :class="form.role === 'super_admin' ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'">
-                            <input type="radio" name="role" value="super_admin" x-model="form.role" class="text-amber-500 focus:ring-amber-400">
-                            <div>
-                                <span class="block text-xs font-bold text-gray-900 dark:text-white">Super Admin</span>
-                                <span class="block text-[10px] text-gray-500 dark:text-gray-400">Akses penuh & staf admin</span>
-                            </div>
-                        </label>
+                    <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 flex items-center justify-between">
+                        <div>
+                            <span class="block text-xs font-bold text-blue-600 dark:text-blue-400">Admin Operasional</span>
+                            <span class="block text-[10px] text-gray-500 dark:text-gray-400">Staf pengelola operasional platform</span>
+                        </div>
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Staf Admin</span>
                     </div>
                 </div>
             </div>
