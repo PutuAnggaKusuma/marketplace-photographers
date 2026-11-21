@@ -86,12 +86,12 @@
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                         Role Pengelola
                     </label>
-                    <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 flex items-center justify-between">
+                    <div class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
                         <div>
-                            <span class="block text-xs font-bold text-blue-600 dark:text-blue-400">Admin Operasional</span>
-                            <span class="block text-[10px] text-gray-500 dark:text-gray-400">Staf pengelola operasional platform</span>
+                            <span class="block text-xs font-bold text-gray-900 dark:text-white">Admin Operasional</span>
+                            <span class="block text-[11px] text-gray-400 dark:text-gray-500">Staf pengelola operasional platform</span>
                         </div>
-                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Staf Admin</span>
+                        <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">Staf Admin</span>
                     </div>
                 </div>
             </div>

@@ -93,25 +93,25 @@
 
                     @if($admin->role === 'super_admin')
                         <!-- Role Terkunci untuk Root Super Admin -->
-                        <div class="p-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/60 dark:bg-amber-950/20 flex items-center justify-between">
+                        <div class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
                             <div>
-                                <span class="block text-xs font-bold text-amber-900 dark:text-amber-200">Super Admin (Terkunci)</span>
-                                <span class="block text-[10px] text-amber-700 dark:text-amber-400">
+                                <span class="block text-xs font-bold text-gray-900 dark:text-white">Super Admin (Terkunci)</span>
+                                <span class="block text-[11px] text-gray-400 dark:text-gray-500">
                                     Root Administrator Platform
                                 </span>
                             </div>
-                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Protected</span>
+                            <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">Protected</span>
                         </div>
                     @else
                         <!-- Role Terkunci untuk Staf Admin Operasional -->
-                        <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 flex items-center justify-between">
+                        <div class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
                             <div>
-                                <span class="block text-xs font-bold text-blue-600 dark:text-blue-400">Admin Operasional (Terkunci)</span>
-                                <span class="block text-[10px] text-gray-500 dark:text-gray-400">
+                                <span class="block text-xs font-bold text-gray-900 dark:text-white">Admin Operasional (Terkunci)</span>
+                                <span class="block text-[11px] text-gray-400 dark:text-gray-500">
                                     Staf Pengelola Platform
                                 </span>
                             </div>
-                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Staf Admin</span>
+                            <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">Staf Admin</span>
                         </div>
                     @endif
                 </div>

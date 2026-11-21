@@ -20,6 +20,28 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 11:30 WITA] — Penyelarasan Tipografi Netral & Bebas Warna Mencolok pada Box Info Role Formulir Admin
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Tipografi Netral Bersih Form Role (`admin/admins/create.blade.php`, `admin/admins/edit.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/admins/edit.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Teks judul peran pada boks informasi role formulir menggunakan warna biru menyala (`text-blue-600 dark:text-blue-400`) pada Admin Operasional dan kuning amber mencolok (`text-amber-900`) pada Super Admin, sehingga tampak kontras dan tidak selaras dengan input form lainnya.
+  - **After**: Mengubah seluruh teks judul peran dan subteks di dalam boks formulir menjadi palet warna monokrom netral standar LensMatch:
+    - Judul Peran: `text-xs font-bold text-gray-900 dark:text-white` (bersih dan tidak alay).
+    - Subteks: `text-[11px] text-gray-400 dark:text-gray-500`.
+    - Badge Keterangan Kanan: `text-xs font-semibold text-gray-400 dark:text-gray-500`.
+    - Container Boks: `border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900` (identik dengan field input netral lainnya).
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
+
+---
+
 ### [2026-11-21 11:25 WITA] — Penguncian Status Super Admin Tunggal (Root Administrator) & Eliminasi Opsi Radio Role
 
 * **Modul / Fitur**:
@@ -110,6 +132,28 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian & Verifikasi**:
   - `php -l`: **PASS (0 syntax errors)**.
   - `php artisan view:cache ; php artisan view:clear`: **PASS (0 compilation errors)**.
+
+---
+
+### [2026-11-21 11:30 WITA] — Penyelarasan Tipografi Netral & Bebas Warna Mencolok pada Box Info Role Formulir Admin
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Tipografi Netral Bersih Form Role (`admin/admins/create.blade.php`, `admin/admins/edit.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/admins/edit.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Teks judul peran pada boks informasi role formulir menggunakan warna biru menyala (`text-blue-600 dark:text-blue-400`) pada Admin Operasional dan kuning amber mencolok (`text-amber-900`) pada Super Admin, sehingga tampak kontras dan tidak selaras dengan input form lainnya.
+  - **After**: Mengubah seluruh teks judul peran dan subteks di dalam boks formulir menjadi palet warna monokrom netral standar LensMatch:
+    - Judul Peran: `text-xs font-bold text-gray-900 dark:text-white` (bersih dan tidak alay).
+    - Subteks: `text-[11px] text-gray-400 dark:text-gray-500`.
+    - Badge Keterangan Kanan: `text-xs font-semibold text-gray-400 dark:text-gray-500`.
+    - Container Boks: `border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900` (identik dengan field input netral lainnya).
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
 
 ---
 
