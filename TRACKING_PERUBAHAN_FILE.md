@@ -20,6 +20,29 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 11:20 WITA] — Penyeragaman Tombol Aksi Tabel Manajemen Admin (Kebab Dropdown untuk Seluruh Role Termasuk Super Admin)
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Penyeragaman Kolom Aksi Tabel (`admin/admins/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/admins/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Baris akun Super Admin menampilkan tombol `[Lihat]` dan `[Edit]` inline berdampingan, sementara baris Admin Operasional menampilkan tombol `[Lihat]` dan `[...]` (Kebab dropdown). Hal ini membuat susunan tombol di kolom aksi tabel tampak tidak simetris antar baris.
+  - **After**: Menyeragamkan seluruh baris tabel (termasuk Super Admin) menggunakan format baku **`[Lihat]` (Soft Blue) + `[...]` (Kebab Dropdown)**.
+    - Pada baris Super Admin: Kebab dropdown memuat opsi **`Edit`** (tanpa tombol Hapus karena dilindungi sistem).
+    - Pada baris Admin Operasional: Kebab dropdown memuat opsi **`Edit`** dan **`Hapus`**.
+    - Teks tombol di dalam dropdown mematuhi Rule #80 (`Edit` dan `Hapus` murni tanpa kata objek).
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #69: Maksimal 2 elemen horizontal di kolom aksi (1 tombol utama + 1 kebab)
+  - Rule #80: Teks bersuku kata tunggal murni (`Lihat`, `Edit`, `Hapus`)
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
+
+---
+
 ### [2026-11-21 10:50 WITA] — Penyelarasan Penuh Standar Desain README (Rule #11, #14, #22, #62, #64, #67, #69, #80) pada Seluruh Halaman Manajemen Admin
 
 * **Modul / Fitur**:
@@ -65,6 +88,29 @@ Setiap entri log perubahan wajib mencantumkan:
 * **Hasil Pengujian & Verifikasi**:
   - `php -l`: **PASS (0 syntax errors)**.
   - `php artisan view:cache ; php artisan view:clear`: **PASS (0 compilation errors)**.
+
+---
+
+### [2026-11-21 11:20 WITA] — Penyeragaman Tombol Aksi Tabel Manajemen Admin (Kebab Dropdown untuk Seluruh Role Termasuk Super Admin)
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Penyeragaman Kolom Aksi Tabel (`admin/admins/index.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/admins/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Baris akun Super Admin menampilkan tombol `[Lihat]` dan `[Edit]` inline berdampingan, sementara baris Admin Operasional menampilkan tombol `[Lihat]` dan `[...]` (Kebab dropdown). Hal ini membuat susunan tombol di kolom aksi tabel tampak tidak simetris antar baris.
+  - **After**: Menyeragamkan seluruh baris tabel (termasuk Super Admin) menggunakan format baku **`[Lihat]` (Soft Blue) + `[...]` (Kebab Dropdown)**.
+    - Pada baris Super Admin: Kebab dropdown memuat opsi **`Edit`** (tanpa tombol Hapus karena dilindungi sistem).
+    - Pada baris Admin Operasional: Kebab dropdown memuat opsi **`Edit`** dan **`Hapus`**.
+    - Teks tombol di dalam dropdown mematuhi Rule #80 (`Edit` dan `Hapus` murni tanpa kata objek).
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #69: Maksimal 2 elemen horizontal di kolom aksi (1 tombol utama + 1 kebab)
+  - Rule #80: Teks bersuku kata tunggal murni (`Lihat`, `Edit`, `Hapus`)
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 errors)**.
+  - `php scripts/audit-ui.php`: **PASS (0 pelanggaran)**.
+  - `npm run build`: **PASS (Vite assets compiled)**.
 
 ---
 
