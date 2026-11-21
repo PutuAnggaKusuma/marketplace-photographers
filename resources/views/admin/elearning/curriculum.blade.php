@@ -8,525 +8,7 @@
 
 @section('content')
 
-<div 
-
-  x-data="{
-
-    showModuleModal: false,
-
-    showLessonModal: false,
-
-    moduleMode: 'create',
-
-    existingModules: [
-      @foreach($course->modules as $mod)
-        { id: {{ $mod->id }}, urutan: {{ (int) $mod->urutan }}, judul: @json($mod->judul_modul) },
-      @endforeach
-    ],
-
-    existingLessons: [
-      @foreach($course->lessons as $les)
-        { id: {{ $les->id }}, id_module: {{ $les->id_module ? $les->id_module : 'null' }}, urutan: {{ (int) $les->urutan }}, judul: @json($les->judul) },
-      @endforeach
-    ],
-
-    moduleForm: {
-
-      id: null,
-
-      judul_modul: '',
-
-      deskripsi: '',
-
-      urutan: 1,
-
-      actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
-
-      touched: {
-        judul_modul: false,
-        urutan: false
-      },
-      errors: {
-        judul_modul: '',
-        urutan: ''
-      }
-
-    },
-
-    lessonMode: 'create',
-
-    lessonForm: {
-
-      id: null,
-
-      id_module: '',
-
-      judul: '',
-
-      tipe: 'video',
-
-      konten: '',
-
-      media_url: '',
-
-      mediaFileName: '',
-
-      durasi_menit: 5,
-
-      urutan: 1,
-
-      is_free: '1',
-
-      actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
-
-      touched: {
-        id_module: false,
-        tipe: false,
-        judul: false,
-        urutan: false
-      },
-      errors: {
-        id_module: '',
-        tipe: '',
-        judul: '',
-        urutan: '',
-        media_file: ''
-      }
-
-    },
-
-    validateJudulModul() {
-      if (!this.moduleForm.judul_modul || !this.moduleForm.judul_modul.trim()) {
-        this.moduleForm.errors.judul_modul = 'Judul modul wajib diisi.';
-        return false;
-      }
-      if (this.moduleForm.judul_modul.trim().length < 3) {
-        this.moduleForm.errors.judul_modul = 'Judul modul minimal 3 karakter.';
-        return false;
-      }
-      this.moduleForm.errors.judul_modul = '';
-      return true;
-    },
-
-    validateUrutanModul() {
-      if (this.moduleForm.urutan === '' || this.moduleForm.urutan === null || isNaN(this.moduleForm.urutan)) {
-        this.moduleForm.errors.urutan = 'Nomor urutan modul wajib diisi.';
-        return false;
-      }
-      const u = parseInt(this.moduleForm.urutan, 10);
-      if (u < 1) {
-        this.moduleForm.errors.urutan = 'Nomor urutan minimal angka 1.';
-        return false;
-      }
-      const duplicate = this.existingModules.find(m => m.urutan === u && m.id !== this.moduleForm.id);
-      if (duplicate) {
-        this.moduleForm.errors.urutan = `Urutan ${u} sudah digunakan oleh Modul ${duplicate.urutan}: '${duplicate.judul}'.`;
-        return false;
-      }
-      this.moduleForm.errors.urutan = '';
-      return true;
-    },
-
-    submitModuleForm(e) {
-      this.moduleForm.touched.judul_modul = true;
-      this.moduleForm.touched.urutan = true;
-
-      const jOk = this.validateJudulModul();
-      const uOk = this.validateUrutanModul();
-
-      if (!jOk) {
-        e.preventDefault();
-        this.$refs.judulModulInput?.focus();
-        return false;
-      }
-      if (!uOk) {
-        e.preventDefault();
-        this.$refs.urutanModulInput?.focus();
-        return false;
-      }
-      return true;
-    },
-
-    validateModule() {
-      if (!this.lessonForm.id_module) {
-        this.lessonForm.errors.id_module = 'Pilih salah satu modul materi.';
-        return false;
-      }
-      this.lessonForm.errors.id_module = '';
-      return true;
-    },
-
-    validateTipe() {
-      if (!this.lessonForm.tipe) {
-        this.lessonForm.errors.tipe = 'Pilih tipe media materi.';
-        return false;
-      }
-      this.lessonForm.errors.tipe = '';
-      return true;
-    },
-
-    validateJudulLesson() {
-      if (!this.lessonForm.judul || !this.lessonForm.judul.trim()) {
-        this.lessonForm.errors.judul = 'Judul tahapan materi wajib diisi.';
-        return false;
-      }
-      if (this.lessonForm.judul.trim().length < 3) {
-        this.lessonForm.errors.judul = 'Judul tahapan minimal 3 karakter.';
-        return false;
-      }
-      this.lessonForm.errors.judul = '';
-      return true;
-    },
-
-    validateUrutanLesson() {
-      if (this.lessonForm.urutan === '' || this.lessonForm.urutan === null || isNaN(this.lessonForm.urutan)) {
-        this.lessonForm.errors.urutan = 'Nomor urutan tahapan wajib diisi.';
-        return false;
-      }
-      const u = parseInt(this.lessonForm.urutan, 10);
-      if (u < 1) {
-        this.lessonForm.errors.urutan = 'Nomor urutan minimal angka 1.';
-        return false;
-      }
-      const duplicate = this.existingLessons.find(l => l.urutan === u && l.id !== this.lessonForm.id);
-      if (duplicate) {
-        this.lessonForm.errors.urutan = `Urutan ${u} sudah digunakan oleh tahapan '${duplicate.judul}'.`;
-        return false;
-      }
-      this.lessonForm.errors.urutan = '';
-      return true;
-    },
-
-    submitLessonForm(e) {
-      this.lessonForm.touched.id_module = true;
-      this.lessonForm.touched.tipe = true;
-      this.lessonForm.touched.judul = true;
-      this.lessonForm.touched.urutan = true;
-
-      const mOk = this.validateModule();
-      const tOk = this.validateTipe();
-      const jOk = this.validateJudulLesson();
-      const uOk = this.validateUrutanLesson();
-
-      let firstInvalidRef = null;
-      if (!mOk) firstInvalidRef = firstInvalidRef || this.$refs.moduleDropdownBtn;
-      if (!tOk) firstInvalidRef = firstInvalidRef || this.$refs.tipeDropdownBtn;
-      if (!jOk) firstInvalidRef = firstInvalidRef || this.$refs.judulLessonInput;
-      if (!uOk) firstInvalidRef = firstInvalidRef || this.$refs.urutanLessonInput;
-
-      if (!mOk || !tOk || !jOk || !uOk) {
-        e.preventDefault();
-        if (firstInvalidRef) {
-          firstInvalidRef.focus();
-          firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return false;
-      }
-      return true;
-    },
-
-    openCreateModule() {
-
-      this.moduleMode = 'create';
-
-      const nextUrutan = this.existingModules.length > 0
-        ? Math.max(...this.existingModules.map(m => m.urutan)) + 1
-        : 1;
-
-      this.moduleForm = {
-
-        id: null,
-
-        judul_modul: '',
-
-        deskripsi: '',
-
-        urutan: nextUrutan,
-
-        actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
-
-        touched: {
-          judul_modul: false,
-          urutan: false
-        },
-
-        errors: {
-          judul_modul: '',
-          urutan: ''
-        }
-
-      };
-
-      this.showModuleModal = true;
-
-    },
-
-    openEditModule(mod) {
-
-      this.moduleMode = 'edit';
-
-      this.moduleForm = {
-
-        id: mod.id,
-
-        judul_modul: mod.judul_modul,
-
-        deskripsi: mod.deskripsi || '',
-
-        urutan: mod.urutan,
-
-        actionUrl: '/admin/elearning/modules/' + mod.id + '/update',
-
-        touched: {
-          judul_modul: false,
-          urutan: false
-        },
-
-        errors: {
-          judul_modul: '',
-          urutan: ''
-        }
-
-      };
-
-      this.showModuleModal = true;
-
-    },
-
-    lessonMediaPreviewUrl: '',
-    lessonMediaDragging: false,
-    lessonLightboxOpen: false,
-
-    handleLessonMediaFile(event) {
-      this.processLessonMediaFiles(event.target.files);
-    },
-
-    handleLessonMediaDrop(event) {
-      this.lessonMediaDragging = false;
-      if (event.dataTransfer && event.dataTransfer.files) {
-        const file = event.dataTransfer.files[0];
-        if (file && typeof DataTransfer !== 'undefined' && this.$refs.lessonMediaInput) {
-          const dt = new DataTransfer();
-          dt.items.add(file);
-          this.$refs.lessonMediaInput.files = dt.files;
-        }
-        this.processLessonMediaFiles(event.dataTransfer.files);
-      }
-    },
-
-    processLessonMediaFiles(fileList) {
-      const res = window.validateUploadFiles(fileList, {
-        maxMB: 50,
-        allowedMimes: [],
-        allowedExts: []
-      });
-
-      if (res.hasErrors) {
-        this.lessonForm.errors.media_file = res.errorMessage;
-        this.lessonForm.mediaFileName = '';
-        this.lessonMediaPreviewUrl = '';
-        return;
-      }
-
-      const file = res.validFiles[0];
-      this.lessonForm.errors.media_file = '';
-      if (file) {
-        this.lessonForm.mediaFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
-        if (file.type && file.type.startsWith('image/')) {
-          this.lessonMediaPreviewUrl = URL.createObjectURL(file);
-        } else {
-          this.lessonMediaPreviewUrl = '';
-        }
-      } else {
-        this.lessonForm.mediaFileName = '';
-        this.lessonMediaPreviewUrl = '';
-      }
-    },
-
-    clearLessonMediaFile() {
-      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
-      this.lessonForm.mediaFileName = '';
-      this.lessonForm.errors.media_file = '';
-      this.lessonMediaPreviewUrl = '';
-    },
-
-    openCreateLesson(moduleId = '') {
-
-      this.lessonMode = 'create';
-
-      const nextUrutan = this.existingLessons.length > 0
-        ? Math.max(...this.existingLessons.map(l => l.urutan)) + 1
-        : 1;
-
-      this.lessonForm = {
-
-        id: null,
-
-        id_module: moduleId,
-
-        judul: '',
-
-        tipe: 'video',
-
-        konten: '',
-
-        media_url: '',
-
-        mediaFileName: '',
-
-        durasi_menit: 5,
-
-        urutan: nextUrutan,
-
-        is_free: '1',
-
-        actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
-
-        touched: {
-
-          id_module: false,
-
-          tipe: false,
-
-          judul: false,
-
-          urutan: false
-
-        },
-
-        errors: {
-
-          id_module: '',
-
-          tipe: '',
-
-          judul: '',
-
-          urutan: '',
-
-          media_file: ''
-
-        }
-
-      };
-
-      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
-      this.lessonMediaPreviewUrl = '';
-
-      this.showLessonModal = true;
-
-    },
-
-    openEditLesson(les) {
-
-      this.lessonMode = 'edit';
-
-      this.lessonForm = {
-
-        id: les.id,
-
-        id_module: les.id_module || '',
-
-        judul: les.judul,
-
-        tipe: les.tipe,
-
-        konten: les.konten || '',
-
-        media_url: les.media_url || '',
-
-        mediaFileName: '',
-
-        durasi_menit: les.durasi_menit,
-
-        urutan: les.urutan,
-
-        is_free: les.is_free ? '1' : '0',
-
-        actionUrl: '/admin/elearning/lessons/' + les.id + '/update',
-
-        touched: {
-
-          id_module: false,
-
-          tipe: false,
-
-          judul: false,
-
-          urutan: false
-
-        },
-
-        errors: {
-
-          id_module: '',
-
-          tipe: '',
-
-          judul: '',
-
-          urutan: '',
-
-          media_file: ''
-
-        }
-
-      };
-
-      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
-      this.lessonMediaPreviewUrl = '';
-
-      this.showLessonModal = true;
-
-    },
-
-    async toggleFree(lessonId) {
-
-      try {
-
-        const res = await fetch('/admin/elearning/lessons/' + lessonId + '/toggle-free', {
-
-          method: 'POST',
-
-          headers: {
-
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-
-            'Accept': 'application/json',
-
-            'Content-Type': 'application/json'
-
-          }
-
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-
-          window.dispatchEvent(new CustomEvent('show-toast', {
-
-            detail: { message: data.message, type: 'success' }
-
-          }));
-
-          setTimeout(() => location.reload(), 600);
-
-        }
-
-      } catch (err) {
-
-        console.error(err);
-
-      }
-
-    }
-
-  }" 
-
-  class="space-y-6"
-
->
+<div x-data="curriculumApp()" class="space-y-6">
 
 
 
@@ -1436,6 +918,524 @@
 
 
 </div>
+
+
+
+<script>
+function curriculumApp() {
+    return {
+showModuleModal: false,
+
+    showLessonModal: false,
+
+    moduleMode: 'create',
+
+    existingModules: [
+      @foreach($course->modules as $mod)
+        { id: {{ $mod->id }}, urutan: {{ (int) $mod->urutan }}, judul: @json($mod->judul_modul) },
+      @endforeach
+    ],
+
+    existingLessons: [
+      @foreach($course->lessons as $les)
+        { id: {{ $les->id }}, id_module: {{ $les->id_module ? $les->id_module : 'null' }}, urutan: {{ (int) $les->urutan }}, judul: @json($les->judul) },
+      @endforeach
+    ],
+
+    moduleForm: {
+
+      id: null,
+
+      judul_modul: '',
+
+      deskripsi: '',
+
+      urutan: 1,
+
+      actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
+
+      touched: {
+        judul_modul: false,
+        urutan: false
+      },
+      errors: {
+        judul_modul: '',
+        urutan: ''
+      }
+
+    },
+
+    lessonMode: 'create',
+
+    lessonForm: {
+
+      id: null,
+
+      id_module: '',
+
+      judul: '',
+
+      tipe: 'video',
+
+      konten: '',
+
+      media_url: '',
+
+      mediaFileName: '',
+
+      durasi_menit: 5,
+
+      urutan: 1,
+
+      is_free: '1',
+
+      actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
+
+      touched: {
+        id_module: false,
+        tipe: false,
+        judul: false,
+        urutan: false
+      },
+      errors: {
+        id_module: '',
+        tipe: '',
+        judul: '',
+        urutan: '',
+        media_file: ''
+      }
+
+    },
+
+    validateJudulModul() {
+      if (!this.moduleForm.judul_modul || !this.moduleForm.judul_modul.trim()) {
+        this.moduleForm.errors.judul_modul = 'Judul modul wajib diisi.';
+        return false;
+      }
+      if (this.moduleForm.judul_modul.trim().length < 3) {
+        this.moduleForm.errors.judul_modul = 'Judul modul minimal 3 karakter.';
+        return false;
+      }
+      this.moduleForm.errors.judul_modul = '';
+      return true;
+    },
+
+    validateUrutanModul() {
+      if (this.moduleForm.urutan === '' || this.moduleForm.urutan === null || isNaN(this.moduleForm.urutan)) {
+        this.moduleForm.errors.urutan = 'Nomor urutan modul wajib diisi.';
+        return false;
+      }
+      const u = parseInt(this.moduleForm.urutan, 10);
+      if (u < 1) {
+        this.moduleForm.errors.urutan = 'Nomor urutan minimal angka 1.';
+        return false;
+      }
+      const duplicate = this.existingModules.find(m => m.urutan === u && m.id !== this.moduleForm.id);
+      if (duplicate) {
+        this.moduleForm.errors.urutan = `Urutan ${u} sudah digunakan oleh Modul ${duplicate.urutan}: '${duplicate.judul}'.`;
+        return false;
+      }
+      this.moduleForm.errors.urutan = '';
+      return true;
+    },
+
+    submitModuleForm(e) {
+      this.moduleForm.touched.judul_modul = true;
+      this.moduleForm.touched.urutan = true;
+
+      const jOk = this.validateJudulModul();
+      const uOk = this.validateUrutanModul();
+
+      if (!jOk) {
+        e.preventDefault();
+        this.$refs.judulModulInput?.focus();
+        return false;
+      }
+      if (!uOk) {
+        e.preventDefault();
+        this.$refs.urutanModulInput?.focus();
+        return false;
+      }
+      return true;
+    },
+
+    validateModule() {
+      if (!this.lessonForm.id_module) {
+        this.lessonForm.errors.id_module = 'Pilih salah satu modul materi.';
+        return false;
+      }
+      this.lessonForm.errors.id_module = '';
+      return true;
+    },
+
+    validateTipe() {
+      if (!this.lessonForm.tipe) {
+        this.lessonForm.errors.tipe = 'Pilih tipe media materi.';
+        return false;
+      }
+      this.lessonForm.errors.tipe = '';
+      return true;
+    },
+
+    validateJudulLesson() {
+      if (!this.lessonForm.judul || !this.lessonForm.judul.trim()) {
+        this.lessonForm.errors.judul = 'Judul tahapan materi wajib diisi.';
+        return false;
+      }
+      if (this.lessonForm.judul.trim().length < 3) {
+        this.lessonForm.errors.judul = 'Judul tahapan minimal 3 karakter.';
+        return false;
+      }
+      this.lessonForm.errors.judul = '';
+      return true;
+    },
+
+    validateUrutanLesson() {
+      if (this.lessonForm.urutan === '' || this.lessonForm.urutan === null || isNaN(this.lessonForm.urutan)) {
+        this.lessonForm.errors.urutan = 'Nomor urutan tahapan wajib diisi.';
+        return false;
+      }
+      const u = parseInt(this.lessonForm.urutan, 10);
+      if (u < 1) {
+        this.lessonForm.errors.urutan = 'Nomor urutan minimal angka 1.';
+        return false;
+      }
+      const duplicate = this.existingLessons.find(l => l.urutan === u && l.id !== this.lessonForm.id);
+      if (duplicate) {
+        this.lessonForm.errors.urutan = `Urutan ${u} sudah digunakan oleh tahapan '${duplicate.judul}'.`;
+        return false;
+      }
+      this.lessonForm.errors.urutan = '';
+      return true;
+    },
+
+    submitLessonForm(e) {
+      this.lessonForm.touched.id_module = true;
+      this.lessonForm.touched.tipe = true;
+      this.lessonForm.touched.judul = true;
+      this.lessonForm.touched.urutan = true;
+
+      const mOk = this.validateModule();
+      const tOk = this.validateTipe();
+      const jOk = this.validateJudulLesson();
+      const uOk = this.validateUrutanLesson();
+
+      let firstInvalidRef = null;
+      if (!mOk) firstInvalidRef = firstInvalidRef || this.$refs.moduleDropdownBtn;
+      if (!tOk) firstInvalidRef = firstInvalidRef || this.$refs.tipeDropdownBtn;
+      if (!jOk) firstInvalidRef = firstInvalidRef || this.$refs.judulLessonInput;
+      if (!uOk) firstInvalidRef = firstInvalidRef || this.$refs.urutanLessonInput;
+
+      if (!mOk || !tOk || !jOk || !uOk) {
+        e.preventDefault();
+        if (firstInvalidRef) {
+          firstInvalidRef.focus();
+          firstInvalidRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return false;
+      }
+      return true;
+    },
+
+    openCreateModule() {
+
+      this.moduleMode = 'create';
+
+      const nextUrutan = this.existingModules.length > 0
+        ? Math.max(...this.existingModules.map(m => m.urutan)) + 1
+        : 1;
+
+      this.moduleForm = {
+
+        id: null,
+
+        judul_modul: '',
+
+        deskripsi: '',
+
+        urutan: nextUrutan,
+
+        actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
+
+        touched: {
+          judul_modul: false,
+          urutan: false
+        },
+
+        errors: {
+          judul_modul: '',
+          urutan: ''
+        }
+
+      };
+
+      this.showModuleModal = true;
+
+    },
+
+    openEditModule(mod) {
+
+      this.moduleMode = 'edit';
+
+      this.moduleForm = {
+
+        id: mod.id,
+
+        judul_modul: mod.judul_modul,
+
+        deskripsi: mod.deskripsi || '',
+
+        urutan: mod.urutan,
+
+        actionUrl: '/admin/elearning/modules/' + mod.id + '/update',
+
+        touched: {
+          judul_modul: false,
+          urutan: false
+        },
+
+        errors: {
+          judul_modul: '',
+          urutan: ''
+        }
+
+      };
+
+      this.showModuleModal = true;
+
+    },
+
+    lessonMediaPreviewUrl: '',
+    lessonMediaDragging: false,
+    lessonLightboxOpen: false,
+
+    handleLessonMediaFile(event) {
+      this.processLessonMediaFiles(event.target.files);
+    },
+
+    handleLessonMediaDrop(event) {
+      this.lessonMediaDragging = false;
+      if (event.dataTransfer && event.dataTransfer.files) {
+        const file = event.dataTransfer.files[0];
+        if (file && typeof DataTransfer !== 'undefined' && this.$refs.lessonMediaInput) {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          this.$refs.lessonMediaInput.files = dt.files;
+        }
+        this.processLessonMediaFiles(event.dataTransfer.files);
+      }
+    },
+
+    processLessonMediaFiles(fileList) {
+      const res = window.validateUploadFiles(fileList, {
+        maxMB: 50,
+        allowedMimes: [],
+        allowedExts: []
+      });
+
+      if (res.hasErrors) {
+        this.lessonForm.errors.media_file = res.errorMessage;
+        this.lessonForm.mediaFileName = '';
+        this.lessonMediaPreviewUrl = '';
+        return;
+      }
+
+      const file = res.validFiles[0];
+      this.lessonForm.errors.media_file = '';
+      if (file) {
+        this.lessonForm.mediaFileName = `${file.name} (${window.formatFileSizeMB(file.size)})`;
+        if (file.type && file.type.startsWith('image/')) {
+          this.lessonMediaPreviewUrl = URL.createObjectURL(file);
+        } else {
+          this.lessonMediaPreviewUrl = '';
+        }
+      } else {
+        this.lessonForm.mediaFileName = '';
+        this.lessonMediaPreviewUrl = '';
+      }
+    },
+
+    clearLessonMediaFile() {
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonForm.mediaFileName = '';
+      this.lessonForm.errors.media_file = '';
+      this.lessonMediaPreviewUrl = '';
+    },
+
+    openCreateLesson(moduleId = '') {
+
+      this.lessonMode = 'create';
+
+      const nextUrutan = this.existingLessons.length > 0
+        ? Math.max(...this.existingLessons.map(l => l.urutan)) + 1
+        : 1;
+
+      this.lessonForm = {
+
+        id: null,
+
+        id_module: moduleId,
+
+        judul: '',
+
+        tipe: 'video',
+
+        konten: '',
+
+        media_url: '',
+
+        mediaFileName: '',
+
+        durasi_menit: 5,
+
+        urutan: nextUrutan,
+
+        is_free: '1',
+
+        actionUrl: '{{ route('admin.elearning.lessons.store', $course->id) }}',
+
+        touched: {
+
+          id_module: false,
+
+          tipe: false,
+
+          judul: false,
+
+          urutan: false
+
+        },
+
+        errors: {
+
+          id_module: '',
+
+          tipe: '',
+
+          judul: '',
+
+          urutan: '',
+
+          media_file: ''
+
+        }
+
+      };
+
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonMediaPreviewUrl = '';
+
+      this.showLessonModal = true;
+
+    },
+
+    openEditLesson(les) {
+
+      this.lessonMode = 'edit';
+
+      this.lessonForm = {
+
+        id: les.id,
+
+        id_module: les.id_module || '',
+
+        judul: les.judul,
+
+        tipe: les.tipe,
+
+        konten: les.konten || '',
+
+        media_url: les.media_url || '',
+
+        mediaFileName: '',
+
+        durasi_menit: les.durasi_menit,
+
+        urutan: les.urutan,
+
+        is_free: les.is_free ? '1' : '0',
+
+        actionUrl: '/admin/elearning/lessons/' + les.id + '/update',
+
+        touched: {
+
+          id_module: false,
+
+          tipe: false,
+
+          judul: false,
+
+          urutan: false
+
+        },
+
+        errors: {
+
+          id_module: '',
+
+          tipe: '',
+
+          judul: '',
+
+          urutan: '',
+
+          media_file: ''
+
+        }
+
+      };
+
+      if (this.$refs.lessonMediaInput) this.$refs.lessonMediaInput.value = '';
+      this.lessonMediaPreviewUrl = '';
+
+      this.showLessonModal = true;
+
+    },
+
+    async toggleFree(lessonId) {
+
+      try {
+
+        const res = await fetch('/admin/elearning/lessons/' + lessonId + '/toggle-free', {
+
+          method: 'POST',
+
+          headers: {
+
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+
+            'Accept': 'application/json',
+
+            'Content-Type': 'application/json'
+
+          }
+
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          window.dispatchEvent(new CustomEvent('show-toast', {
+
+            detail: { message: data.message, type: 'success' }
+
+          }));
+
+          setTimeout(() => location.reload(), 600);
+
+        }
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+    };
+}
+</script>
 
 @endsection
 

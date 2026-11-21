@@ -20,6 +20,25 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 10:30 WITA] — Perbaikan Fatal Raw JavaScript Leaking pada Halaman Kurikulum E-Learning
+
+* **Modul / Fitur**:
+  - Admin E-Learning: Refaktor Komponen Alpine.js Kurikulum dari Inline Attribute ke Dedicated Script Block (`admin/elearning/curriculum.blade.php`)
+* **File yang Diubah**:
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  - **Before**: Objek Alpine.js berukuran ~500 baris diletakkan langsung di dalam atribut HTML inline `x-data="{ ... }"`. Ketika logika validasi duplikasi menambahkan fungsi panah `m => m.urutan`, token parser HTML browser menganggap karakter `>` sebagai penutup tag pembuka `<div>`. Hal ini menyebabkan tag `<div>` tertutup prematur dan ratusan baris kode JavaScript mentah bocor serta tercetak sebagai teks biasa di atas halaman web seperti pada tangkapan layar user.
+  - **After**: Memindahkan seluruh fungsi dan state Alpine.js ke dalam blok JavaScript fungsi terpisah `<script>function curriculumApp() { return { ... }; }</script>` di bagian bawah berkas, dan memanggilnya secara bersih via `<div x-data="curriculumApp()" class="space-y-6">`. Tag HTML menjadi 100% valid, tidak ada karakter yang bentrok dengan parser HTML browser, dan halaman ter-render sempurna tanpa kebocoran teks kode.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Form Validation & UX State
+  - Rule #51: Clean Code & High-Standard Script Architecture
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l`: **PASS (0 syntax errors)**.
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 compilation errors)**.
+
+---
+
 ### [2026-11-21 10:25 WITA] — Implementasi CRUD Lengkap Manajemen Admin & Standarisasi Safe Min-Height Seluruh Tabel Bebas Scrollbar
 
 * **Modul / Fitur**:
