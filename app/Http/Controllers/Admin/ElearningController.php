@@ -8,6 +8,7 @@ use App\Models\Elearning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ElearningController extends Controller
 {
@@ -173,7 +174,7 @@ class ElearningController extends Controller
     {
         $material = Elearning::findOrFail($id);
 
-        $hasPaidEnrollments = \App\Models\ElearningTransaction::where('id_elearning', $material->id)
+        $hasPaidEnrollments = \App\Models\ElearningTransaction::where('id_e_learning', $material->id)
             ->where('payment_status', 'completed')
             ->exists();
 
@@ -208,7 +209,15 @@ class ElearningController extends Controller
         $request->validate([
             'judul_modul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'urutan' => 'nullable|integer|min:1',
+            'urutan' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::unique('elearning_modules', 'urutan')->where('id_elearning', $course->id),
+            ],
+        ], [
+            'judul_modul.required' => 'Judul modul wajib diisi.',
+            'urutan.unique' => 'Nomor urutan modul ini sudah digunakan pada kurikulum.',
         ]);
 
         $maxOrder = $course->modules()->max('urutan') ?? 0;
@@ -233,7 +242,15 @@ class ElearningController extends Controller
         $request->validate([
             'judul_modul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'urutan' => 'nullable|integer|min:1',
+            'urutan' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::unique('elearning_modules', 'urutan')->where('id_elearning', $module->id_elearning)->ignore($module->id),
+            ],
+        ], [
+            'judul_modul.required' => 'Judul modul wajib diisi.',
+            'urutan.unique' => 'Nomor urutan modul ini sudah digunakan pada kurikulum.',
         ]);
 
         $module->update([
@@ -274,11 +291,17 @@ class ElearningController extends Controller
             'konten' => 'nullable|string',
             'media_url' => 'nullable|string|max:1000',
             'durasi_menit' => 'nullable|integer|min:1',
-            'urutan' => 'nullable|integer|min:1',
+            'urutan' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::unique('elearning_lessons', 'urutan')->where('id_elearning', $course->id),
+            ],
             'is_free' => 'nullable|in:0,1',
             'media_file' => 'nullable|file|max:51200', // max 50MB
         ], [
             'judul.required' => 'Judul tahapan materi wajib diisi.',
+            'urutan.unique' => 'Nomor urutan tahapan ini sudah digunakan pada kurikulum.',
             'media_file.file' => 'File media tidak valid.',
             'media_file.max' => 'Ukuran file media maksimal 50 MB.',
         ]);
@@ -330,11 +353,17 @@ class ElearningController extends Controller
             'konten' => 'nullable|string',
             'media_url' => 'nullable|string|max:1000',
             'durasi_menit' => 'nullable|integer|min:1',
-            'urutan' => 'nullable|integer|min:1',
+            'urutan' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::unique('elearning_lessons', 'urutan')->where('id_elearning', $lesson->id_elearning)->ignore($lesson->id),
+            ],
             'is_free' => 'nullable|in:0,1',
             'media_file' => 'nullable|file|max:51200',
         ], [
             'judul.required' => 'Judul tahapan materi wajib diisi.',
+            'urutan.unique' => 'Nomor urutan tahapan ini sudah digunakan pada kurikulum.',
             'media_file.file' => 'File media tidak valid.',
             'media_file.max' => 'Ukuran file media maksimal 50 MB.',
         ]);

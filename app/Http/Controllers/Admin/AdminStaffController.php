@@ -121,7 +121,7 @@ class AdminStaffController extends Controller
             'no_telepon' => $validated['no_hp'] ?? null,
         ]);
 
-        return redirect()->route('admin.admins.index')->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
+        return redirect()->route('admin.admins')->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
     }
 
     /**

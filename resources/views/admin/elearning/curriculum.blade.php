@@ -18,6 +18,18 @@
 
     moduleMode: 'create',
 
+    existingModules: [
+      @foreach($course->modules as $mod)
+        { id: {{ $mod->id }}, urutan: {{ (int) $mod->urutan }}, judul: @json($mod->judul_modul) },
+      @endforeach
+    ],
+
+    existingLessons: [
+      @foreach($course->lessons as $les)
+        { id: {{ $les->id }}, id_module: {{ $les->id_module ? $les->id_module : 'null' }}, urutan: {{ (int) $les->urutan }}, judul: @json($les->judul) },
+      @endforeach
+    ],
+
     moduleForm: {
 
       id: null,
@@ -31,10 +43,12 @@
       actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
 
       touched: {
-        judul_modul: false
+        judul_modul: false,
+        urutan: false
       },
       errors: {
-        judul_modul: ''
+        judul_modul: '',
+        urutan: ''
       }
 
     },
@@ -68,12 +82,14 @@
       touched: {
         id_module: false,
         tipe: false,
-        judul: false
+        judul: false,
+        urutan: false
       },
       errors: {
         id_module: '',
         tipe: '',
         judul: '',
+        urutan: '',
         media_file: ''
       }
 
@@ -92,11 +108,40 @@
       return true;
     },
 
+    validateUrutanModul() {
+      if (this.moduleForm.urutan === '' || this.moduleForm.urutan === null || isNaN(this.moduleForm.urutan)) {
+        this.moduleForm.errors.urutan = 'Nomor urutan modul wajib diisi.';
+        return false;
+      }
+      const u = parseInt(this.moduleForm.urutan, 10);
+      if (u < 1) {
+        this.moduleForm.errors.urutan = 'Nomor urutan minimal angka 1.';
+        return false;
+      }
+      const duplicate = this.existingModules.find(m => m.urutan === u && m.id !== this.moduleForm.id);
+      if (duplicate) {
+        this.moduleForm.errors.urutan = `Urutan ${u} sudah digunakan oleh Modul ${duplicate.urutan}: '${duplicate.judul}'.`;
+        return false;
+      }
+      this.moduleForm.errors.urutan = '';
+      return true;
+    },
+
     submitModuleForm(e) {
       this.moduleForm.touched.judul_modul = true;
-      if (!this.validateJudulModul()) {
+      this.moduleForm.touched.urutan = true;
+
+      const jOk = this.validateJudulModul();
+      const uOk = this.validateUrutanModul();
+
+      if (!jOk) {
         e.preventDefault();
         this.$refs.judulModulInput?.focus();
+        return false;
+      }
+      if (!uOk) {
+        e.preventDefault();
+        this.$refs.urutanModulInput?.focus();
         return false;
       }
       return true;
@@ -133,21 +178,43 @@
       return true;
     },
 
+    validateUrutanLesson() {
+      if (this.lessonForm.urutan === '' || this.lessonForm.urutan === null || isNaN(this.lessonForm.urutan)) {
+        this.lessonForm.errors.urutan = 'Nomor urutan tahapan wajib diisi.';
+        return false;
+      }
+      const u = parseInt(this.lessonForm.urutan, 10);
+      if (u < 1) {
+        this.lessonForm.errors.urutan = 'Nomor urutan minimal angka 1.';
+        return false;
+      }
+      const duplicate = this.existingLessons.find(l => l.urutan === u && l.id !== this.lessonForm.id);
+      if (duplicate) {
+        this.lessonForm.errors.urutan = `Urutan ${u} sudah digunakan oleh tahapan '${duplicate.judul}'.`;
+        return false;
+      }
+      this.lessonForm.errors.urutan = '';
+      return true;
+    },
+
     submitLessonForm(e) {
       this.lessonForm.touched.id_module = true;
       this.lessonForm.touched.tipe = true;
       this.lessonForm.touched.judul = true;
+      this.lessonForm.touched.urutan = true;
 
       const mOk = this.validateModule();
       const tOk = this.validateTipe();
       const jOk = this.validateJudulLesson();
+      const uOk = this.validateUrutanLesson();
 
       let firstInvalidRef = null;
       if (!mOk) firstInvalidRef = firstInvalidRef || this.$refs.moduleDropdownBtn;
       if (!tOk) firstInvalidRef = firstInvalidRef || this.$refs.tipeDropdownBtn;
       if (!jOk) firstInvalidRef = firstInvalidRef || this.$refs.judulLessonInput;
+      if (!uOk) firstInvalidRef = firstInvalidRef || this.$refs.urutanLessonInput;
 
-      if (!mOk || !tOk || !jOk) {
+      if (!mOk || !tOk || !jOk || !uOk) {
         e.preventDefault();
         if (firstInvalidRef) {
           firstInvalidRef.focus();
@@ -162,6 +229,10 @@
 
       this.moduleMode = 'create';
 
+      const nextUrutan = this.existingModules.length > 0
+        ? Math.max(...this.existingModules.map(m => m.urutan)) + 1
+        : 1;
+
       this.moduleForm = {
 
         id: null,
@@ -170,20 +241,18 @@
 
         deskripsi: '',
 
-        urutan: {{ ($course->modules()->max('urutan') ?? 0) + 1 }},
+        urutan: nextUrutan,
 
         actionUrl: '{{ route('admin.elearning.modules.store', $course->id) }}',
 
         touched: {
-
-          judul_modul: false
-
+          judul_modul: false,
+          urutan: false
         },
 
         errors: {
-
-          judul_modul: ''
-
+          judul_modul: '',
+          urutan: ''
         }
 
       };
@@ -209,15 +278,13 @@
         actionUrl: '/admin/elearning/modules/' + mod.id + '/update',
 
         touched: {
-
-          judul_modul: false
-
+          judul_modul: false,
+          urutan: false
         },
 
         errors: {
-
-          judul_modul: ''
-
+          judul_modul: '',
+          urutan: ''
         }
 
       };
@@ -287,6 +354,10 @@
 
       this.lessonMode = 'create';
 
+      const nextUrutan = this.existingLessons.length > 0
+        ? Math.max(...this.existingLessons.map(l => l.urutan)) + 1
+        : 1;
+
       this.lessonForm = {
 
         id: null,
@@ -305,7 +376,7 @@
 
         durasi_menit: 5,
 
-        urutan: {{ ($course->lessons()->max('urutan') ?? 0) + 1 }},
+        urutan: nextUrutan,
 
         is_free: '1',
 
@@ -317,7 +388,9 @@
 
           tipe: false,
 
-          judul: false
+          judul: false,
+
+          urutan: false
 
         },
 
@@ -328,6 +401,8 @@
           tipe: '',
 
           judul: '',
+
+          urutan: '',
 
           media_file: ''
 
@@ -376,7 +451,9 @@
 
           tipe: false,
 
-          judul: false
+          judul: false,
+
+          urutan: false
 
         },
 
@@ -387,6 +464,8 @@
           tipe: '',
 
           judul: '',
+
+          urutan: '',
 
           media_file: ''
 
@@ -486,21 +565,11 @@
 
     <div class="flex items-center gap-2.5">
 
-      <button type="button" @click="openCreateModule()" class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs">
+      <button type="button" @click="openCreateModule()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition inline-flex items-center gap-1.5 cursor-pointer">
 
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
 
         <span>Tambah Modul</span>
-
-      </button>
-
-
-
-      <button type="button" @click="openCreateLesson()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition inline-flex items-center gap-1.5">
-
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-
-        <span>Tambah Tahapan</span>
 
       </button>
 
@@ -639,11 +708,11 @@
 
           <div class="flex items-center gap-1.5">
 
-            <button type="button" @click="openCreateLesson('{{ $module->id }}')" class="px-3 py-1.5 rounded-xl bg-[#222222] hover:bg-amber-400 hover:text-gray-900 text-white font-extrabold text-xs transition inline-flex items-center gap-1.5 shadow-xs">
+            <button type="button" @click="openCreateLesson('{{ $module->id }}')" class="px-3 py-1.5 rounded-xl bg-[#222222] hover:bg-amber-400 hover:text-gray-900 text-white font-extrabold text-xs transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer">
 
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
 
-              <span>Tahapan</span>
+              <span>Tambah Tahapan</span>
 
             </button>
 
@@ -904,9 +973,19 @@
 
           <div>
 
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Modul</label>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Modul <span class="text-rose-500">*</span></label>
 
-            <input type="number" name="urutan" x-model="moduleForm.urutan" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="number" 
+                   name="urutan" 
+                   min="1"
+                   x-ref="urutanModulInput"
+                   x-model="moduleForm.urutan" 
+                   @input="moduleForm.touched.urutan = true; validateUrutanModul()" 
+                   @blur="moduleForm.touched.urutan = true; validateUrutanModul()" 
+                   :class="moduleForm.touched.urutan && moduleForm.errors.urutan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:outline-hidden" />
+
+            <p x-show="moduleForm.touched.urutan && moduleForm.errors.urutan" x-text="moduleForm.errors.urutan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
 
@@ -916,15 +995,15 @@
 
         <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-center gap-3 shrink-0">
 
-          <button type="button" @click="showModuleModal = false" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 dark:hover:bg-gray-750 transition">
+          <button type="button" @click="showModuleModal = false" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 dark:hover:bg-gray-750 transition cursor-pointer">
 
             Batal
 
           </button>
 
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition">
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
 
-            <span x-text="moduleMode === 'create' ? 'Simpan Data' : 'Perbaharui Data'"></span>
+            <span x-text="moduleMode === 'create' ? 'Tambah Data' : 'Perbaharui Data'"></span>
 
           </button>
 
@@ -1295,9 +1374,19 @@
 
           <div>
 
-            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Tahapan</label>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Urutan Tahapan <span class="text-rose-500">*</span></label>
 
-            <input type="number" name="urutan" x-model="lessonForm.urutan" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+            <input type="number" 
+                   name="urutan" 
+                   min="1"
+                   x-ref="urutanLessonInput"
+                   x-model="lessonForm.urutan" 
+                   @input="lessonForm.touched.urutan = true; validateUrutanLesson()" 
+                   @blur="lessonForm.touched.urutan = true; validateUrutanLesson()" 
+                   :class="lessonForm.touched.urutan && lessonForm.errors.urutan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" 
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:outline-hidden" />
+
+            <p x-show="lessonForm.touched.urutan && lessonForm.errors.urutan" x-text="lessonForm.errors.urutan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
           </div>
 
@@ -1309,15 +1398,15 @@
 
         <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-center gap-3 shrink-0">
 
-          <button type="button" @click="showLessonModal = false" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 dark:hover:bg-gray-750 transition">
+          <button type="button" @click="showLessonModal = false" class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-50 dark:hover:bg-gray-750 transition cursor-pointer">
 
             Batal
 
           </button>
 
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition">
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold text-xs shadow-xs transition cursor-pointer">
 
-            <span x-text="lessonMode === 'create' ? 'Simpan Data' : 'Perbaharui Data'"></span>
+            <span x-text="lessonMode === 'create' ? 'Tambah Data' : 'Perbaharui Data'"></span>
 
           </button>
 

@@ -47,7 +47,7 @@
         $backUrl = route('client.chat');
         $backLabel = 'Kembali ke Ruang Chat';
       } elseif ($from === 'admin') {
-        $backUrl = route('admin.transactions.index');
+        $backUrl = route('admin.transactions');
         $backLabel = 'Kembali ke Kelola Transaksi';
       } else {
         $backUrl = route('client.bookings');
