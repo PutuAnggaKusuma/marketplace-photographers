@@ -8,11 +8,11 @@
     <!-- Standard Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <!-- Breadcrumb Navigation (Rule #62) -->
+            <!-- Breadcrumb Navigation (Rule #62: Abu-abu netral seragam tanpa highlight tebal) -->
             <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                 <a href="{{ route('admin.admins') }}" class="hover:text-amber-500 transition">Manajemen Admin</a>
                 <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                <span class="text-gray-900 dark:text-white font-bold">Edit Pengelola</span>
+                <span class="text-gray-400 dark:text-gray-500 font-bold">Edit Pengelola</span>
             </nav>
             <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                 Edit Akun Pengelola: {{ $admin->nama }}
@@ -20,8 +20,9 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.admins.show', $admin->id) }}" class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer">
-                <span>Lihat Detail</span>
+            <!-- Tombol Lihat Baku (Rule #80: Teks Tunggal 'Lihat') -->
+            <a href="{{ route('admin.admins.show', $admin->id) }}" class="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition inline-flex items-center justify-center shadow-2xs shrink-0 cursor-pointer">
+                Lihat
             </a>
             <a href="{{ route('admin.admins') }}" class="px-4 py-2 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 font-bold text-xs transition inline-flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>

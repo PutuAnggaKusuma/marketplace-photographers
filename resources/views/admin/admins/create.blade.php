@@ -8,11 +8,11 @@
     <!-- Standard Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <!-- Breadcrumb Navigation (Rule #62) -->
+            <!-- Breadcrumb Navigation (Rule #62: Abu-abu netral seragam tanpa highlight tebal) -->
             <nav class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                 <a href="{{ route('admin.admins') }}" class="hover:text-amber-500 transition">Manajemen Admin</a>
                 <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                <span class="text-gray-900 dark:text-white font-bold">Tambah Pengelola</span>
+                <span class="text-gray-400 dark:text-gray-500 font-bold">Tambah Pengelola</span>
             </nav>
             <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                 Tambah Akun Pengelola Baru

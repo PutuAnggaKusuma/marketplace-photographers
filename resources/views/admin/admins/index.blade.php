@@ -58,8 +58,8 @@
         </a>
     </div>
 
-        <!-- Metric Stat Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <!-- Metric Stat Cards (Rule #64 & Rule #7: 2 Baris Murni text-xs, Tanpa Duplikasi) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
         <!-- Card 1 -->
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Total Pengelola</span>
@@ -76,12 +76,6 @@
         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
             <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Operasional</span>
             <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalStaffAdmins ?? $admins->where('role', 'admin')->count() }}</div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm space-y-2">
-            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Admin Terdaftar</span>
-            <div class="text-xs font-black text-gray-900 dark:text-white tracking-tight">{{ $totalAdmins ?? $admins->total() }} Akun</div>
         </div>
     </div>
 
@@ -153,9 +147,16 @@
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-middle whitespace-nowrap">
-                                    <span class="text-xs font-bold text-gray-900 dark:text-white">
-                                        {{ $a->role === 'super_admin' ? 'Super Admin' : 'Admin Operasional' }}
-                                    </span>
+                                    <!-- Role Teks Murni (Rule #11 Standard) -->
+                                    @if($a->role === 'super_admin')
+                                        <span class="text-xs font-extrabold text-amber-600 dark:text-amber-400">
+                                            Super Admin
+                                        </span>
+                                    @else
+                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
+                                            Admin Operasional
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-middle text-gray-600 dark:text-gray-400 whitespace-nowrap">
                                     {{ $a->created_at ? $a->created_at->format('d M Y, H:i') : '-' }}
@@ -166,20 +167,14 @@
                                         $canDelete = auth()->id() !== $a->id && !$a->is_protected && $a->role !== 'super_admin';
                                     @endphp
                                     <div class="inline-flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
-                                        <!-- 1. Tombol Utama: Lihat (Rule #69 & Rule #80) -->
+                                        <!-- 1. Tombol Utama: Lihat (Rule #69 & Rule #80: Soft Blue) -->
                                         <a href="{{ route('admin.admins.show', $a->id) }}" 
                                            class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[54px] text-center inline-block cursor-pointer shadow-2xs">
                                             Lihat
                                         </a>
 
-                                        <!-- 2. Tombol Kedua: Edit (Soft Amber) -->
-                                        <a href="{{ route('admin.admins.edit', $a->id) }}" 
-                                           class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[50px] text-center inline-block cursor-pointer shadow-2xs">
-                                            Edit
-                                        </a>
-
-                                        <!-- 3. Kebab Menu untuk Aksi Tambahan (Hapus) jika diizinkan -->
                                         @if($canDelete)
+                                            <!-- Kebab Menu jika > 2 aksi: Edit & Hapus ada di dalam menu dropdown (Rule #69) -->
                                             <div class="relative inline-block text-left">
                                                 <button type="button" 
                                                         @click="menuOpen = !menuOpen" 
@@ -201,6 +196,10 @@
                                                      x-transition:leave-end="transform opacity-0 scale-95" 
                                                      class="absolute right-0 {{ $isDropup ? 'bottom-full mb-1.5 origin-bottom-right' : 'top-full mt-1.5 origin-top-right' }} w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden py-1" 
                                                      style="display: none;">
+                                                    <a href="{{ route('admin.admins.edit', $a->id) }}" 
+                                                       class="w-full px-4 py-2 text-xs font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition block text-left">
+                                                        Edit
+                                                    </a>
                                                     <button type="button" 
                                                             @click="menuOpen = false; $dispatch('open-confirm-modal', {
                                                                 title: 'Hapus Akun Pengelola?',
@@ -211,11 +210,17 @@
                                                                 actionUrl: '{{ route('admin.admins.destroy', $a->id) }}',
                                                                 method: 'POST'
                                                             })"
-                                                            class="w-full px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer">
+                                                            class="w-full px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
                                                         Hapus Akun
                                                     </button>
                                                 </div>
                                             </div>
+                                        @else
+                                            <!-- Jika hanya 2 aksi (tanpa hapus): tampilkan Edit langsung berdampingan (Rule #69) -->
+                                            <a href="{{ route('admin.admins.edit', $a->id) }}" 
+                                               class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[50px] text-center inline-block cursor-pointer shadow-2xs">
+                                                Edit
+                                            </a>
                                         @endif
                                     </div>
                                 </td>
