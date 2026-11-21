@@ -20,6 +20,63 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 10:10 WITA] — Implementasi Validasi Real-time Kurikulum, Restrukturisasi Tombol Modul, dan Perbaikan 5 Bug Sistem
+
+* **Modul / Fitur**:
+  - Admin E-Learning: Validasi Real-time Nomor Urutan Modul & Tahapan Pembelajaran (`admin/elearning/curriculum.blade.php`, `Admin/ElearningController.php`)
+  - Admin E-Learning: Restrukturisasi Tombol Aksi Kurikulum (Single Primary `Tambah Modul` di Header, Tombol `Tambah Tahapan` di Setiap Kartu Modul)
+  - Admin E-Learning: Standarisasi Teks Tombol Modal (`Tambah Data` / `Perbaharui Data` Sesuai Rule #53 & Rule #59)
+  - Admin Kelola Pengelola/Staff: Perbaikan Route 500 (`AdminStaffController.php`)
+  - Booking & Transaksi: Perbaikan Route 500 pada Tombol Kembali Checkout & Invoice (`public/booking/checkout.blade.php`, `public/booking/invoice.blade.php`)
+  - E-Learning: Perbaikan SQLSTATE 42S22 Kolom `id_e_learning` pada Penghapusan Kursus (`Admin/ElearningController.php`)
+  - Monitoring Transaksi: Penerapan Operator Nullsafe PHP 8 pada Detail Transaksi Kontrak (`Admin/TransactionController.php`)
+  - Basis Data Sistem: Migrasi Pelebaran Kolom Teks & Varchar Pencegah Error Truncation 1406 (`2026_11_21_000001_widen_text_and_varchar_columns_for_truncation_safety.php`)
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/AdminStaffController.php`
+  * `app/Http/Controllers/Admin/ElearningController.php`
+  * `app/Http/Controllers/Admin/TransactionController.php`
+  * `database/migrations/2026_11_21_000001_widen_text_and_varchar_columns_for_truncation_safety.php`
+  * `resources/views/admin/elearning/curriculum.blade.php`
+  * `resources/views/public/booking/checkout.blade.php`
+  * `resources/views/public/booking/invoice.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **Validasi Real-time Urutan Modul & Tahapan (Rule #49 & Rule #51)**:
+     - **Before**: Tidak ada pengecekan duplikasi urutan saat admin menginput angka urutan. Duplikasi angka menyebabkan tumpang tindih urutan materi atau error di sistem.
+     - **After**: Menambahkan `validateUrutanModul()` dan `validateUrutanLesson()` di Alpine.js yang mengecek array `existingModules` dan `existingLessons` secara langsung saat input (`@input` dan `@blur`). Jika nomor sudah terpakai, border input berubah merah dan pesan informatif muncul seketika (misal: *"Urutan 5 sudah digunakan oleh tahapan 'Video Masterclass'..."*), serta mencegah submit form. Di sisi backend, menambahkan `Rule::unique` pada `storeModule`, `updateModule`, `storeLesson`, dan `updateLesson`.
+  2. **Restrukturisasi Tombol Aksi Kurikulum**:
+     - **Before**: Di header atas terdapat dua tombol kembar berdampingan (`+ Tambah Modul` dan `+ Tambah Tahapan`), membuat alur penambahan tahapan membingungkan karena tidak otomatis terhubung ke modul terkait.
+     - **After**: Header atas kini hanya menampilkan satu tombol utama tunggal: `Tambah Modul` (`bg-amber-400 text-gray-900 font-extrabold`). Penambahan tahapan dilakukan melalui tombol `Tambah Tahapan` di masing-masing modul yang otomatis mengisi pilihan modul bersangkutan.
+  3. **Standarisasi Teks Tombol Aksi Modal (Rule #53 & Rule #59)**:
+     - **Before**: Teks tombol submit modal masih menggunakan label generik *"Simpan Data"*.
+     - **After**: Distandarisasi secara dinamis menjadi *"Tambah Data"* saat membuat record baru dan *"Perbaharui Data"* saat menyunting record.
+  4. **Perbaikan RouteNotFoundException pada Staff Admin**:
+     - **Before**: `AdminStaffController.php:124` memanggil route `admin.admins.index` yang tidak terdaftar di route provider.
+     - **After**: Diarahkan ke route resmi `admin.admins`.
+  5. **Perbaikan RouteNotFoundException pada Checkout & Invoice**:
+     - **Before**: `checkout.blade.php:81` dan `invoice.blade.php:50` memanggil `admin.transactions.index` saat parameter `from=admin`.
+     - **After**: Diarahkan ke route resmi `admin.transactions`.
+  6. **Perbaikan SQL Column Error pada Penghapusan Materi E-Learning**:
+     - **Before**: `Admin/ElearningController.php:177` memanggil kolom salah `id_elearning` pada tabel `elearning_transactions` sehingga menghasilkan `SQLSTATE[42S22] Column not found`.
+     - **After**: Diperbaiki menjadi `id_e_learning` sesuai skema database.
+  7. **Pencegahan Fatal Null Pointer Exception pada Transaksi (PHP 8)**:
+     - **Before**: Pemanggilan chained property relasi di `Admin/TransactionController.php:192-205` tanpa operator nullsafe rawan fatal error jika data relasi terhapus atau kosong.
+     - **After**: Diberikan operator nullsafe `?->` menyeluruh (`client?->user?->email`, `bookingDetail?->service?->nama_layanan`, dsb).
+  8. **Migrasi Pelebaran Kolom MySQL (Pencegah Error 1406 Truncation)**:
+     - **Before**: Kolom `deskripsi_review` (ulasan), `comment` (forum), `keterangan` (ketersediaan jadwal), dan `media_link` (submisi lomba) bertipe `VARCHAR(255)`, memicu fatal error 500 saat divalidasi hingga 500-1000 karakter di form.
+     - **After**: Melebarkan kolom-kolom teks panjang menjadi `TEXT` dan memperlebar kolom nama/judul menjadi `VARCHAR(255)`.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #49: Form Validation & UX State
+  - Rule #51: Anti-AI Slop & Clean Copywriting
+  - Rule #53: Standard Action Button Text (`Tambah Data`, `Perbaharui Data`)
+  - Rule #59: Modal Layout & Footer Standards
+* **Hasil Pengujian & Verifikasi**:
+  - `php artisan migrate`: **PASS (Migration 2026_11_21_000001 executed successfully)**.
+  - `php -l` seluruh berkas: **PASS (0 syntax errors)**.
+  - `php artisan view:clear`: **PASS (0 view compilation errors)**.
+
+---
+
 ### [2026-11-20 14:25 WITA] — Standarisasi Tata Letak Unggah Foto & Dokumen (Pratinjau di ATAS, Kotak Dropzone di BAWAH) di Seluruh Sistem
 
 * **Modul / Fitur**:

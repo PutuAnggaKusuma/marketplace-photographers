@@ -983,7 +983,7 @@
                    @input="moduleForm.touched.urutan = true; validateUrutanModul()" 
                    @blur="moduleForm.touched.urutan = true; validateUrutanModul()" 
                    :class="moduleForm.touched.urutan && moduleForm.errors.urutan ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-gray-200 dark:border-gray-700 focus:ring-amber-500'" 
-                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:ring-2 focus:outline-hidden" />
+                   class="w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:outline-hidden" />
 
             <p x-show="moduleForm.touched.urutan && moduleForm.errors.urutan" x-text="moduleForm.errors.urutan" x-cloak class="text-[11px] font-bold text-red-500 mt-1"></p>
 
