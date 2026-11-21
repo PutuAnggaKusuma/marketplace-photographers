@@ -133,7 +133,7 @@
         <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
             <!-- Table -->
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto min-h-[300px]" style="min-height: 300px;">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -161,23 +161,63 @@
                                     {{ $a->created_at ? $a->created_at->format('d M Y, H:i') : '-' }}
                                 </td>
                                 <td class="py-4 px-4 sm:px-6 align-middle text-center whitespace-nowrap">
-                                    @if(auth()->id() !== $a->id)
-                                        <button type="button" 
-                                                @click="$dispatch('open-confirm-modal', {
-                                                    title: 'Hapus Akun Admin?',
-                                                    message: 'Apakah Anda yakin ingin mencabut hak akses dan menghapus admin {{ addslashes($a->nama ?? $a->name) }}?',
-                                                    buttonText: 'Ya, Hapus Admin',
-                                                    iconType: 'delete',
-                                                    buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
-                                                    actionUrl: '{{ route('admin.admins.destroy', $a->id) }}',
-                                                    method: 'POST'
-                                                })"
-                                                class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 font-bold text-xs transition min-w-[60px] text-center">
-                                            Hapus
-                                        </button>
-                                    @else
-                                        <span class="text-xs text-gray-400 italic font-medium">Akun Anda</span>
-                                    @endif
+                                    @php
+                                        $isDropup = ($loop->count > 2 && ($loop->last || $loop->remaining < 2)) || ($loop->count === 2 && $loop->last);
+                                        $canDelete = auth()->id() !== $a->id && !$a->is_protected && $a->role !== 'super_admin';
+                                    @endphp
+                                    <div class="inline-flex items-center justify-center gap-1.5" x-data="{ menuOpen: false }">
+                                        <!-- 1. Tombol Utama: Lihat (Rule #69 & Rule #80) -->
+                                        <a href="{{ route('admin.admins.show', $a->id) }}" 
+                                           class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 font-bold text-xs transition min-w-[54px] text-center inline-block cursor-pointer shadow-2xs">
+                                            Lihat
+                                        </a>
+
+                                        <!-- 2. Tombol Kedua: Edit (Soft Amber) -->
+                                        <a href="{{ route('admin.admins.edit', $a->id) }}" 
+                                           class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 font-bold text-xs transition min-w-[50px] text-center inline-block cursor-pointer shadow-2xs">
+                                            Edit
+                                        </a>
+
+                                        <!-- 3. Kebab Menu untuk Aksi Tambahan (Hapus) jika diizinkan -->
+                                        @if($canDelete)
+                                            <div class="relative inline-block text-left">
+                                                <button type="button" 
+                                                        @click="menuOpen = !menuOpen" 
+                                                        class="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center justify-center transition shadow-2xs cursor-pointer">
+                                                    <svg class="w-4 h-4 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
+                                                        <circle cx="12" cy="5" r="1.75" />
+                                                        <circle cx="12" cy="12" r="1.75" />
+                                                        <circle cx="12" cy="19" r="1.75" />
+                                                    </svg>
+                                                </button>
+
+                                                <div x-show="menuOpen" 
+                                                     @click.away="menuOpen = false" 
+                                                     x-transition:enter="transition ease-out duration-100" 
+                                                     x-transition:enter-start="transform opacity-0 scale-95" 
+                                                     x-transition:enter-end="transform opacity-100 scale-100" 
+                                                     x-transition:leave="transition ease-in duration-75" 
+                                                     x-transition:leave-start="transform opacity-100 scale-100" 
+                                                     x-transition:leave-end="transform opacity-0 scale-95" 
+                                                     class="absolute right-0 {{ $isDropup ? 'bottom-full mb-1.5 origin-bottom-right' : 'top-full mt-1.5 origin-top-right' }} w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 text-left overflow-hidden py-1" 
+                                                     style="display: none;">
+                                                    <button type="button" 
+                                                            @click="menuOpen = false; $dispatch('open-confirm-modal', {
+                                                                title: 'Hapus Akun Pengelola?',
+                                                                message: 'Apakah Anda yakin ingin mencabut hak akses dan menghapus admin {{ addslashes($a->nama ?? $a->name) }}?',
+                                                                buttonText: 'Ya, Hapus Admin',
+                                                                iconType: 'delete',
+                                                                buttonClass: 'bg-red-600 hover:bg-red-700 text-white',
+                                                                actionUrl: '{{ route('admin.admins.destroy', $a->id) }}',
+                                                                method: 'POST'
+                                                            })"
+                                                            class="w-full px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition block text-left cursor-pointer">
+                                                        Hapus Akun
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty

@@ -20,6 +20,49 @@ Setiap entri log perubahan wajib mencantumkan:
 
 ---
 
+### [2026-11-21 10:25 WITA] — Implementasi CRUD Lengkap Manajemen Admin & Standarisasi Safe Min-Height Seluruh Tabel Bebas Scrollbar
+
+* **Modul / Fitur**:
+  - Manajemen Admin: Implementasi CRUD Lengkap (Detail, Edit, Update, Tambah, Hapus Akun Pengelola) Sesuai Standar Rule #53, #62, #69, #70, #74, #76
+  - Manajemen Admin: Halaman Detail Akun Pengelola (`resources/views/admin/admins/show.blade.php`) & Riwayat Aktivitas
+  - Manajemen Admin: Halaman Edit Akun Pengelola (`resources/views/admin/admins/edit.blade.php`) & Proteksi Role Akun Terlindungi
+  - Manajemen Admin: Pembenahan Form Tambah Admin (`resources/views/admin/admins/create.blade.php`) dengan Input Nomor Telepon & Pilihan Role
+  - Manajemen Admin: Standarisasi Tombol Aksi Tabel Admin (`resources/views/admin/admins/index.blade.php`) dengan `Lihat`, `Edit`, & Kebab Menu `Hapus` (Rule #69)
+  - Seluruh Tabel Sistem: Penambahan Standarisasi Safe Minimum Height (`style="min-height: 300px;"`) pada Seluruh Container Tabel untuk Menghilangkan Scrollbar Vertikal pada Data 1-2 Baris
+* **File yang Diubah**:
+  * `app/Http/Controllers/Admin/AdminStaffController.php`
+  * `routes/web.php`
+  * `resources/views/admin/admins/create.blade.php`
+  * `resources/views/admin/admins/edit.blade.php`
+  * `resources/views/admin/admins/show.blade.php`
+  * `resources/views/admin/admins/index.blade.php`
+  * `resources/views/admin/users/index.blade.php`
+  * `resources/views/admin/categories/index.blade.php`
+  * `resources/views/admin/contests/index.blade.php`
+  * `resources/views/admin/elearning/index.blade.php`
+  * `resources/views/client/bookings/index.blade.php`
+  * `resources/views/photographer/bookings/index.blade.php`
+  * `TRACKING_PERUBAHAN_FILE.md`
+* **Rincian Perubahan (Before vs After)**:
+  1. **CRUD Lengkap Manajemen Admin**:
+     - **Before**: Manajemen Admin hanya memiliki fitur Tambah (`create`/`store`) dan Hapus (`destroy`). Tidak ada tombol/halaman Detail (`show`) maupun Edit (`edit`/`update`). Form tambah juga tidak memiliki input nomor telepon dan pilihan role pengelola.
+     - **After**: Menambahkan `show`, `edit`, dan `update` di `AdminStaffController.php` serta mendaftarkan rutenya di `routes/web.php`. Menyediakan tampilan `show.blade.php` (detail profil pengelola & riwayat log aktivitas) dan `edit.blade.php` (penyuntingan nama, email, no telepon, role, serta ganti kata sandi opsional dengan proteksi akun terlindungi). Pada `create.blade.php`, ditambahkan input nomor telepon/WhatsApp, pilihan role dinamis, serta label tombol standar *"Tambah Data"*. Kolom aksi di `index.blade.php` diperbarui mengikuti Rule #69 (`Lihat` tombol biru lembut, `Edit` tombol amber lembut, dan `Hapus` pada kebab menu).
+  2. **Penyelesaian Tuntas Bug Scrollbar Vertikal Tabel (Gambar 2)**:
+     - **Before**: Pada tabel dengan 1 atau 2 baris data (seperti Manajemen Klien pada tangkapan layar user), tinggi kontainer tabel kolaps mengikuti tinggi 1 baris (~100px). Ketika menu aksi dibuka ke bawah, popover menu meluap melewati kontainer tabel sehingga browser otomatis memunculkan scrollbar vertikal dan menggulung header kolom tabel ke atas. Selain itu, utility arbitrary Tailwind `min-h-[240px]` tidak ter-compile pada asset Vite sebelumnya.
+     - **After**: Menambahkan inline style `style="min-height: 300px;"` pada seluruh pembungkus `overflow-x-auto` di 7 tabel sistem (`users/index.blade.php`, `categories/index.blade.php`, `contests/index.blade.php`, `elearning/index.blade.php`, `admins/index.blade.php`, `client/bookings/index.blade.php`, `photographer/bookings/index.blade.php`). Menjalankan `npm run build` untuk mengompilasi ulang aset Vite. Ruang tinggi 300px menjamin popover menu (~85-120px) selalu muat sepenuhnya di dalam kontainer tanpa memicu scrollbar vertikal, menjaga header tabel tetap berada di posisinya.
+* **Standar / Rule README yang Dipatuhi**:
+  - Rule #51 & Rule #70: Copywriting Bersih, Proporsional & Anti-AI Slop (Bebas Jargon & Simbol `&` Berlebih)
+  - Rule #53 & Rule #76: Standarisasi Teks Tombol Aksi (`Tambah Data`, `Perbaharui Data`)
+  - Rule #62: Standarisasi Breadcrumb Global
+  - Rule #69: Standarisasi Tombol Kolom Aksi Tabel (Maksimal 2 Tombol Inline + Kebab Menu)
+  - Rule #74: Standar Tata Letak Tombol Formulir (Grouping Rata Kanan)
+* **Hasil Pengujian & Verifikasi**:
+  - `php -l` controller & routes: **PASS (0 syntax errors)**.
+  - `php artisan view:cache ; php artisan view:clear`: **PASS (0 Blade compilation errors)**.
+  - `npm run build`: **PASS (Vite production build completed)**.
+
+---
+
 ### [2026-11-21 10:10 WITA] — Implementasi Validasi Real-time Kurikulum, Restrukturisasi Tombol Modul, dan Perbaikan 5 Bug Sistem
 
 * **Modul / Fitur**:

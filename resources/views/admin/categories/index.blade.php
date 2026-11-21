@@ -134,7 +134,7 @@
         <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
             <!-- Table -->
-            <div class="overflow-x-auto min-h-[240px]">
+            <div class="overflow-x-auto min-h-[300px]" style="min-height: 300px;">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-[11px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">

@@ -239,7 +239,7 @@
 
       <div id="dashboard-table-container" class="transition-opacity duration-200" :class="isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'">
 
-        <div class="overflow-x-auto min-h-[240px]">
+        <div class="overflow-x-auto min-h-[300px]" style="min-height: 300px;">
 
         <table class="w-full text-left border-collapse">
 

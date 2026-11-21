@@ -246,6 +246,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::get('/admins', [\App\Http\Controllers\Admin\AdminStaffController::class, 'index'])->name('admins');
     Route::get('/admins/create', [\App\Http\Controllers\Admin\AdminStaffController::class, 'create'])->name('admins.create');
     Route::post('/admins', [\App\Http\Controllers\Admin\AdminStaffController::class, 'store'])->name('admins.store');
+    Route::get('/admins/{id}', [\App\Http\Controllers\Admin\AdminStaffController::class, 'show'])->name('admins.show');
+    Route::get('/admins/{id}/edit', [\App\Http\Controllers\Admin\AdminStaffController::class, 'edit'])->name('admins.edit');
+    Route::post('/admins/{id}/update', [\App\Http\Controllers\Admin\AdminStaffController::class, 'update'])->name('admins.update');
     Route::post('/admins/{id}/delete', [\App\Http\Controllers\Admin\AdminStaffController::class, 'destroy'])->name('admins.destroy');
 
     // Admin Customer Reviews & Rating Management Routes

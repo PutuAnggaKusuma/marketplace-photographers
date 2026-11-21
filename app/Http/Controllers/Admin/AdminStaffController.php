@@ -99,11 +99,21 @@ class AdminStaffController extends Controller
         }
 
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|min:3|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'no_hp' => 'nullable|string|max:20',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
             'role' => 'required|in:admin,super_admin',
+        ], [
+            'nama.required' => 'Nama lengkap admin wajib diisi.',
+            'nama.min' => 'Nama lengkap minimal 3 karakter.',
+            'email.required' => 'Alamat email login wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email sudah digunakan oleh akun lain.',
+            'role.required' => 'Pilih role pengelola akun.',
+            'role.in' => 'Role pengelola tidak valid.',
+            'password.required' => 'Kata sandi akun wajib diisi.',
+            'password.min' => 'Kata sandi akun minimal 8 karakter.',
         ]);
 
         $user = User::create([
@@ -122,6 +132,110 @@ class AdminStaffController extends Controller
         ]);
 
         return redirect()->route('admin.admins')->with('success', "Akun pengelola '{$validated['nama']}' ({$validated['role']}) berhasil ditambahkan.");
+    }
+
+    /**
+     * Tampilkan Detail Akun Pengelola / Admin.
+     */
+    public function show($id)
+    {
+        $this->authorizeSuperAdmin();
+
+        $admin = User::whereIn('role', ['super_admin', 'admin'])
+            ->with('roleAdmin')
+            ->findOrFail($id);
+
+        $activities = \App\Models\ActivityLog::where('id_user', $admin->id)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return view('admin.admins.show', compact('admin', 'activities'));
+    }
+
+    /**
+     * Tampilkan Form Edit Akun Pengelola / Admin.
+     */
+    public function edit($id)
+    {
+        $this->authorizeSuperAdmin();
+
+        $admin = User::whereIn('role', ['super_admin', 'admin'])
+            ->with('roleAdmin')
+            ->findOrFail($id);
+
+        return view('admin.admins.edit', compact('admin'));
+    }
+
+    /**
+     * Perbarui Data Akun Pengelola / Admin.
+     */
+    public function update(Request $request, $id)
+    {
+        $this->authorizeSuperAdmin();
+
+        $user = User::whereIn('role', ['super_admin', 'admin'])
+            ->with('roleAdmin')
+            ->findOrFail($id);
+
+        if (!$request->has('nama') && $request->has('name')) {
+            $request->merge(['nama' => $request->name]);
+        }
+
+        $validated = $request->validate([
+            'nama' => 'required|string|min:3|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'no_hp' => 'nullable|string|max:20',
+            'role' => 'required|in:admin,super_admin',
+            'password' => 'nullable|string|min:8',
+        ], [
+            'nama.required' => 'Nama lengkap admin wajib diisi.',
+            'nama.min' => 'Nama lengkap minimal 3 karakter.',
+            'email.required' => 'Alamat email login wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email sudah digunakan oleh akun lain.',
+            'role.required' => 'Pilih role pengelola akun.',
+            'role.in' => 'Role pengelola tidak valid.',
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
+        ]);
+
+        // Proteksi: Super Admin tidak boleh downgrade akun sendiri menjadi Admin biasa
+        if (Auth::id() === $user->id && $validated['role'] !== 'super_admin') {
+            return redirect()->back()->withInput()->with('error', 'Anda tidak dapat menurunkan role akun Anda sendiri.');
+        }
+
+        // Proteksi: Akun root terlindungi tidak boleh diubah role-nya
+        if ($user->is_protected && $validated['role'] !== 'super_admin') {
+            return redirect()->back()->withInput()->with('error', 'Akun Super Admin terlindungi tidak dapat diubah rolenya.');
+        }
+
+        $userData = [
+            'nama' => $validated['nama'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'is_protected' => ($user->is_protected || $validated['role'] === 'super_admin'),
+        ];
+
+        if (!empty($validated['password'])) {
+            $userData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($userData);
+
+        if ($user->roleAdmin) {
+            $user->roleAdmin->update([
+                'nama' => $user->nama,
+                'no_telepon' => $validated['no_hp'] ?? null,
+            ]);
+        } else {
+            RoleAdmin::create([
+                'id_user' => $user->id,
+                'nama' => $user->nama,
+                'no_telepon' => $validated['no_hp'] ?? null,
+            ]);
+        }
+
+        return redirect()->route('admin.admins')->with('success', "Data akun pengelola '{$user->nama}' berhasil diperbaharui.");
     }
 
     /**

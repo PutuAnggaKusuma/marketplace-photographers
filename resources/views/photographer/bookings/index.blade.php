@@ -659,7 +659,7 @@
 
 
 
-            <div class="overflow-x-auto min-h-[240px]">
+            <div class="overflow-x-auto min-h-[300px]" style="min-height: 300px;">
 
 
 
